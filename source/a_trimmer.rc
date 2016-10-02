@@ -1,0 +1,33 @@
+#include <winver.h>
+
+IWA ICON "crag.ico"
+
+VS_VERSION_INFO    VERSIONINFO 
+FILEVERSION        1,0,0,0
+PRODUCTVERSION     1,0,0,0
+FILEFLAGSMASK      VS_FFI_FILEFLAGSMASK 
+FILEFLAGS          0x0L
+FILEOS             VOS__WINDOWS32
+FILETYPE           VFT_APP
+FILESUBTYPE        VFT2_UNKNOWN
+BEGIN
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0411, 1200
+    END
+
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041104b0"
+        BEGIN
+			VALUE "CompanyName",      "\0"
+            VALUE "FileDescription",  "Anime Trimmer X"
+            VALUE "FileVersion",      "1, 0, 0, 0\0"
+            VALUE "InternalName",     "atx\0"
+            VALUE "LegalCopyright",   "dog lab.\0"
+            VALUE "OriginalFilename", "atx.exe\0"
+            VALUE "ProductName",      "TV radio simulating game\0"
+            VALUE "ProductVersion",   "1, 0, 0, 0\0"
+        END 
+    END
+END
