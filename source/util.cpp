@@ -1185,7 +1185,12 @@ void fillRect(Image* scr, int x, int y, int w, int h, int R,int G,int B, int a){
 void setAlpha(Image* scr, int R,int G,int B){
 	Uint8 *px = (Uint8*)scr->RGB;
 	Uint8 *alpha = (Uint8*)scr->A;
-	Uint32 color=setRGB(R,G,B);
+	Uint32 color;
+	if(R==0 && G==0 && B==0){
+		color=0;
+	}else{
+		color=setRGB(img.alphaR,img.alphaG,img.alphaB);
+	}
 	for(int j=0 ; j<scr->h ; j++){
 		for(int i=0 ; i<scr->w ; i++){
 			if( *(Uint32 *)px == color)*alpha=0;
@@ -1208,23 +1213,24 @@ void initFont(){
 			SDL_FreeSurface(img2);
 			getImage(font2,str,0,0,0);
 			font[k]=new Image(font2->w,font2->h);
-			fillRect(font[k],0,0,font2->w,font2->h,0,0,255,255);
+			fillRect(font[k],0,0,font2->w,font2->h,img.alphaR,img.alphaG,img.alphaB,255);
 			drawImage(font[k],font2,0,0,0,0,font2->w,font2->h,255);
 			freeImage(font2);
 			for(int j=0 ; j<font[k]->h ; j++)for(int i=0 ; i<font[k]->w ; i++){
 				getRGB( font[k]->RGB[j*(font[k]->w)+i], &col.r, &col.g, &col.b);
 				//ê¬ÇÕîwåiÅAçïÇÕâèéÊÇË
-				if(col.r==0 && col.g==0 && (col.b==0||col.b==255))continue;
+				if(col.r==0 && col.g==0 && col.b==0)continue;
+				if(col.r==img.alphaR && col.g==img.alphaG && col.b==img.alphaB)continue;
 				for(int b=-1 ; b<=1 ; b++)for(int a=-1 ; a<=1 ; a++){
 					if(a==0&&b==0 || i+a<0 || i+a>=font[k]->w || j+b<0 || j+b>=font[k]->h)continue;
 					getRGB( font[k]->RGB[(j+b)*(font[k]->w)+(i+a)], &col.r, &col.g, &col.b);
 					//çïÇÃâèéÊÇËÇÇŸÇ«Ç±Ç∑
-					if(col.r==0 && col.g==0 && col.b==255){
+					if(col.r==img.alphaR && col.g==img.alphaG && col.b==img.alphaB){
 						font[k]->RGB[(j+b)*(font[k]->w)+(i+a)] = setRGB(0,0,0);
 					}
 				}
 			}
-			setColorKey(font[k],0,0,255);
+			setColorKey(font[k],img.alphaR,img.alphaG,img.alphaB);
 		}
 	}
 }

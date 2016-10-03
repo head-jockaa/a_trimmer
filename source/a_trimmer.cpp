@@ -1,6 +1,7 @@
 #include "util.h"
 
 void checkEndian();
+void createAlphaKey();
 void drawZoom(SDL_Surface* scr);
 void initAll();
 void endAll();
@@ -128,6 +129,7 @@ int main(int argc, char *argv[]) {
 	load_option();
 	Mix_VolumeMusic(BGM_VOLUME);
 	for(int i=0 ; i<4 ; i++)Mix_Volume(i,SE_VOLUME);
+	createAlphaKey();
 	initFont();
 	initAll();
 	SDL_Surface *icon;
@@ -320,6 +322,26 @@ void checkEndian(){
 	if(*(Uint32*)px%256==1)ABGR=TRUE;
 	else ABGR=FALSE;
 	SDL_UnlockSurface(img.screen);
+}
+
+void createAlphaKey(){
+	SDL_Surface *img1=NULL, *img2;
+	img1=IMG_Load("file/img/alphakey.png");
+	if(img1==NULL){
+		return;
+	}
+
+	if(SDL_BYTEORDER==SDL_BIG_ENDIAN)img2=SDL_CreateRGBSurface(SDL_SWSURFACE, 1, 1, 32, 0xff000000,0x00ff0000,0x0000ff00,0);
+	else img2=SDL_CreateRGBSurface(SDL_SWSURFACE, 1, 1, 32, 0x000000ff,0x0000ff00,0x00ff0000,0);
+	drawSurface(img2,img1,0,0,0,0,1,1,255);
+	SDL_FreeSurface(img1);
+
+	SDL_LockSurface(img2);
+	SDL_PixelFormat *f = img2->format;
+	Uint32 *px = (Uint32*)img2->pixels;
+	SDL_GetRGB(*px,f,&img.alphaR,&img.alphaG,&img.alphaB);
+	SDL_UnlockSurface(img2);
+	SDL_FreeSurface(img2);
 }
 
 void drawZoom(SDL_Surface* scr){

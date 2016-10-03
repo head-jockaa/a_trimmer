@@ -288,6 +288,7 @@ struct ImageFile{
 	Image *back, *chr, *menuback, *facechip, *boss, *keyboard, *symbol, *pre_scr;
 	Image *rod, *circle, *fishup, *scr2, *colorlight, *tv_asahi;
 	Image *buffer[4], *photo[14];
+	Uint8 alphaR, alphaG, alphaB;
 };
 extern ImageFile img;
 
