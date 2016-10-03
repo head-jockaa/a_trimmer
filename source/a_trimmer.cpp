@@ -5,6 +5,8 @@ void drawZoom(SDL_Surface* scr);
 void initAll();
 void endAll();
 BOOL pause;
+SDL_Window* window;
+SDL_Renderer *render;
 
 void draw(SDL_Surface* scr){
 	setKick(scr);
@@ -118,8 +120,8 @@ int main(int argc, char *argv[]) {
 	if( Mix_OpenAudio(22050, AUDIO_S16SYS, 2, 1024) < 0 )exit(0);
 	Mix_AllocateChannels(4);
 	img.iwa=IMG_Load("file/img/crag.png");
-	SDL_WM_SetIcon(img.iwa, NULL);
-    img.screen = SDL_SetVideoMode(scr.w, scr.h, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
+	window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
+	img.screen = SDL_GetWindowSurface(window);
 	if ( img.screen == NULL )exit(0);
 	if(SDL_BYTEORDER==SDL_BIG_ENDIAN)img.screen2=SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0xff000000,0x00ff0000,0x0000ff00,0);
 	else img.screen2=SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0x000000ff,0x0000ff00,0x00ff0000,0);
@@ -128,7 +130,9 @@ int main(int argc, char *argv[]) {
 	for(int i=0 ; i<4 ; i++)Mix_Volume(i,SE_VOLUME);
 	initFont();
 	initAll();
-	SDL_WM_SetCaption(text[0].str[0], "crag.ico");
+	SDL_Surface *icon;
+	icon = IMG_Load("crag.ico");
+	SDL_SetWindowIcon(window, icon);
 
 	while(run){
 		SDL_Delay((int)delay);
@@ -176,25 +180,27 @@ int main(int argc, char *argv[]) {
 				}
 				if(ev.key.keysym.sym==SDLK_F4 && !key_stop(key.F4)){
 					if(FULLSCR){
-					    if(SCRSIZE==0)img.screen = SDL_SetVideoMode(320, 240, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_RESIZABLE);
-					    else img.screen = SDL_SetVideoMode(640, 480, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_RESIZABLE);
+					    if(SCRSIZE==0)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, 0);
+					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
 						FULLSCR=FALSE;
 					}else{
-					    if(SCRSIZE==0)img.screen=SDL_SetVideoMode(320, 240, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
-					    else img.screen=SDL_SetVideoMode(640, 480, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
+					    if(SCRSIZE==0)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, SDL_WINDOW_FULLSCREEN);
+					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_FULLSCREEN);
 						FULLSCR=TRUE;
 					}
+					img.screen = SDL_GetWindowSurface(window);
 				}
 				if(ev.key.keysym.sym==SDLK_F5 && !key_stop(key.F5)){
 					if(SCRSIZE==0){
-					    if(FULLSCR)img.screen = SDL_SetVideoMode(640, 480, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
-					    else img.screen = SDL_SetVideoMode(640, 480, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_RESIZABLE);
+					    if(FULLSCR)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_FULLSCREEN);
+					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
 						SCRSIZE=1;
 					}else{
-					    if(FULLSCR)img.screen=SDL_SetVideoMode(320, 240, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
-					    else img.screen=SDL_SetVideoMode(320, 240, 32, SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_RESIZABLE);
+					    if(FULLSCR)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, SDL_WINDOW_FULLSCREEN);
+					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, 0);
 						SCRSIZE=0;
 					}
+					img.screen = SDL_GetWindowSurface(window);
 				}
 				if(ev.key.keysym.sym==SDLK_F10 && !key_stop(key.F10)){
 					if(gd.bought[17]){
@@ -236,7 +242,7 @@ int main(int argc, char *argv[]) {
 			drawZoom(img.screen);
 		}
 		else draw(img.screen);
-		SDL_Flip(img.screen);
+		SDL_UpdateWindowSurface(window);
 	}
 
 	end();
@@ -279,7 +285,7 @@ void initAll(){
 void endAll(){
 	for(int i=0 ; i<4 ; i++)freeImage(img.buffer[i]);
 	if(fsize)delete [] fstr;
-	if(index_num)delete [] index;
+	if(index_num)delete [] indexName;
 	if(stas)delete [] sta;
 	if(allworks)delete [] animebook;
 	if(works){delete [] prg;delete [] work;delete [] gd.timeslot;}

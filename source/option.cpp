@@ -1,6 +1,6 @@
 #include "option.h"
 
-void dupcheck(SDLKey k);
+void dupcheck(SDL_Keycode k);
 BOOL key_ok(int k);
 void keyOptionMenu();
 Uint8 key_setting=0;

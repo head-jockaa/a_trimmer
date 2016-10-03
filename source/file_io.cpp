@@ -47,7 +47,7 @@ void load_index(){
 	load_haziashop();
 	char fn[50];
 	size_t fc=0;
-	if(index_num)delete [] index;
+	if(index_num)delete [] indexName;
 	index_num=0;
 	gd.hazia=0;
 	while(true){
@@ -55,13 +55,13 @@ void load_index(){
 		if(!loadFile(fn))break;
 		index_num++;
 	}
-	index=new Index[index_num];
+	indexName=new Index[index_num];
 
 	if(!loadFile("save/clear.dat")){
 		for(int i=0 ; i<18 ; i++)gd.bought[i]=FALSE;
 		for(int i=0 ; i<index_num ; i++){
-			index[i].rate=0;
-			index[i].hiscore=0;
+			indexName[i].rate=0;
+			indexName[i].hiscore=0;
 		}
 		clear_num=1;
 	}else{
@@ -70,13 +70,13 @@ void load_index(){
 			if(gd.bought[i])gd.hazia-=price[i];
 		}
 		for(int i=0 ; i<index_num ; i++){
-			index[i].rate=to8int(fstr[fc]);fc++;
-			index[i].hiscore=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
-			gd.hazia+=index[i].hiscore;
+			indexName[i].rate=to8int(fstr[fc]);fc++;
+			indexName[i].hiscore=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+			gd.hazia+=indexName[i].hiscore;
 		}
 		clear_num=1;
 		for(int i=0 ; i<index_num-1 ; i++){//ÅIƒ{ƒX–Ê‚Í•Û—¯
-			if(index[i].rate<60)break;
+			if(indexName[i].rate<60)break;
 			clear_num++;
 		}
 	}
@@ -87,7 +87,7 @@ void load_index(){
 		else loadFile("file/data/index_en.dat");
 		for(int i=0 ; i<index_num ; i++){
 			for(int j=0 ; j<60 ; j++){
-				index[i].name.str[k][j]=fstr[fc];
+				indexName[i].name.str[k][j]=fstr[fc];
 				fc++;
 				if(fstr[fc-1]==0)break;
 			}
@@ -272,7 +272,7 @@ void load_works(int n){
 
 	for(int i=0 ; i<works ; i++){
 		work[i].num=0;
-		work[i].not=FALSE;
+		work[i].notExist=FALSE;
 		work[i].prg=prgs;
 		work[i].tnum=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		while(fstr[fc]!=EOF || fstr[fc+1]!=EOF){
@@ -797,11 +797,11 @@ void save_index(){
 		fstr[fc]=gd.bought[i];fc++;
 	}
 	for(int i=0 ; i<index_num ; i++){
-		fstr[fc]=index[i].rate;fc++;
-		fstr[fc]=index[i].hiscore%256;fc++;
-		fstr[fc]=(index[i].hiscore/256)%256;fc++;
-		fstr[fc]=(index[i].hiscore/65536)%256;fc++;
-		fstr[fc]=index[i].hiscore/16777216;fc++;
+		fstr[fc]=indexName[i].rate;fc++;
+		fstr[fc]=indexName[i].hiscore%256;fc++;
+		fstr[fc]=(indexName[i].hiscore/256)%256;fc++;
+		fstr[fc]=(indexName[i].hiscore/65536)%256;fc++;
+		fstr[fc]=indexName[i].hiscore/16777216;fc++;
 	}
 
 	sprintf_s(str,"save/clear.dat");

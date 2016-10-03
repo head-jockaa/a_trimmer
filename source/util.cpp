@@ -1,7 +1,7 @@
 #include "util.h"
 
 Key key;
-Index *index;
+Index *indexName;
 Station *sta;
 Prg *prg;
 Work *work;
@@ -305,7 +305,7 @@ void FishBox::drawFishBox(SDL_Surface* scr){
 	panelColor(n);
 	drawImage(scr,img.menuback,20,30,0,0,280,120,128);
 	for(int i=0 ; i<14 ; i++)for(int j=0 ; j<6 ; j++){
-		if((j+offset)*14+i>=max || work[(j+offset)*14+i].not)drawImage(scr,img.symbol,i*20+20,j*20+30,238,0,17,17,255);
+		if((j+offset)*14+i>=max || work[(j+offset)*14+i].notExist)drawImage(scr,img.symbol,i*20+20,j*20+30,238,0,17,17,255);
 		else if(fish[(j+offset)*14+i].score!=0)drawImage(scr,img.symbol,i*20+20,j*20+30,(work[(j+offset)*14+i].mark%16)*17,(work[(j+offset)*14+i].mark/16)*17,17,17,255);
 	}
 	if(count%40<20)drawImage(scr,img.chr,cx*20+20,cy*20+30,283,0,20,20,255);
@@ -989,7 +989,7 @@ void drawSurface(SDL_Surface* sdl, SDL_Surface* img, int x, int y, int x2, int y
 	if(a<0)a=0;
 	if(a>255)a=255;
 	SDL_Rect rect,rect2;
-	SDL_SetAlpha(img, SDL_SRCALPHA, a);
+	SDL_SetSurfaceAlphaMod(img, a);
 	rect.x=x;rect.y=y;rect.w=0;rect.h=0;
 	rect2.x=x2;rect2.y=y2;rect2.w=w2;rect2.h=h2;
 	SDL_BlitSurface(img, &rect2, sdl, &rect);
@@ -1561,3 +1561,14 @@ void controlTextCount(BOOL ok){
 		gd.text_count++;
 	}
 }
+
+#ifdef __APPLE__
+void sprintf_s(char *s, char *c, ...){
+	va_list c2;
+	va_start(c2, c);
+	vsprintf(s,c,c2);
+}
+void fopen_s(FILE **f, char* c1, char* c2){
+    *f = fopen(c1, c2);
+}
+#endif

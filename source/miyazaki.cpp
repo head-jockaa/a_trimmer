@@ -36,7 +36,7 @@ void initMiyazaki(){
 	menu[DELETE_YN].stack(text[MIYAZAKITEXT+29]);
 	menu[DELETE_YN].stack(text[MIYAZAKITEXT+28]);
 	menu[GUIDE_SEASON].setMenu(50,40,10,8,index_num);
-	for(int i=0 ; i<index_num ; i++)menu[GUIDE_SEASON].stack(index[i].name);
+	for(int i=0 ; i<index_num ; i++)menu[GUIDE_SEASON].stack(indexName[i].name);
 	menu[BGM_TEST].setMenu(20,60,25,7,37);
 	for(int i=1 ; i<=18 ; i++){
 		sprintf_s(str,"Music No.%2d",i);
@@ -367,8 +367,8 @@ void keyGuideAll(){
 				if(i==prgs2[b]){
 					if(ok[b]){
 						if(a!=0){menu[GUIDE_STALIST].stack("");a++;}
-						sprintf_s(s.str[0],"=== %s ===",index[b].name.str[0]);
-						sprintf_s(s.str[1],"=== %s ===",index[b].name.str[1]);
+						sprintf_s(s.str[0],"=== %s ===",indexName[b].name.str[0]);
+						sprintf_s(s.str[1],"=== %s ===",indexName[b].name.str[1]);
 						menu[GUIDE_STALIST].stack(s);
 						a++;
 					}

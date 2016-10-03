@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <iostream>
 
 #pragma comment(lib, "SDL.lib")
 #pragma comment(lib, "SDLmain.lib")
@@ -127,7 +128,7 @@ struct Index{
 	Uint8 rate;
 	int hiscore;
 };
-extern Index *index;
+extern Index *indexName;
 
 struct Mhz{
 	int mhz,dis;
@@ -191,7 +192,7 @@ struct Work{
 	String title;
 	int mark,prg,num,tnum;
 	Uint8 r,g,b;
-	BOOL not;
+	BOOL notExist;
 };
 
 struct Area{
@@ -314,6 +315,11 @@ void drawLight(SDL_Surface* scr, Image* img, int x, int y, int x2, int y2, int w
 void drawLight(Image* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a);
 void drawImage_x2(SDL_Surface* scr, Image *img, int x, int y, double mag, int x2, int y2, int w2, int h2);
 void drawImage_x2(Image* scr, Image *img, int x, int y, double mag, int x2, int y2, int w2, int h2);
+
+#ifdef __APPLE__
+void sprintf_s(char *s, char *c, ...);
+void fopen_s(FILE **f, char* c1, char* c2);
+#endif
 
 extern Key key;
 extern Station *sta;

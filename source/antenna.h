@@ -17,11 +17,11 @@ protected:
 	void catching();
 	void drawExplain2(SDL_Surface* scr);
 	void drawAntennaMode(SDL_Surface* scr);
-	void Antenna::drawBuoy(SDL_Surface* scr);
-	void Antenna::drawWaterBall(SDL_Surface* scr);
-	void Antenna::drawRadioWaveMeter(SDL_Surface* scr);
-	void Antenna::drawMountainHeight(SDL_Surface* scr);
-	void Antenna::drawDirectionLine(SDL_Surface* scr);
+	void drawBuoy(SDL_Surface* scr);
+	void drawWaterBall(SDL_Surface* scr);
+	void drawRadioWaveMeter(SDL_Surface* scr);
+	void drawMountainHeight(SDL_Surface* scr);
+	void drawDirectionLine(SDL_Surface* scr);
 public:
 	Uint8 ant_mode,change_mode_count;
 	int station;

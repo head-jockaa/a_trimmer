@@ -200,10 +200,10 @@ void initGame2(){
 	}
 
 	if(gd.game_mode==SELECT)for(int i=0 ; i<works ; i++){
-		work[i].not=TRUE;
+		work[i].notExist=TRUE;
 		for(int j=work[i].prg ; j<work[i].prg+work[i].num ; j++){
 			if(prg[j].week==gd.week || prg[j].week==(gd.week+6)%7 && in_time(prg[j].week,prg[j].hour,prg[j].minute,prg[j].time)){
-				work[i].not=FALSE;
+				work[i].notExist=FALSE;
 				break;
 			}
 		}
@@ -338,7 +338,7 @@ void keyGetHazia(){
 						start=300;count=2;
 						gd.scene_count++;
 						gd.face_count++;
-						gd.hazia2=gd.score-index[dataNo-1].hiscore;
+						gd.hazia2=gd.score-indexName[dataNo-1].hiscore;
 						if(gd.hazia2<0)gd.hazia2=0;
 						Mix_FreeMusic(bgm);
 						bgm=Mix_LoadMUS("file/bgm/13.ogg");
@@ -1629,7 +1629,7 @@ void drawGetHazia(SDL_Surface *scr){
 		drawTalking(scr);
 	}
 	else if(gd.scene_count==1){
-		int inc=gd.score-index[dataNo-1].hiscore;
+		int inc=gd.score-indexName[dataNo-1].hiscore;
 		if(inc<0)inc=0;
 		drawImage(scr,img.back,0,20,0,360,320,200,255);
 
@@ -1649,7 +1649,7 @@ void drawGetHazia(SDL_Surface *scr){
 		fillRect(scr,0,220,320,20,0,0,0,255);
 		TextOut(scr,120,20,text[EPILOGUE+2]);
 
-		sprintf_s(str,"%10d",index[dataNo-1].hiscore);
+		sprintf_s(str,"%10d",indexName[dataNo-1].hiscore);
 		if(start>250){
 			TextOut(scr,100+(start-250)*5,40,text[GAMETEXT+7]);
 			drawImage(scr,img.menuback,170+(start-250)*5,60,0,0,100,20,128);
@@ -2258,12 +2258,12 @@ void timerGetHazia(){
 		if(count==100){
 			gd.text_count=0;
 			phase=END_YN;
-			if(index[dataNo-1].rate<100*gd.crops/works)index[dataNo-1].rate=100*gd.crops/works;
-			if(index[dataNo-1].rate>100)index[dataNo-1].rate=100;
-			if(index[dataNo-1].hiscore<gd.score)index[dataNo-1].hiscore=gd.score;
+			if(indexName[dataNo-1].rate<100*gd.crops/works)indexName[dataNo-1].rate=100*gd.crops/works;
+			if(indexName[dataNo-1].rate>100)indexName[dataNo-1].rate=100;
+			if(indexName[dataNo-1].hiscore<gd.score)indexName[dataNo-1].hiscore=gd.score;
 			clear_num=1;
 			for(int i=0 ; i<index_num-1 ; i++){//ÅIƒ{ƒX–Ê‚Í•Û—¯
-				if(index[i].rate<60)break;
+				if(indexName[i].rate<60)break;
 				clear_num++;
 			}
 			save_index();
@@ -2275,7 +2275,7 @@ void timerGetHazia(){
 void timerSavingGame(){
 	String s;
 	for(int k=0 ; k<2 ; k++){
-		sprintf_s(s.str[k],"%s (%s) %2d:",index[dataNo-1].name.str[k],weekChar[gd.week][k],gd.hour);
+		sprintf_s(s.str[k],"%s (%s) %2d:",indexName[dataNo-1].name.str[k],weekChar[gd.week][k],gd.hour);
 		if(gd.minute<10)sprintf_s(s.str[k],"%s0%d",s.str[k],gd.minute);
 		else sprintf_s(s.str[k],"%s%2d",s.str[k],gd.minute);
 	}
@@ -2297,8 +2297,8 @@ void timerSavingGame(){
 
 void timerSavingRecord(){
 	String s;
-	sprintf_s(s.str[0],"%s %10d",index[dataNo-1].name.str[0],gd.score);
-	sprintf_s(s.str[1],"%s %10d",index[dataNo-1].name.str[1],gd.score);
+	sprintf_s(s.str[0],"%s %10d",indexName[dataNo-1].name.str[0],gd.score);
+	sprintf_s(s.str[1],"%s %10d",indexName[dataNo-1].name.str[1],gd.score);
 	putHeadMark(s);
 	if(count==(int)strlen(s.str[CHAR_CODE])*5){
 		menu[1].input(menu[1].selected(),s);

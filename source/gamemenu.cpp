@@ -65,7 +65,12 @@ void endGameMenu(){
 	}
 	if(img.boss!=NULL)freeImage(img.boss);
 	freeImage(img.back);
-	if(phase!=GOTO_GAME || dataNo!=index_num+1)Mix_FreeMusic(bgm);
+	if(phase!=GOTO_GAME || dataNo!=index_num+1){
+		if(bgm!=NULL){
+			Mix_FreeMusic(bgm);
+			bgm=NULL;
+		}
+	}
 	Mix_FreeChunk(sf.thunder);
 	Mix_FreeChunk(sf.swish);
 	for(int i=0 ; i<15 ; i++)menu[i].reset();
@@ -539,14 +544,14 @@ void drawGameMenu(SDL_Surface* scr){
 					if((gd.scrX+k)*4+i==index_num){
 						TextOut(scr,90+k*320+start*10,60+i*40,text[MENUTEXT+19]);
 					}else{
-						TextOut(scr,90+k*320+start*10,60+i*40,index[(gd.scrX+k)*4+i].name);
-						sprintf_s(str,"%3d%c",index[(gd.scrX+k)*4+i].rate,37);
+						TextOut(scr,90+k*320+start*10,60+i*40,indexName[(gd.scrX+k)*4+i].name);
+						sprintf_s(str,"%3d%c",indexName[(gd.scrX+k)*4+i].rate,37);
 						TextOut(scr,180+k*320+start*10,60+i*40,str);
-						sprintf_s(str,"%10d",index[(gd.scrX+k)*4+i].hiscore);
+						sprintf_s(str,"%10d",indexName[(gd.scrX+k)*4+i].hiscore);
 						TextOut(scr,133+k*320+start*10,77+i*40,str);
-						if(index[(gd.scrX+k)*4+i].rate==100)drawImage(scr,img.symbol,220+k*320+start*10,60+i*40,51,0,17,17,255);
-						else if(index[(gd.scrX+k)*4+i].rate>=80)drawImage(scr,img.symbol,220+k*320+start*10,60+i*40,34,0,17,17,255);
-						else if(index[(gd.scrX+k)*4+i].rate>=60)drawImage(scr,img.symbol,220+k*320+start*10,60+i*40,17,0,17,17,255);
+						if(indexName[(gd.scrX+k)*4+i].rate==100)drawImage(scr,img.symbol,220+k*320+start*10,60+i*40,51,0,17,17,255);
+						else if(indexName[(gd.scrX+k)*4+i].rate>=80)drawImage(scr,img.symbol,220+k*320+start*10,60+i*40,34,0,17,17,255);
+						else if(indexName[(gd.scrX+k)*4+i].rate>=60)drawImage(scr,img.symbol,220+k*320+start*10,60+i*40,17,0,17,17,255);
 					}
 				}
 			}
@@ -582,7 +587,7 @@ BOOL makeSaveMenu(int n){
 		sprintf_s(str,"save/save%d.dat",i);
 		if(!loadFile(str))break;
 		for(int k=0 ; k<2 ; k++){
-			sprintf_s(s.str[k],"%s (%s) %2d:",index[fstr[0]].name.str[k],weekChar[fstr[3]][k],fstr[4]);
+			sprintf_s(s.str[k],"%s (%s) %2d:",indexName[fstr[0]].name.str[k],weekChar[fstr[3]][k],fstr[4]);
 			if(fstr[5]<10)sprintf_s(s.str[k],"%s0%d",s.str[k],fstr[5]);
 			else sprintf_s(s.str[k],"%s%2d",s.str[k],fstr[5]);
 		}
@@ -612,8 +617,8 @@ BOOL makeRecordMenu(int n){
 		for(int i=17 ; i<(int)fsize ; i+=18){
 			sc+=to16int(fstr[i],fstr[i+1]);
 		}
-		sprintf_s(s.str[0],"%s %10d",index[fstr[0]].name.str[0],sc);
-		sprintf_s(s.str[1],"%s %10d",index[fstr[0]].name.str[1],sc);
+		sprintf_s(s.str[0],"%s %10d",indexName[fstr[0]].name.str[0],sc);
+		sprintf_s(s.str[1],"%s %10d",indexName[fstr[0]].name.str[1],sc);
 		menu[n].stack(s);
 	}
 	if(a==0)return FALSE;
