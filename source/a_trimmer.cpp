@@ -149,29 +149,30 @@ int main(int argc, char *argv[]) {
 		SDL_PollEvent(&ev);
 		switch(ev.type){
 			case SDL_KEYDOWN:
+				key.pressed = ev.key.keysym.sym;
 //				test=ev.key.keysym.scancode;
 				if(key.count==0)key.count=1;
-				if(ev.key.keysym.sym==key.upC && key.up==0)key.up=1;
-				if(ev.key.keysym.sym==key.downC && key.down==0)key.down=1;
-				if(ev.key.keysym.sym==key.leftC && key.left==0)key.left=1;
-				if(ev.key.keysym.sym==key.rightC && key.right==0)key.right=1;
-				if(ev.key.keysym.sym==key.zC && key.z==0)key.z=1;
-				if(ev.key.keysym.sym==key.xC && key.x==0)key.x=1;
-				if(ev.key.keysym.sym==key.cC && key.c==0)key.c=1;
-				if(ev.key.keysym.sym==key.aC && key.a==0)key.a=1;
-				if(ev.key.keysym.sym==SDLK_F1 && key.F1==0)key.F1=1;
-				if(ev.key.keysym.sym==SDLK_F4 && key.F4==0)key.F4=1;
-				if(ev.key.keysym.sym==SDLK_F5 && key.F5==0)key.F5=1;
-				if(ev.key.keysym.sym==SDLK_F10 && key.F10==0)key.F10=1;
-				if(ev.key.keysym.sym==SDLK_ESCAPE)run=FALSE;
-				if(ev.key.keysym.sym==SDLK_a && !key_stop(key.a)){
+				if(key.pressed==key.upC && key.up==0)key.up=1;
+				if(key.pressed==key.downC && key.down==0)key.down=1;
+				if(key.pressed==key.leftC && key.left==0)key.left=1;
+				if(key.pressed==key.rightC && key.right==0)key.right=1;
+				if(key.pressed==key.zC && key.z==0)key.z=1;
+				if(key.pressed==key.xC && key.x==0)key.x=1;
+				if(key.pressed==key.cC && key.c==0)key.c=1;
+				if(key.pressed==key.aC && key.a==0)key.a=1;
+				if(key.pressed==SDLK_F1 && key.F1==0)key.F1=1;
+				if(key.pressed==SDLK_F4 && key.F4==0)key.F4=1;
+				if(key.pressed==SDLK_F5 && key.F5==0)key.F5=1;
+				if(key.pressed==SDLK_F10 && key.F10==0)key.F10=1;
+				if(key.pressed==SDLK_ESCAPE)run=FALSE;
+				if(key.pressed==SDLK_a && !key_stop(key.a)){
 					if(!(mode==OPTION&&phase==OPTION_KEY_SETTING)){
 						if(CHAR_CODE==JAPANESE)CHAR_CODE=EUROPEAN;
 						else CHAR_CODE=JAPANESE;
 						gd.text_count=0;
 					}
 				}
-				if(ev.key.keysym.sym==SDLK_F1 && !key_stop(key.F1)){
+				if(key.pressed==SDLK_F1 && !key_stop(key.F1)){
 					if(pause){
 						pause=FALSE;
 						resumeMovie();
@@ -180,7 +181,7 @@ int main(int argc, char *argv[]) {
 						pauseMovie();
 					}
 				}
-				if(ev.key.keysym.sym==SDLK_F4 && !key_stop(key.F4)){
+				if(key.pressed==SDLK_F4 && !key_stop(key.F4)){
 					if(FULLSCR){
 					    if(SCRSIZE==0)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, 0);
 					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
@@ -192,7 +193,7 @@ int main(int argc, char *argv[]) {
 					}
 					img.screen = SDL_GetWindowSurface(window);
 				}
-				if(ev.key.keysym.sym==SDLK_F5 && !key_stop(key.F5)){
+				if(key.pressed==SDLK_F5 && !key_stop(key.F5)){
 					if(SCRSIZE==0){
 					    if(FULLSCR)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_FULLSCREEN);
 					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
@@ -204,14 +205,14 @@ int main(int argc, char *argv[]) {
 					}
 					img.screen = SDL_GetWindowSurface(window);
 				}
-				if(ev.key.keysym.sym==SDLK_F10 && !key_stop(key.F10)){
+				if(key.pressed==SDLK_F10 && !key_stop(key.F10)){
 					if(gd.bought[17]){
 						if(CHOSEON)CHOSEON=FALSE;
 						else CHOSEON=TRUE;
 					}
 				}
-				if(ev.key.keysym.sym==SDLK_F11)reset_key();
-				if(ev.key.keysym.sym==SDLK_F12){
+				if(key.pressed==SDLK_F11)reset_key();
+				if(key.pressed==SDLK_F12){
 					movie_test=FALSE;
 					end();
 					initOpening();

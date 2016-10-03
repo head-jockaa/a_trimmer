@@ -20,5 +20,6 @@ void drawOptionMenuBox(SDL_Surface* scr);
 void drawOptionSetting(SDL_Surface* scr, int x, int y);
 
 extern Uint8 key_setting;
+extern Uint32 key_enable[82];
 
 #endif

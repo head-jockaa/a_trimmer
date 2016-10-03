@@ -5,6 +5,18 @@ BOOL key_ok(int k);
 void keyOptionMenu();
 Uint8 key_setting=0;
 
+Uint32 key_enable[82]={
+	0, SDLK_a, SDLK_b, SDLK_c, SDLK_d, SDLK_e, SDLK_f, SDLK_g, SDLK_h, SDLK_i,
+	SDLK_j, SDLK_k, SDLK_l, SDLK_m, SDLK_n, SDLK_o, SDLK_p, SDLK_q, SDLK_r, SDLK_s,
+	SDLK_t, SDLK_u, SDLK_v, SDLK_w, SDLK_x, SDLK_y, SDLK_z, SDLK_SPACE, SDLK_UP, SDLK_DOWN,
+	SDLK_RIGHT, SDLK_LEFT, SDLK_F1, SDLK_F2, SDLK_F3, SDLK_F4, SDLK_F5, SDLK_F6, SDLK_F7, SDLK_F8,
+	SDLK_F9, SDLK_F10, SDLK_F11, SDLK_F12, SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
+	SDLK_6, SDLK_7, SDLK_8, SDLK_9, SDLK_COMMA, SDLK_MINUS, SDLK_PERIOD, SDLK_SLASH, SDLK_RETURN, SDLK_BACKSPACE,
+	SDLK_LSHIFT, SDLK_RSHIFT, SDLK_LCTRL, SDLK_RCTRL, SDLK_LALT, SDLK_RALT, SDLK_TAB, SDLK_INSERT, SDLK_DELETE, SDLK_HOME,
+	SDLK_END, SDLK_PAGEUP, SDLK_PAGEDOWN, SDLK_SCROLLLOCK, SDLK_PAUSE, SDLK_PRINTSCREEN, SDLK_SYSREQ, SDLK_MODE, SDLK_HELP, SDLK_CLEAR,
+	SDLK_POWER, SDLK_MENU
+};
+
 void initOption(){
 	mode=OPTION;
 	phase=OPTION_MENU;
@@ -23,30 +35,30 @@ void keyOption(){
 }
 
 void dupcheck(int k){
-	if(key_setting!=0 && key.aC==ev.key.keysym.sym)key.aC=k;
-	if(key_setting!=1 && key.zC==ev.key.keysym.sym)key.zC=k;
-	if(key_setting!=2 && key.xC==ev.key.keysym.sym)key.xC=k;
-	if(key_setting!=3 && key.cC==ev.key.keysym.sym)key.cC=k;
-	if(key_setting!=4 && key.upC==ev.key.keysym.sym)key.upC=k;
-	if(key_setting!=5 && key.downC==ev.key.keysym.sym)key.downC=k;
-	if(key_setting!=6 && key.leftC==ev.key.keysym.sym)key.leftC=k;
-	if(key_setting!=7 && key.rightC==ev.key.keysym.sym)key.rightC=k;
+	if(key_setting!=0 && key.aC==key.pressed)key.aC=k;
+	if(key_setting!=1 && key.zC==key.pressed)key.zC=k;
+	if(key_setting!=2 && key.xC==key.pressed)key.xC=k;
+	if(key_setting!=3 && key.cC==key.pressed)key.cC=k;
+	if(key_setting!=4 && key.upC==key.pressed)key.upC=k;
+	if(key_setting!=5 && key.downC==key.pressed)key.downC=k;
+	if(key_setting!=6 && key.leftC==key.pressed)key.leftC=k;
+	if(key_setting!=7 && key.rightC==key.pressed)key.rightC=k;
 	key.a=0;key.z=0;key.x=0;key.c=0;key.up=0;key.down=0;key.left=0;key.right=0;
 }
 
 void keySetting(){
 	if(key.count!=2)return;
-	if(!key_ok(ev.key.keysym.sym))return;
+	if(!key_ok(key.pressed))return;
 	switch(key_setting){
-		case 0:dupcheck(key.aC);key.aC=ev.key.keysym.sym;break;
-		case 1:dupcheck(key.zC);key.zC=ev.key.keysym.sym;break;
-		case 2:dupcheck(key.xC);key.xC=ev.key.keysym.sym;break;
-		case 3:dupcheck(key.cC);key.cC=ev.key.keysym.sym;break;
-		case 4:dupcheck(key.upC);key.upC=ev.key.keysym.sym;break;
-		case 5:dupcheck(key.downC);key.downC=ev.key.keysym.sym;break;
-		case 6:dupcheck(key.leftC);key.leftC=ev.key.keysym.sym;break;
+		case 0:dupcheck(key.aC);key.aC=key.pressed;break;
+		case 1:dupcheck(key.zC);key.zC=key.pressed;break;
+		case 2:dupcheck(key.xC);key.xC=key.pressed;break;
+		case 3:dupcheck(key.cC);key.cC=key.pressed;break;
+		case 4:dupcheck(key.upC);key.upC=key.pressed;break;
+		case 5:dupcheck(key.downC);key.downC=key.pressed;break;
+		case 6:dupcheck(key.leftC);key.leftC=key.pressed;break;
 		case 7:
-			dupcheck(key.rightC);key.rightC=ev.key.keysym.sym;
+			dupcheck(key.rightC);key.rightC=key.pressed;
 			if(mode==GAME)phase=GAME_OPTION;
 			else phase=OPTION_MENU;
 			key.right=0;
@@ -432,14 +444,8 @@ void timerOption(){
 }
 
 BOOL key_ok(int k){
-	BOOL b=FALSE;
-	int a[]={8,9,12,13,19,32,44,45,46,47,48,49,50,51,52,53,54,55,56,57,
-			 97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,
-			 113,114,115,116,117,118,119,120,121,122,127,
-			 273,274,275,276,277,278,279,280,281,288,289,290,291,292,293,
-			 302,303,304,305,306,307,308,313,315,316,317,318,319,320};
-	for(int i=0 ; i<76 ; i++){
-		if(k==a[i]){b=TRUE;break;}
+	for(int i=0 ; i<82 ; i++){
+		if(k==key_enable[i])return TRUE;
 	}
-	return b;
+	return FALSE;
 }

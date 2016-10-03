@@ -996,7 +996,14 @@ void drawSurface(SDL_Surface* sdl, SDL_Surface* img, int x, int y, int x2, int y
 }
 
 void drawKeyboard(SDL_Surface* scr, int k, int X, int Y){
-	drawImage(scr,img.keyboard,X,Y,(k%16)*17,(k/16)*17,17,17,255);
+	int a=0;
+	for(int i=0 ; i<82 ; i++){
+		if(k==key_enable[i]){
+			a=i;
+			break;
+		}
+	}
+	drawImage(scr,img.keyboard,X,Y,(a%16)*17,(a/16)*17,17,17,255);
 }
 
 void fix_scrXY(){

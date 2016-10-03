@@ -227,7 +227,7 @@ struct Town{
 
 struct Key{
 	BOOL left,right,up,down,z,x,c,a,F1,F4,F5,F10;
-	int leftC,rightC,upC,downC,zC,xC,cC,aC,count;
+	int leftC,rightC,upC,downC,zC,xC,cC,aC,count,pressed;
 };
 
 struct Image{
