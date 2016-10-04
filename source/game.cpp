@@ -103,12 +103,12 @@ void initGame(){
 	else phase=READY;
 
 	gd.bs_ch=0;
-	menu[YNFORM].setMenu(20,100,6,2,2);
+	menu[YNFORM].setMenu(40,200,6,2,2);
 	menu[YNFORM].stack(text[MENUTEXT+13]);
 	menu[YNFORM].stack(text[MENUTEXT+14]);
-	menu[GAME_OPTION].setMenu(40,20,30,9,13);
+	menu[GAME_OPTION].setMenu(80,40,30,9,13);
 	for (int i=0 ; i<13 ; i++)menu[GAME_OPTION].stack("");
-	menu[MANEKI].setMenu(100,30,20,2,2);
+	menu[MANEKI].setMenu(200,60,20,2,2);
 	menu[MANEKI].stack(text[ANTENNATEXT+20]);
 	menu[MANEKI].stack(text[ANTENNATEXT+21]);
 	load_animebook();
@@ -119,7 +119,7 @@ void initGame(){
 	estimate();
 	setAntenna();
 	initManekiTV();
-	menu[PREF_LIST].setMenu(30,20,20,8,areas);
+	menu[PREF_LIST].setMenu(60,40,20,8,areas);
 	for(int i=0 ; i<areas-1 ; i++)menu[PREF_LIST].stack(area[i].name);
 	if(gd.game_mode!=NO_RELAY){
 		BOOL ok;
@@ -951,7 +951,7 @@ void keyAntennaMenu(){
 
 void keyPrefList_SMR(){
 	if(key.z && !key_stop(key.z)){
-		menu[SMR].setMenu(0,20,40,10,area[menu[PREF_LIST].selected()].st_num);
+		menu[SMR].setMenu(0,40,40,10,area[menu[PREF_LIST].selected()].st_num);
 		for(int i=0 ; i<area[menu[PREF_LIST].selected()].st_num ; i++){
 			if(NHK_REMOVE && gd.game_mode!=NO_RELAY){
 				if(sta[area[menu[PREF_LIST].selected()].station[i]].mark==5 || sta[area[menu[PREF_LIST].selected()].station[i]].mark==6){
@@ -983,7 +983,7 @@ void keyPrefList_SMR(){
 void keyPrefList_trans(){
 	if(key.z && !key_stop(key.z)){
 		int n=menu[PREF_LIST].selected();
-		menu[TOWN_LIST].setMenu(50,30,20,8,area[n].town_num);
+		menu[TOWN_LIST].setMenu(100,60,20,8,area[n].town_num);
 		for(int i=0 ; i<area[n].town_num ; i++)menu[TOWN_LIST].stack(town[area[n].town+i].name);
 		menu[TOWN_LIST].setViewMode(VISIBLE);
 		phase=TOWN_LIST;
@@ -1447,12 +1447,12 @@ void televise(){
 }
 
 void drawSMR(SDL_Surface* scr){
-	int Y1=120+(SMRcount/(320/SMRfast)+1)/2;
-	int Y2=120-(SMRcount/(320/SMRfast)+1)/2;
-	fillRect(scr,0,Y1,320,1,255,128,128,255);
-	fillRect(scr,0,Y2,320,1,255,128,128,255);
+	int Y1=240+(SMRcount/(640/SMRfast)+1)/2;
+	int Y2=240-(SMRcount/(640/SMRfast)+1)/2;
+	fillRect(scr,0,Y1,640,1,255,128,128,255);
+	fillRect(scr,0,Y2,640,1,255,128,128,255);
 	int a;
-	for(int i=0 ; i<320 ; i++)for(int j=0 ; j<240 ; j++){
+	for(int i=0 ; i<640 ; i++)for(int j=0 ; j<480 ; j++){
 		a=map.smr[gd.scrX+i][gd.scrY+j];
 		if(a==7)fillRect(scr,i,j,1,1,255,255,255,255);
 		else if(a==6)fillRect(scr,i,j,1,1,255,255,255,170);
@@ -1461,237 +1461,236 @@ void drawSMR(SDL_Surface* scr){
 		else if(a==3)fillRect(scr,i,j,1,1,255,255,255,50);
 		else if(a==2)fillRect(scr,i,j,1,1,255,255,255,33);
 	}
-	TextOut(scr,60,0,sta[area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]].name);
-	if(SMRcount<240*(320/SMRfast))TextOut(scr,60,20,text[GAMETEXT+22]);
+	TextOut(scr,120,0,sta[area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]].name);
+	if(SMRcount<480*(640/SMRfast))TextOut(scr,120,20,text[GAMETEXT+22]);
 	if(EXPLAIN){
-		drawKeyboard(scr,key.xC,0,220);
-		TextOut(scr,20,220,text[GAMETEXT+23]);
+		drawKeyboard(scr,key.xC,0,460);
+		TextOut(scr,20,460,text[GAMETEXT+23]);
 	}
 }
 
 void drawBossGame(SDL_Surface* scr){
-	drawImage(scr,img.chr,0,0,190,60,30,20,255);
+	drawImage(scr,img.chr,0,0,380,120,60,40,255);
 	if(bd.bossHP<=bd.pre_bossHP){
-		drawImage(scr,img.chr,30,10,0,280,(int)(bd.pre_bossHP*28/3000.0),10,255);
-		drawImage(scr,img.chr,30,10,0,290,(int)(bd.bossHP*28/3000.0),10,255);
+		drawImage(scr,img.chr,60,20,0,560,(int)(bd.pre_bossHP*56/3000.0),20,255);
+		drawImage(scr,img.chr,60,20,0,580,(int)(bd.bossHP*56/3000.0),20,255);
 	}else{
-		drawImage(scr,img.chr,30,10,0,280,(int)(bd.bossHP*28/3000.0),10,255);
-		drawImage(scr,img.chr,30,10,0,290,(int)(bd.pre_bossHP*28/3000.0),10,255);
+		drawImage(scr,img.chr,60,20,0,560,(int)(bd.bossHP*56/3000.0),20,255);
+		drawImage(scr,img.chr,60,20,0,580,(int)(bd.pre_bossHP*56/3000.0),20,255);
 	}
-	if(bd.bossHP>0)drawImage(scr,img.chr,30,10,0,290,1,10,255);
-	drawImage(scr,img.chr,200,60,140+((count/5)%2)*25,85,25,35,255);
+	if(bd.bossHP>0)drawImage(scr,img.chr,60,20,0,580,2,20,255);
+	drawImage(scr,img.chr,400,120,280+((count/5)%2)*50,170,50,70,255);
 	for(int i=0 ; i<bd.num ; i++){
-		if(bd.color[i]==1)drawImage(scr,img.chr,(int)(bd.atkX[i]-gd.scrX),(int)(bd.atkY[i]-gd.scrY)-20,190,85,20,20,255);
-		else drawImage(scr,img.chr,(int)(bd.atkX[i]-gd.scrX),(int)(bd.atkY[i]-gd.scrY)-20,190,105,20,20,255);
+		if(bd.color[i]==1)drawImage(scr,img.chr,(int)(bd.atkX[i]-gd.scrX),(int)(bd.atkY[i]-gd.scrY)-40,380,170,40,40,255);
+		else drawImage(scr,img.chr,(int)(bd.atkX[i]-gd.scrX),(int)(bd.atkY[i]-gd.scrY)-40,380,210,40,40,255);
 	}
 	if(phase==HIT_BOSS){
 		int a=0;
-		if(bd.damage<0)a=20;
-		if(start>70)drawImage(scr,img.chr,(int)bd.hitX-gd.scrX,(int)bd.hitY-gd.scrY,210+((count/5)%2)*20,85+a,20,20,255);
-		else drawM(scr,start,abs(bd.damage),210,90);
+		if(bd.damage<0)a=40;
+		if(start>70)drawImage(scr,img.chr,(int)bd.hitX-gd.scrX,(int)bd.hitY-gd.scrY,420+((count/5)%2)*40,170+a,40,40,255);
+		else drawM(scr,start,abs(bd.damage),420,180);
 	}
 }
 
 void drawClock(SDL_Surface* scr){
-	drawImage(scr,img.chr,3,3,120+((count/100)%3)*30,0,30,30,255);
-	if(gd.hour>=10)drawImage(scr,img.chr,5,10,(gd.hour/10)*10,223,10,17,255);
-	drawImage(scr,img.chr,15,10,(gd.hour%10)*10,223,10,17,255);
-	drawImage(scr,img.chr,25,10,100,223,10,17,255);
-	drawImage(scr,img.chr,35,10,(gd.minute/10)*10,223,10,17,255);
-	drawImage(scr,img.chr,45,10,(gd.minute%10)*10,223,10,17,255);
+	drawImage(scr,img.chr,6,6,240+((bg_count/100)%3)*60,0,60,60,255);
+	if(gd.hour>=10)drawImage(scr,img.chr,10,20,(gd.hour/10)*20,446,20,34,255);
+	drawImage(scr,img.chr,30,20,(gd.hour%10)*20,446,20,34,255);
+	drawImage(scr,img.chr,50,20,200,446,20,34,255);
+	drawImage(scr,img.chr,70,20,(gd.minute/10)*20,446,20,34,255);
+	drawImage(scr,img.chr,90,20,(gd.minute%10)*20,446,20,34,255);
 }
 
 void drawScore(SDL_Surface * scr){
-	if(gd.score>=100000)drawImage(scr,img.chr,180,0,(gd.score/100000)*8,202,8,9,255);
-	if(gd.score>=10000)drawImage(scr,img.chr,188,0,((gd.score/10000)%10)*8,202,8,9,255);
-	if(gd.score>=1000)drawImage(scr,img.chr,196,0,((gd.score/1000)%10)*8,202,8,9,255);
-	if(gd.score>=100)drawImage(scr,img.chr,204,0,((gd.score/100)%10)*8,202,8,9,255);
-	if(gd.score>=10)drawImage(scr,img.chr,212,0,((gd.score/10)%10)*8,202,8,9,255);
-	drawImage(scr,img.chr,220,0,(gd.score%10)*8,202,8,9,255);
-	drawImage(scr,img.chr,228,0,93,202,12,9,255);
+	if(gd.score>=100000)drawImage(scr,img.chr,360,0,(gd.score/100000)*16,404,16,18,255);
+	if(gd.score>=10000)drawImage(scr,img.chr,376,0,((gd.score/10000)%10)*16,404,16,18,255);
+	if(gd.score>=1000)drawImage(scr,img.chr,392,0,((gd.score/1000)%10)*16,404,16,18,255);
+	if(gd.score>=100)drawImage(scr,img.chr,408,0,((gd.score/100)%10)*16,404,16,18,255);
+	if(gd.score>=10)drawImage(scr,img.chr,424,0,((gd.score/10)%10)*16,404,16,18,255);
+	drawImage(scr,img.chr,440,0,(gd.score%10)*16,404,16,18,255);
+	drawImage(scr,img.chr,456,0,186,404,24,18,255);
 }
 
 void drawResult(SDL_Surface* scr){
-	fillRect(scr,0,0,320,240,0,0,0,255);
-	drawImage(scr,img.back,30,20,0,0,140,200,255);
-	drawImage(scr,img.back,170,20,180,0,120,200,255);
-	drawImage(scr,img.back,30,80,260,200,120,140,255);
+	fillRect(scr,0,0,640,480,0,0,0,255);
+	drawImage(scr,img.back,60,40,0,0,280,400,255);
+	drawImage(scr,img.back,340,40,360,0,240,400,255);
+	drawImage(scr,img.back,60,160,520,400,240,280,255);
 
-	TextOut(scr,100,60,text[GAMETEXT+2]);
+	TextOut2(scr,200,120,text[GAMETEXT+2]);
 	sprintf_s(str,"%3d/%3d",gd.crops,works);
 	if(phase==TODAYS_CROP){
-		drawImage(scr,img.menuback,10,80,0,0,100,20,128);
-		TextOut(scr,50,80,str);
+		drawImage(scr,img.menuback,20,160,0,0,200,40,128);
+		TextOut2(scr,100,160,str);
 	}
 	else if(phase==RESULT){
 		if(start>30){
-			drawImage(scr,img.menuback,150-(start-30)*7,80,0,0,100,20,128);
-			TextOut(scr,190-(start-30)*7,80,str);
+			drawImage(scr,img.menuback,300-(start-30)*14,160,0,0,200,40,128);
+			TextOut2(scr,380-(start-30)*14,160,str);
 		}else{
-			drawImage(scr,img.menuback,150,80,0,0,100,20,128);
-			TextOut(scr,190,80,str);
+			drawImage(scr,img.menuback,300,160,0,0,200,40,128);
+			TextOut2(scr,380,160,str);
 		}
 	}
 
 	if(phase==TODAYS_CROP){
 		int n;
-		drawImage(scr,img.menuback,50,100,0,0,260,100,128);
+		drawImage(scr,img.menuback,100,200,0,0,520,200,128);
 		for(int i=0 ; i<5 ; i++){
 			n=count/10+i;
 			if(n==works)break;
 			if(fishbox.today[n]==EOF)break;
 			if(n<0)continue;
-			drawImage(scr,img.symbol,55,100+i*20,(work[fishbox.today[n]].mark%16)*17,(work[fishbox.today[n]].mark/16)*17,17,17,255);
-			TextOut_lang(scr,70,100+i*20,work[fishbox.today[n]].title,60,JAPANESE);
+			drawImage(scr,img.symbol,110,200+i*40,(work[fishbox.today[n]].mark%16)*34,(work[fishbox.today[n]].mark/16)*34,34,34,255);
+			TextOut2_lang(scr,140,200+i*40,work[fishbox.today[n]].title,60,JAPANESE);
 		}
 	}
 	if(phase==RESULT){
 		if(start<10){
-			TextOut(scr,100,110,text[GAMETEXT+6]);
-			drawImage(scr,img.menuback,150,130,0,0,100,20,128);
+			TextOut2(scr,200,220,text[GAMETEXT+6]);
+			drawImage(scr,img.menuback,300,260,0,0,200,40,128);
 			sprintf_s(str,"%6d",gd.score);
-			TextOut(scr,188,130,str);
+			TextOut2(scr,376,260,str);
 		}else{
-			TextOut(scr,100+(start-10)*8,110,text[GAMETEXT+6]);
-			drawImage(scr,img.menuback,150+(start-10)*8,130,0,0,100,20,128);
+			TextOut2(scr,200+(start-10)*16,220,text[GAMETEXT+6]);
+			drawImage(scr,img.menuback,300+(start-10)*16,260,0,0,200,40,128);
 			sprintf_s(str,"%6d",gd.score);
-			TextOut(scr,188+(start-10)*8,130,str);
+			TextOut2(scr,376+(start-10)*16,260,str);
 		}
-		TextOut(scr,100+start*8,160,text[GAMETEXT+5]);
-		drawImage(scr,img.menuback,150+start*8,180,0,0,100,20,128);
+		TextOut2(scr,200+start*16,320,text[GAMETEXT+5]);
+		drawImage(scr,img.menuback,300+start*16,360,0,0,200,40,128);
 		sprintf_s(str,"%3d%c",100*gd.crops/works,37);
-		TextOut(scr,203+start*8,180,str);
+		TextOut2(scr,406+start*16,360,str);
 	}
 }
 
 void drawGetHazia(SDL_Surface *scr){
 	if(gd.scene_count==0 && start>0){
-		drawImage(scr,img.back,150-start/10,20,140,0,160,200,255);
-		drawImage(scr,img.back,130-start/5,80,300+((count/5)%2)*80,0,80,140,255);
-		drawImage(scr,img.back,10+start/10,20,0,0,140,200,255);
-		drawImage(scr,img.back,20+start/20,80,260,200,120,140,255);
-		fillRect(scr,0,0,320,20,0,0,0,255);
-		fillRect(scr,0,220,320,20,0,0,0,255);
-		fillRect(scr,0,0,30,240,0,0,0,255);
-		fillRect(scr,290,0,30,240,0,0,0,255);
+		drawImage(scr,img.back,300-start/5,40,280,0,320,400,255);
+		drawImage(scr,img.back,260-(int)(start/2.5),160,600+((count/5)%2)*160,0,160,280,255);
+		drawImage(scr,img.back,20+start/5,40,0,0,280,400,255);
+		drawImage(scr,img.back,40+start/10,160,520,400,240,280,255);
+		fillRect(scr,0,0,640,40,0,0,0,255);
+		fillRect(scr,0,440,640,40,0,0,0,255);
+		fillRect(scr,0,0,60,480,0,0,0,255);
+		fillRect(scr,580,0,60,480,0,0,0,255);
 
 		if(start==1){
 			int a;
-			for(int i=0 ; i<100 ; i++)for(int j=0 ; j<100 ; j++){
-				a=255-(int)(255.0*(sqrt((50.0-i)*(50-i)+(50-j)*(50-j))/50));
-				if(a>0)fillRect(img.back,620+i,j,1,1,a,a,0,255);
+			for(int i=0 ; i<200 ; i++)for(int j=0 ; j<200 ; j++){
+				a=255-(int)(255.0*(sqrt((100.0-i)*(100-i)+(100-j)*(100-j))/100));
+				if(a>0)fillRect(img.back,1240+i,j,1,1,a,a,0,255);
 			}
 		}
 	}
 	else if(gd.scene_count==0 || gd.scene_count>=2){
 		int a=0;
 		if(gd.scene_count==3)a=count;
-		drawImage(scr,img.back,90,20,60,200,140,160,255);
-		drawImage(scr,img.back,320-((count+70)%120)*6,120,300,140,160,60,255);
-		drawImage(scr,img.back,((count+20)%120)*6-160,140,460,160,160,40,255);
+		drawImage(scr,img.back,180,40,120,400,280,320,255);
+		drawImage(scr,img.back,640-((count+70)%120)*12,240,600,280,320,120,255);
+		drawImage(scr,img.back,((count+20)%120)*12-320,280,920,320,320,80,255);
 
 		int X,Y,X2,Y2,W,H;
 
 		for(int k=0 ; k<2 ; k++){
-			if(k==0){X=((count+20)%120)*6-50;Y=120;}
-			if(k==1){X=270-((count+70)%120)*6;Y=140;}
-			X2=0;Y2=0;W=100;H=100;
+			if(k==0){X=((count+20)%120)*12-100;Y=240;}
+			if(k==1){X=540-((count+70)%120)*12;Y=280;}
+			X2=0;Y2=0;W=200;H=200;
 
-			drawLight(scr,img.back,X,Y,620+X2,Y2,W,H,255);
+			illuminateImage(scr,img.back,X,Y,1240+X2,Y2,W,H,255);
 		}
 
+		drawImage(scr,img.back,240-a,120,600+((count/5)%2)*160,0,160,280,255);
 
-		drawImage(scr,img.back,120-a,60,300+((count/5)%2)*80,0,80,140,255);
-
-		Y=60;W=40;H=140;
+		Y=120;W=80;H=280;
 		X2=0;Y2=0;
 		int b=0;
 		if(count%120<40){
-			X=120-a;
-			b=(20-abs(20-count%120))*13;
+			X=240-a;
+			b=(20-abs(20-count%120))*26;
 		}
 		if((count+50)%120<40){
-			X=160-a;X2=40;
-			b=(20-abs(20-(count+50)%120))*13;
+			X=320-a;X2=80;
+			b=(20-abs(20-(count+50)%120))*26;
 		}
 		if(b!=0){
-			drawLight(scr,img.back,X,Y,640+X2,100+Y2,W,H,b);
+			illuminateImage(scr,img.back,X,Y,1280+X2,200+Y2,W,H,b);
 		}
 
-		drawImage(scr,img.back,30,20,0,200,60,160,255);
-		drawImage(scr,img.back,230,20,200,200,60,160,255);
-		if((count+70)%120<40)fillRect(scr,30,20,60,160,255,255,255,(20-abs(20-(count+70)%120))*13);
-		if((count+20)%120<40)fillRect(scr,230,20,60,160,255,255,255,(20-abs(20-(count+20)%120))*13);
-		fillRect(scr,0,0,320,20,0,0,0,255);
-		fillRect(scr,0,180,320,60,0,0,0,255);
-		fillRect(scr,0,0,30,240,0,0,0,255);
-		fillRect(scr,290,0,30,240,0,0,0,255);
+		drawImage(scr,img.back,60,40,0,400,120,320,255);
+		drawImage(scr,img.back,460,40,400,400,120,320,255);
+		if((count+70)%120<40)fillRect(scr,60,40,120,320,255,255,255,(20-abs(20-(count+70)%120))*13);
+		if((count+20)%120<40)fillRect(scr,460,40,120,320,255,255,255,(20-abs(20-(count+20)%120))*13);
+		fillRect(scr,0,0,640,40,0,0,0,255);
+		fillRect(scr,0,360,640,230,0,0,0,255);
+		fillRect(scr,0,0,60,480,0,0,0,255);
+		fillRect(scr,580,0,60,480,0,0,0,255);
 		drawTalking(scr);
 	}
 	else if(gd.scene_count==1){
 		int inc=gd.score-indexName[dataNo-1].hiscore;
 		if(inc<0)inc=0;
-		drawImage(scr,img.back,0,20,0,360,320,200,255);
+		drawImage(scr,img.back,0,40,0,720,640,400,255);
 
-		int x1=0,y1=60,x2=140,y2=-20,x3=120,y3=100,x4=320,y4=0;
-		if(start<260){x1=-(260-start)*2;y1=60+(260-start)*2;}
-		if(start<280 && start>=180){x2=140+(280-start)*2;y2=-20-(280-start)*2;}
-		if(start<180 && start>=100){x2=300-(180-start)*2;y2=-180+(180-start)*2;}
-		if(start<280){x3=120+(280-start)*2;y3=100-(280-start)*2;}
-		if(start<180 && start>=100){x4=300-(180-start)*2;y4=-60+(180-start)*2;}
-		if(start<100){x4=140;y4=100;}
-		drawImage(scr,img.back,x1,y1,320,360,160,160,255);
-		drawImage(scr,img.back,x2,y2,480,360,160,160,255);
-		drawImage(scr,img.back,x3,y3,460,60,60,60,255);
-		drawImage(scr,img.back,x4,y4,520,60,100,100,255);
+		int x1=0,y1=120,x2=280,y2=-40,x3=240,y3=200,x4=640,y4=0;
+		if(start<260){x1=-(260-start)*4;y1=120+(260-start)*4;}
+		if(start<280 && start>=180){x2=280+(280-start)*4;y2=-40-(280-start)*4;}
+		if(start<180 && start>=100){x2=600-(180-start)*4;y2=-360+(180-start)*4;}
+		if(start<280){x3=240+(280-start)*4;y3=200-(280-start)*4;}
+		if(start<180 && start>=100){x4=600-(180-start)*4;y4=-120+(180-start)*4;}
+		if(start<100){x4=280;y4=200;}
+		drawImage(scr,img.back,x1,y1,640,720,320,320,255);
+		drawImage(scr,img.back,x2,y2,960,720,320,320,255);
+		drawImage(scr,img.back,x3,y3,920,120,120,120,255);
+		drawImage(scr,img.back,x4,y4,1040,120,200,200,255);
 
-		fillRect(scr,0,0,320,20,0,0,0,255);
-		fillRect(scr,0,220,320,20,0,0,0,255);
-		TextOut(scr,120,20,text[EPILOGUE+2]);
+		fillRect(scr,0,0,640,40,0,0,0,255);
+		fillRect(scr,0,440,640,40,0,0,0,255);
+		TextOut2(scr,240,40,text[EPILOGUE+2]);
 
 		sprintf_s(str,"%10d",indexName[dataNo-1].hiscore);
 		if(start>250){
-			TextOut(scr,100+(start-250)*5,40,text[GAMETEXT+7]);
-			drawImage(scr,img.menuback,170+(start-250)*5,60,0,0,100,20,128);
-			TextOut(scr,170+(start-250)*5,60,str);
+			TextOut2(scr,200+(start-250)*10,80,text[GAMETEXT+7]);
+			drawImage(scr,img.menuback,340+(start-250)*10,120,0,0,200,40,128);
+			TextOut2(scr,340+(start-250)*10,120,str);
 		}else{
-			TextOut(scr,100,40,text[GAMETEXT+7]);
-			drawImage(scr,img.menuback,170,60,0,0,100,20,128);
-			TextOut(scr,170,60,str);
+			TextOut2(scr,200,80,text[GAMETEXT+7]);
+			drawImage(scr,img.menuback,340,120,0,0,200,40,128);
+			TextOut2(scr,340,120,str);
 		}
 		sprintf_s(str,"%10d",gd.score);
 		if(start>200){
-			TextOut(scr,100+(start-200)*5,90,text[GAMETEXT+6]);
-			drawImage(scr,img.menuback,170+(start-200)*5,110,0,0,100,20,128);
-			TextOut(scr,170+(start-200)*5,110,str);
+			TextOut2(scr,200+(start-200)*10,180,text[GAMETEXT+6]);
+			drawImage(scr,img.menuback,340+(start-200)*10,220,0,0,200,40,128);
+			TextOut2(scr,340+(start-200)*10,220,str);
 		}else{
-			TextOut(scr,100,90,text[GAMETEXT+6]);
-			drawImage(scr,img.menuback,170,110,0,0,100,20,128);
-			TextOut(scr,170,110,str);
+			TextOut2(scr,200,180,text[GAMETEXT+6]);
+			drawImage(scr,img.menuback,340,220,0,0,200,40,128);
+			TextOut2(scr,340,220,str);
 		}
-		TextOut(scr,100,155,text[MIYAZAKITEXT+6]);
+		TextOut2(scr,200,310,text[MIYAZAKITEXT+6]);
 		int a=1;
 		for(int i=0 ; i<10 ; i++){
 			if(gd.hazia/a==0 && gd.hazia>0 || gd.hazia==0 && i>0)continue;
-			drawImage(scr,img.chr,260-i*15,155,((gd.hazia/a)%10)*10,260,10,20,255);
+			drawImage(scr,img.chr,520-i*30,310,((gd.hazia/a)%10)*20,520,20,40,255);
 			a*=10;
 		}
 
 		if(start==100){
 			sprintf_s(str,"+%d",inc);
-			TextOut(img.back,480,20,str);
+			TextOut2(img.back,960,40,str);
 		}
 		if(start<100 && start>=50){
-			int a=50-abs((start-50)-25)*2;
-			drawImage(scr,img.back,0,20,((count/2)%2)*320,560,320,200,255);
-			drawImage_x2(scr,img.back,110-a/2,90-a/2,(100.0+a)/100.0,460,0,100,60);
+			int a=100-abs((start-50)-25)*4;
+			drawImage(scr,img.back,0,40,((count/2)%2)*640,1120,640,400,255);
+			drawImage_x(scr,img.back,220-a,180-a,(100.0+a)/100.0,920,0,200,120,255);
 		}
 		if(start<50 && start>0){
-			drawImage(scr,img.back,210-start*2,165-(int)(start*1.5),460,0,100,60,255);
+			drawImage(scr,img.back,420-start*4,330-start*3,920,0,200,120,255);
 		}
 		if(start==0){
 			sprintf_s(str,"(+%d)",gd.hazia2);
-			TextOut(scr,230,180,str);
+			TextOut(scr,460,360,str);
 		}
 	}else{
 		if(gd.scene_count==2)drawTalking(scr);
@@ -1701,27 +1700,27 @@ void drawGetHazia(SDL_Surface *scr){
 void drawPlayer(SDL_Surface* scr){
 	if(MAP3D)return;
 	if(key.x && !key.up && !key.down && !key.left && !key.right){
-		if(gd.doze)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-13,(int)(gd.y*MAGNIFY)-gd.scrY-19,((count/10)%2)*30+30,30,30,24,255);
-		else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-13,(int)(gd.y*MAGNIFY)-gd.scrY-19,0,30,30,24,255);
+		if(gd.doze)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-26,(int)(gd.y*MAGNIFY)-gd.scrY-38,((count/10)%2)*60+60,60,60,48,255);
+		else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-26,(int)(gd.y*MAGNIFY)-gd.scrY-38,0,60,60,48,255);
 	}else{
 		int a=0;
-		if(map.rural[(int)gd.x/map.rural_size][(int)gd.y/map.rural_size]==NONE)a=15;
-		if(DASH_TYPE==TYPE_MEGAMAN && gd.speed>1)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-33,(int)(gd.y*MAGNIFY)-gd.scrY-19,0,30,30,24,255);
-		else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-7,(int)(gd.y*MAGNIFY)-gd.scrY-25,gd.player_dir*15,0,15,30,255);
+		if(map.rural[(int)gd.x/map.rural_size][(int)gd.y/map.rural_size]==NONE)a=30;
+		if(DASH_TYPE==TYPE_MEGAMAN && gd.speed>1)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-66,(int)(gd.y*MAGNIFY)-gd.scrY-38,0,60,60,48,255);
+		else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-14,(int)(gd.y*MAGNIFY)-gd.scrY-50,gd.player_dir*30,0,30,60,255);
 		if(gd.speed>1.5){
-			drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-16,(int)(gd.y*MAGNIFY)-gd.scrY-20,((count/5)%2)*30,55+a*2,30,30,255);
-			if(CHAR_CODE==JAPANESE)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-16,(int)(gd.y*MAGNIFY)-gd.scrY-20,((count/5)%2)*30,115+a,30,15,255);
-			else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-16,(int)(gd.y*MAGNIFY)-gd.scrY-20,((count/5)%2)*30,145+a,30,15,255);
+			drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-32,(int)(gd.y*MAGNIFY)-gd.scrY-40,((count/5)%2)*60,110+a*4,60,60,255);
+			if(CHAR_CODE==JAPANESE)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-32,(int)(gd.y*MAGNIFY)-gd.scrY-40,((count/5)%2)*60,230+a,60,30,255);
+			else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-32,(int)(gd.y*MAGNIFY)-gd.scrY-40,((count/5)%2)*60,290+a,60,30,255);
 		}
 		if(key.up||key.down||key.left||key.right){
-			drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-16,(int)(gd.y*MAGNIFY)-gd.scrY,((count/5)%2)*30,a+75,30,10,255);
-			if(phase==PLAYING && gd.real_speed<0.5)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX,(int)(gd.y*MAGNIFY)-gd.scrY-35,60+((count/10)%2)*10,100,10,10,255);
+			drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-32,(int)(gd.y*MAGNIFY)-gd.scrY,((count/5)%2)*60,a+150,60,20,255);
+			if(phase==PLAYING && gd.real_speed<0.5)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX,(int)(gd.y*MAGNIFY)-gd.scrY-70,120+((count/10)%2)*20,200,20,20,255);
 		}
 	}
 	if(abs((int)gd.x-gd.memmaX)<20 && abs((int)gd.y-gd.memmaY)<20){
 		if(gd.memma_count!=0 && gd.memma_count<20){
-			if(gd.memma_type)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-10,(int)(gd.y*MAGNIFY)-gd.scrY-15,270-(gd.memma_count/10)*20,85,20,20,255);
-			else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-10,(int)(gd.y*MAGNIFY)-gd.scrY-15,270-(gd.memma_count/10)*20,105,20,20,255);
+			if(gd.memma_type)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-20,(int)(gd.y*MAGNIFY)-gd.scrY-30,540-(gd.memma_count/10)*40,170,40,40,255);
+			else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-20,(int)(gd.y*MAGNIFY)-gd.scrY-30,540-(gd.memma_count/10)*40,210,40,40,255);
 		}
 	}
 }
@@ -1736,177 +1735,177 @@ void drawFishup(SDL_Surface* scr){
 	}
 	else if(phase==BS_CH && BSstation[gd.bs_ch]!=EOF){
 		drawTerop(scr,sta[ BSstation[gd.bs_ch] ].talk,100,0);
-		drawImage(scr,img.fishup,0,190,50,0,50,50,255);
+		drawImage(scr,img.fishup,0,380,100,0,100,100,255);
 	}
 	if(phase==BS_ATTACK){
-		if(start>0)drawImage(scr,img.fishup,10,20-abs(start%10-5)*5,0,150,160,160,255);
-		else drawImage(scr,img.fishup,10,20,0,150,160,160,255);
+		if(start>0)drawImage(scr,img.fishup,20,40-abs(start%10-5)*10,0,300,320,320,255);
+		else drawImage(scr,img.fishup,20,40,0,300,320,320,255);
 		if(!animebook[ work[sta[BSstation[gd.bs_ch]].ontv].tnum ]){
-			drawImage(scr,img.fishup,150,80,260,0,120,60,255);
+			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 			sprintf_s(str,"%4d/%4d",collection+1,allworks);
-			TextOut(scr,190,110,str);
+			TextOut2(scr,380,220,str);
 		}
 	}
 	if(phase==CROP){
 		fishbox.drawFishBox(scr);
 		sprintf_s(str,"%s %d",toChar(text[GAMETEXT+13]),getMissing());
-		TextOut(scr,100,0,str,(int)strlen(str));
+		TextOut2(scr,200,0,str,(int)strlen(str));
 	}
 	if(phase==BS_CH){
-		drawImage(scr,img.fishup,80,40,100,0,160,120,255);
+		drawImage(scr,img.fishup,160,80,200,0,320,240,255);
 		for(int i=0 ; i<12 ; i++){
-			if(i==gd.bs_ch)drawImage(scr,img.fishup,90+(i%4)*36,97+(i/4)*20,130,120,30,22,192);
-			else drawImage(scr,img.fishup,90+(i%4)*36,97+(i/4)*20,100,120,30,22,192);
+			if(i==gd.bs_ch)drawImage(scr,img.fishup,180+(i%4)*72,194+(i/4)*40,260,240,60,44,192);
+			else drawImage(scr,img.fishup,180+(i%4)*72,194+(i/4)*40,200,240,60,44,192);
 		}
 		sprintf_s(str,"%s",toChar(sta[BSstation[gd.bs_ch]].name));
-		drawImage(scr,img.menuback,60,0,0,0,(int)strlen(str)*9,20,128);
-		TextOut(scr,60,0,str,(int)strlen(str));
-		drawImage(scr,img.chr,260,25,110,225,20,15,255);
-		drawImage(scr,img.chr,280,20,(BSchannel[gd.bs_ch]/10)*10,240,10,20,255);
-		drawImage(scr,img.chr,290,20,(BSchannel[gd.bs_ch]%10)*10,240,10,20,255);
+		drawImage(scr,img.menuback,120,0,0,0,(int)strlen(str)*18,40,128);
+		TextOut2(scr,120,0,str,(int)strlen(str));
+		drawImage(scr,img.chr,520,50,220,450,40,30,255);
+		drawImage(scr,img.chr,560,40,(BSchannel[gd.bs_ch]/10)*20,480,20,40,255);
+		drawImage(scr,img.chr,580,40,(BSchannel[gd.bs_ch]%10)*20,480,20,40,255);
 	}
 	if((phase==FISHUP||phase==MANEKI_FISHUP) && gd.game_mode!=BOSS){
-		if(start>40)drawImage(scr,img.fishup,(start-40)*10,20,160,150,160,160,255);
-		else drawImage(scr,img.fishup,0,20,160,150,160,160,255);
+		if(start>40)drawImage(scr,img.fishup,(start-40)*20,40,320,300,320,320,255);
+		else drawImage(scr,img.fishup,0,40,320,300,320,320,255);
 		int n;
 		if(phase==FISHUP)n=work[sta[ant->station].ontv].tnum;
 		else n=work[md.fish[0].title_num].tnum;
 		if(start<70 && !animebook[n]){
-			drawImage(scr,img.fishup,150,80,260,0,120,60,255);
+			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 			sprintf_s(str,"%4d/%4d",collection+1,allworks);
-			TextOut(scr,190,110,str);
+			TextOut2(scr,380,220,str);
 		}
 	}
 	if(phase==GRADEUP || phase==MANEKI_GRADEUP){
 		int a=start-54;
 		if(a<0)a=0;
-		drawImage(scr,img.chr,240+a*4,100,230,30,70,50,255);
+		drawImage(scr,img.chr,480+a*8,200,460,60,140,100,255);
 		sprintf_s(str,"+%d",gd.gradeup);
-		TextOut(scr,255+a*4,120,str);
+		TextOut(scr,510+a*8,240,str);
 	}
 }
 
 void drawMenuBox(SDL_Surface* scr){
-	if(start<25)drawImage(scr,img.chr,70,60,0,300,40,40,255);
-	if(start<20)drawImage(scr,img.chr,130,60,40,300,40,40,255);
-	if(start<15)drawImage(scr,img.chr,190,60,80,300,40,40,255);
+	if(start<25)drawImage(scr,img.chr,140,120,0,600,80,80,255);
+	if(start<20)drawImage(scr,img.chr,260,120,80,600,80,80,255);
+	if(start<15)drawImage(scr,img.chr,380,120,160,600,80,80,255);
 	if(start<10){
-		if(gd.game_mode==STORYMODE)drawImage(scr,img.chr,70,120,120,300,40,40,255);
-		else if(MAP3D)drawImage(scr,img.chr,70,120,280,300,40,40,255);
-		else drawImage(scr,img.chr,70,120,240,300,40,40,255);
+		if(gd.game_mode==STORYMODE)drawImage(scr,img.chr,140,240,240,600,80,80,255);
+		else if(MAP3D)drawImage(scr,img.chr,140,240,560,600,80,80,255);
+		else drawImage(scr,img.chr,140,240,480,600,80,80,255);
 	}
 	if(start<5){
-		if(gd.game_mode==STORYMODE)drawImage(scr,img.chr,130,120,160,300,40,40,255);
-		else if(MAP3D)drawImage(scr,img.chr,130,120,320,300,40,40,255);
+		if(gd.game_mode==STORYMODE)drawImage(scr,img.chr,260,240,320,600,80,80,255);
+		else if(MAP3D)drawImage(scr,img.chr,260,240,640,600,80,80,255);
 	}
-	if(start==0)drawImage(scr,img.chr,190,120,200,300,40,40,255);
-	drawImage(scr,img.chr,(gd.menu_selected%3)*60+70,(gd.menu_selected/3)*60+60,160,150+((count/20)%2)*40,40,40,255);
+	if(start==0)drawImage(scr,img.chr,380,240,400,600,80,80,255);
+	drawImage(scr,img.chr,(gd.menu_selected%3)*120+140,(gd.menu_selected/3)*120+120,320,300+((count/20)%2)*80,80,80,255);
 
-	drawImage(scr,img.menuback,60,180,0,0,200,20,128);
-	if(gd.menu_selected==0)TextOut(scr,70,182,text[GAMETEXT]);
-	else if(gd.menu_selected==1)TextOut(scr,70,182,text[GAMETEXT+1]);
-	else if(gd.menu_selected==2)TextOut(scr,70,182,text[TITLETEXT+1]);
+	drawImage(scr,img.menuback,120,360,0,0,400,40,128);
+	if(gd.menu_selected==0)TextOut2(scr,140,364,text[GAMETEXT]);
+	else if(gd.menu_selected==1)TextOut2(scr,140,364,text[GAMETEXT+1]);
+	else if(gd.menu_selected==2)TextOut2(scr,140,364,text[TITLETEXT+1]);
 	else if(gd.menu_selected==3){
-		if(gd.game_mode==STORYMODE)TextOut(scr,70,182,text[GAMETEXT+2]);
+		if(gd.game_mode==STORYMODE)TextOut2(scr,140,364,text[GAMETEXT+2]);
 		else if(MAP3D){
 			sprintf_s(str,"%d",gd.height);
-			TextOut(scr,70,182,text[GAMETEXT+26]);
-			TextOut(scr,200,182,str);
+			TextOut2(scr,140,364,text[GAMETEXT+26]);
+			TextOut2(scr,400,364,str);
 		}
-		else TextOut(scr,70,182,text[GAMETEXT+28]);
+		else TextOut2(scr,140,364,text[GAMETEXT+28]);
 	}
 	else if(gd.menu_selected==4){
-		if(gd.game_mode==STORYMODE)TextOut(scr,70,182,text[GAMETEXT+3]);
+		if(gd.game_mode==STORYMODE)TextOut2(scr,140,364,text[GAMETEXT+3]);
 		else if(MAP3D){
 			sprintf_s(str,"%d",gd.zoom);
-			TextOut(scr,70,182,text[GAMETEXT+27]);
-			TextOut(scr,200,182,str);
+			TextOut2(scr,140,364,text[GAMETEXT+27]);
+			TextOut2(scr,400,364,str);
 		}
 	}
-	else if(gd.menu_selected==5)TextOut(scr,70,182,text[GAMETEXT+4]);
+	else if(gd.menu_selected==5)TextOut2(scr,140,364,text[GAMETEXT+4]);
 }
 
 void drawAntennaMenuBox(SDL_Surface* scr){
-	if(start<30)drawImage(scr,img.chr,70,60,0,340,40,40,255);
-	if(start<25)drawImage(scr,img.chr,130,60,40,340,40,40,255);
+	if(start<30)drawImage(scr,img.chr,140,120,0,680,80,80,255);
+	if(start<25)drawImage(scr,img.chr,260,120,80,680,80,80,255);
 	if(start<20){
-		if(gd.bought[0])drawImage(scr,img.chr,190,60,80,340,40,40,255);
-		else drawImage(scr,img.chr,190,60,360,300,40,40,255);
+		if(gd.bought[0])drawImage(scr,img.chr,380,120,160,680,80,80,255);
+		else drawImage(scr,img.chr,380,120,720,600,80,80,255);
 	}
 	if(start<15){
-		if(gd.bought[1])drawImage(scr,img.chr,70,120,120,340,40,40,255);
-		else drawImage(scr,img.chr,70,120,360,300,40,40,255);
+		if(gd.bought[1])drawImage(scr,img.chr,140,240,240,680,80,80,255);
+		else drawImage(scr,img.chr,140,240,720,600,80,80,255);
 	}
 	if(start<10){
-		if(gd.bought[2])drawImage(scr,img.chr,130,120,160,340,40,40,255);
-		else drawImage(scr,img.chr,130,120,360,300,40,40,255);
+		if(gd.bought[2])drawImage(scr,img.chr,260,240,320,680,80,80,255);
+		else drawImage(scr,img.chr,260,240,720,600,80,80,255);
 	}
 	if(start<5){
-		if(gd.bought[3])drawImage(scr,img.chr,190,120,200,340,40,40,255);
-		else drawImage(scr,img.chr,190,120,360,300,40,40,255);
+		if(gd.bought[3])drawImage(scr,img.chr,380,240,400,680,80,80,255);
+		else drawImage(scr,img.chr,380,240,720,600,80,80,255);
 	}
 	if(start==0){
-		if(gd.bought[8])drawImage(scr,img.chr,250,120,240,340,40,40,255);
-		else drawImage(scr,img.chr,250,120,360,300,40,40,255);
+		if(gd.bought[8])drawImage(scr,img.chr,500,240,480,680,80,80,255);
+		else drawImage(scr,img.chr,500,240,720,600,80,80,255);
 	}
-	if(gd.antenna_selected==6)drawImage(scr,img.chr,250,120,160,150+((count/20)%2)*40,40,40,255);
-	else drawImage(scr,img.chr,(gd.antenna_selected%3)*60+70,(gd.antenna_selected/3)*60+60,160,150+((count/20)%2)*40,40,40,255);
+	if(gd.antenna_selected==6)drawImage(scr,img.chr,500,240,320,300+((count/20)%2)*80,80,80,255);
+	else drawImage(scr,img.chr,(gd.antenna_selected%3)*120+140,(gd.antenna_selected/3)*120+120,320,300+((count/20)%2)*80,80,80,255);
 
-	drawImage(scr,img.menuback,60,180,0,0,200,20,128);
-	if(gd.antenna_selected==0)TextOut(scr,70,182,text[GAMETEXT+14]);
-	else if(gd.antenna_selected==1)TextOut(scr,70,182,text[GAMETEXT+15]);
-	else if(gd.antenna_selected==2 && gd.bought[0])TextOut(scr,70,182,text[GAMETEXT+16]);
-	else if(gd.antenna_selected==3 && gd.bought[1])TextOut(scr,70,182,text[GAMETEXT+17]);
-	else if(gd.antenna_selected==4 && gd.bought[2])TextOut(scr,70,182,text[GAMETEXT+18]);
-	else if(gd.antenna_selected==5 && gd.bought[3])TextOut(scr,70,182,text[GAMETEXT+19]);
-	else if(gd.antenna_selected==6 && gd.bought[8])TextOut(scr,70,182,text[GAMETEXT+20]);
+	drawImage(scr,img.menuback,120,360,0,0,400,40,128);
+	if(gd.antenna_selected==0)TextOut2(scr,140,364,text[GAMETEXT+14]);
+	else if(gd.antenna_selected==1)TextOut2(scr,140,364,text[GAMETEXT+15]);
+	else if(gd.antenna_selected==2 && gd.bought[0])TextOut2(scr,140,364,text[GAMETEXT+16]);
+	else if(gd.antenna_selected==3 && gd.bought[1])TextOut2(scr,140,364,text[GAMETEXT+17]);
+	else if(gd.antenna_selected==4 && gd.bought[2])TextOut2(scr,140,364,text[GAMETEXT+18]);
+	else if(gd.antenna_selected==5 && gd.bought[3])TextOut2(scr,140,364,text[GAMETEXT+19]);
+	else if(gd.antenna_selected==6 && gd.bought[8])TextOut2(scr,140,364,text[GAMETEXT+20]);
 }
 
 void drawRural(SDL_Surface* scr){
 	int a=map.rural[(int)gd.x/map.rural_size][(int)gd.y/map.rural_size];
+	if(a<0 || a>=areas)return;
 	if(gd.game_mode!=STORYMODE && gd.game_mode!=SELECT && gd.game_mode!=BOSS)return;
 	if(gd.pre_rural!=map.rural_rate[a]){
 		gd.pre_rural=map.rural_rate[a];
 		gd.count_rural=100;
 	}
-	if(a==NONE)return;
 	if(gd.count_rural>0){
-		drawImage(scr,img.chr,270,210,180,30,50,30,255);
-		if(gd.pre_rural>=10)drawImage(scr,img.chr,291,222,(gd.pre_rural/10)*10,211,10,12,255);
-		drawImage(scr,img.chr,303,222,(gd.pre_rural%10)*10,211,10,12,255);
+		drawImage(scr,img.chr,540,420,360,60,100,60,255);
+		if(gd.pre_rural>=10)drawImage(scr,img.chr,582,444,(gd.pre_rural/10)*20,422,20,24,255);
+		drawImage(scr,img.chr,606,444,(gd.pre_rural%10)*20,422,20,24,255);
 		gd.count_rural--;
 	}
 }
 
 void drawSpeedMeter(SDL_Surface* scr){
 	double a=PI*gd.speed/30.0;
-	drawImage(scr,img.chr,268,188,110,145,50,50,255);
-	drawImage(scr,img.chr,316-(int)(cos(a)*50),236-(int)(sin(a)*50),110,195,5,5,255);
+	drawImage(scr,img.chr,536,376,220,290,100,100,255);
+	drawImage(scr,img.chr,632-(int)(cos(a)*100),472-(int)(sin(a)*100),220,390,10,10,255);
 	a=PI*gd.real_speed/30.0;
-	drawImage(scr,img.chr,316-(int)(cos(a)*50),236-(int)(sin(a)*50),110,195,5,5,255);
+	drawImage(scr,img.chr,632-(int)(cos(a)*100),472-(int)(sin(a)*100),220,390,10,10,255);
 }
 
 void drawTimeSlot(SDL_Surface* scr){
 	int a=0,b=255;
-	if(gd.gaze_count<20)a=320-gd.gaze_count*16;
+	if(gd.gaze_count<20)a=640-gd.gaze_count*32;
 	if(gd.gaze_count>80)b=(100-gd.gaze_count)*13;
-	fillRect(scr,a,100,320,40,0,0,255,128);
-	drawImage(scr,img.fishup,a,100,380,0,320,40,b);
-	drawImage(scr,img.fishup,a+140,100,380,gd.gaze_num*40+40,160,40,b);
+	fillRect(scr,a,200,640,80,0,0,255,128);
+	drawImage(scr,img.fishup,a,200,760,0,640,80,b);
+	drawImage(scr,img.fishup,a+280,200,760,gd.gaze_num*80+80,320,80,b);
 }
 
 void drawManekiTV(SDL_Surface *scr){
-	if(md.maneki_mode==NULL)drawImage(scr,img.chr,(int)(md.manekiX*MAGNIFY)-10-gd.scrX,(int)(md.manekiY*MAGNIFY)-15-gd.scrY,20+((count/20)%2)*20,180,20,20,255);
-	else if(md.maneki_mode==CARRYING)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-7-gd.scrX,(int)(gd.y*MAGNIFY)-38-gd.scrY,0,180,20,20,255);
-	else if(md.maneki_mode==PLUGGED_IN)drawImage(scr,img.chr,(int)(md.manekiX*MAGNIFY)-10-gd.scrX,(int)(md.manekiY*MAGNIFY)-15-gd.scrY,0,180,20,20,255);
+	if(md.maneki_mode==NULL)drawImage(scr,img.chr,(int)(md.manekiX*MAGNIFY)-20-gd.scrX,(int)(md.manekiY*MAGNIFY)-30-gd.scrY,40+((count/20)%2)*40,360,40,40,255);
+	else if(md.maneki_mode==CARRYING)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-14-gd.scrX,(int)(gd.y*MAGNIFY)-76-gd.scrY,0,360,40,40,255);
+	else if(md.maneki_mode==PLUGGED_IN)drawImage(scr,img.chr,(int)(md.manekiX*MAGNIFY)-20-gd.scrX,(int)(md.manekiY*MAGNIFY)-30-gd.scrY,0,360,40,40,255);
 	for(int i=0 ; i<md.fish_num ; i++){
 		if(md.maneki_count[i]!=0 && md.maneki_count[i]<40){
 			int x=(int)(gd.x+(md.manekiX-gd.x)*md.maneki_count[i]/40)*MAGNIFY;
 			int y=(int)(gd.y+(md.manekiY-gd.y)*md.maneki_count[i]/40)*MAGNIFY;
 			if(md.fish[i].bs){
-				drawImage(scr,img.chr,(int)md.manekiX-gd.scrX-10,(int)md.manekiY-gd.scrY-md.maneki_count[i]*6-30,210,125,20,40,255);
-				drawImage(scr,img.chr,x-gd.scrX-10,y-gd.scrY-10,210+(((count/5))%2)*20,105,20,20,255);
-			}else drawImage(scr,img.chr,x-gd.scrX-10,y-gd.scrY-10,210+(((count/5))%2)*20,85,20,20,255);
+				drawImage(scr,img.chr,(int)md.manekiX-gd.scrX-20,(int)md.manekiY-gd.scrY-md.maneki_count[i]*12-60,420,250,40,80,255);
+				drawImage(scr,img.chr,x-gd.scrX-20,y-gd.scrY-20,420+(((count/5))%2)*40,210,40,40,255);
+			}else drawImage(scr,img.chr,x-gd.scrX-20,y-gd.scrY-20,420+(((count/5))%2)*40,170,40,40,255);
 		}
 	}
 }
@@ -1920,47 +1919,47 @@ void drawGame(SDL_Surface* scr){
 	else if(phase==GET_HAZIA)drawGetHazia(scr);
 	else if(phase==SUMMERWARS)drawSummerWars(scr);
 	else if(gd.game_mode==BOSS && phase==TALKING && bd.talking==4 && gd.scene_count==1){
-		fillRect(scr,0,0,320,240,0,0,0,255);
-		drawImage(scr,img.back,0,20,0,0,320,200,255);
-		drawImage(scr,img.back,60,60+abs(20-(count/5)%40),320,0,60,40,255);
+		fillRect(scr,0,0,640,480,0,0,0,255);
+		drawImage(scr,img.back,0,40,0,0,640,400,255);
+		drawImage(scr,img.back,120,120+abs(20-(count/5)%40)*2,640,0,120,80,255);
 		drawTalking(scr);
 	}else{
 		SDL_Color col=getSkyColor(gd.hour,gd.minute);
-		fillRect(scr,0,0,320,240,col.r,col.g,col.b,255);
+		fillRect(scr,0,0,640,480,col.r,col.g,col.b,255);
 		drawMap(scr, gd.scrX, gd.scrY);
-		if(!MAP3D && gd.y>=md.manekiY-3)drawManekiTV(scr);
+		if(!MAP3D && gd.y>=md.manekiY-6)drawManekiTV(scr);
 		if(phase!=ANTENNA && phase!=READY && phase!=LEAVE_MAP)drawPlayer(scr);
-		if(!MAP3D && gd.y<md.manekiY-3)drawManekiTV(scr);
+		if(!MAP3D && gd.y<md.manekiY-6)drawManekiTV(scr);
 		drawFireWork(scr);
-		if(phase==CALLING)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-10,(int)(gd.y*MAGNIFY)-gd.scrY-50,160,30,20,20,255);
+		if(phase==CALLING)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-20,(int)(gd.y*MAGNIFY)-gd.scrY-100,320,60,40,40,255);
 		if(phase==FINISH){
-			drawImage(scr,img.menuback,0,90,0,0,320,40,128);
-			TextOut(scr,100,100,text[GAMETEXT+4],20);
+			drawImage(scr,img.menuback,0,180,0,0,640,80,128);
+			TextOut2(scr,200,200,text[GAMETEXT+4],20);
 		}
 		if(!MAP3D)drawMap2(scr,gd.scrX,gd.scrY);
 
 		if(MAP3D){
-			fillRect(scr,260,180,60,60,192,192,255,255);
-			drawGround(scr,(int)gd.x-30,(int)gd.y-30,260,180,60,60,1000,FALSE);
-			drawTowerSpot(scr,(int)gd.x-30,(int)gd.y-30,260,180,60,60,FALSE);
+			fillRect(scr,520,360,120,120,192,192,255,255);
+			drawGround(scr,(int)gd.x-60,(int)gd.y-60,520,360,120,120,1000,FALSE);
+			drawTowerSpot(scr,(int)gd.x-60,(int)gd.y-60,520,360,120,120,FALSE);
 			int a,b;
-			for(int i=0 ; i<30 ; i++){
+			for(int i=0 ; i<60 ; i++){
 				a=(int)(i*cos(gd.ant_dir*PI/180));
 				b=(int)(i*sin(gd.ant_dir*PI/180));
-				fillRect(scr,290+a,210-b,1,1,255,255,0,255);
+				fillRect(scr,580+a,420-b,1,1,255,255,0,255);
 			}
 
 			if(phase==ADJUST_HEIGHT){
 				sprintf_s(str,"%d",gd.height);
-				drawImage(scr,img.menuback,60,60,0,0,200,20,128);
-				TextOut(scr,70,62,text[GAMETEXT+26]);
-				TextOut(scr,200,62,str);
+				drawImage(scr,img.menuback,120,120,0,0,400,40,128);
+				TextOut2(scr,140,124,text[GAMETEXT+26]);
+				TextOut2(scr,400,124,str);
 			}
 			if(phase==ADJUST_ZOOM){
 				sprintf_s(str,"%d",gd.zoom);
-				drawImage(scr,img.menuback,60,60,0,0,200,20,128);
-				TextOut(scr,70,62,text[GAMETEXT+26]);
-				TextOut(scr,200,62,str);
+				drawImage(scr,img.menuback,120,120,0,0,400,40,128);
+				TextOut2(scr,140,124,text[GAMETEXT+26]);
+				TextOut2(scr,400,124,str);
 			}
 		}
 
@@ -1969,29 +1968,29 @@ void drawGame(SDL_Surface* scr){
 			drawScore(scr);
 		}
 		if(gd.game_mode==BOSS)drawBossGame(scr);
-		if(gd.m_wave>0)drawM(scr,gd.m_wave,rd.seeH[0],(int)(gd.x*MAGNIFY)-gd.scrX-10,(int)(gd.y*MAGNIFY)-gd.scrY+15);
+		if(gd.m_wave>0)drawM(scr,gd.m_wave,rd.seeH[0],(int)(gd.x*MAGNIFY)-gd.scrX-20,(int)(gd.y*MAGNIFY)-gd.scrY+30);
 		if(phase==READY){
-			if(count>=100)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX,(int)(gd.y*MAGNIFY)-gd.scrY-(125-count)*6-25,275,0,5,30,255);
-			else if(count%20<10)TextOut(scr,150,100,"READY");
+			if(count>=100)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX,(int)(gd.y*MAGNIFY)-gd.scrY-(125-count)*12-50,550,0,10,60,255);
+			else if(count%20<10)TextOut2(scr,300,200,"READY");
 		}
 		if(phase==LEAVE_MAP){
 			if(count<50){
-				drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-7,(int)(gd.y*MAGNIFY)-gd.scrY-25,0,0,15,30,255);
+				drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-14,(int)(gd.y*MAGNIFY)-gd.scrY-50,0,0,30,60,255);
 			}
 			else if(count<120){
-				drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-8,(int)(gd.y*MAGNIFY)-gd.scrY-25,160,120,15,30,255);
-				if(count<80)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-13,(int)(gd.y*MAGNIFY)-gd.scrY-30,175+((count-50)/10)*10,125,10,10,255);
+				drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-16,(int)(gd.y*MAGNIFY)-gd.scrY-50,320,240,30,60,255);
+				if(count<80)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-26,(int)(gd.y*MAGNIFY)-gd.scrY-60,350+((count-50)/10)*20,250,20,20,255);
 			}
-			else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX,(int)(gd.y*MAGNIFY)-gd.scrY-(count-120)*6-25,275,0,5,30,255);
+			else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX,(int)(gd.y*MAGNIFY)-gd.scrY-(count-120)*12-50,550,0,10,60,255);
 		}
 
 		if(EXPLAIN)ant->drawExplain(scr);
 
 		drawRural(scr);
 		if(gd.speed>0)drawSpeedMeter(scr);
-		if(phase==PREF_LIST_SMR || phase==SMR)TextOut(scr,60,220,text[GAMETEXT+21]);
+		if(phase==PREF_LIST_SMR || phase==SMR)TextOut2(scr,120,440,text[GAMETEXT+21]);
 		if(phase==SMR_RESULT)drawSMR(scr);
-		if(phase==END_YN)TextOut(scr,0,30,text[EPILOGUE+4],50);
+		if(phase==END_YN)TextOut2(scr,0,60,text[EPILOGUE+4],50);
 		if(ant->ant_mode==TROLL)ant->drawTrolling(scr);
 		else ant->drawAntenna(scr);
 		drawFishup(scr);
@@ -2002,16 +2001,16 @@ void drawGame(SDL_Surface* scr){
 		if(phase==GAME_OPTION)drawOptionMenuBox(scr);
 		if(phase==GAME_OPTION_SETTING){
 			if(count%40<20){
-				drawImage(scr,img.chr,150,85,75,110,15,15,225);
-				drawImage(scr,img.chr,150,120,75,140,15,15,225);
+				drawImage(scr,img.chr,300,170,150,220,30,30,225);
+				drawImage(scr,img.chr,300,240,150,280,30,30,225);
 			}
-			drawOptionSetting(scr,60,100);
+			drawOptionSetting(scr,120,200);
 		}
 		if(phase==GAME_KEY_SETTING)drawKeySetting(scr);
 
 		for(int i=0 ; i<15 ; i++)menu[i].drawMenu(scr);
-		if(phase==SAVING && count>=150)TextOut(scr,80,30,text[GAMETEXT+29]);
-		if(phase==SAVING_RECORD && count>=150)TextOut(scr,80,30,text[EPILOGUE+5]);
+		if(phase==SAVING && count>=150)TextOut2(scr,160,60,text[GAMETEXT+29]);
+		if(phase==SAVING_RECORD && count>=150)TextOut2(scr,160,60,text[EPILOGUE+5]);
 		if(phase==MANEKI)drawTalking(scr,1,text[ANTENNATEXT+17+gd.scene_count]);
 		else if(phase==MANEKI_CONFIRM)drawTalking(scr,1,text[ANTENNATEXT+24+gd.scene_count]);
 		else if(phase!=CALLING)drawTalking(scr);
@@ -2022,44 +2021,44 @@ void drawGame(SDL_Surface* scr){
 void drawGameExplain(SDL_Surface* scr){
 	if(EXPLAIN){
 		if(phase==GAMESTART){
-			drawKeyboard(scr,key.zC,0,220);
-			TextOut(scr,20,220,text[TITLETEXT]);
+			drawKeyboard(scr,key.zC,0,460);
+			TextOut(scr,20,460,text[TITLETEXT]);
 		}
 		else if(phase==PLAYING){
 			if(count%1000<200){
-				drawKeyboard(scr,key.zC,0,220);
-				TextOut(scr,20,220,text[GAMETEXT+8]);
+				drawKeyboard(scr,key.zC,0,460);
+				TextOut(scr,20,460,text[GAMETEXT+8]);
 			}
 			else if(count%1000<400){
 				if(gd.game_mode==BOSS){
-					drawKeyboard(scr,key.xC,0,220);
-					TextOut(scr,20,220,text[GAMETEXT+11]);
+					drawKeyboard(scr,key.xC,0,460);
+					TextOut(scr,20,460,text[GAMETEXT+11]);
 				}else{
-					drawKeyboard(scr,key.xC,0,220);
-					TextOut(scr,20,220,text[GAMETEXT+10]);
+					drawKeyboard(scr,key.xC,0,460);
+					TextOut(scr,20,460,text[GAMETEXT+10]);
 				}
 			}
 			else if(count%1000<600){
-				drawKeyboard(scr,key.cC,0,220);
-				TextOut(scr,20,220,text[GAMETEXT+9]);
+				drawKeyboard(scr,key.cC,0,460);
+				TextOut(scr,20,460,text[GAMETEXT+9]);
 			}
 			else if(count%1000<800){
-				drawKeyboard(scr,key.leftC,0,220);
-				drawKeyboard(scr,key.rightC,20,220);
-				drawKeyboard(scr,key.upC,40,220);
-				drawKeyboard(scr,key.downC,60,220);
-				TextOut(scr,80,220,text[GAMETEXT+12]);
+				drawKeyboard(scr,key.leftC,0,460);
+				drawKeyboard(scr,key.rightC,20,460);
+				drawKeyboard(scr,key.upC,40,460);
+				drawKeyboard(scr,key.downC,60,460);
+				TextOut(scr,80,460,text[GAMETEXT+12]);
 			}else{
 				if(DASH_TYPE==TYPE_MARIO || DASH_TYPE==TYPE_MEGAMAN){
-					drawKeyboard(scr,key.xC,0,220);
-					TextOut(scr,20,220,text[GAMETEXT+24]);
+					drawKeyboard(scr,key.xC,0,460);
+					TextOut(scr,20,460,text[GAMETEXT+24]);
 				}
 				if(DASH_TYPE==TYPE_KIRBY){
-					drawKeyboard(scr,key.leftC,0,220);
-					drawKeyboard(scr,key.rightC,20,220);
-					drawKeyboard(scr,key.upC,40,220);
-					drawKeyboard(scr,key.downC,60,220);
-					TextOut(scr,80,220,text[GAMETEXT+25]);
+					drawKeyboard(scr,key.leftC,0,460);
+					drawKeyboard(scr,key.rightC,20,460);
+					drawKeyboard(scr,key.upC,40,460);
+					drawKeyboard(scr,key.downC,60,460);
+					TextOut(scr,80,460,text[GAMETEXT+25]);
 				}
 			}
 		}
@@ -2139,62 +2138,62 @@ void drawGameExplain(SDL_Surface* scr){
 			}
 		}
 		else if(phase==FISHUP || phase==GRADEUP){
-			drawKeyboard(scr,key.zC,40,160);
-			TextOut(scr,60,160,text[MENUTEXT+4]);
+			drawKeyboard(scr,key.zC,40,320);
+			TextOut(scr,60,320,text[MENUTEXT+4]);
 		}
 		else if(phase==CROP){
 			if(count%400<200){
-				drawKeyboard(scr,key.upC,0,160);
-				drawKeyboard(scr,key.downC,20,160);
-				drawKeyboard(scr,key.leftC,40,160);
-				drawKeyboard(scr,key.rightC,60,160);
-				TextOut(scr,80,160,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.upC,0,320);
+				drawKeyboard(scr,key.downC,20,320);
+				drawKeyboard(scr,key.leftC,40,320);
+				drawKeyboard(scr,key.rightC,60,320);
+				TextOut(scr,80,320,text[MENUTEXT+15]);
 			}else{
-				drawKeyboard(scr,key.xC,0,160);
-				TextOut(scr,20,160,text[MENUTEXT+4]);
+				drawKeyboard(scr,key.xC,0,320);
+				TextOut(scr,20,320,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==GAME_OPTION){
 			if(count%600<200){
-				drawKeyboard(scr,key.zC,0,220);
-				TextOut(scr,20,220,text[OPTIONTEXT+1]);
+				drawKeyboard(scr,key.zC,0,460);
+				TextOut(scr,20,460,text[OPTIONTEXT+1]);
 			}
 			else if(count%600<400){
-				drawKeyboard(scr,key.upC,0,220);
-				drawKeyboard(scr,key.downC,20,220);
-				drawKeyboard(scr,key.leftC,40,220);
-				drawKeyboard(scr,key.rightC,60,220);
-				TextOut(scr,80,220,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.upC,0,460);
+				drawKeyboard(scr,key.downC,20,460);
+				drawKeyboard(scr,key.leftC,40,460);
+				drawKeyboard(scr,key.rightC,60,460);
+				TextOut(scr,80,460,text[MENUTEXT+15]);
 			}
 			else{
-				drawKeyboard(scr,key.xC,0,220);
-				TextOut(scr,20,220,text[MENUTEXT+4]);
+				drawKeyboard(scr,key.xC,0,460);
+				TextOut(scr,20,460,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==GAME_OPTION_SETTING){
 			if(count%400<200){
-				drawKeyboard(scr,key.upC,0,220);
-				drawKeyboard(scr,key.downC,20,220);
-				drawKeyboard(scr,key.leftC,40,220);
-				drawKeyboard(scr,key.rightC,60,220);
-				TextOut(scr,80,220,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.upC,0,460);
+				drawKeyboard(scr,key.downC,20,460);
+				drawKeyboard(scr,key.leftC,40,460);
+				drawKeyboard(scr,key.rightC,60,460);
+				TextOut(scr,80,460,text[MENUTEXT+15]);
 			}else{
-				drawKeyboard(scr,key.zC,0,220);
-				TextOut(scr,20,220,text[OPTIONTEXT+1]);
+				drawKeyboard(scr,key.zC,0,460);
+				TextOut(scr,20,460,text[OPTIONTEXT+1]);
 			}
 		}
 		else if(phase==END_YN){
 			if(count%600<200){
-				drawKeyboard(scr,key.zC,0,220);
-				TextOut(scr,20,220,text[OPTIONTEXT+1]);
+				drawKeyboard(scr,key.zC,0,460);
+				TextOut(scr,20,460,text[OPTIONTEXT+1]);
 			}
 			else if(count%600<400){
-				drawKeyboard(scr,key.xC,0,220);
-				TextOut(scr,20,220,text[MENUTEXT+4]);
+				drawKeyboard(scr,key.xC,0,460);
+				TextOut(scr,20,460,text[MENUTEXT+4]);
 			}else{
-				drawKeyboard(scr,key.upC,0,220);
-				drawKeyboard(scr,key.downC,20,220);
-				TextOut(scr,40,220,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.upC,0,460);
+				drawKeyboard(scr,key.downC,20,460);
+				TextOut(scr,40,460,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==TALKING || phase==MANEKI&&gd.scene_count<3 || phase==SUMMERWARS&&count>=660){
@@ -2377,7 +2376,7 @@ void timerCatchPhone(){
 void timerSMRcount(){
 	if(SMRcount!=0){
 		SMRscanned=FALSE;
-		for(int i=SMRcount ; i<320*240/SMRfast ; i++){
+		for(int i=SMRcount ; i<640*480/SMRfast ; i++){
 		startSMR(area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]);
 			if(SMRscanned)break;
 		}
@@ -2518,7 +2517,7 @@ void timerGame(){
 void drawM(SDL_Surface* scr, int w, int m, int x, int y){
 	int Y1=0,Y2=0,Y3=0,Y4=0;
 	if(m==-1){
-		drawImage(scr,img.chr,x-3,y-7,88,202,5,9,255);
+		drawImage(scr,img.chr,x-6,y-14,176,404,10,18,255);
 		return;
 	}
 	if(w>34){
@@ -2527,12 +2526,12 @@ void drawM(SDL_Surface* scr, int w, int m, int x, int y){
 		Y3=mwave[4*(17-(w-35)/2)+2];
 		Y4=mwave[4*(17-(w-35)/2)+3];
 	}
-	if(m>=10000)drawImage(scr,img.chr,x-48,y-Y4-9,(m/10000)*8,202,8,9,255);
-	if(m>=1000)drawImage(scr,img.chr,x-40,y-Y1-9,((m/1000)%10)*8,202,8,9,255);
-	if(m>=100)drawImage(scr,img.chr,x-32,y-Y2-9,((m/100)%10)*8,202,8,9,255);
-	if(m>=10)drawImage(scr,img.chr,x-24,y-Y3-9,((m/10)%10)*8,202,8,9,255);
-	drawImage(scr,img.chr,x-16,y-Y4-9,(m%10)*8,202,8,9,255);
-	if(gd.game_mode!=BOSS)drawImage(scr,img.chr,x-8,y-9,80,202,8,9,255);
+	if(m>=10000)drawImage(scr,img.chr,x-96,y-Y4-18,(m/10000)*16,404,16,18,255);
+	if(m>=1000)drawImage(scr,img.chr,x-80,y-Y1-18,((m/1000)%10)*16,404,16,18,255);
+	if(m>=100)drawImage(scr,img.chr,x-64,y-Y2-18,((m/100)%10)*16,404,16,18,255);
+	if(m>=10)drawImage(scr,img.chr,x-48,y-Y3-18,((m/10)%10)*16,404,16,18,255);
+	drawImage(scr,img.chr,x-32,y-Y4-18,(m%10)*16,404,16,18,255);
+	if(gd.game_mode!=BOSS)drawImage(scr,img.chr,x-16,y-18,160,404,16,18,255);
 }
 
 void drawTerop(SDL_Surface* scr, String str, int rcv, int mg_rcv){
@@ -2545,8 +2544,8 @@ void drawTerop(SDL_Surface* scr, String str, int rcv, int mg_rcv){
 		if(!s.head[k][0])s.str[k][0]=' ';
 		s.str[k][40]=0;
 	}
-	drawImage(scr,img.menuback,50,220,0,0,270,20,128);
-	TextOut(scr,40-(count)%9,220,jummingText(s,40,rcv,mg_rcv),36);
+	drawImage(scr,img.menuback,100,440,0,0,540,50,128);
+	TextOut2(scr,80-((count)%9)*2,440,jummingText(s,40,rcv,mg_rcv),36);
 }
 
 void estimate_rural(){

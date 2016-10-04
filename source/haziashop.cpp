@@ -5,20 +5,20 @@ int price[18], shop_icon[18];
 void makeShoppingList();
 
 void initHaziaShop(){
-	gd.x=40;
-	gd.y=170;
+	gd.x=80;
+	gd.y=340;
 	gd.talk_count=EOF;
 	mode=HAZIASHOP;
 	phase=SHOP_FLOOR;
-	menu[YNFORM].setMenu(160,100,12,3,3);
+	menu[YNFORM].setMenu(320,300,12,3,3);
 	menu[YNFORM].stack("");
 	menu[YNFORM].stack("");
 	menu[YNFORM].stack("");
-	menu[SHOP_CONFIRM].setMenu(160,100,18,3,3);
+	menu[SHOP_CONFIRM].setMenu(320,300,18,3,3);
 	menu[SHOP_CONFIRM].stack(text[MIYAZAKITEXT+7]);
 	menu[SHOP_CONFIRM].stack(text[MIYAZAKITEXT+13]);
 	menu[SHOP_CONFIRM].stack(text[MIYAZAKITEXT+8]);
-	menu[OHANA_MENU].setMenu(160,100,10,2,2);
+	menu[OHANA_MENU].setMenu(320,200,10,2,2);
 	menu[OHANA_MENU].stack(text[MIYAZAKITEXT+31]);
 	menu[OHANA_MENU].stack(text[EPILOGUE+10]);
 	load_story(0);
@@ -44,28 +44,28 @@ void endHaziaShop(){
 
 void keyShopFloor(){
 	if(key.z && !key_stop(key.z)){
-		if(gd.y==70 && gd.x>60 && gd.x<120){
+		if(gd.y==140 && gd.x>120 && gd.x<240){
 			phase=SHOP_TALK;
 			TalkingAt(29);
 			gd.talk_open_count=1;
 		}
-		if(gd.y==70 && gd.x>150 && gd.x<200){
+		if(gd.y==140 && gd.x>300 && gd.x<400){
 			phase=NAGANO_APPLE;
 			TalkingAt(35);
 			gd.talk_open_count=1;
 		}
-		if(gd.y>120 && gd.y<170 && gd.x>200 && gd.x<250){
+		if(gd.y>240 && gd.y<340 && gd.x>400 && gd.x<500){
 			phase=ARANCIA;
 			TalkingAt(36);
 			gd.talk_open_count=1;
 		}
-		if(gd.y==20 && gd.x>=200){
+		if(gd.y==40 && gd.x>=400){
 			phase=MEMMA_TALK;
 			TalkingAt(37);
 			gd.talk_open_count=1;
 			count=0;
 		}
-		if(gd.x==280 && gd.y>=60 && gd.y<=100){
+		if(gd.x==560 && gd.y>=120 && gd.y<=200){
 			phase=OHANA_TALK;
 			TalkingAt(38);
 			gd.talk_open_count=1;
@@ -80,21 +80,21 @@ void keyShopFloor(){
 	else if(key.down)gd.player_dir=0;
 	else if(key.left)gd.player_dir=3;
 	else if(key.right)gd.player_dir=1;
-	if(key.up)gd.y-=2;
-	if(key.down)gd.y+=2;
-	if(key.left)gd.x-=2;
-	if(key.right)gd.x+=2;
-	if(gd.x<20)gd.x=20;
-	if(gd.x>280)gd.x=280;
-	if(gd.y<20)gd.y=20;
-	if(gd.y>190)gd.y=190;
-	if(key.left && gd.x>190 && gd.x<200 && gd.y<70)gd.x=200;
-	if(key.up && gd.x<200 && gd.y>60 && gd.y<70)gd.y=70;
-	if(gd.y==190 && gd.x>80 && gd.x<100){
+	if(key.up)gd.y-=4;
+	if(key.down)gd.y+=4;
+	if(key.left)gd.x-=4;
+	if(key.right)gd.x+=4;
+	if(gd.x<40)gd.x=40;
+	if(gd.x>560)gd.x=560;
+	if(gd.y<40)gd.y=40;
+	if(gd.y>380)gd.y=380;
+	if(key.left && gd.x>380 && gd.x<400 && gd.y<140)gd.x=400;
+	if(key.up && gd.x<400 && gd.y>120 && gd.y<140)gd.y=140;
+	if(gd.y==380 && gd.x>160 && gd.x<200){
 		endHaziaShop();
 		initMiyazaki();
 		phase=MIYAZAKI_MUSEUM;
-		gd.x=100;
+		gd.x=200;
 	}
 }
 
@@ -419,16 +419,16 @@ void timerHaziaShop(){
 void drawHaziaShopExplain(SDL_Surface* scr){
 	if(EXPLAIN){
 		if(phase==SHOP_FLOOR){
-			drawKeyboard(scr,key.upC,160,220);
-			drawKeyboard(scr,key.downC,180,220);
-			drawKeyboard(scr,key.leftC,200,220);
-			drawKeyboard(scr,key.rightC,220,220);
-			TextOut(scr,240,220,text[GAMETEXT+12]);
-			if(gd.y==70 && gd.x<200 || gd.y==20 && gd.x>=200){
+			drawKeyboard(scr,key.upC,160,460);
+			drawKeyboard(scr,key.downC,180,460);
+			drawKeyboard(scr,key.leftC,200,460);
+			drawKeyboard(scr,key.rightC,220,460);
+			TextOut(scr,480,440,text[GAMETEXT+12]);
+			if(gd.y==140 && gd.x<400 || gd.y==40 && gd.x>=400){
 				drawKeyboard(scr,key.zC,0,0);
 				TextOut(scr,20,0,text[EPILOGUE+10]);
 			}
-			if((gd.y==70 && gd.x>150 && gd.x<200)||(gd.y>120 && gd.y<170 && gd.x>200 && gd.x<250)||(gd.x==280 && gd.y>=60 && gd.y<=100)){
+			if((gd.y==140 && gd.x>300 && gd.x<400)||(gd.y>240 && gd.y<340 && gd.x>400 && gd.x<500)||(gd.x==560 && gd.y>=120 && gd.y<=200)){
 				drawKeyboard(scr,key.zC,0,0);
 				TextOut(scr,20,0,text[MIYAZAKITEXT+30]);
 			}
@@ -456,60 +456,60 @@ void drawHaziaShopExplain(SDL_Surface* scr){
 
 void drawHaziaShop(SDL_Surface* scr){
 	if(phase==NAGANO_APPLE){
-		drawImage(scr,img.back,0,0,0,480,320,180,255);
-		fillRect(scr,0,180,320,60,0,0,0,255);
+		drawImage(scr,img.back,0,0,0,960,640,360,255);
+		fillRect(scr,0,360,640,120,0,0,0,255);
 	}
 	else if(phase==ARANCIA){
-		drawImage(scr,img.back,0,0,0,660,320,180,255);
-		fillRect(scr,0,180,320,60,0,0,0,255);
+		drawImage(scr,img.back,0,0,0,1320,640,360,255);
+		fillRect(scr,0,360,640,120,0,0,0,255);
 	}
 	else if(phase==SHOP_FLOOR || phase==OHANA_TALK || phase==OHANA_MENU || phase==MEMMA_TALK || phase==THROW_MEMMA || phase==STAY_IN&&count<30){
-		drawImage(scr,img.back,0,0,0,0,320,240,255);
-		drawImage(scr,img.back,80,40,320+((count/5)%2)*25,0,25,20,255);
-		if(phase==MEMMA_TALK && count<20)drawImage(scr,img.back,240,0,350,20,30,30,255);
-		else if(phase==MEMMA_TALK)drawImage(scr,img.back,240,0,380,20,30,30,255);
-		else drawImage(scr,img.back,240,0,320,20,30,30,255);
-		drawImage(scr,img.chr,(int)gd.x,(int)gd.y,gd.player_dir*15,0,15,30,255);
+		drawImage(scr,img.back,0,0,0,0,640,480,255);
+		drawImage(scr,img.back,160,80,640+((count/5)%2)*50,0,50,40,255);
+		if(phase==MEMMA_TALK && count<20)drawImage(scr,img.back,480,0,700,40,60,60,255);
+		else if(phase==MEMMA_TALK)drawImage(scr,img.back,480,0,760,40,60,60,255);
+		else drawImage(scr,img.back,480,0,640,40,60,60,255);
+		drawImage(scr,img.chr,(int)gd.x,(int)gd.y,gd.player_dir*30,0,30,60,255);
 		if(key.up||key.down||key.left||key.right){
-			drawImage(scr,img.chr,(int)gd.x-10,(int)gd.y+10,((count/5)%2)*30,55,30,30,255);
+			drawImage(scr,img.chr,(int)gd.x-20,(int)gd.y+20,((count/5)%2)*60,110,60,60,255);
 		}
-		if((gd.y==70 && gd.x>60 && gd.x<120)
-		 ||(gd.y==70 && gd.x>150 && gd.x<200)
-		 ||(gd.y==20 && gd.x>=200)
-		 ||(gd.y>120 && gd.y<170 && gd.x>200 && gd.x<250)
-		 ||(gd.x==280 && gd.y>=60 && gd.y<=100))
+		if((gd.y==140 && gd.x>120 && gd.x<240)
+		   ||(gd.y==140 && gd.x>300 && gd.x<400)
+		   ||(gd.y==40 && gd.x>=400)
+		   ||(gd.y>240 && gd.y<340 && gd.x>400 && gd.x<500)
+		   ||(gd.x==560 && gd.y>=120 && gd.y<=200))
 		{
-			drawImage(scr,img.back,(int)gd.x-20,(int)gd.y-20,320,410,20,20,255);
+			drawImage(scr,img.back,(int)gd.x-40,(int)gd.y-40,640,820,40,40,255);
 		}
 		if(phase==THROW_MEMMA){
-			drawImage(scr,img.back,90+count*5,40-count,395,0,15,15,255);
+			drawImage(scr,img.back,180+count*10,80-count*2,790,0,30,30,255);
 		}
-		drawImage(scr,img.back,240-(count%100)/2,count%100/2,370,0,25,20,250-(int)(2.5*(count%100)));
+		drawImage(scr,img.back,480-(count%100),count%100,740,0,50,40,500-5*(count%100));
 	}else{
-		drawImage(scr,img.back,0,0,0,240,320,240,255);
-		if(CHAR_CODE==JAPANESE)drawImage(scr,img.back,40,85,320,330,80,40,255);
-		else drawImage(scr,img.back,40,85,320,370,80,40,255);
-		drawImage(scr,img.back,180,40,320,50+((count/5)%2)*140,80,140,255);
+		drawImage(scr,img.back,0,0,0,480,640,480,255);
+		if(CHAR_CODE==JAPANESE)drawImage(scr,img.back,80,170,640,660,160,80,255);
+		else drawImage(scr,img.back,80,170,640,740,160,80,255);
+		drawImage(scr,img.back,360,80,640,100+((count/5)%2)*280,160,280,255);
 		if(phase==SHOPPING || phase==BUYING || phase==SELLING){
-			TextOut(scr,115,200,text[MIYAZAKITEXT+6]);
+			TextOut(scr,230,400,text[MIYAZAKITEXT+6]);
 			int a=1;
 			for(int i=0 ; i<10 ; i++){
 				if(gd.hazia/a==0 && gd.hazia>0 || gd.hazia==0 && i>0)continue;
-				drawImage(scr,img.chr,100-i*15,200,((gd.hazia/a)%10)*10,260,10,20,255);
+				drawImage(scr,img.chr,1200-i*30,400,((gd.hazia/a)%10)*20,520,20,40,255);
 				a*=10;
 			}
 		}
 	}
 	if(phase==STAY_IN){
-		if(count<30)fillRect(scr,0,0,320,240,0,0,0,255-(30-count)*8);
+		if(count<30)fillRect(scr,0,0,640,480,0,0,0,255-(30-count)*8);
 		else if(count<300){
-			fillRect(scr,0,0,320,240,0,0,0,255);
+			fillRect(scr,0,0,640,480,0,0,0,255);
 			if(CHAR_CODE==JAPANESE){
-				if(count>100)drawImage(scr,img.back,40,60,0,840,240,50,255);
-				if(count>200)drawImage(scr,img.back,40,130,0,890,240,30,(count-200)*6);
+				if(count>100)drawImage(scr,img.back,80,120,0,1680,480,100,255);
+				if(count>200)drawImage(scr,img.back,80,260,0,1780,480,60,(count-200)*6);
 			}else{
-				if(count>100)drawImage(scr,img.back,30,60,0,920,260,75,255);
-				if(count>200)drawImage(scr,img.back,15,150,0,995,290,25,(count-200)*6);
+				if(count>100)drawImage(scr,img.back,60,120,0,1840,520,150,255);
+				if(count>200)drawImage(scr,img.back,30,300,0,1990,580,50,(count-200)*6);
 			}
 		}
 	}
@@ -519,7 +519,7 @@ void drawHaziaShop(SDL_Surface* scr){
 }
 
 void makeShoppingList(){
-	menu[SHOPPING].setMenu(0,20,40,8,36);
+	menu[SHOPPING].setMenu(0,40,40,8,36);
 	menu[SHOPPING].setCombo(2);
 	menu[SHOPPING].setBG(192);
 	for(int i=0 ; i<18 ; i++){

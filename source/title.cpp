@@ -16,30 +16,30 @@ void endOpening(){
 
 void drawOpening(SDL_Surface* scr){
 	if(phase==0){
-		drawImage(scr,img.back,0,0,0,0,320,240,255);
+		drawImage(scr,img.back,0,0,0,0,640,480,255);
 	}
 	else if(phase==1){
 		double a=1,b=1;
 		if(count<80)a=count/80.0;
 		if(count>170 && count<200)b=1+(200-count)/30.0;
-		fillRect(scr,0,20,320,200,255,255,255,255);
-		if(a==1)drawImage(scr,img.back,0,20,0,240,320,200,255);
-		else drawImage_x2(scr,img.back,(int)((1.0-a)*120),20+(int)((1.0-a)*100),a,0,240,320,200);
+		fillRect(scr,0,40,640,400,255,255,255,255);
+		if(a==1)drawImage(scr,img.back,0,40,0,480,640,400,255);
+		else drawImage_x(scr,img.back,(int)((1.0-a)*240),40+(int)((1.0-a)*200),a,0,480,640,400,255);
 		if(count>170){
-			if(b==1)drawImage(scr,img.back,0,20,320,240,80,200,255);
-			else drawImage_x2(scr,img.back,(int)((1.0-b)*80),20+(int)((1.0-b)*100),b,320,240,80,200);
+			if(b==1)drawImage(scr,img.back,0,40,640,480,160,400,255);
+			else drawImage_x(scr,img.back,(int)((1.0-b)*160),40+(int)((1.0-b)*200),b,640,480,160,400,255);
 		}
-		fillRect(scr,0,0,320,20,0,0,0,255);
-		fillRect(scr,0,220,320,20,0,0,0,255);
+		fillRect(scr,0,0,640,40,0,0,0,255);
+		fillRect(scr,0,440,640,40,0,0,0,255);
 	}
 	else if(phase==2){
 		if(pause)drawOpeningAnim(scr,(pausetime-timestamp)/16);
 		else drawOpeningAnim(scr,(SDL_GetTicks()-timestamp)/16);
 	}
 	if(EXPLAIN){
-		drawKeyboard(scr,key.zC,0,220);
-		if(phase==0)TextOut(scr,20,220,text[TITLETEXT]);
-		else TextOut(scr,20,220,text[EPILOGUE]);
+		drawKeyboard(scr,key.zC,0,460);
+		if(phase==0)TextOut(scr,20,460,text[TITLETEXT]);
+		else TextOut(scr,20,460,text[EPILOGUE]);
 	}
 }
 
@@ -52,8 +52,8 @@ void keyOpening(){
 			endOpening();
 			if(movie_test){
 				initMiyazaki();
-				gd.x=800;
-				gd.scrX=(int)gd.x-160;
+				gd.x=1600;
+				gd.scrX=(int)gd.x-320;
 				phase=MIYAZAKI_MUSEUM;
 				start=0;
 				for(int i=0 ; i<29 ; i++)menu[BGM_TEST].cursorDown();
@@ -75,8 +75,8 @@ void timerOpening(){
 			if(movie_test){
 				endOpening();
 				initMiyazaki();
-				gd.x=800;
-				gd.scrX=(int)gd.x-160;
+				gd.x=1600;
+				gd.scrX=(int)gd.x-320;
 				phase=MIYAZAKI_MUSEUM;
 				start=0;
 				for(int i=0 ; i<29 ; i++)menu[BGM_TEST].cursorDown();
@@ -99,7 +99,7 @@ void initOpeningMainAnime(){
 
 void initTitle2(){
 	mode=TITLE;
-	menu[0].setMenu(120,150,10,3,3);
+	menu[0].setMenu(240,300,10,3,3);
 	menu[0].stack(text[TITLETEXT]);
 	menu[0].stack(text[TITLETEXT+1]);
 	menu[0].stack(text[TITLETEXT+2]);
@@ -148,43 +148,43 @@ void keyTitle(){
 }
 
 void drawTitle(SDL_Surface* scr){
-	fillRect(scr,0,0,320,240,0,0,0,255);
+	fillRect(scr,0,0,640,480,0,0,0,255);
 
 	if(start<20){
-		for(int i=0 ; i<200 ; i++)fillRect(scr,0,20+i,320,1,0,0,i/2,255);
-		drawImage(scr,img.back,135-count/150,110-count/150,180,200,32,16,255);
-		if(count%50==0)drawImage(scr,img.back,135-count/150,110-count/150,180,216,32,16,255);
-		drawImage(scr,img.back,0,20,0,0,320,200,255);
+		for(int i=0 ; i<400 ; i++)fillRect(scr,0,40+i,640,1,0,0,i/4,255);
+		drawImage(scr,img.back,270-count/75,220-count/75,360,400,64,32,255);
+		if(count%50==0)drawImage(scr,img.back,270-count/75,220-count/75,360,432,64,32,255);
+		drawImage(scr,img.back,0,40,0,0,640,400,255);
 	}
-	if(start>170)drawImage_x2(scr,img.back,-(start-170)*3,20-(start-170)*1,((start-170)*3+40.0)/40.0,0,240,40,60);
-	else drawImage(scr,img.back,0,20,0,240,40,60,255);
+	if(start>170)drawImage_x(scr,img.back,-(start-170)*6,40-(start-170)*2,((start-170)*3+40.0)/40.0,0,480,80,120,255);
+	else drawImage(scr,img.back,0,40,0,480,80,120,255);
 	if(start<=170){
-		if(start>140)drawImage_x2(scr,img.back,110-(start-140)*3,20-(start-140)*1,((start-140)*3+40.0)/40.0,40,240,40,60);
-		else drawImage(scr,img.back,110,20,40,240,40,60,255);
+		if(start>140)drawImage_x(scr,img.back,220-(start-140)*6,40-(start-140)*2,((start-140)*3+40.0)/40.0,80,480,80,120,255);
+		else drawImage(scr,img.back,220,40,80,480,80,120,255);
 	}
 	if(start<=140){
-		if(start>110)drawImage_x2(scr,img.back,230-(start-110)*3,20-(start-110)*1,((start-110)*3+80.0)/80.0,80,240,80,90);
-		else drawImage(scr,img.back,230,20,80,240,80,90,255);
+		if(start>110)drawImage_x(scr,img.back,470-(start-110)*6,40-(start-110)*2,((start-110)*3+80.0)/80.0,160,480,160,180,255);
+		else drawImage(scr,img.back,460,40,160,480,160,180,255);
 	}
 	if(start<=60 && start>=20){
-		drawImage(scr,img.back,0,140,220,200,90,20,(60-start)*14);
-		if(start>=30)drawImage(scr,img.back,90,130,220+((30-(start-30))/10)*20,220,20,20,255);
+		drawImage(scr,img.back,0,280,440,400,180,40,(60-start)*14);
+		if(start>=30)drawImage(scr,img.back,180,260,440+((30-(start-30))/10)*40,440,40,40,255);
 	}
 	if(start<20){
-		for(int i=1 ; i<=4 ; i++)drawImage(scr,img.back,20+i*18-(i*18)*start/20,45,(i-1)*18,200,18,34,255);
-		for(int i=1 ; i<=6 ; i++)drawImage(scr,img.back,115+i*18-(i*18)*start/20,45,(i+3)*18,200,18,34,255);
+		for(int i=1 ; i<=4 ; i++)drawImage(scr,img.back,40+i*36-(i*36)*start/20,90,(i-1)*36,400,36,68,255);
+		for(int i=1 ; i<=6 ; i++)drawImage(scr,img.back,230+i*36-(i*36)*start/20,90,(i+3)*36,400,36,68,255);
 		menu[0].drawMenu(scr);
 	}
 	if(EXPLAIN){
 		if(start==0){
 			if(count%400<200){
-				drawKeyboard(scr,key.zC,0,220);
-				TextOut(scr,20,220,text[OPTIONTEXT+1]);
+				drawKeyboard(scr,key.zC,0,460);
+				TextOut(scr,20,460,text[OPTIONTEXT+1]);
 			}
 			else{
-				drawKeyboard(scr,key.upC,0,220);
-				drawKeyboard(scr,key.downC,20,220);
-				TextOut(scr,40,220,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.upC,0,460);
+				drawKeyboard(scr,key.downC,20,460);
+				TextOut(scr,40,460,text[MENUTEXT+15]);
 			}
 		}
 	}

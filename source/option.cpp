@@ -280,155 +280,155 @@ void keyOptionSetting(){
 }
 
 void drawKeySetting(SDL_Surface* scr){
-	drawImage(scr,img.menuback,0,23,0,0,200,148,128);
+	drawImage(scr,img.menuback,0,46,0,0,400,296,128);
 	fontA=255;
-	TextOut(scr,40,25,"[LANGUAGE]");
-	drawKeyboard(scr,key.aC,20,25);
-	TextOut(scr,40,43,"[Z]");
-	drawKeyboard(scr,key.zC,20,43);
-	TextOut(scr,40,61,"[X]");
-	drawKeyboard(scr,key.xC,20,61);
-	TextOut(scr,40,79,"[C]");
-	drawKeyboard(scr,key.cC,20,79);
-	TextOut(scr,40,97,"[UP]");
-	drawKeyboard(scr,key.upC,20,97);
-	TextOut(scr,40,115,"[DOWN]");
-	drawKeyboard(scr,key.downC,20,115);
-	TextOut(scr,40,133,"[LEFT]");
-	drawKeyboard(scr,key.leftC,20,133);
-	TextOut(scr,40,151,"[RIGHT]");
-	drawKeyboard(scr,key.rightC,20,151);
-	drawImage(scr,img.chr,0,key_setting*18+25,140,120,20,20,255);
+	TextOut2(scr,80,50,"[LANGUAGE]");
+	drawKeyboard2(scr,key.aC,40,50);
+	TextOut2(scr,80,86,"[Z]");
+	drawKeyboard2(scr,key.zC,40,86);
+	TextOut2(scr,80,122,"[X]");
+	drawKeyboard2(scr,key.xC,40,122);
+	TextOut2(scr,80,158,"[C]");
+	drawKeyboard2(scr,key.cC,40,158);
+	TextOut2(scr,80,194,"[UP]");
+	drawKeyboard2(scr,key.upC,40,194);
+	TextOut2(scr,80,230,"[DOWN]");
+	drawKeyboard2(scr,key.downC,40,230);
+	TextOut2(scr,80,266,"[LEFT]");
+	drawKeyboard2(scr,key.leftC,40,266);
+	TextOut2(scr,80,302,"[RIGHT]");
+	drawKeyboard2(scr,key.rightC,40,302);
+	drawImage(scr,img.chr,0,key_setting*36+50,280,240,40,40,255);
 	TextOut(scr,0,0,text[OPTIONTEXT+25],60);
 }
 
 void drawOptionMenuBox(SDL_Surface* scr){
-	if(start<60)drawImage(scr,img.chr,30,30,0,380,40,40,255);
-	if(start<55)drawImage(scr,img.chr,90,30,40,380,40,40,255);
-	if(start<50)drawImage(scr,img.chr,150,30,80,380,40,40,255);
-	if(start<45)drawImage(scr,img.chr,210,30,120,380,40,40,255);
-	if(start<40)drawImage(scr,img.chr,30,90,160,380,40,40,255);
-	if(start<35)drawImage(scr,img.chr,90,90,200,380,40,40,255);
-	if(start<30)drawImage(scr,img.chr,150,90,240,380,40,40,255);
-	if(start<25)drawImage(scr,img.chr,210,90,280,380,40,40,255);
-	if(start<20)drawImage(scr,img.chr,30,150,320,380,40,40,255);
-	if(start<15)drawImage(scr,img.chr,90,150,360,380,40,40,255);
+	if(start<60)drawImage(scr,img.chr,60,60,0,760,80,80,255);
+	if(start<55)drawImage(scr,img.chr,180,60,80,760,80,80,255);
+	if(start<50)drawImage(scr,img.chr,300,60,160,760,80,80,255);
+	if(start<45)drawImage(scr,img.chr,420,60,240,760,80,80,255);
+	if(start<40)drawImage(scr,img.chr,60,180,320,760,80,80,255);
+	if(start<35)drawImage(scr,img.chr,180,180,400,760,80,80,255);
+	if(start<30)drawImage(scr,img.chr,300,180,480,760,80,80,255);
+	if(start<25)drawImage(scr,img.chr,420,180,560,760,80,80,255);
+	if(start<20)drawImage(scr,img.chr,60,300,640,760,80,80,255);
+	if(start<15)drawImage(scr,img.chr,180,300,720,760,80,80,255);
 	if(start<10){
-		if(gd.bought[10])drawImage(scr,img.chr,150,150,400,380,40,40,255);
-		else drawImage(scr,img.chr,150,150,360,300,40,40,255);
+		if(gd.bought[10])drawImage(scr,img.chr,300,300,800,760,80,80,255);
+		else drawImage(scr,img.chr,300,300,720,600,80,80,255);
 	}
 	if(start<5){
-		if(gd.bought[14])drawImage(scr,img.chr,210,150,440,380,40,40,255);
-		else drawImage(scr,img.chr,210,150,360,300,40,40,255);
+		if(gd.bought[14])drawImage(scr,img.chr,420,300,880,760,80,80,255);
+		else drawImage(scr,img.chr,420,300,720,600,80,80,255);
 	}
-	if(start==0)drawImage(scr,img.chr,270,150,200,300,40,40,255);
-	if(gd.option_selected==12)drawImage(scr,img.chr,270,150,160,150+((count/20)%2)*40,40,40,255);
-	else drawImage(scr,img.chr,(gd.option_selected%4)*60+30,(gd.option_selected/4)*60+30,160,150+((count/20)%2)*40,40,40,255);
-	drawOptionSetting(scr,60,200);
+	if(start==0)drawImage(scr,img.chr,540,300,400,600,80,80,255);
+	if(gd.option_selected==12)drawImage(scr,img.chr,540,300,320,300+((count/20)%2)*80,80,80,255);
+	else drawImage(scr,img.chr,(gd.option_selected%4)*120+60,(gd.option_selected/4)*120+60,320,300+((count/20)%2)*80,80,80,255);
+	drawOptionSetting(scr,120,400);
 }
 
 void drawOptionSetting(SDL_Surface* scr, int x, int y){
-	drawImage(scr,img.menuback,x,y,0,0,200,20,128);
-	if(gd.option_selected==0)TextOut(scr,x+10,y+2,text[OPTIONTEXT]);
+	drawImage(scr,img.menuback,x,y,0,0,400,40,128);
+	if(gd.option_selected==0)TextOut2(scr,x+20,y+4,text[OPTIONTEXT]);
 	else if(gd.option_selected==1){
-		if(SHOW_TOWER)TextOut(scr,x+10,y+2,text[OPTIONTEXT+2]);
-		else TextOut(scr,x+10,y+2,text[OPTIONTEXT+3]);
+		if(SHOW_TOWER)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+2]);
+		else TextOut2(scr,x+20,y+4,text[OPTIONTEXT+3]);
 	}
 	else if(gd.option_selected==2){
-		if(AIR_IMG==TYPE1_EDGE)TextOut(scr,x+10,y+2,text[OPTIONTEXT+4]);
-		else if(AIR_IMG==TYPE1_BARE)TextOut(scr,x+10,y+2,text[OPTIONTEXT+5]);
-		else if(AIR_IMG==TYPE2_EDGE)TextOut(scr,x+10,y+2,text[OPTIONTEXT+6]);
-		else if(AIR_IMG==TYPE2_BARE)TextOut(scr,x+10,y+2,text[OPTIONTEXT+7]);
-		else if(AIR_IMG==NULL)TextOut(scr,x+10,y+2,text[OPTIONTEXT+8]);
+		if(AIR_IMG==TYPE1_EDGE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+4]);
+		else if(AIR_IMG==TYPE1_BARE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+5]);
+		else if(AIR_IMG==TYPE2_EDGE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+6]);
+		else if(AIR_IMG==TYPE2_BARE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+7]);
+		else if(AIR_IMG==NULL)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+8]);
 	}
 	else if(gd.option_selected==3){
-		if(DASH_TYPE==TYPE_MARIO)TextOut(scr,x+10,y+2,text[OPTIONTEXT+9]);
-		else if(DASH_TYPE==TYPE_KIRBY)TextOut(scr,x+10,y+2,text[OPTIONTEXT+10]);
-		else if(DASH_TYPE==TYPE_MEGAMAN)TextOut(scr,x+10,y+2,text[OPTIONTEXT+11]);
-		else if(DASH_TYPE==TYPE_SONIC)TextOut(scr,x+10,y+2,text[OPTIONTEXT+12]);
+		if(DASH_TYPE==TYPE_MARIO)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+9]);
+		else if(DASH_TYPE==TYPE_KIRBY)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+10]);
+		else if(DASH_TYPE==TYPE_MEGAMAN)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+11]);
+		else if(DASH_TYPE==TYPE_SONIC)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+12]);
 	}
-	else if(gd.option_selected==4)TextOut(scr,x+10,y+2,text[OPTIONTEXT+13]);
+	else if(gd.option_selected==4)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+13]);
 	else if(gd.option_selected==5){
-		TextOut(scr,x+10,y+2,text[OPTIONTEXT+14]);
+		TextOut2(scr,x+20,y+4,text[OPTIONTEXT+14]);
 		sprintf_s(str,"%d",MAGNIFY);
-		TextOut(scr,x+140,y+2,str);
+		TextOut2(scr,x+280,y+4,str);
 	}
 	else if(gd.option_selected==6){
-		if(ADJ_DIR==MANUAL)TextOut(scr,x+10,y+2,text[OPTIONTEXT+15]);
-		else if(ADJ_DIR==AUTO)TextOut(scr,x+10,y+2,text[OPTIONTEXT+16]);
+		if(ADJ_DIR==MANUAL)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+15]);
+		else if(ADJ_DIR==AUTO)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+16]);
 	}
 	else if(gd.option_selected==7){
-		if(EXPLAIN==TRUE)TextOut(scr,x+10,y+2,text[OPTIONTEXT+17]);
-		else if(EXPLAIN==FALSE)TextOut(scr,x+10,y+2,text[OPTIONTEXT+18]);
+		if(EXPLAIN==TRUE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+17]);
+		else if(EXPLAIN==FALSE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+18]);
 	}
 	else if(gd.option_selected==8){
-		TextOut(scr,x+10,y+2,text[OPTIONTEXT+19]);
+		TextOut2(scr,x+20,y+4,text[OPTIONTEXT+19]);
 		sprintf_s(str,"%d",BGM_VOLUME);
-		TextOut(scr,x+100,y+2,str);
+		TextOut2(scr,x+200,y+4,str);
 	}
 	else if(gd.option_selected==9){
-		TextOut(scr,x+10,y+2,text[OPTIONTEXT+20]);
+		TextOut2(scr,x+20,y+4,text[OPTIONTEXT+20]);
 		sprintf_s(str,"%d",SE_VOLUME);
-		TextOut(scr,x+100,y+2,str);
+		TextOut2(scr,x+200,y+4,str);
 	}
 	else if(gd.option_selected==10){
 		if(gd.bought[10]){
-			if(NHK_REMOVE==FALSE)TextOut(scr,x+10,y+2,text[OPTIONTEXT+21]);
-			else if(NHK_REMOVE==TRUE)TextOut(scr,x+10,y+2,text[OPTIONTEXT+22]);
+			if(NHK_REMOVE==FALSE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+21]);
+			else if(NHK_REMOVE==TRUE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+22]);
 		}
 	}
 	else if(gd.option_selected==11){
 		if(gd.bought[14]){
-			if(WALKING_TYPE==SMOOTH)TextOut(scr,x+10,y+2,text[OPTIONTEXT+23]);
-			else if(WALKING_TYPE==BUMPY)TextOut(scr,x+10,y+2,text[OPTIONTEXT+24]);
+			if(WALKING_TYPE==SMOOTH)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+23]);
+			else if(WALKING_TYPE==BUMPY)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+24]);
 		}
 	}
-	else if(gd.option_selected==12)TextOut(scr,x+10,y+2,text[OPTIONTEXT+1]);
+	else if(gd.option_selected==12)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+1]);
 }
 
 void drawOptionExplain(SDL_Surface* scr){
 	if(EXPLAIN){
 		if(phase==OPTION_MENU){
 			if(count%600<200){
-				drawKeyboard(scr,key.zC,0,220);
-				TextOut(scr,20,220,text[OPTIONTEXT+1]);
+				drawKeyboard(scr,key.zC,0,460);
+				TextOut(scr,20,460,text[OPTIONTEXT+1]);
 			}
 			else if(count%600<400){
-				drawKeyboard(scr,key.upC,0,220);
-				drawKeyboard(scr,key.downC,20,220);
-				drawKeyboard(scr,key.leftC,40,220);
-				drawKeyboard(scr,key.rightC,60,220);
-				TextOut(scr,80,220,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.upC,0,460);
+				drawKeyboard(scr,key.downC,20,460);
+				drawKeyboard(scr,key.leftC,40,460);
+				drawKeyboard(scr,key.rightC,60,460);
+				TextOut(scr,80,460,text[MENUTEXT+15]);
 			}
 			else{
-				drawKeyboard(scr,key.xC,0,220);
-				TextOut(scr,20,220,text[MENUTEXT+4]);
+				drawKeyboard(scr,key.xC,0,460);
+				TextOut(scr,20,460,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==OPTION_SETTING){
 			if(count%400<200){
-				drawKeyboard(scr,key.upC,0,220);
-				drawKeyboard(scr,key.downC,20,220);
-				drawKeyboard(scr,key.leftC,40,220);
-				drawKeyboard(scr,key.rightC,60,220);
-				TextOut(scr,80,220,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.upC,0,460);
+				drawKeyboard(scr,key.downC,20,460);
+				drawKeyboard(scr,key.leftC,40,460);
+				drawKeyboard(scr,key.rightC,60,460);
+				TextOut(scr,80,460,text[MENUTEXT+15]);
 			}else{
-				drawKeyboard(scr,key.zC,0,220);
-				TextOut(scr,20,220,text[OPTIONTEXT+1]);
+				drawKeyboard(scr,key.zC,0,460);
+				TextOut(scr,20,460,text[OPTIONTEXT+1]);
 			}
 		}
 	}
 }
 
 void drawOption(SDL_Surface* scr){
-	fillRect(scr,0,0,320,240,0,0,0,255);
-	drawImage(scr,img.back,32,24,0,0,256,192,255);
+	fillRect(scr,0,0,640,480,0,0,0,255);
+	drawImage(scr,img.back,64,48,0,0,512,384,255);
 	if(phase==OPTION_SETTING){
 		if(count%40<20){
-			drawImage(scr,img.chr,150,85,75,110,15,15,225);
-			drawImage(scr,img.chr,150,120,75,140,15,15,225);
+			drawImage(scr,img.chr,300,170,150,220,30,30,225);
+			drawImage(scr,img.chr,300,240,150,280,30,30,225);
 		}
-		drawOptionSetting(scr,60,100);
+		drawOptionSetting(scr,120,200);
 	}
 	else drawOptionMenuBox(scr);
 	if(phase==OPTION_KEY_SETTING)drawKeySetting(scr);

@@ -42,7 +42,7 @@ struct Map{
 	Uint8 **rural, *shore, *type, **smr;
 	Uint16 **h, **slope;
 	Uint16 *volcano, *volcano_id, *volcanoX, *volcanoY, *rural_rate;
-	Uint32 *RGB;
+	Image *rgb;
 	BOOL moved,buffered,buffered2,rural_loaded;
 	Image *rpg;
 	Uint8 c[76800];

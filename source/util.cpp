@@ -24,7 +24,7 @@ String text[1000],talk[1000];
 BOOL run,setSMR,map_loaded=FALSE, *animebook, ABGR;
 double test=0;
 int stas=0,works=0,prgs=0,allworks=0,collection=0,areas=0,towers=0,mounts=0,towns=0,index_num=0,clear_num=0;
-int count=0,face[1000],start=0;
+int count=0,bg_count=0,face[1000],start=0;
 Uint8 mode=0,phase=0,dataNo=1,fontA=255,kick_count=0;
 Uint8 CHAR_CODE,AIR_IMG,WALKING_TYPE,SHOW_TOWER,ROD_TYPE,ADJ_DIR,MAP3D;
 Uint8 CHANNELS,EXPLAIN,FULLSCR,SCRSIZE=1,BGM_VOLUME,SE_VOLUME;
@@ -585,6 +585,101 @@ void TextOut_lang(Image* img, int x, int y, char* st, int l, int lang){
 	}
 }
 
+void TextOut2(SDL_Surface* scr, int X, int Y, char* st){
+	TextOut2_lang(scr,X,Y,st,0,CHAR_CODE);
+}
+void TextOut2(SDL_Surface* scr, int X, int Y, String st){
+	if(CHAR_CODE==JAPANESE)TextOut2_lang(scr,X,Y,st.str[0],0,JAPANESE);
+	else TextOut2_lang(scr,X,Y,st.str[1],0,EUROPEAN);
+}
+void TextOut2(SDL_Surface* scr, int X, int Y, String st, int l){
+	if(CHAR_CODE==JAPANESE)TextOut2_lang(scr,X,Y,st.str[0],l,JAPANESE);
+	else TextOut2_lang(scr,X,Y,st.str[1],l,EUROPEAN);
+}
+void TextOut2(SDL_Surface* scr, int x, int y, char* st, int l){
+	TextOut2_lang(scr,x,y,st,l,CHAR_CODE);
+}
+void TextOut2(Image* img, int X, int Y, char* st){
+	TextOut2_lang(img,X,Y,st,0,CHAR_CODE);
+}
+void TextOut2(Image* img, int X, int Y, String st){
+	if(CHAR_CODE==JAPANESE)TextOut2_lang(img,X,Y,st.str[0],0,JAPANESE);
+	else TextOut2_lang(img,X,Y,st.str[1],0,EUROPEAN);
+}
+void TextOut2(Image* img, int X, int Y, String st, int l){
+	if(CHAR_CODE==JAPANESE)TextOut2_lang(img,X,Y,st.str[0],l,JAPANESE);
+	else TextOut2_lang(img,X,Y,st.str[1],l,EUROPEAN);
+}
+void TextOut2(Image* img, int x, int y, char* st, int l){
+	TextOut2_lang(img,x,y,st,l,CHAR_CODE);
+}
+void TextOut2_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang){
+	if(lang==JAPANESE)TextOut2_lang(scr,x,y,st.str[0],l,JAPANESE);
+	else TextOut2_lang(scr,x,y,st.str[1],l,EUROPEAN);
+}
+void TextOut2_lang(Image* img, int x, int y, String st, int l, int lang){
+	if(lang==JAPANESE)TextOut2_lang(img,x,y,st.str[0],l,JAPANESE);
+	else TextOut2_lang(img,x,y,st.str[1],l,EUROPEAN);
+}
+
+void TextOut2_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang){
+	int i=0,s=0,s2=0,p=0;
+	if(l<0)l=0;
+	while(i<l || l==0){
+		if(st[i]==0)break;
+		s=st[i];
+		if(s<0)s+=256;
+		s2=st[i+1];
+		if(s2<0)s2+=256;
+
+		if(lang==JAPANESE){
+			if((s>=129 && s<=159 || s>=224) && s2!=0){
+				if(s>=224)s-=64;
+				s=(s-129)*192;
+				s+=s2-64;
+				drawImage_x(scr, font[s/256+1], x+p,y, 2, ((s%256)%16)*17,((s%256)/16)*17,17,17, fontA);
+				p+=32;i++;
+			}else{
+				drawImage_x(scr, font[0], x+p,y, 2, (s%32)*9,(s/32)*17,9,17, fontA);
+				p+=16;
+			}
+		}else{
+			drawImage_x(scr, font[46], x+p,y, 2, (s%32)*9,(s/32)*17,9,17, fontA);
+			p+=16;
+		}
+		i++;
+	}
+}
+
+void TextOut2_lang(Image* img, int x, int y, char* st, int l, int lang){
+	int i=0,s=0,s2=0,p=0;
+	if(l<0)l=0;
+	while(i<l || l==0){
+		if(st[i]==0)break;
+		s=st[i];
+		if(s<0)s+=256;
+		s2=st[i+1];
+		if(s2<0)s2+=256;
+
+		if(lang==JAPANESE){
+			if((s>=129 && s<=159 || s>=224) && s2!=0){
+				if(s>=224)s-=64;
+				s=(s-129)*192;
+				s+=s2-64;
+				drawImage_x(img, font[s/256+1], x+p,y, 2, ((s%256)%16)*17,((s%256)/16)*17,17,17, fontA);
+				p+=32;i++;
+			}else{
+				drawImage_x(img, font[0], x+p,y, 2, (s%32)*9,(s/32)*17,9,17, fontA);
+				p+=16;
+			}
+		}else{
+			drawImage_x(img, font[46], x+p,y, 2, (s%32)*9,(s/32)*17,9,17, fontA);
+			p+=16;
+		}
+		i++;
+	}
+}
+
 void putHeadMark(String &s){
 	//ÇQÉoÉCÉgï∂éöÉRÅ[ÉhÇÃì™Ç…É}Å[ÉNÇÇ¬ÇØÇÈ
 	int a;
@@ -1006,6 +1101,17 @@ void drawKeyboard(SDL_Surface* scr, int k, int X, int Y){
 	drawImage(scr,img.keyboard,X,Y,(a%16)*17,(a/16)*17,17,17,255);
 }
 
+void drawKeyboard2(SDL_Surface* scr, int k, int X, int Y){
+	int a=0;
+	for(int i=0 ; i<82 ; i++){
+		if(k==key_enable[i]){
+			a=i;
+			break;
+		}
+	}
+	drawImage_x(scr,img.keyboard,X,Y,2,(a%16)*17,(a/16)*17,17,17,255);
+}
+
 void fix_scrXY(){
 	gd.scrX=(int)(gd.x*MAGNIFY)-160;
 	gd.scrY=(int)(gd.y*MAGNIFY)-120;
@@ -1411,7 +1517,7 @@ Image::Image(int W, int H){
 	}
 }
 
-void drawImage_x2(SDL_Surface* scr, Image *img, int x, int y, double mag, int x2, int y2, int w2, int h2){
+void drawImage_x(SDL_Surface* scr, Image *img, int x, int y, double mag, int x2, int y2, int w2, int h2, int alpha){
 //ägëÂèkè¨ï`âÊ
 	if(mag<0)return;
 	SDL_LockSurface(scr);
@@ -1441,11 +1547,14 @@ void drawImage_x2(SDL_Surface* scr, Image *img, int x, int y, double mag, int x2
 	if(y+h>(scr->h))h=(scr->h)-y;
 	px=px+pitch*y+bypp*x;
 	px_skip=pitch-bypp*w;
-
 	for(int j=0 ; j<h ; j++){
 		for(int i=0 ; i<w ; i++){
 			R2=0;G2=0;B2=0;num=0;
 			a=x2+i*grope/prec;b=y2+j*grope/prec;
+			if(i==0){
+			sprintf(str,"%d,%d,%d : ",a,b,int_grope);
+				std::cout << str;}
+
 			for(int n=0 ; n<=int_grope ; n++){
 				for(int m=0 ; m<=int_grope ; m++){
 					img_a2=img_a+(b+n)*(img->w)+(a+m);
@@ -1470,7 +1579,7 @@ void drawImage_x2(SDL_Surface* scr, Image *img, int x, int y, double mag, int x2
 	SDL_UnlockSurface(scr);
 }
 
-void drawImage_x2(Image* scr, Image *img, int x, int y, double mag, int x2, int y2, int w2, int h2){
+void drawImage_x(Image* scr, Image *img, int x, int y, double mag, int x2, int y2, int w2, int h2, int alpha){
 //ägëÂèkè¨ï`âÊ
 	if(mag<0)return;
 	Uint8 *px = (Uint8*)scr->RGB;
@@ -1521,6 +1630,102 @@ void drawImage_x2(Image* scr, Image *img, int x, int y, double mag, int x2, int 
 		}
 		px+=px_skip;
 	}
+}
+
+void clipping(int *x, int *y, int *scr_w, int *scr_h, int *x2, int *y2, int *w2, int *h2, int *ima_w, int *ima_h, int *a){
+	if(*a<0)*a=0;
+	if(*a>255)*a=255;
+	//ÇÕÇ›ÇæÇ∑ïîï™ÇÕï`âÊÇµÇ»Ç¢
+	if(*x2<0){*w2+=*x2;*x2=0;}
+	if(*y2<0){*h2+=*y2;*y2=0;}
+	if(*x2+*w2>*ima_w)*w2=*ima_w-*x2;
+	if(*y2+*h2>*ima_h)*h2=*ima_h-*y2;
+	if(*x<0){*x2-=*x;*w2+=*x;*x=0;}
+	if(*y<0){*y2-=*y;*h2+=*y;*y=0;}
+	if(*x+*w2>*scr_w)*w2=*scr_w-*x;
+	if(*y+*h2>*scr_h)*h2=*scr_h-*y;
+}
+
+void __illuminateImage(Uint8* px, int pxwidth, Image* ima, int x, int y, int x2, int y2, int w2, int h2, int a){
+	if(a<0)return;
+	if(a>255)a=255;
+
+	Uint8 *rgb=(Uint8*)ima->RGB;
+	Uint8 *alpha=(Uint8*)ima->A;
+	Uint16 px_skip, rgb_skip, alpha_skip;
+
+	px=px+(pxwidth*y+x)*4;
+	px_skip=(pxwidth-w2)*4;
+	rgb=rgb+(y2*(ima->w)+x2)*4;
+	rgb_skip=((ima->w)-w2)*4;
+	alpha=alpha+y2*(ima->w)+x2;
+	alpha_skip=(ima->w)-w2;
+
+	if(a==255){
+		for(int j=0 ; j<h2 ; j++){
+			for(int i=0 ; i<w2 ; i++){
+				if(*(Uint8 *)alpha){
+					if(*rgb+*px<256)*px+=*rgb;
+					else *px=255;
+					px++;rgb++;
+					if(*rgb+*px<256)*px+=*rgb;
+					else *px=255;
+					px++;rgb++;
+					if(*rgb+*px<256)*px+=*rgb;
+					else *px=255;
+					px++;px++;rgb++;rgb++;
+				}else{
+					px+=4;
+					rgb+=4;
+				}
+				alpha++;
+			}
+			px+=px_skip;
+			rgb+=rgb_skip;
+			alpha+=alpha_skip;
+		}
+	}else{
+		Uint8 col;
+		for(int j=0 ; j<h2 ; j++){
+			for(int i=0 ; i<w2 ; i++){
+				if(*(Uint8 *)alpha){
+					col=(*rgb*a)>>8;
+					if(col+*px<256)*px+=col;
+					else *px=255;
+					px++;rgb++;
+					col=(*rgb*a)>>8;
+					if(col+*px<256)*px+=col;
+					else *px=255;
+					px++;rgb++;
+					col=(*rgb*a)>>8;
+					if(col+*px<256)*px+=col;
+					else *px=255;
+					px++;px++;rgb++;rgb++;
+				}else{
+					px+=4;
+					rgb+=4;
+				}
+				alpha++;
+			}
+			px+=px_skip;
+			rgb+=rgb_skip;
+			alpha+=alpha_skip;
+		}
+	}
+}
+
+void illuminateImage(SDL_Surface* scr, Image* ima, int x, int y, int x2, int y2, int w2, int h2, int a){
+	if(scr==NULL || ima==NULL)return;
+	clipping(&x,&y,&scr->w,&scr->h,&x2,&y2,&w2,&h2,&ima->w,&ima->h,&a);
+	SDL_LockSurface(scr);
+	__illuminateImage((Uint8*)scr->pixels, scr->w, ima, x, y, x2, y2, w2, h2, a);
+	SDL_UnlockSurface(scr);
+}
+
+void illuminateImage(Image* scr, Image* ima, int x, int y, int x2, int y2, int w2, int h2, int a){
+	if(scr==NULL || ima==NULL)return;
+	clipping(&x,&y,&scr->w,&scr->h,&x2,&y2,&w2,&h2,&ima->w,&ima->h,&a);
+	__illuminateImage((Uint8*)scr->RGB, scr->w, ima, x, y, x2, y2, w2, h2, a);
 }
 
 int controlTalking(){

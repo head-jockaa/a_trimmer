@@ -15,29 +15,29 @@ void initMiyazaki(){
 	prgs2=NULL;
 	gd.x=30;gd.scrX=0;
 	gd.talk_count=EOF;
-	menu[GUIDE_TOP].setMenu(30,30,26,4,4);
+	menu[GUIDE_TOP].setMenu(60,60,26,4,4);
 	menu[GUIDE_TOP].stack(text[MIYAZAKITEXT+1]);
 	menu[GUIDE_TOP].stack(text[MIYAZAKITEXT+2]);
 	menu[GUIDE_TOP].stack(text[MIYAZAKITEXT+3]);
 	if(gd.bought[7])menu[GUIDE_TOP].stack(text[MIYAZAKITEXT+4]);
 	else menu[GUIDE_TOP].stack("???");
-	menu[DELETE_MENU].setMenu(80,80,20,6,6);
+	menu[DELETE_MENU].setMenu(160,160,20,6,6);
 	menu[DELETE_MENU].stack(text[TITLETEXT+1]);
 	menu[DELETE_MENU].stack(text[MIYAZAKITEXT+32]);
 	menu[DELETE_MENU].stack(text[MIYAZAKITEXT+33]);
 	menu[DELETE_MENU].stack(text[MENUTEXT+1]);
 	menu[DELETE_MENU].stack(text[MENUTEXT+2]);
 	menu[DELETE_MENU].stack(text[GAMETEXT+21]);
-	menu[YNFORM].setMenu(160,100,12,3,3);
+	menu[YNFORM].setMenu(320,200,12,3,3);
 	menu[YNFORM].stack(text[MIYAZAKITEXT]);
 	menu[YNFORM].stack("");
 	menu[YNFORM].stack("");
-	menu[DELETE_YN].setMenu(160,30,12,2,2);
+	menu[DELETE_YN].setMenu(320,60,12,2,2);
 	menu[DELETE_YN].stack(text[MIYAZAKITEXT+29]);
 	menu[DELETE_YN].stack(text[MIYAZAKITEXT+28]);
-	menu[GUIDE_SEASON].setMenu(50,40,10,8,index_num);
+	menu[GUIDE_SEASON].setMenu(100,80,10,8,index_num);
 	for(int i=0 ; i<index_num ; i++)menu[GUIDE_SEASON].stack(indexName[i].name);
-	menu[BGM_TEST].setMenu(20,60,25,7,37);
+	menu[BGM_TEST].setMenu(40,120,25,7,37);
 	for(int i=1 ; i<=18 ; i++){
 		sprintf_s(str,"Music No.%2d",i);
 		menu[BGM_TEST].stack(str);
@@ -126,8 +126,8 @@ void gotoTowerList(){
 	createMap();
 	createMap_color(1000);
 	createMap_tower();
-	gd.scrX=(int)gd.x*MAGNIFY-160;
-	gd.scrY=(int)gd.y*MAGNIFY-120;
+	gd.scrX=(int)gd.x*MAGNIFY-320;
+	gd.scrY=(int)gd.y*MAGNIFY-240;
 	map.buffered=FALSE;
 	phase=TOWERLIST;
 }
@@ -224,62 +224,62 @@ void timerMiyazaki(){
 void keyMiyazakiMuseum(){
 	if(kick_count>0)return;
 	if(key.z && !key_stop(key.z)){
-		if(gd.x>90 && ((int)gd.x-90)%100<60){
+		if(gd.x>180 && ((int)gd.x-180)%200<120){
 			phase=YNFORM;
 			menu[YNFORM].setViewMode(VISIBLE);
-			if(gd.x>90 && gd.x<150){
+			if(gd.x>180 && gd.x<300){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+14]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+15]);
 			}
-			if(gd.x>190 && gd.x<250){
+			if(gd.x>380 && gd.x<500){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>290 && gd.x<350){
+			if(gd.x>580 && gd.x<700){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+18]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+19]);
 			}
-			if(gd.x>390 && gd.x<450){
+			if(gd.x>780 && gd.x<900){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+20]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+21]);
 			}
-			if(gd.x>490 && gd.x<550){
+			if(gd.x>980 && gd.x<1100){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>590 && gd.x<650 && gd.bought[6]){
+			if(gd.x>1180 && gd.x<1300 && gd.bought[6]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>690 && gd.x<750 && gd.bought[15]){
+			if(gd.x>1380 && gd.x<1500 && gd.bought[15]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+22]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+23]);
 			}
-			if(gd.x>790 && gd.x<850 && gd.bought[12]){
+			if(gd.x>1580 && gd.x<1700 && gd.bought[12]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>890 && gd.x<950 && gd.bought[16]){
+			if(gd.x>1780 && gd.x<1900 && gd.bought[16]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+24]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+25]);
 			}
-			if(gd.x>990 && gd.x<1050 && gd.bought[9]){
+			if(gd.x>1980 && gd.x<2100 && gd.bought[9]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>1090 && gd.x<1150 && gd.bought[11]){
+			if(gd.x>2180 && gd.x<2300 && gd.bought[11]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+18]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+19]);
 			}
-			if(gd.x>1190 && gd.x<1250){
+			if(gd.x>2380 && gd.x<2500){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+26]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+27]);
 			}
-			if(gd.x>1290 && gd.x<1350){
+			if(gd.x>2580 && gd.x<2700){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+28]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+29]);
 			}
-			if(gd.x>1390 && gd.x<1450){
+			if(gd.x>2780 && gd.x<2900){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+18]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+19]);
 			}
@@ -292,18 +292,18 @@ void keyMiyazakiMuseum(){
 		gd.player_dir=0;
 	}
 	if(key.left){
-		gd.x-=3;
+		gd.x-=6;
 		gd.player_dir=3;
 	}
 	if(key.right){
-		gd.x+=3;
-		if(gd.x>1400)gd.x=1400;
+		gd.x+=6;
+		if(gd.x>2800)gd.x=2800;
 		gd.player_dir=1;
 	}
-	gd.scrX=(int)gd.x-160;
+	gd.scrX=(int)gd.x-320;
 	if(gd.scrX<0)gd.scrX=0;
-	if(gd.scrX>1080)gd.scrX=1080;
-	if(talk_seoiha && abs(gd.x-720)>100){
+	if(gd.scrX>2160)gd.scrX=2160;
+	if(talk_seoiha && abs(gd.x-1440)>200){
 		TalkingAt(23);
 		phase=MIYAZAKI_TALK;
 		gd.talk_open_count=1;
@@ -541,7 +541,7 @@ void keyGuideSta(){
 			if(prg[i].station==n)a++;
 		}
 		b=new int[a];
-		menu[GUIDE_PRGLIST].setMenu(10,30,30,9,a);
+		menu[GUIDE_PRGLIST].setMenu(20,60,30,9,a);
 		menu[GUIDE_PRGLIST].lang=JAPANESE;
 		a=0;
 		for(int i=0; i<prgs ; i++)if(prg[i].station==n){
@@ -632,7 +632,7 @@ void keyBgmTest(){
 void keyPrefList_tower(){
 	if(key.z && !key_stop(key.z)){
 		int n=menu[PREF_LIST_MIYAZAKI].selected();
-		menu[GUIDE_STA].setMenu(30,20,20,8,area[n].st_num+1);
+		menu[GUIDE_STA].setMenu(60,40,20,8,area[n].st_num+1);
 		menu[GUIDE_STA].stack(text[MIYAZAKITEXT+5]);
 		for(int i=0 ; i<area[n].st_num ; i++){
 			menu[GUIDE_STA].stack(sta[area[n].station[i]].name);
@@ -701,7 +701,7 @@ void keyTowerList(){
 			}
 			double a;
 			String s;
-			menu[WHICH_TOWER].setMenu(30,30,20,5,n);
+			menu[WHICH_TOWER].setMenu(60,60,20,5,n);
 			for(int i=0 ; i<n ; i++){
 				a=tower[this_tower[i]].kw*1.0;
 				for(int j=0 ; j<tower[this_tower[i]].kw2 ; j++)a/=10;
@@ -735,16 +735,16 @@ void keyTowerList(){
 		createMap_tower();
 		menu[GUIDE_STA].setViewMode(VISIBLE);
 		phase=STA_LIST_TOWER;
-		gd.x=600;
-		gd.scrX=440;
+		gd.x=1200;
+		gd.scrX=880;
 	}
 	if(!key_wait(key.up) || !key_wait(key.down) || !key_wait(key.left) || !key_wait(key.right)){
 		if(key.up)gd.y--;
 		if(key.down)gd.y++;
 		if(key.left)gd.x--;
 		if(key.right)gd.x++;
-		gd.scrX=(int)gd.x*MAGNIFY-160;
-		gd.scrY=(int)gd.y*MAGNIFY-120;
+		gd.scrX=(int)gd.x*MAGNIFY-320;
+		gd.scrY=(int)gd.y*MAGNIFY-240;
 		map.buffered=FALSE;
 	}
 	if(key.left||key.right||key.up||key.down){
@@ -803,7 +803,7 @@ void keyDeleteMenu(){
 		else if(menu[DELETE_MENU].selected()==5){
 			load_towers();
 			load_station();
-			menu[PREF_LIST_MIYAZAKI].setMenu(50,20,12,10,areas-1);
+			menu[PREF_LIST_MIYAZAKI].setMenu(100,40,12,10,areas-1);
 			for(int i=0 ; i<areas-1 ; i++)menu[PREF_LIST_MIYAZAKI].stack(area[i].name);
 			phase=SMR_DELETE_PREF;
 			menu[PREF_LIST_MIYAZAKI].setViewMode(VISIBLE);
@@ -854,7 +854,7 @@ void keyRecordDelete(){
 void keySmrDelete_pref(){
 	if(key.z && !key_stop(key.z)){
 		String str2;
-		menu[GUIDE_STA].setMenu(0,20,40,10,area[menu[PREF_LIST_MIYAZAKI].selected()].st_num);
+		menu[GUIDE_STA].setMenu(0,40,40,10,area[menu[PREF_LIST_MIYAZAKI].selected()].st_num);
 		for(int i=0 ; i<area[menu[PREF_LIST_MIYAZAKI].selected()].st_num ; i++){
 			int n=area[ menu[PREF_LIST_MIYAZAKI].selected() ].station[i];
 			sprintf_s(str2.str[0],"%s",sta[n].name.str[0]);
@@ -902,7 +902,7 @@ void keyMiyazakiTalk(){
 	if(key.z && !key_stop(key.z)){
 		int a=controlTalking();
 		if(a==EOF){
-			if(gd.x>90 && gd.x<150 && menu[YNFORM].selected()==1){
+			if(gd.x>180 && gd.x<300 && menu[YNFORM].selected()==1){
 				endMiyazaki();
 				initHaziaShop();
 				kick_count++;
@@ -1036,9 +1036,9 @@ void keyYNForm(){
 		if(menu[YNFORM].selected()==0){
 			gd.text_count=0;
 			phase=MIYAZAKI_TALK;
-			int a=((int)gd.x-90)/100;
+			int a=((int)gd.x-180)/200;
 			if(a==6&&!gd.bought[15] || a==8&&!gd.bought[16] || a==5&&!gd.bought[6]
-			|| a==9&&!gd.bought[9] || a==10&&!gd.bought[11] || a==7&&!gd.bought[12]){
+			   || a==9&&!gd.bought[9] || a==10&&!gd.bought[11] || a==7&&!gd.bought[12]){
 				TalkingAt(0);
 			}else{
 				TalkingAt(a+1);
@@ -1048,50 +1048,50 @@ void keyYNForm(){
 		}
 		if(menu[YNFORM].selected()==1){
 			phase=MIYAZAKI_MUSEUM;
-			if(gd.x>90 && gd.x<150){
+			if(gd.x>180 && gd.x<300){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(15);
 			}
-			if(gd.x>190 && gd.x<250){
+			if(gd.x>380 && gd.x<500){
 				phase=GUIDE_TOP;
 				menu[GUIDE_TOP].setViewMode(VISIBLE);
 				load_animebook();
 			}
-			if(gd.x>290 && gd.x<350){
+			if(gd.x>580 && gd.x<700){
 				gd.game_mode=WALKING;
 				phase=GOTO_STROLL;
 				count=0;
 			}
-			if(gd.x>390 && gd.x<450){
+			if(gd.x>780 && gd.x<900){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(16);
 			}
-			if(gd.x>490 && gd.x<550){
+			if(gd.x>980 && gd.x<1100){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(17);
 			}
-			if(gd.x>590 && gd.x<650 && gd.bought[6]){
+			if(gd.x>1180 && gd.x<1300 && gd.bought[6]){
 				load_towers();
 				load_station();
-				menu[PREF_LIST_MIYAZAKI].setMenu(50,20,12,10,areas-1);
+				menu[PREF_LIST_MIYAZAKI].setMenu(100,40,12,10,areas-1);
 				for(int i=0 ; i<areas-1 ; i++)menu[PREF_LIST_MIYAZAKI].stack(area[i].name);
 				phase=PREF_LIST_TOWER;
 				menu[PREF_LIST_MIYAZAKI].setViewMode(VISIBLE);
 			}
-			if(gd.x>690 && gd.x<750 && gd.bought[15]){
+			if(gd.x>1380 && gd.x<1500 && gd.bought[15]){
 				Mix_PlayChannel(1,sf.decide,0);
 				gd.player_dir=2;
 				phase=SEOI_HA;
 				count=0;
 			}
-			if(gd.x>790 && gd.x<850 && gd.bought[12]){
+			if(gd.x>1580 && gd.x<1700 && gd.bought[12]){
 				phase=BGM_TEST;
 				menu[BGM_TEST].setViewMode(VISIBLE);
 			}
-			if(gd.x>890 && gd.x<950 && gd.bought[16]){
+			if(gd.x>1780 && gd.x<1900 && gd.bought[16]){
 				if(scr_design==MONO){
 					scr_design=NULL;
 					phase=MIYAZAKI_MUSEUM;
@@ -1102,27 +1102,27 @@ void keyYNForm(){
 					TalkingAt(19);
 				}
 			}
-			if(gd.x>990 && gd.x<1050 && gd.bought[9]){
+			if(gd.x>1980 && gd.x<2100 && gd.bought[9]){
 				gd.game_mode=WALKING;
 				MAP3D=TRUE;
 				phase=GOTO_STROLL;
 				count=0;
 			}
-			if(gd.x>1090 && gd.x<1150 && gd.bought[11]){
+			if(gd.x>2180 && gd.x<2300 && gd.bought[11]){
 				gd.game_mode=NO_RELAY;
 				phase=GOTO_STROLL;
 				count=0;
 			}
-			if(gd.x>1190 && gd.x<1250){
+			if(gd.x>2380 && gd.x<2500){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(20);
 			}
-			if(gd.x>1290 && gd.x<1350){
+			if(gd.x>2580 && gd.x<2700){
 				phase=DELETE_MENU;
 				menu[DELETE_MENU].setViewMode(VISIBLE);
 			}
-			if(gd.x>1390 && gd.x<1450){
+			if(gd.x>2780 && gd.x<2900){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(21);
@@ -1192,148 +1192,148 @@ void keyMiyazaki(){
 }
 
 void drawTowerList(SDL_Surface* scr){
-	fillRect(scr,0,0,320,240,192,192,255,255);
-	drawMap(scr,(int)gd.x-160,(int)gd.y-120);
-	drawImage(scr,img.chr,145,105,90,30,30,30,255);
+	fillRect(scr,0,0,640,480,192,192,255,255);
+	drawMap(scr,(int)gd.x-320,(int)gd.y-240);
+	drawImage(scr,img.chr,290,210,180,60,60,60,255);
 	if(phase==SHOW_TOWERDATA){
 		TextOut(scr,0,0,tower[this_tower[which_tower]].name);
 		double n=tower[this_tower[which_tower]].kw*1.0;
 		for(int m=0 ; m<tower[this_tower[which_tower]].kw2 ; m++)n/=10.0;
 		sprintf_s(str,"%.6gkw",n);
-		TextOut(scr,0,20,str);
+		TextOut(scr,0,40,str);
 		for(int i=0 ; i<area[tower[this_tower[which_tower]].area].st_num ; i++){
-			drawImage(scr,img.symbol,0,i*20+40,
-				(sta[area[tower[this_tower[which_tower]].area].station[i]].mark%17)*17,
-				(sta[area[tower[this_tower[which_tower]].area].station[i]].mark/17)*17,
-				17,17,255);
-			TextOut(scr,20,i*20+40,sta[area[tower[this_tower[which_tower]].area].station[i]].name);
-			if(tower[this_tower[which_tower]].ch[i]==0)TextOut(scr,200,i*20+40,"----");
-			else if(tower[this_tower[which_tower]].ch[i]==CHANNELS+1)TextOut(scr,200,i*20+40,"****");
+			drawImage(scr,img.symbol,0,i*40+80,
+					  (sta[area[tower[this_tower[which_tower]].area].station[i]].mark%17)*34,
+					  (sta[area[tower[this_tower[which_tower]].area].station[i]].mark/17)*34,
+					  34,34,255);
+			TextOut(scr,40,i*40+80,sta[area[tower[this_tower[which_tower]].area].station[i]].name);
+			if(tower[this_tower[which_tower]].ch[i]==0)TextOut(scr,400,i*40+80,"----");
+			else if(tower[this_tower[which_tower]].ch[i]==CHANNELS+1)TextOut(scr,400,i*40+80,"****");
 			else{
 				sprintf_s(str,"ch%2d",tower[this_tower[which_tower]].ch[i]);
-				TextOut(scr,200,i*20+40,str);
+				TextOut(scr,400,i*40+80,str);
 			}
 		}
-		if(tower[this_tower[which_tower]].v)drawImage(scr,img.back,280,0,620,320,40,40,255);
-		else drawImage(scr,img.back,280,0,620,280,40,40,255);
+		if(tower[this_tower[which_tower]].v)drawImage(scr,img.back,560,0,1240,640,80,80,255);
+		else drawImage(scr,img.back,560,0,1240,560,80,80,255);
 		if(((count/20)%4)!=3){
 			for(int i=0 ; i<8 ; i++){
 				if(((tower[this_tower[which_tower]].bias>>i)&1)==1){
-					drawImage(scr,img.back,240,0,300+i*40,280+((count/20)%4)*40,40,40,255);
+					drawImage(scr,img.back,480,0,600+i*80,560+((count/20)%4)*80,80,80,255);
 				}
 			}
 		}
 	}else{
 		for(int i=0 ; i<10 ; i++){
 			if(this_tower[i]==EOF)break;
-			TextOut(scr,0,i*20,tower[this_tower[i]].name);
+			TextOut(scr,0,i*40,tower[this_tower[i]].name);
 		}
 	}
 }
 
 void drawMiyazakiMuseum(SDL_Surface* scr){
-	for(int i=0 ; i<240 ; i++){
-		fillRect(scr,0,i,320,1,abs(30-(i+count)%60)*2,0,0,255);
+	for(int i=0 ; i<480 ; i++){
+		fillRect(scr,0,i,640,1,abs(30-(i+count)%60)*4,0,0,255);
 	}
-	drawImage(scr,img.back,0,start/2,0,0,320,240,255-start*255/200);
+	drawImage(scr,img.back,0,start,0,0,640,480,255-start*255/200);
 	if(start>0){
 		if(start>180)fontA=(200-start)*13;
 		if(start<20)fontA=start*13;
-		TextOut(scr,start/3,60,text[MIYAZAKITEXT+71]);
-		TextOut(scr,50+start/2,100,text[MIYAZAKITEXT+72]);
+		TextOut2(scr,start/3,120,text[MIYAZAKITEXT+71]);
+		TextOut2(scr,50+start/2,200,text[MIYAZAKITEXT+72]);
 		fontA=255;
 	}
 	int a=0;
-	if(start>40)a=240;
-	else if(start>0)a=start*6;
+	if(start>40)a=480;
+	else if(start>0)a=start*12;
 	for(int i=0 ; i<16 ; i++){
-		drawImage(scr,img.back,i*80-gd.scrX,abs(25-(count/2+(i%4)*8)%50)+a,((count/10)%2)*50,280,50,50,255);
-		drawImage(scr,img.back,i*80-gd.scrX,abs(25-(count/2+(i%4)*8)%50)+a,(i%4)*50+100,280,50,50,255);
+		drawImage(scr,img.back,i*160-gd.scrX,abs(25-(count/2+(i%4)*8)%50)*2+a,((count/10)%2)*100,560,100,100,255);
+		drawImage(scr,img.back,i*160-gd.scrX,abs(25-(count/2+(i%4)*8)%50)*2+a,(i%4)*100+200,560,100,100,255);
 	}
 	for(int i=0 ; i<14 ; i++){
 		if(i==7&&!gd.bought[15] || i==9&&!gd.bought[16] || i==6&&!gd.bought[6]
-		|| i==10&&!gd.bought[9] || i==11&&!gd.bought[11] || i==8&&!gd.bought[12]){
-			drawImage(scr,img.back,i*100-gd.scrX,200,0,240,40,40,255);
+		   || i==10&&!gd.bought[9] || i==11&&!gd.bought[11] || i==8&&!gd.bought[12]){
+			drawImage(scr,img.back,i*200-gd.scrX,400,0,480,80,80,255);
 		}
-		else drawImage(scr,img.back,i*100-gd.scrX,200,40+i*40,240,40,40,255);
+		else drawImage(scr,img.back,i*200-gd.scrX,400,80+i*80,480,80,80,255);
 	}
 	if(phase==SEOI_HA){
-		drawImage(scr,img.back,700-gd.scrX,190,600+(count/30)*40,240,40,40,255);
+		drawImage(scr,img.back,1400-gd.scrX,380,1200+(count/30)*80,480,80,80,255);
 	}
-	drawImage(scr,img.chr,(int)gd.x-gd.scrX-7,210,gd.player_dir*15,0,15,30,255);
-	if(key.left || key.right)drawImage(scr,img.chr,(int)gd.x-gd.scrX-13,220,((count/5)%2)*30,55,30,30,255);
+	drawImage(scr,img.chr,(int)gd.x-gd.scrX-14,420,gd.player_dir*30,0,30,60,255);
+	if(key.left || key.right)drawImage(scr,img.chr,(int)gd.x-gd.scrX-26,440,((count/5)%2)*60,110,60,60,255);
 	if(phase==GUIDE_ALL){
 		sprintf_s(str,"%4d/%4d",menu[GUIDE_ALL].selected()+1,allworks);
-		TextOut(scr,0,0,str,(int)strlen(str));
+		TextOut2(scr,0,0,str,(int)strlen(str));
 	}
 	if(phase==GUIDE_TOP){
-		drawImage(scr,img.back,150,120,0,330,120,60,255);
+		drawImage(scr,img.back,300,240,0,660,240,120,255);
 		sprintf_s(str,"%4d/%4d",collection,allworks);
-		TextOut(scr,190,150,str);
+		TextOut2(scr,380,300,str);
 	}
 }
 
 void drawComeMiyazaki(SDL_Surface* scr){
 	int x,y,x2,y2;
 	double mag;
-	if(count<100)x=330-count*2;
-	else if(count<130)x=130;
-	else x=130-(count-130)/2;
-	if(count<80)y=125+count/16;
-	else if(count<100)y=130+(count-80);
-	else if(count<130)y=150;
-	else y=150-(count-130)/2;
-	if(count<100){x2=129;y2=104;mag=0.85;}
-	else if(count<120){x2=129-(count-100)/2;y2=104-(count-100)/4;mag=0.85+(count-100)*0.0075;}
-	else{x2=119;y2=99;mag=1;}
-	drawImage(scr,img.back,0,0,320,0,320,240,255);
-	drawImage(scr,img.back,119,99,640,0,9,108,255);
-	drawImage(scr,img.back,x,y,120,330,30,60,255);
-	drawImage(scr,img.back,230,120,640,165,90,70,255);
-	drawImage_x2(scr,img.back,x2,y2,mag,640,0,9,108);
-	if(count<110)drawImage(scr,img.back,90,180,660,280,40,40,255);
-	else if(count<120)drawImage(scr,img.back,100,185,660,320,40,40,255);
-	else drawImage(scr,img.back,110,190,660,360,40,40,255);
+	if(count<100)x=660-count*4;
+	else if(count<130)x=260;
+	else x=260-(count-130);
+	if(count<80)y=250+count/8;
+	else if(count<100)y=260+(count-80)*2;
+	else if(count<130)y=300;
+	else y=300-(count-130);
+	if(count<100){x2=258;y2=208;mag=0.85;}
+	else if(count<120){x2=258-(count-100);y2=208-(count-100)/2;mag=0.85+(count-100)*0.0075;}
+	else{x2=238;y2=198;mag=1;}
+	drawImage(scr,img.back,0,0,640,0,640,480,255);
+	drawImage(scr,img.back,238,198,1280,0,18,216,255);
+	drawImage(scr,img.back,x,y,240,660,60,120,255);
+	drawImage(scr,img.back,460,240,1280,330,180,140,255);
+	drawImage_x(scr,img.back,x2,y2,mag,1280,0,18,216,255);
+	if(count<110)drawImage(scr,img.back,180,360,1320,560,80,80,255);
+	else if(count<120)drawImage(scr,img.back,200,370,1320,640,80,80,255);
+	else drawImage(scr,img.back,220,380,1320,720,80,80,255);
 }
 
 void drawLeaveMiyazaki(SDL_Surface* scr){
 	int x,y,a,x2,y2,x3,y3;
-	if(count<30)x=120+count*2;
-	else if(count<60)x=180;
-	else x=180-(count-60)*2;
-	if(count<60)y=140;
-	else y=140+(count-60);
-	if(count<50)a=150;
-	else a=120;
-	if(count<30){x2=119+count*4;y2=99-count;}
-	else if(count<60){x2=219-(count-30)*6;y2=44+(count-40)*(count-40)/4;}
-	else{x2=39;y2=144;}
-	if(count>60){x3=60;y3=210;}
-	else if(count>30){x3=(count-30)*2;y3=120+(count-30)*(count-30)/10;}
-	drawImage(scr,img.back,0,0,320,0,320,240,255);
-	if(count<30)drawImage(scr,img.back,x2,y2,640,0,9,108,255);
-	else drawImage(scr,img.back,x2,y2,650,0,50,80,255);
-	drawImage(scr,img.back,40,185,640,110,40,55,255);
-	drawImage(scr,img.back,x,y,a,330,30,60,255);
+	if(count<30)x=240+count*4;
+	else if(count<60)x=360;
+	else x=360-(count-60)*4;
+	if(count<60)y=280;
+	else y=280+(count-60)*2;
+	if(count<50)a=300;
+	else a=240;
+	if(count<30){x2=238+count*8;y2=198-count*2;}
+	else if(count<60){x2=438-(count-30)*12;y2=88+(count-40)*(count-40)/2;}
+	else{x2=78;y2=288;}
+	if(count>60){x3=120;y3=420;}
+	else if(count>30){x3=(count-30)*4;y3=240+(count-30)*(count-30)/5;}
+	drawImage(scr,img.back,0,0,640,0,640,480,255);
+	if(count<30)drawImage(scr,img.back,x2,y2,1280,0,18,216,255);
+	else drawImage(scr,img.back,x2,y2,1300,0,100,160,255);
+	drawImage(scr,img.back,80,370,1280,220,80,110,255);
+	drawImage(scr,img.back,x,y,a,660,60,120,255);
 	if(count>30){
-		drawImage(scr,img.back,220-x3,y3,700,0,30,30,255);
-		drawImage(scr,img.back,220+x3,y3,700,0,30,30,255);
+		drawImage(scr,img.back,440-x3,y3,1400,0,60,60,255);
+		drawImage(scr,img.back,440+x3,y3,1400,0,60,60,255);
 	}
 }
 
 void drawDeploma(SDL_Surface* scr){
-	fillRect(scr,0,0,320,240,255,255,255,255);
+	fillRect(scr,0,0,640,480,255,255,255,255);
 	for(int i=0 ; i<16 ; i++){
-		drawImage(scr,img.back,i*20,0,530,400,20,20,255);
-		drawImage(scr,img.back,i*20,220,530,400,20,20,255);
+		drawImage(scr,img.back,i*40,0,1060,800,40,40,255);
+		drawImage(scr,img.back,i*40,440,1060,800,40,40,255);
 	}
 	for(int i=0 ; i<12 ; i++){
-		drawImage(scr,img.back,0,i*20,530,400,20,20,255);
-		drawImage(scr,img.back,300,i*20,530,400,20,20,255);
+		drawImage(scr,img.back,0,i*40,1060,800,40,40,255);
+		drawImage(scr,img.back,600,i*40,1060,800,40,40,255);
 	}
-	drawImage(scr,img.back,240,130,480,400,50,80,255);
-	if(CHAR_CODE==JAPANESE)drawImage(scr,img.back,40,40,0,400,240,160,255);
-	else drawImage(scr,img.back,40,40,240,400,240,160,255);
+	drawImage(scr,img.back,480,260,960,800,100,160,255);
+	if(CHAR_CODE==JAPANESE)drawImage(scr,img.back,80,80,0,800,480,320,255);
+	else drawImage(scr,img.back,80,80,480,800,480,320,255);
 }
 
 void drawMiyazaki(SDL_Surface* scr){
@@ -1342,10 +1342,10 @@ void drawMiyazaki(SDL_Surface* scr){
 	else if(phase==LEAVE_MIYAZAKI)drawLeaveMiyazaki(scr);
 	else if(phase==DEPLOMA)drawDeploma(scr);
 	else if(phase==GOTO_MOVIE){
-		fillRect(scr,0,0,320,240,0,0,0,255);
-		for(int i=0 ; i<320 ; i++)fillRect(scr,i,108,1,21,0,0,255-(int)(i*0.8),255);
-		TextOut(scr,30,110,text[MIYAZAKITEXT+menu[BGM_TEST].selected()+34]);
-		if(count>=50)fillRect(scr,0,108,320,21,0,0,0,(count-50)*5);
+		fillRect(scr,0,0,640,480,0,0,0,255);
+		for(int i=0 ; i<640 ; i++)fillRect(scr,i,216,1,42,0,0,255-(int)(i*0.4),255);
+		TextOut2(scr,60,220,text[MIYAZAKITEXT+menu[BGM_TEST].selected()+30]);
+		if(count>=50)fillRect(scr,0,216,640,42,0,0,0,(count-50)*5);
 	}
 	else if(phase==GAMESTART){
 		drawWeeklyComic(scr);
@@ -1354,18 +1354,18 @@ void drawMiyazaki(SDL_Surface* scr){
 		drawSummerWars(scr);
 	}
 	else drawMiyazakiMuseum(scr);
-	if(phase==GUIDE_STALIST || phase==GUIDE_STALIST_ALL)drawImage(scr,fishbox.panel,0,20,0,0,320,200,255);
+	if(phase==GUIDE_STALIST || phase==GUIDE_STALIST_ALL)drawImage(scr,fishbox.panel,0,40,0,0,640,400,255);
 	for(int i=0 ; i<20 ; i++){
 		if(i==GUIDE_ALL || i==GUIDE_ANIME)menu[i].drawColorMenu(scr);
 		else menu[i].drawMenu(scr);
 	}
 	drawTalking(scr);
-	if(phase==NODATA1 || phase==NODATA2)TextOut(scr,50,200,text[MENUTEXT+18]);
+	if(phase==NODATA1 || phase==NODATA2)TextOut(scr,100,400,text[MENUTEXT+18]);
 	drawMiyazakiExplain(scr);
 	if(phase==GOTO_STROLL || phase==GOTO_TOWERLIST){
-		drawImage(scr,img.menuback,0,90,0,0,320,60,128);
-		TextOut(scr,120,100,text[MENUTEXT+16]);
-		TextOut(scr,50,120,text[MENUTEXT+17]);
+		drawImage(scr,img.menuback,0,180,0,0,640,120,128);
+		TextOut2(scr,240,200,text[MENUTEXT+16]);
+		TextOut2(scr,100,240,text[MENUTEXT+17]);
 	}
 }
 
@@ -1377,58 +1377,58 @@ void drawMiyazakiExplain(SDL_Surface *scr){
 			drawKeyboard(scr,key.leftC,0,0);
 			drawKeyboard(scr,key.rightC,20,0);
 			TextOut(scr,40,0,text[GAMETEXT+12]);
-			if(gd.x>90 && ((int)gd.x-90)%100<60){
+			if(gd.x>180 && ((int)gd.x-180)%200<120){
 				drawKeyboard(scr,key.zC,100,0);
 				TextOut(scr,120,0,text[OPTIONTEXT+1]);
 			}
 		}
 		else if(phase==GUIDE_ALL || phase==GUIDE_ANIME || phase==GUIDE_STALIST_ALL || phase==PREF_LIST || phase==BGM_TEST || phase==PREF_LIST_TOWER || phase==SMR_DELETE_PREF){
 			if(count%600<200){
-				drawKeyboard(scr,key.upC,0,220);
-				drawKeyboard(scr,key.downC,20,220);
-				drawKeyboard(scr,key.leftC,40,220);
-				drawKeyboard(scr,key.rightC,60,220);
-				TextOut(scr,80,220,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.upC,0,460);
+				drawKeyboard(scr,key.downC,20,460);
+				drawKeyboard(scr,key.leftC,40,460);
+				drawKeyboard(scr,key.rightC,60,460);
+				TextOut(scr,80,460,text[MENUTEXT+15]);
 			}
 			else if(count%600<400){
-				drawKeyboard(scr,key.zC,0,220);
-				TextOut(scr,20,220,text[OPTIONTEXT+1]);
+				drawKeyboard(scr,key.zC,0,460);
+				TextOut(scr,20,460,text[OPTIONTEXT+1]);
 			}else{
-				drawKeyboard(scr,key.xC,0,220);
-				TextOut(scr,20,220,text[MENUTEXT+4]);
+				drawKeyboard(scr,key.xC,0,460);
+				TextOut(scr,20,460,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==GUIDE_STALIST || phase==GUIDE_STALIST_ALL || phase==GUIDE_PRGLIST || phase==GUIDE_TIME){
 			if(count%400<200){
-				drawKeyboard(scr,key.upC,0,220);
-				drawKeyboard(scr,key.downC,20,220);
-				drawKeyboard(scr,key.leftC,40,220);
-				drawKeyboard(scr,key.rightC,60,220);
-				TextOut(scr,80,220,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.upC,0,460);
+				drawKeyboard(scr,key.downC,20,460);
+				drawKeyboard(scr,key.leftC,40,460);
+				drawKeyboard(scr,key.rightC,60,460);
+				TextOut(scr,80,460,text[MENUTEXT+15]);
 			}else{
-				drawKeyboard(scr,key.xC,0,220);
-				TextOut(scr,20,220,text[MENUTEXT+4]);
+				drawKeyboard(scr,key.xC,0,460);
+				TextOut(scr,20,460,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==GAMESTART || phase==DEPLOMA){
-			drawKeyboard(scr,key.zC,0,220);
-			TextOut(scr,20,220,text[MENUTEXT+4]);
+			drawKeyboard(scr,key.zC,0,460);
+			TextOut(scr,20,460,text[MENUTEXT+4]);
 		}
 		else if(phase==TOWERLIST){
-			drawKeyboard(scr,key.upC,180,220);
-			drawKeyboard(scr,key.downC,200,220);
-			drawKeyboard(scr,key.leftC,220,220);
-			drawKeyboard(scr,key.rightC,240,220);
-			TextOut(scr,260,220,text[GAMETEXT+12]);
+			drawKeyboard(scr,key.upC,180,460);
+			drawKeyboard(scr,key.downC,200,460);
+			drawKeyboard(scr,key.leftC,220,460);
+			drawKeyboard(scr,key.rightC,240,460);
+			TextOut(scr,260,460,text[GAMETEXT+12]);
 			if(this_tower[0]!=EOF){
-				drawKeyboard(scr,key.zC,200,200);
-				TextOut(scr,220,200,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.zC,200,440);
+				TextOut(scr,220,440,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==SHOW_TOWERDATA){
-			drawKeyboard(scr,key.zC,240,220);
-			drawKeyboard(scr,key.xC,260,220);
-			TextOut(scr,280,220,text[MENUTEXT+4]);
+			drawKeyboard(scr,key.zC,240,460);
+			drawKeyboard(scr,key.xC,260,460);
+			TextOut(scr,280,460,text[MENUTEXT+4]);
 		}
 		else if(phase==MIYAZAKI_TALK || phase==DEPLOMA_TALK){
 			drawKeyboard(scr,key.zC,0,0);
@@ -1454,7 +1454,7 @@ void drawMiyazakiExplain(SDL_Surface *scr){
 void makeGuideBook(){
 	load_animebook();
 	load_station();
-	menu[GUIDE_ALL].setMenu(0,20,40,10,allworks);
+	menu[GUIDE_ALL].setMenu(0,40,40,10,allworks);
 	menu[GUIDE_ALL].lang=JAPANESE;
 	size_t fc=0;
 	loadFile("file/data/work/work_name_jp.dat");

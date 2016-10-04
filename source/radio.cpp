@@ -322,9 +322,9 @@ void startSMR(int st){
 		end=FALSE;
 		end_mount_dis=FALSE;
 		int ud=1;
-		if((SMRcount/(320/SMRfast))%2==0)ud=-1;
-		int X=gd.scrX+a+(SMRcount%(320/SMRfast))*SMRfast;
-		int Y=gd.scrY+120+(SMRcount/(320/SMRfast)+1)/2*ud;
+		if((SMRcount/(640/SMRfast))%2==0)ud=-1;
+		int X=gd.scrX+a+(SMRcount%(640/SMRfast))*SMRfast;
+		int Y=gd.scrY+240+(SMRcount/(640/SMRfast)+1)/2*ud;
 		if(map.smr[X][Y]!=0)continue;
 		saveSMR=TRUE;
 

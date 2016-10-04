@@ -10,7 +10,7 @@ void keyNoData();
 
 void initGameMenu(){
 	mode=GAMEMENU;
-	menu[GAMEMODE].setMenu(80,60,10,8,8);
+	menu[GAMEMODE].setMenu(160,120,10,8,8);
 	menu[GAMEMODE].stack(text[MENUTEXT+5]);
 	menu[GAMEMODE].stack(text[MENUTEXT+6]);
 	menu[GAMEMODE].stack(text[MENUTEXT+7]);
@@ -121,7 +121,7 @@ void timerSeaSide(){
 				endGameMenu();
 				initMiyazaki();
 				start=0;
-				gd.x=800;gd.y=640;
+				gd.x=1600;gd.y=1280;
 			}else{
 				phase=GOTO_GAME;
 				freeImage(img.back);
@@ -143,7 +143,7 @@ void timerKomoro(){
 			initMiyazaki();
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
-			gd.x=800;gd.y=640;
+			gd.x=1600;gd.y=1280;
 			for(int i=0 ; i<32 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			phase=GOTO_GAME;
@@ -161,8 +161,8 @@ void timerPrologue(){
 		if(movie_test){
 			endGameMenu();
 			initMiyazaki();
-			gd.x=800;
-			gd.scrX=(int)gd.x-160;
+			gd.x=1600;
+			gd.scrX=(int)gd.x-320;
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
 			for(int i=0 ; i<30 ; i++)menu[BGM_TEST].cursorDown();
@@ -328,11 +328,11 @@ void keySaveData(){
 
 void keyRecordMenu(){
 	if(key.z && !key_stop(key.z)){
-		fillRect(img.buffer[1],0,0,320,240,0,0,0,255);
+		fillRect(img.buffer[1],0,0,640,480,0,0,0,255);
 		int n=menu[RECORDMENU].selected();
 		load_record(n);
-		gd.scrX=fishbox.getX()-160;
-		gd.scrY=fishbox.getY()-120;
+		gd.scrX=fishbox.getX()-320;
+		gd.scrY=fishbox.getY()-240;
 		map.buffered=FALSE;
 		phase=RECORD;
 		menu[RECORDMENU].setViewMode(GRAY);
@@ -357,8 +357,8 @@ void keyGameRecord(){
 	if(key.left && !key_wait(key.left))fishbox.cursorLeft();
 	if(key.right && !key_wait(key.right))fishbox.cursorRight();
 	if(preX!=fishbox.getX() || preY!=fishbox.getY()){
-		gd.scrX=fishbox.getX()-160;
-		gd.scrY=fishbox.getY()-120;
+		gd.scrX=fishbox.getX()-320;
+		gd.scrY=fishbox.getY()-240;
 		map.buffered=FALSE;
 	}
 }
@@ -392,8 +392,8 @@ void keyPrologue(){
 		if(movie_test){
 			endGameMenu();
 			initMiyazaki();
-			gd.x=800;
-			gd.scrX=(int)gd.x-160;
+			gd.x=1600;
+			gd.scrX=(int)gd.x-320;
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
 			for(int i=0 ; i<30 ; i++)menu[BGM_TEST].cursorDown();
@@ -430,52 +430,52 @@ void keyNoData(){
 }
 
 void drawGameMainMenuBox(SDL_Surface* scr){
-	if(start<15)drawImage(scr,img.chr,30,100,120,380,40,40,255);
-	if(start<10)drawImage(scr,img.chr,90,100,160,300,40,40,255);
-	if(start<5)drawImage(scr,img.chr,150,100,120,300,40,40,255);
-	if(start==0)drawImage(scr,img.chr,210,100,280,340,40,40,255);
-	drawImage(scr,img.chr,gd.mainmenu_selected*60+30,100,160,150+((count/20)%2)*40,40,40,255);
-	TextOut(scr,60,160,text[MENUTEXT+gd.mainmenu_selected]);
+	if(start<15)drawImage(scr,img.chr,60,200,240,760,80,80,255);
+	if(start<10)drawImage(scr,img.chr,180,200,320,600,80,80,255);
+	if(start<5)drawImage(scr,img.chr,300,200,240,600,80,80,255);
+	if(start==0)drawImage(scr,img.chr,420,200,560,680,80,80,255);
+	drawImage(scr,img.chr,gd.mainmenu_selected*120+60,200,320,300+((count/20)%2)*80,80,80,255);
+	TextOut2(scr,120,320,text[MENUTEXT+gd.mainmenu_selected]);
 }
 
 void drawSeaSide(SDL_Surface* scr){
 	int a=0,b=0,c=0,d=0;
 	if(dataNo==index_num+1){//ÅIƒ{ƒX
-		if(start>0 && gd.scene_count==1)a=5-abs(10-start%20);
+		if(start>0 && gd.scene_count==1)a=10-2*abs(10-start%20);
 		if(gd.scene_count==2){
-			c=(int)((200-start)*0.85);
+			c=(int)((200-start)*1.7);
 			d=start;
 		}
 	}
-	if(mode==GAMEMENU && start>0 && gd.scene_count==0 && face[gd.face_count]!=EOF)b=start*2;
-	if(mode==ENDING && face[gd.face_count]==EOF)b=200-start*2;
-	if(dataNo==index_num+1)fillRect(scr,0,0,320,240,96,136,216,255);
-	else fillRect(scr,0,0,320,240,0,0,0,255);
+	if(mode==GAMEMENU && start>0 && gd.scene_count==0 && face[gd.face_count]!=EOF)b=start*4;
+	if(mode==ENDING && face[gd.face_count]==EOF)b=400-start*4;
+	if(dataNo==index_num+1)fillRect(scr,0,0,640,480,192,272,432,255);
+	else fillRect(scr,0,0,640,480,0,0,0,255);
 	if(img.boss!=NULL){
-		drawImage(scr,img.boss,200,20+d,((count/5)%8)*110,(((count/5)/8)%2)*205,110,205,255);
+		drawImage(scr,img.boss,400,40+d,((bg_count/5)%8)*220,(((bg_count/5)/8)%2)*410,220,410,255);
 	}
-	drawImage(scr,img.back,a-10,20,0,170-c,340,200,192);
-	drawImage(scr,img.back,a-10,90+c,0,270,340,130,255);
-	drawImage(scr,img.back,a-b-10,110+c-abs(20-(count/5)%40),380,150,245,90,255);
-	drawImage(scr,img.back,a-b-10,110+c-abs(20-(count/5)%40),380,240,245,90,255);
-	if(mode==GAMEMENU && face[gd.face_count]==EOF)drawImage(scr,img.back,a+100-b,-280+start*4+c,440,330,10,70,255);
-	else if(mode==ENDING && start>0 && gd.scene_count==0 && face[gd.face_count]!=EOF)drawImage(scr,img.back,a+100-b,120-start*4+c,440,330,10,70,255);
-	else drawImage(scr,img.back,a+80-b,120+c-abs(20-(count/5)%40),380,330,60,70,255);
-	drawImage(scr,img.back,a-b-10,110+c-abs(20-(count/5)%40),380,0,245,150,255);
+	drawImage(scr,img.back,a-20,40,0,340-c,680,400,192);
+	drawImage(scr,img.back,a-20,180+c,0,540,680,260,255);
+	drawImage(scr,img.back,a-b-20,220+c-2*abs(20-(bg_count/5)%40),760,300,490,180,255);
+	drawImage(scr,img.back,a-b-20,220+c-2*abs(20-(bg_count/5)%40),760,480,490,180,255);
+	if(mode==GAMEMENU && face[gd.face_count]==EOF)drawImage(scr,img.back,a+200-b,-560+start*8+c,880,660,20,140,255);
+	else if(mode==ENDING && start>0 && gd.scene_count==0 && face[gd.face_count]!=EOF)drawImage(scr,img.back,a+200-b,240-start*8+c,880,660,20,140,255);
+	else drawImage(scr,img.back,a+160-b,240+c-2*abs(20-(bg_count/5)%40),760,660,120,140,255);
+	drawImage(scr,img.back,a-b-20,220+c-2*abs(20-(bg_count/5)%40),760,0,490,300,255);
 	if(gd.scene_count==1){
-		if(dataNo==1 && face[gd.face_count]!=EOF)drawImage(scr,img.back,-b+30,80-abs(20-(count/5)%40),0,520,160,80,255);
+		if(dataNo==1 && face[gd.face_count]!=EOF)drawImage(scr,img.back,-b+60,160-2*abs(20-(bg_count/5)%40),0,1040,320,160,255);
 	}
-	fillRect(scr,0,0,320,20,0,0,0,255);
-	fillRect(scr,0,220,320,20,0,0,0,255);
+	fillRect(scr,0,0,640,40,0,0,0,255);
+	fillRect(scr,0,440,640,40,0,0,0,255);
 	if(start==0)drawTalking(scr);
 }
 
 void drawGameRecord(SDL_Surface* scr){
 	SDL_Color col=getSkyColor(fishbox.getH(),fishbox.getM());
-	fillRect(scr,0,0,320,240,col.r,col.g,col.b,255);
-	drawMap(scr,fishbox.getX()-160,fishbox.getY()-120);
+	fillRect(scr,0,0,640,480,col.r,col.g,col.b,255);
+	drawMap(scr,fishbox.getX()-320,fishbox.getY()-240);
 	sprintf_s(str,"%10d",gd.score);
-	TextOut(scr,160,0,str);
+	TextOut(scr,320,0,str);
 	fishbox.drawFishBox(scr);
 }
 
@@ -484,8 +484,8 @@ void drawGamemenuExplain(SDL_Surface* scr){
 		if(phase==PROLOGUE || phase==SEASIDE || phase==KOMORO){
 			drawKeyboard(scr,key.zC,0,0);
 			TextOut(scr,20,0,text[EPILOGUE+1]);
-			drawKeyboard(scr,key.cC,200,0);
-			TextOut(scr,220,0,text[EPILOGUE]);
+			drawKeyboard(scr,key.cC,400,0);
+			TextOut(scr,420,0,text[EPILOGUE]);
 		}
 		else if(phase==RECORD){
 			if(count%400<200){
@@ -527,47 +527,47 @@ void drawGameMenu(SDL_Surface* scr){
 	else if(phase==SEASIDE)drawSeaSide(scr);
 	else if(phase==KOMORO)drawKomoro(scr);
 	else{
-		fillRect(scr,0,0,320,240,0,0,0,255);
-		drawImage(scr,img.back,0,0,320+(count/2)%300,0+(count/2)%300,320,240,255);
-		drawImage(scr,img.back,0,160,0,((count/10)%4)*80,320,80,255);
+		fillRect(scr,0,0,640,480,0,0,0,255);
+		drawImage(scr,img.back,0,0,640+(count/2)%600,(count/2)%600,640,480,255);
+		drawImage(scr,img.back,0,320,0,((count/10)%4)*160,640,160,255);
 		if(phase==MAIN || phase==NODATA)drawGameMainMenuBox(scr);
 		for(int i=0 ; i<5 ; i++)menu[i].drawMenu(scr);
 		if(phase==SEASON){
 			for(int k=-1 ; k<=1 ; k++){
 				if(gd.scrX+k<0)continue;
-				drawImage(scr,fishbox.panel,60+k*320+start*10,20,0,0,100,200,255);
-				drawImage(scr,fishbox.panel,160+k*320+start*10,20,220,0,100,200,255);
-				drawImage(scr,img.back,90+k*320+start*10,30,0,320,140,30,255);
-				drawImage(scr,img.chr,70+k*320+start*10,60+gd.scrY*40,140,120,20,20,255);
+				drawImage(scr,fishbox.panel,120+k*640+start*20,40,0,0,200,400,255);
+				drawImage(scr,fishbox.panel,320+k*640+start*20,40,440,0,200,400,255);
+				drawImage(scr,img.back,180+k*640+start*20,60,0,640,280,60,255);
+				drawImage(scr,img.chr,140+k*640+start*20,120+gd.scrY*80,280,240,40,40,255);
 				for(int i=0 ; i<4 ; i++){
 					if((gd.scrX+k)*4+i>=clear_num)break;
 					if((gd.scrX+k)*4+i==index_num){
-						TextOut(scr,90+k*320+start*10,60+i*40,text[MENUTEXT+19]);
+						TextOut2(scr,180+k*640+start*20,120+i*80,text[MENUTEXT+19]);
 					}else{
-						TextOut(scr,90+k*320+start*10,60+i*40,indexName[(gd.scrX+k)*4+i].name);
+						TextOut2(scr,180+k*640+start*20,120+i*80,indexName[(gd.scrX+k)*4+i].name);
 						sprintf_s(str,"%3d%c",indexName[(gd.scrX+k)*4+i].rate,37);
-						TextOut(scr,180+k*320+start*10,60+i*40,str);
+						TextOut2(scr,360+k*640+start*20,120+i*80,str);
 						sprintf_s(str,"%10d",indexName[(gd.scrX+k)*4+i].hiscore);
-						TextOut(scr,133+k*320+start*10,77+i*40,str);
-						if(indexName[(gd.scrX+k)*4+i].rate==100)drawImage(scr,img.symbol,220+k*320+start*10,60+i*40,51,0,17,17,255);
-						else if(indexName[(gd.scrX+k)*4+i].rate>=80)drawImage(scr,img.symbol,220+k*320+start*10,60+i*40,34,0,17,17,255);
-						else if(indexName[(gd.scrX+k)*4+i].rate>=60)drawImage(scr,img.symbol,220+k*320+start*10,60+i*40,17,0,17,17,255);
+						TextOut2(scr,266+k*640+start*20,154+i*80,str);
+						if(indexName[(gd.scrX+k)*4+i].rate==100)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,102,0,34,34,255);
+						else if(indexName[(gd.scrX+k)*4+i].rate>=80)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,64,0,34,34,255);
+						else if(indexName[(gd.scrX+k)*4+i].rate>=60)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,34,0,34,34,255);
 					}
 				}
 			}
 			if(start==0 && count%40<20){
-				if(gd.scrX>0)drawImage(scr,img.back,0,140,140,320,30,20,255);
-				if(gd.scrX<(clear_num-1)/4)drawImage(scr,img.back,290,130,170,320,30,20,255);
+				if(gd.scrX>0)drawImage(scr,img.back,0,280,280,640,60,40,255);
+				if(gd.scrX<(clear_num-1)/4)drawImage(scr,img.back,580,260,340,640,60,40,255);
 			}
 		}
 	}
 	if(phase==GOTO_GAME || phase==GOTO_RECORD){
-		fillRect(scr,0,0,320,240,0,0,0,255);
-		drawImage(scr,img.menuback,0,90,0,0,320,60,128);
-		TextOut(scr,120,100,text[MENUTEXT+16]);
-		TextOut(scr,50,120,text[MENUTEXT+17]);
+		fillRect(scr,0,0,640,480,0,0,0,255);
+		drawImage(scr,img.menuback,0,180,0,0,640,120,128);
+		TextOut2(scr,240,200,text[MENUTEXT+16]);
+		TextOut2(scr,100,240,text[MENUTEXT+17]);
 	}
-	if(phase==NODATA)TextOut(scr,50,200,text[MENUTEXT+18]);
+	if(phase==NODATA)TextOut2(scr,100,400,text[MENUTEXT+18]);
 	drawGamemenuExplain(scr);
 }
 
@@ -582,7 +582,7 @@ BOOL makeSaveMenu(int n){
 		a++;
 	}
 	String s;
-	menu[n].setMenu(40,50,22,8,a+1);
+	menu[n].setMenu(80,100,22,8,a+1);
 	for(int i=0 ; i<a ; i++){
 		sprintf_s(str,"save/save%d.dat",i);
 		if(!loadFile(str))break;
@@ -609,7 +609,7 @@ BOOL makeRecordMenu(int n){
 	}
 	int sc;
 	String s;
-	menu[n].setMenu(40,50,22,8,a+1);
+	menu[n].setMenu(80,100,22,8,a+1);
 	for(int i=0 ; i<a ; i++){
 		sc=0;
 		sprintf_s(str,"save/record%d.dat",i);

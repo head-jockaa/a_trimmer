@@ -9,7 +9,7 @@ void drawRPGchip(Uint32* px, Uint16 scrWidth, int x, int y, int mag, int n, int 
 void fillRect_except_yellow(Image *img, int x, int y, int w, int h, int r, int g, int b, int a);
 
 void Map::set(){
-	RGB=new Uint32[mapW*mapH];
+	rgb=new Image(mapW,mapH);
 	shore=new Uint8[mapW*mapH];
 	h=new Uint16*[mapW];
 	type=new Uint8[mapW*mapH];
@@ -21,7 +21,7 @@ void Map::set(){
 		smr[i]=new Uint8[mapH];
 	}
 	for(int i=0 ; i<mapW ; i++)for(int j=0 ; j<mapH ; j++){
-		RGB[j*mapW+i]=0;h[i][j]=0;
+		rgb->RGB[j*mapW+i]=0;h[i][j]=0;
 		type[j*mapW+i]=0;slope[i][j]=0;smr[i][j]=0;
 	}
 	getImage(rpg,"file/img/rpgchip.png",0,0,0);
@@ -53,7 +53,7 @@ void Map::reset(){
 	}
 	delete [] rural;
 	delete [] rural_rate;
-	delete [] RGB;
+	freeImage(rgb);
 	delete [] shore;
 	delete [] h;
 	delete [] type;
@@ -97,14 +97,14 @@ void createMap(){
 			pixel = *(Uint32*)(px + pitch*b + bypp*a);
 			SDL_GetRGB( pixel, f, &col.r, &col.g, &col.b);
 			if(col.r==0 && col.g==0 && col.b==0){
-				map.RGB[(j*300+b)*map.mapW+(i*300+a)]=0;
+				map.rgb->RGB[(j*300+b)*map.mapW+(i*300+a)]=0;
 			}
 			else if(col.r==255 && col.g==255 && col.b==255){
-				map.RGB[(j*300+b)*map.mapW+(i*300+a)]=setRGB(255,255,255);
+				map.rgb->RGB[(j*300+b)*map.mapW+(i*300+a)]=setRGB(255,255,255);
 				map.type[(j*300+b)*map.mapW+(i*300+a)]=ROAD;
 			}
 			else{
-				map.RGB[(j*300+b)*map.mapW+(i*300+a)]=setRGB(255,255,0);
+				map.rgb->RGB[(j*300+b)*map.mapW+(i*300+a)]=setRGB(255,255,0);
 			}
 		}
 		SDL_UnlockSurface(img);
@@ -112,10 +112,10 @@ void createMap(){
 	}
 
 	int a;
-	for(int i=0 ; i<320 ; i++)for(int j=0 ; j<240 ; j++){
-		a=255-(int)(sqrt((160.0-i)*(160-i)+(120-j)*(120-j))*3);
-		if(a<0)map.c[i+j*320]=0;
-		else map.c[i+j*320]=a;
+	for(int i=0 ; i<640 ; i++)for(int j=0 ; j<480 ; j++){
+		a=255-(int)(sqrt((320.0-i)*(320-i)+(240-j)*(240-j))*3);
+		if(a<0)map.c[i+j*640]=0;
+		else map.c[i+j*640]=a;
 	}
 
 	createMap_shore();
@@ -127,7 +127,7 @@ void createMap(){
 
 void createMap_shore(){
 	for(int a=0 ; a<map.mapW ; a++)for(int b=0 ; b<map.mapH ; b++){
-		if(map.RGB[b*map.mapW+a]==0){
+		if(map.rgb->RGB[b*map.mapW+a]==0){
 			map.type[b*map.mapW+a]=SEA;
 		}
 	}
@@ -180,7 +180,7 @@ void createMap_color(int bright){
 				col.g=128;
 				col.b=255;
 			}
-			map.RGB[b*map.mapW+a]=setRGB(col.r*bright/1000,col.g*bright/1000,col.b*bright/1000);
+			map.rgb->RGB[b*map.mapW+a]=setRGB(col.r*bright/1000,col.g*bright/1000,col.b*bright/1000);
 		}
 	}
 	map.setRPGchip(bright);
@@ -293,22 +293,22 @@ int onBS(){
 void drawMap(SDL_Surface* scr, int X, int Y){
 	if(X<0)X=0;
 	if(Y<0)Y=0;
-	if(X>map.mapW*MAGNIFY-320)X=map.mapW*MAGNIFY-320;
-	if(Y>map.mapH*MAGNIFY-240)Y=map.mapH*MAGNIFY-240;
+	if(X>map.mapW*MAGNIFY-640)X=map.mapW*MAGNIFY-640;
+	if(Y>map.mapH*MAGNIFY-480)Y=map.mapH*MAGNIFY-480;
 	int n=onBS();
 	if(n==0){
 		for(int i=-2 ; i<17 ; i++)for(int j=-1 ; j<13 ; j++){
-			drawImage(scr,img.chr,i*20-X%20+((Y/20+j)%2)*10+(count/12)%20,j*20-Y%20+(count/12)%20, ((count/20)%4)*20+60,60,20,20,64);
+			drawImage(scr,img.chr,i*40-X%40+((Y/40+j)%2)*20+(count/12)%40,j*40-Y%40+(count/12)%40, ((count/20)%4)*40+120,120,40,40,64);
 		}
 	}
 	else if(n==1){
 		for(int i=-2 ; i<17 ; i++)for(int j=-1 ; j<13 ; j++){
-			drawImage(scr,img.chr,i*20-X%20+((Y/20+j)%2)*10+(count/12)%20,j*20-Y%20+(count/12)%20, ((count/20)%4)*20+60,80,20,20,128);
+			drawImage(scr,img.chr,i*40-X%40+((Y/40+j)%2)*20+(count/12)%40,j*40-Y%40+(count/12)%40, ((count/20)%4)*40+120,160,40,40,128);
 		}
 	}
 	else if(n==2){
 		for(int i=-2 ; i<17 ; i++)for(int j=-1 ; j<13 ; j++){
-			drawImage(scr,img.chr,i*20-X%20+((Y/20+j)%2)*10+(count/12)%20,j*20-Y%20+(count/12)%20, ((count/20)%4)*20+60,80,20,20,255);
+			drawImage(scr,img.chr,i*40-X%40+((Y/40+j)%2)*20+(count/12)%40,j*40-Y%40+(count/12)%40, ((count/20)%4)*40+120,160,40,40,255);
 		}
 	}
 
@@ -320,52 +320,58 @@ void drawMap(SDL_Surface* scr, int X, int Y){
 	}
 
 	if(MAP3D){
-		drawImage(scr,img.buffer[0],0,0,0,0,320,240,255);
-		if(SHOW_TOWER)drawImage(scr,img.buffer[1],0,0,0,0,320,240,a);
+		drawImage(scr,img.buffer[0],0,0,0,0,640,480,255);
+		if(SHOW_TOWER)drawImage(scr,img.buffer[1],0,0,0,0,640,480,a);
 	}else{
-	if(map.moved){
-		drawGround(scr,X,Y,0,0,320,240,b,FALSE);
-		drawTowerSpot(scr,X,Y,0,0,320,240,FALSE);
-		drawVolcano(X,Y,320,240,FALSE);
-	}else{
-		if(!map.buffered){
-			drawGround(scr,X,Y,0,0,320,240,b,TRUE);
-			drawTowerSpot(scr,X,Y,0,0,320,240,TRUE);
-			drawVolcano(X,Y,320,240,TRUE);
+		if(!map.buffered && !gd.doze){
+			drawGround(scr,X,Y,0,0,640,480,b,TRUE);
+			drawTowerSpot(scr,X,Y,0,0,640,480,TRUE);
 		}
-		drawImage(scr,img.buffer[0],0,0,0,0,320,240,255);
-		if(SHOW_TOWER)drawImage(scr,img.buffer[1],0,0,0,0,320,240,a);
-	}
+		if(!map.buffered2){
+			drawVolcano(X,Y,640,480,TRUE);
+		}
+		if(map.moved){
+			drawGround(scr,X,Y,0,0,640,480,b,FALSE);
+			drawTowerSpot(scr,X,Y,0,0,640,480,FALSE);
+			drawVolcano(X,Y,640,480,FALSE);
+		}
+		else if(!map.buffered && gd.doze){
+			drawGround(scr,X,Y,0,0,640,480,b,FALSE);
+			if(SHOW_TOWER)drawImage(scr,img.buffer[1],0,0,0,0,640,480,a);
+		}else{
+			drawImage(scr,img.buffer[0],0,0,0,0,640,480,255);
+			if(SHOW_TOWER)drawImage(scr,img.buffer[1],0,0,0,0,640,480,a);
+		}
 
-	if(MAGNIFY>=8){
-		if(gd.town_count<400){
-			if(gd.town_count<30 || gd.town_count>370){
-				if(gd.town_count<30)a=gd.town_count;
-				else a=400-gd.town_count;
-				drawImage(scr,img.chr,150-(int)(a*3.3),0,110,120,10,25,255);
-				for(int i=9-a/3 ; i<11+a/3 ; i++)drawImage(scr,img.chr,60+i*10,0,120,120,10,25,255);
-				drawImage(scr,img.chr,160+(int)(a*3.3),0,130,120,10,25,255);
-			}else{
-				drawImage(scr,img.chr,50,0,110,120,10,25,255);
-				for(int i=0 ; i<20 ; i++)drawImage(scr,img.chr,60+i*10,0,120,120,10,25,255);
-				drawImage(scr,img.chr,260,0,130,120,10,25,255);
-				if(gd.location!=EOF)TextOut(scr,160-(int)strlen(town[gd.location].name.str[CHAR_CODE])*4,4,town[gd.location].name);
+		if(MAGNIFY>=8){
+			if(gd.town_count<400){
+				if(gd.town_count<30 || gd.town_count>370){
+					if(gd.town_count<30)a=gd.town_count;
+					else a=400-gd.town_count;
+					drawImage(scr,img.chr,300-(int)(a*6.6),0,220,240,20,50,255);
+					for(int i=9-a/3 ; i<11+a/3 ; i++)drawImage(scr,img.chr,120+i*20,0,240,240,20,50,255);
+					drawImage(scr,img.chr,320+(int)(a*6.6),0,260,240,20,50,255);
+				}else{
+					drawImage(scr,img.chr,100,0,220,240,20,50,255);
+					for(int i=0 ; i<20 ; i++)drawImage(scr,img.chr,120+i*20,0,240,240,20,50,255);
+					drawImage(scr,img.chr,520,0,260,240,20,50,255);
+					if(gd.location!=EOF)TextOut2(scr,320-(int)strlen(town[gd.location].name.str[CHAR_CODE])*8,8,town[gd.location].name);
+				}
 			}
 		}
-	}
 	}
 }
 
 void drawMap2(SDL_Surface *scr, int X, int Y){
 	if(AIR_IMG==NULL)return;
-	if(map.moved && gd.ta_count>=87)drawColorLight(X,Y,320,240,FALSE);
-	else if(!map.buffered2)drawColorLight(X,Y,320,240,TRUE);
+	if(map.moved && gd.ta_count>=87)drawColorLight(X,Y,640,480,FALSE);
+	else if(!map.buffered2)drawColorLight(X,Y,640,480,TRUE);
 	int a=0;
 	if(count%200<80)a=(int)(6.3*(40-abs(count%200-40)));
-	if(phase!=GAMESTART)drawLight(scr,img.buffer[2],map.airX,map.airY,map.airX,map.airY,map.airW,map.airH,255);
-	if(a!=0 && phase!=GAMESTART)drawLight(scr,img.buffer[3],map.volX,map.volY,map.volX,map.volY,map.volW,map.volH,a);
+	if(phase!=GAMESTART)illuminateImage(scr,img.buffer[2],map.airX,map.airY,map.airX,map.airY,map.airW,map.airH,255);
+	if(a!=0 && phase!=GAMESTART)illuminateImage(scr,img.buffer[3],map.volX,map.volY,map.volX,map.volY,map.volW,map.volH,a);
 	if(gd.ta_count<87){
-		drawLight(scr,img.tv_asahi,245,0,(gd.ta_count%10)*75,(gd.ta_count/10)*50,75,50,255);
+		illuminateImage(scr,img.tv_asahi,565,0,(gd.ta_count%10)*75,(gd.ta_count/10)*50,75,50,255);
 	}
 }
 
@@ -388,8 +394,10 @@ void fillRect_except_yellow(Image *img, int x, int y, int w, int h, int r, int g
 	}
 }
 
-void drawRPGchip(Uint32* px, Uint16 scrWidth, int x, int y, int mag, int n, int p, int bright){
-	Uint32 *rgb=map.rpg->RGB;
+void drawRPGchip(Uint8* px, Uint16 scrWidth, int x, int y, int mag, int n, int p, int bright){
+	Uint8 *rgb=(Uint8*)map.rpg->RGB;
+	Uint8 *pos=(Uint8*)map.rgb->RGB;
+	pos+=p*4;
 	int w=mag,h=mag,x2,y2;
 
 	if(mag==8){
@@ -407,36 +415,53 @@ void drawRPGchip(Uint32* px, Uint16 scrWidth, int x, int y, int mag, int n, int 
 
 	if(x<0){x2-=x;w+=x;x=0;}
 	if(y<0){y2-=y;h+=y;y=0;}
-	if(x+w>320)w=320-x;
-	if(y+h>240)h=240-y;
-	px=px+y*scrWidth+x;
-	Uint16 px_skip=scrWidth-w;
-	rgb=rgb+y2*(map.rpg->w)+x2;
-	Uint16 rgb_skip=(map.rpg->w)-w;
-	SDL_Color col;
+	if(x+w>640)w=640-x;
+	if(y+h>480)h=480-y;
+	px=px+(y*scrWidth+x)*4;
+	Uint16 px_skip=(scrWidth-w)*4;
+	rgb=rgb+(y2*(map.rpg->w)+x2)*4;
+	Uint16 rgb_skip=((map.rpg->w)-w)*4;
 
 	int shore_bright=1000;
 	if(gd.hour<=5 || gd.hour>=23)shore_bright=200;
-	else if(gd.hour==6 || gd.hour==22)shore_bright=bright;
+	if(gd.hour==6 || gd.hour==22)shore_bright=bright;
+
+	Uint8 R,G,B;
+	Uint8 R2=*pos, G2=*(pos+1), B2=*(pos+2);
+	Uint8 A=255-255*bright/1000;
+	Uint8 A2=255-255*shore_bright/1000;
 
 	for(int j=0 ; j<h ; j++){
 		for(int i=0 ; i<w ; i++){
-			getRGB(*rgb,&col.r,&col.g,&col.b);
-			if(n>=8 && col.r==255 && col.g==255 && col.b==255){
-				*px = setRGB(128*shore_bright/1000,128*shore_bright/1000,0);
+			B=*rgb;
+			G=*(rgb+1);
+			R=*(rgb+2);
+			if(n>=8 && R==255 && G==255 && B==255){
+				*px=0;px++;
+				*px=128+(128*(-A2)>>8);px++;
+				*px=128+(128*(-A2)>>8);px++;
+				px++;rgb+=4;
 			}
-			else if(n==7 && col.r==255 && col.g==255 && col.b==0){
-				*px = setRGB(255,255,0);
+			else if(n==7 && R==255 && G==255 && B==0){
+				*px=0;px++;
+				*px=255;px++;
+				*px=255;px++;
+				px++;rgb+=4;
 			}
-			else if(*rgb!=0){
-				*px = setRGB(col.r*bright/1000,col.g*bright/1000,col.b*bright/1000);
+			else if(R!=0 || G!=0 || B!=0){
+				*px=*rgb+(*rgb*(-A)>>8);px++;rgb++;
+				*px=*rgb+(*rgb*(-A)>>8);px++;rgb++;
+				*px=*rgb+(*rgb*(-A)>>8);px++;rgb++;
+				px++;rgb++;
 			}
 			else if(n==1){
-				getRGB(map.RGB[p],&col.r,&col.g,&col.b);
-				*px = setRGB(col.r*bright/1000,col.g*bright/1000,col.b*bright/1000);
+				*px=B2+(B2*(-A)>>8);px++;
+				*px=G2+(G2*(-A)>>8);px++;
+				*px=R2+(R2*(-A)>>8);px++;
+				px++;rgb+=4;
+			}else{
+				px+=4;rgb+=4;
 			}
-			px++;
-			rgb++;
 		}
 		px+=px_skip;
 		rgb+=rgb_skip;
@@ -444,35 +469,22 @@ void drawRPGchip(Uint32* px, Uint16 scrWidth, int x, int y, int mag, int n, int 
 }
 
 void drawGround(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, int bright, BOOL buf){
-	SDL_LockSurface(scr);
-		
 	x+=MAGNIFY/2;
 	y+=MAGNIFY/2;
 	if(x2<0){w+=x2;x2=0;}
 	if(y2<0){h+=y2;y2=0;}
-	if(x2+w>320)w=320-x2;
-	if(y2+h>240)h=240-y2;
-	int countX=x%MAGNIFY+1,countY=y%MAGNIFY+1;
+	if(x2+w>640)w=640-x2;
+	if(y2+h>480)h=480-y2;
 
-	Uint32* px;
-	Uint16 px_skip,scrWidth;
+	Uint8* px;
+	Uint16 scrWidth;
 	if(buf){
-		px=img.buffer[0]->RGB;
-		px=px+y2*320+x2;
-		scrWidth=320;
-		px_skip=320-w;
+		px=(Uint8*)img.buffer[0]->RGB;
+		scrWidth=640;
 	}else{
-		px=(Uint32*)scr->pixels;
-		px=px+y2*((scr->pitch)/4)+x2;
-		scrWidth=(scr->pitch)/4;
-		px_skip=((scr->pitch)/4)-w;
+		px=(Uint8*)scr->pixels;
+		scrWidth=(scr->w);
 	}
-	Uint8 px_r,px_g,px_b;
-	Uint32* px_RGB=map.RGB+(y/MAGNIFY)*map.mapW+(x/MAGNIFY);
-	Uint8* px_city=map.type+(y/MAGNIFY)*map.mapW+(x/MAGNIFY);
-	Uint8* px_c=map.c+y2*map.mapW+x2;
-	Uint16 rgb_skip=map.mapW-w/MAGNIFY, c_skip=320-w;
-	Uint16 rgb_back=w/MAGNIFY;
 
 	if(buf)fillRect(img.buffer[0],x2,y2,w,h,0,0,0,255);
 
@@ -497,75 +509,120 @@ void drawGround(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, in
 			}
 		}
 	}else{
+		Uint8 *px,*rgb,*a,*city,*blue;
+		Uint16 px_skip,rgb_skip,a_skip,city_skip,blue_skip;
+		Uint16 rgb_back,a_back,city_back;
+		Uint8 countX=0, countY=0;
+		if(buf){
+			px=(Uint8*)img.buffer[0]->RGB;
+			px_skip=(640-w)*4;
+			px+=(y2*640+x2)*4;
+		}else{
+			SDL_LockSurface(scr);
+			px=(Uint8*)scr->pixels;
+			px_skip=((scr->w)-w)*4;
+			px+=(y2*(scr->w)+x2)*4;
+		}
+		rgb=(Uint8*)map.rgb->RGB;
+		a=map.rgb->A;
+		city=map.type;
+		blue=map.c;
+		rgb_skip=(map.mapW-w/MAGNIFY)*4;
+		a_skip=map.mapW-w/MAGNIFY;
+		city_skip=map.mapW-w/MAGNIFY;
+		blue_skip=640-w;
+		rgb_back=w/MAGNIFY*4;
+		a_back=w/MAGNIFY;
+		city_back=w/MAGNIFY;
+		rgb+=(y/MAGNIFY*map.mapW+x/MAGNIFY)*4;
+		a+=y/MAGNIFY*map.mapW+x/MAGNIFY;
+		city+=y/MAGNIFY*map.mapW+x/MAGNIFY;
+		blue+=y2*640+x2;
+
 		if(bright==1000){
 			for(int j=0 ; j<h ; j++){
 				for(int i=0 ; i<w ; i++){
-					if(*px_RGB){
-						if(*px_city==CITY){
-							getRGB(*px_RGB,&px_r,&px_g,&px_b);
-							if(px_b+*px_c>255)*px=setRGB(px_r,px_g,255);
-							else *px=setRGB(px_r,px_g,px_b+*px_c);
+					if(*a){
+						if(*city==CITY){
+							if(*rgb+*blue>255)*px=255;
+							else *px=*rgb+*blue;
 						}else{
-							*px=*px_RGB;
+							*px=*rgb;
 						}
+						px++;rgb++;
+						*px=*rgb;px++;rgb++;
+						*px=*rgb;px++;rgb++;
+						px++;rgb++;
+					}else{
+						px+=4;rgb+=4;
 					}
-					px++;px_c++;
+					blue++;
+					countX++;
 					if(countX==MAGNIFY){
-						px_RGB++;px_city++;
-						countX=1;
+						a++;city++;
+						countX=0;
+					}else{
+						rgb-=4;
 					}
-					else countX++;
 				}
-				px+=px_skip;px_c+=c_skip;
+				px+=px_skip;
+				blue+=blue_skip;
+				countY++;
 				if(countY==MAGNIFY){
-					px_RGB+=rgb_skip;
-					px_city+=rgb_skip;
-					countY=1;
+					rgb+=rgb_skip;a+=a_skip;city+=city_skip;
+					countY=0;
 				}else{
-					px_RGB-=rgb_back;
-					px_city-=rgb_back;
-					countY++;
+					rgb-=rgb_back;a-=a_back;city-=city_back;
 				}
 			}
 		}else{
+			Uint8 d=255-255*bright/1000;
 			for(int j=0 ; j<h ; j++){
 				for(int i=0 ; i<w ; i++){
-					if(*px_RGB){
-						getRGB(*px_RGB,&px_r,&px_g,&px_b);
-						if(*px_city==CITY){
-							if(px_b*bright/1000+*px_c>255)*px=setRGB(px_r*bright/1000,px_g*bright/1000,255);
-							else *px=setRGB(px_r*bright/1000,px_g*bright/1000,px_b*bright/1000+*px_c);
+					if(*a){
+						if(*city==CITY){
+							if(*rgb+((*rgb)*(-d)>>8)+*blue>255)*px=255;
+							else *px=*rgb+((*rgb)*(-d)>>8)+*blue;
 						}else{
-							*px=setRGB(px_r*bright/1000,px_g*bright/1000,px_b*bright/1000);
+							*px=*rgb+((*rgb)*(-d)>>8);
 						}
+						px++;rgb++;
+						*px=*rgb+((*rgb)*(-d)>>8);px++;rgb++;
+						*px=*rgb+((*rgb)*(-d)>>8);px++;rgb++;
+						px++;rgb++;
+					}else{
+						px+=4;rgb+=4;
 					}
-					px++;px_c++;
+					blue++;
+					countX++;
 					if(countX==MAGNIFY){
-						px_RGB++;px_city++;
-						countX=1;
+						a++;city++;
+						countX=0;
+					}else{
+						rgb-=4;
 					}
-					else countX++;
 				}
-				px+=px_skip;px_c+=c_skip;
+				px+=px_skip;
+				blue+=blue_skip;
+				countY++;
 				if(countY==MAGNIFY){
-					px_RGB+=rgb_skip;
-					px_city+=rgb_skip;
-					countY=1;
+					rgb+=rgb_skip;a+=a_skip;city+=city_skip;
+					countY=0;
 				}else{
-					px_RGB-=rgb_back;
-					px_city-=rgb_back;
-					countY++;
+					rgb-=rgb_back;a-=a_back;city-=city_back;
 				}
 			}
+		}
+
+		if(!buf){
+			SDL_UnlockSurface(scr);
 		}
 	}
 
 	if(buf){
-		setColorKey(img.buffer[0],0,0,0);
+		setAlpha(img.buffer[0],0,0,0);
 		map.buffered=TRUE;
 	}
-
-	SDL_UnlockSurface(scr);
 }
 
 void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, BOOL buf){
@@ -577,8 +634,8 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 	if(y<0)y=0;
 	if(x2<0)x2=0;
 	if(y2<0)y2=0;
-	if(x2+w>320)w=320-x2;
-	if(y2+h>240)h=240-y2;
+	if(x2+w>640)w=640-x2;
+	if(y2+h>480)h=480-y2;
 	int countX=x%MAGNIFY,countY=y%MAGNIFY;
 
 	Uint32* px;
@@ -593,8 +650,8 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 
 	if(buf){
 		fillRect(img.buffer[1],x2,y2,w,h,0,0,0,255);
-		px_skip=320-w;
-		px_down=320;
+		px_skip=640-w;
+		px_down=640;
 	}else{
 		px_skip=(scr->pitch)/4-w;
 		px_down=(scr->pitch)/4;
@@ -1023,8 +1080,8 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 	}
 
 	if(buf){
-		setColorKey(img.buffer[0],0,0,0);
-		setColorKey(img.buffer[1],0,0,0);
+		setAlpha(img.buffer[0],0,0,0);
+		setAlpha(img.buffer[1],0,0,0);
 		map.buffered=TRUE;
 	}
 
@@ -1035,19 +1092,19 @@ void drawFireWork(SDL_Surface *scr){
 	if(gd.firework>0){
 		int v_max=0;
 		for(int i=0 ; i<map.volcanoNum ; i++)if(map.volcano[i]!=0){
-			int mX=map.volcanoX[i], mY=map.volcanoY[i], a=133-map.volcano[i]/15;
-			if(map.volcano[i]>1600)drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-10,mY*MAGNIFY-gd.scrY-40,100+((count/4)%2)*20,240,20,40,255);
-			else if(map.volcano[i]>1200)drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-10,mY*MAGNIFY-gd.scrY-40,140+((count/4)%2)*20,240,20,40,255);
-			else if(map.volcano[i]>800)drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-10,mY*MAGNIFY-gd.scrY-40,180+((count/4)%2)*20,240,20,40,255);
-			else drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-10,mY*MAGNIFY-gd.scrY-20,220+((count/4)%2)*20,260,20,20,255);
-			if(map.volcano[i]<=800 && map.volcano[i]>400 && count%100<8)drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-10,mY*MAGNIFY-gd.scrY-30,220+((count/4)%2)*20,240,20,20,255);
-			int x1=a-40,y1=a*3/2,x2=a*3/2-40,y2=a;
+			int mX=map.volcanoX[i], mY=map.volcanoY[i], a=266-map.volcano[i]/8;
+			if(map.volcano[i]>1600)drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-20,mY*MAGNIFY-gd.scrY-80,200+((count/4)%2)*40,480,40,80,255);
+			else if(map.volcano[i]>1200)drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-20,mY*MAGNIFY-gd.scrY-80,280+((count/4)%2)*40,480,40,80,255);
+			else if(map.volcano[i]>800)drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-20,mY*MAGNIFY-gd.scrY-80,360+((count/4)%2)*40,480,40,80,255);
+			else drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-20,mY*MAGNIFY-gd.scrY-40,440+((count/4)%2)*40,520,40,40,255);
+			if(map.volcano[i]<=800 && map.volcano[i]>400 && count%100<8)drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX-20,mY*MAGNIFY-gd.scrY-60,440+((count/4)%2)*40,480,40,40,255);
+			int x1=a-80,y1=a*3/2,x2=a*3/2-80,y2=a;
 			int b=a,c=a*3/2,d=128;
 			if(x1<0)x1=0;if(x2<0)x2=0;
-			if(b>40)b=40;if(c>40)c=40;
+			if(b>80)b=80;if(c>80)c=80;
 			if(map.volcano[i]<128)d=map.volcano[i];
-			drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX+x1,mY*MAGNIFY-gd.scrY-y1,300-b,240,b,c,d);
-			drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX+x2,mY*MAGNIFY-gd.scrY-y2,300-c,240,c,b,d);
+			drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX+x1,mY*MAGNIFY-gd.scrY-y1,600-b,480,b,c,d);
+			drawImage(scr,img.chr,mX*MAGNIFY-gd.scrX+x2,mY*MAGNIFY-gd.scrY-y2,600-c,480,c,b,d);
 			if(v_max<map.volcano[i])v_max=map.volcano[i];
 			map.volcano[i]--;
 			if(map.volcano[i]==0){
@@ -1066,10 +1123,10 @@ void drawColorLight(int x, int y, int w, int h, BOOL buf){
 	x-=gd.scrX;
 	y-=gd.scrY;
 
-	int minX=320,maxX=0,minY=240,maxY=0;
+	int minX=640,maxX=0,minY=480,maxY=0;
 	int X,Y,X2,Y2,W,H;
 
-	fillRect(img.buffer[2],0,0,320,240,0,0,0,255);
+	fillRect(img.buffer[2],0,0,640,480,0,0,0,255);
 
 	for(int i=0 ; i<towers ; i++){
 		if(tower[i].remove)continue;
@@ -1087,7 +1144,7 @@ void drawColorLight(int x, int y, int w, int h, BOOL buf){
 		if(X+W>x+w)W=x+w-X;
 		if(Y+H>y+h)H=y+h-Y;
 
-		drawLight(img.buffer[2],img.colorlight,X,Y,X2+m*80,Y2+(n-1)*80,W,H,255);
+		illuminateImage(img.buffer[2],img.colorlight,X,Y,X2+m*80,Y2+(n-1)*80,W,H,255);
 
 		if(minX>X-1)minX=X-1;
 		if(maxX<X+W)maxX=X+W;
@@ -1110,8 +1167,8 @@ void drawColorLight(int x, int y, int w, int h, BOOL buf){
 
 		Uint32* px=img.buffer[2]->RGB;
 		Uint32 white=setRGB(255,255,255);
-		px=px+(minY*320+minX);
-		Uint16 px_skip=320-W;
+		px=px+(minY*640+minX);
+		Uint16 px_skip=640-W;
 
 		for(int j=0 ; j<H ; j++){
 			for(int i=0 ; i<W ; i++){
@@ -1122,10 +1179,10 @@ void drawColorLight(int x, int y, int w, int h, BOOL buf){
 					else if( *(px+1) && *(px+1)!=white ){
 						*px=white;
 					}
-					else if( *(px-320) && *(px-320)!=white ){
+					else if( *(px-640) && *(px-640)!=white ){
 						*px=white;
 					}
-					else if( *(px+320) && *(px+320)!=white ){
+					else if( *(px+640) && *(px+640)!=white ){
 						*px=white;
 					}
 				}
@@ -1135,6 +1192,7 @@ void drawColorLight(int x, int y, int w, int h, BOOL buf){
 		}
 	}
 
+	setAlpha(img.buffer[2],0,0,0);
 	if(buf)map.buffered2=TRUE;
 }
 
@@ -1142,10 +1200,10 @@ void drawVolcano(int x, int y, int w, int h, BOOL buf){
 	if(AIR_IMG==NULL || mode==GAMEMENU || mode==MIYAZAKI)return;
 	x-=gd.scrX;
 	y-=gd.scrY;
-	int minX=320,maxX=0,minY=240,maxY=0;
+	int minX=640,maxX=0,minY=480,maxY=0;
 	int X,Y,X2,Y2,W,H;
 
-	fillRect(img.buffer[3],0,0,320,240,0,0,0,255);
+	fillRect(img.buffer[3],0,0,640,480,0,0,0,255);
 	for(int i=0 ; i<mounts ; i++)if(mount[i].volcano){
 		X=mount[i].x*MAGNIFY-gd.scrX-5;
 		Y=mount[i].y*MAGNIFY-gd.scrY-5;
@@ -1163,9 +1221,10 @@ void drawVolcano(int x, int y, int w, int h, BOOL buf){
 		if(minY>Y)minY=Y;
 		if(maxY<Y+H)maxY=Y+H;
 
-		drawLight(img.buffer[3],img.colorlight,X,Y,X2,Y2,W,H,255);
+		illuminateImage(img.buffer[3],img.colorlight,X,Y,X2,Y2,W,H,255);
 	}
 
+	setAlpha(img.buffer[3],0,0,0);
 	map.volX=minX;
 	map.volW=maxX-minX;
 	map.volY=minY;
@@ -1287,7 +1346,7 @@ void make3dview(double X, double Y, int D){
 			col=setRGB((int)(128*aa),(int)(128*aa),0);
 			flat=TRUE;road=TRUE;
 		}else{
-			getRGB(map.RGB[j*map.mapW+i],&R,&G,&B);
+			getRGB(map.rgb->RGB[j*map.mapW+i],&R,&G,&B);
 			col=setRGB( (int)(R*aa),(int)(G*aa),(int)(B*aa) );
 		}
 

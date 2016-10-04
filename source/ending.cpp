@@ -81,9 +81,9 @@ void initLastStory2(){
 	load_story(25);
 	TalkingAt(26);
 	getImage(img.back,"file/img/epilogue2.png",0,0,255);
-	mirror=new Image(320,1440);
-	fillRect(mirror,0,0,320,1440,0,0,255,255);
-	setColorKey(mirror,0,0,255);
+	mirror=new Image(640,2880);
+	fillRect(mirror,0,0,640,2880,0,0,255,255);
+	setAlpha(mirror,0,0,255);
 	sf.thunder=NULL;sf.tub=NULL;sf.alarm=NULL;sf.sunset=NULL;sf.swish=NULL;
 	sf.noize=Mix_LoadWAV("file/se/21.ogg");
 	Mix_PlayChannel(0,sf.noize,0);
@@ -121,8 +121,8 @@ void keyEndingAnime(){
 		if(movie_test){
 			endEnding();
 			initMiyazaki();
-			gd.x=800;
-			gd.scrX=(int)gd.x-160;
+			gd.x=1600;
+			gd.scrX=(int)gd.x-1320;
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
 			for(int i=0 ; i<31 ; i++)menu[BGM_TEST].cursorDown();
@@ -186,8 +186,8 @@ void keyEnding(){
 					if(movie_test){
 						endTitle();
 						initMiyazaki();
-						gd.x=800;
-						gd.scrX=(int)gd.x-160;
+						gd.x=1600;
+						gd.scrX=(int)gd.x-320;
 						phase=MIYAZAKI_MUSEUM;
 						start=0;
 						for(int i=0 ; i<34 ; i++)menu[BGM_TEST].cursorDown();
@@ -238,8 +238,8 @@ void timerLeaveTorishima(){
 		if(movie_test){
 			endEnding();
 			initMiyazaki();
-			gd.x=800;
-			gd.scrX=(int)gd.x-160;
+			gd.x=1600;
+			gd.scrX=(int)gd.x-320;
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
 			for(int i=0 ; i<25+which_medal ; i++)menu[BGM_TEST].cursorDown();
@@ -288,8 +288,8 @@ void timerAnimeGod(){
 			if(movie_test){
 				endEnding();
 				initMiyazaki();
-				gd.x=800;
-				gd.scrX=(int)gd.x-160;
+				gd.x=1600;
+				gd.scrX=(int)gd.x-320;
 				phase=MIYAZAKI_MUSEUM;
 				start=0;
 				for(int i=0 ; i<33 ; i++)menu[BGM_TEST].cursorDown();
@@ -370,8 +370,8 @@ void timerEndingAnime(){
 			if(movie_test){
 				endEnding();
 				initMiyazaki();
-				gd.x=800;
-				gd.scrX=(int)gd.x-160;
+				gd.x=1600;
+				gd.scrX=(int)gd.x-320;
 				phase=MIYAZAKI_MUSEUM;
 				start=0;
 				for(int i=0 ; i<31 ; i++)menu[BGM_TEST].cursorDown();
@@ -402,8 +402,8 @@ void timerLastEnding(){
 		if(movie_test){
 			endEnding();
 			initMiyazaki();
-			gd.x=800;
-			gd.scrX=(int)gd.x-160;
+			gd.x=1600;
+			gd.scrX=(int)gd.x-320;
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
 			for(int i=0 ; i<34 ; i++)menu[BGM_TEST].cursorDown();
@@ -435,81 +435,81 @@ void drawTryAgain(SDL_Surface* scr){
 	int a=512;
 	if(count<200)a=0;
 	else if(count<250)a=(count-200)*10;
-	fillRect(scr,0,0,320,240,0,0,0,255);
-	drawImage(scr,img.back,210,180,520,560,110,30,255);
-	for(int i=0 ; i<110 ; i++){
-		drawImage(scr,img.back,210+i,180,520+i,590,1,30,-10*abs(25-i%50)+a);
+	fillRect(scr,0,0,640,480,0,0,0,255);
+	drawImage(scr,img.back,420,360,1040,1120,220,60,255);
+	for(int i=0 ; i<220 ; i++){
+		drawImage(scr,img.back,420+i,360,1040+i,1180,2,60,-10*abs(25-i%50)+a);
 	}
 	if(count>250){
 		if(count<300){
-			for(int i=-2 ; i<=2 ; i++)drawImage(scr,img.back,210+i*(300-count)/10,180,520,620,15,30,50);
+			for(int i=-2 ; i<=2 ; i++)drawImage(scr,img.back,420+i*(300-count)/5,360,1040,1240,30,60,50);
 		}
-		else drawImage(scr,img.back,210,180,520,620,15,30,255);
+		else drawImage(scr,img.back,420,360,1040,1240,30,60,255);
 	}
 	if(count>270){
 		if(count<320){
-			for(int i=-2 ; i<=2 ; i++)drawImage(scr,img.back,270+i*(320-count)/10,180,580,620,10,30,50);
+			for(int i=-2 ; i<=2 ; i++)drawImage(scr,img.back,540+i*(320-count)/5,360,1160,1240,20,60,50);
 		}
-		else drawImage(scr,img.back,270,180,580,620,10,30,255);
+		else drawImage(scr,img.back,540,360,1160,1240,20,60,255);
 	}
 	if(count>260){
 		if(count<310){
-			for(int i=-2 ; i<=2 ; i++)drawImage(scr,img.back,300+i*(310-count)/10,180,610,620,15,30,50);
+			for(int i=-2 ; i<=2 ; i++)drawImage(scr,img.back,600+i*(310-count)/5,360,1220,1240,30,60,50);
 		}
-		else drawImage(scr,img.back,300,180,610,620,15,30,255);
+		else drawImage(scr,img.back,600,360,1220,1240,30,60,255);
 	}
-	if(count>300)drawImage(scr,img.back,210,180,520,620,110,30,(count-300)*15);
+	if(count>300)drawImage(scr,img.back,420,360,1040,1240,220,60,(count-300)*15);
 }
 
 void drawTorishima(SDL_Surface *scr){
-	fillRect(scr,0,30,320,180,96,136,216,255);
-	drawImage(scr,img.back,0,120,0,400,320,120,255);
-	if(face[gd.face_count]==12)drawImage(scr,img.back,290,150,320,620+abs((count/5)%2)*30,30,30,255);
-	else drawImage(scr,img.back,290,150,320,530+abs(2-(count/10)%4)*30,30,30,255);
+	fillRect(scr,0,60,640,1360,96,136,216,255);
+	drawImage(scr,img.back,0,240,0,800,640,240,255);
+	if(face[gd.face_count]==12)drawImage(scr,img.back,580,300,640,1240+abs((count/5)%2)*60,60,60,255);
+	else drawImage(scr,img.back,580,300,640,1060+abs(2-(count/10)%4)*60,60,60,255);
 	if(which_medal==0){
-		if(gd.scene_count>=1)drawImage(scr,img.back,280,70,320,490,40,40,255);
-		if(gd.scene_count==2 && phase==GET_MEDAL)drawImage(scr,img.back,120,90,360,400+((count/5)%2)*120,160,120,255);
+		if(gd.scene_count>=1)drawImage(scr,img.back,560,140,640,980,80,80,255);
+		if(gd.scene_count==2 && phase==GET_MEDAL)drawImage(scr,img.back,240,180,720,800+((count/5)%2)*240,320,240,255);
 	}
 	if(phase==COME_TORISHIMA){
-		drawImage(scr,img.back,-250+count*2,110-abs(20-(count/5)%40),380,150,245,90,255);
-		drawImage(scr,img.back,-250+count*2,110-abs(20-(count/5)%40),380,240,245,90,255);
-		drawImage(scr,img.back,-160+count*2,120-abs(20-(count/5)%40),380,330,60,70,255);
-		drawImage(scr,img.back,-250+count*2,110-abs(20-(count/5)%40),380,0,245,150,255);
+		drawImage(scr,img.back,-500+count*4,220-abs(20-(count/5)%40)*2,760,300,490,180,255);
+		drawImage(scr,img.back,-500+count*4,220-abs(20-(count/5)%40)*2,760,480,490,180,255);
+		drawImage(scr,img.back,-320+count*4,240-abs(20-(count/5)%40)*2,760,660,120,140,255);
+		drawImage(scr,img.back,-500+count*4,220-abs(20-(count/5)%40)*2,760,0,490,300,255);
 	}
 	else if(phase==LEAVE_TORISHIMA){
 		if(which_medal==0){
 			if(count<150){
-				drawImage(scr,img.back,80,120,520,400+((count/5)%2)*80,100,80,255);
-				if(count>100)fillRect(scr,0,0,320,240,0,0,0,(count-100)*5);
+				drawImage(scr,img.back,160,240,1040,800+((count/5)%2)*160,200,160,255);
+				if(count>100)fillRect(scr,0,0,640,480,0,0,0,(count-100)*5);
 			}
 			else drawTryAgain(scr);
 		}else{
-			drawImage(scr,img.back,-count*2,110-abs(20-(count/5)%40),380,150,245,90,255);
-			drawImage(scr,img.back,-count*2,110-abs(20-(count/5)%40),380,240,245,90,255);
-			drawImage(scr,img.back,90-count*2,120-abs(20-(count/5)%40),380,330,60,70,255);
-			drawImage(scr,img.back,-count*2,110-abs(20-(count/5)%40),380,0,245,150,255);
+			drawImage(scr,img.back,-count*4,220-abs(20-(count/5)%40)*2,760,300,490,180,255);
+			drawImage(scr,img.back,-count*4,220-abs(20-(count/5)%40)*2,760,480,490,180,255);
+			drawImage(scr,img.back,180-count*4,240-abs(20-(count/5)%40)*2,760,660,120,140,255);
+			drawImage(scr,img.back,-count*4,220-abs(20-(count/5)%40)*2,760,0,490,300,255);
 		}
 	}else{
-		drawImage(scr,img.back,0,110-abs(20-(count/5)%40),380,150,245,90,255);
-		drawImage(scr,img.back,0,110-abs(20-(count/5)%40),380,240,245,90,255);
-		drawImage(scr,img.back,90,120-abs(20-(count/5)%40),380,330,60,70,255);
-		drawImage(scr,img.back,0,110-abs(20-(count/5)%40),380,0,245,150,255);
+		drawImage(scr,img.back,0,220-abs(20-(count/5)%40)*2,760,300,490,180,255);
+		drawImage(scr,img.back,0,220-abs(20-(count/5)%40)*2,760,480,490,180,255);
+		drawImage(scr,img.back,180,240-abs(20-(count/5)%40)*2,760,660,120,140,255);
+		drawImage(scr,img.back,0,220-abs(20-(count/5)%40)*2,760,0,490,300,255);
 	}
 	if(which_medal!=0){
 		int a=(which_medal-1);
 		if(phase==LEAVE_TORISHIMA){
-			drawImage_x2(scr,img.back,120-count*2,100-abs(20-(count/5)%40),2,320,400+a*30,30,30);
+			drawImage_x(scr,img.back,240-count*4,200-abs(20-(count/5)%40)*2,4,640,800+a*60,60,60,255);
 		}else{
-			if(gd.scene_count==0)drawImage(scr,img.back,250,140-abs(10-(count/3)%20),320,400+a*30,30,30,255);
+			if(gd.scene_count==0)drawImage(scr,img.back,500,280-abs(10-(count/3)%20)*2,640,800+a*60,60,60,255);
 			if(gd.scene_count==1){
-				if(count<20)drawImage_x2(scr,img.back,240-count*6,140-count*2-abs(20-(count/5)%40),1.0+count/20.0,320,400+a*30,30,30);
-				else drawImage_x2(scr,img.back,120,100-abs(20-(count/5)%40),2,320,400+a*30,30,30);
+				if(count<20)drawImage_x(scr,img.back,480-count*12,280-count*4-abs(20-(count/5)%40)*2,2.0+count/10.0,640,800+a*60,60,60,255);
+				else drawImage_x(scr,img.back,240,200-abs(20-(count/5)%40)*2,4,640,800+a*60,60,60,255);
 			}
 		}
 	}
-	fillRect(scr,0,0,320,30,0,0,0,255);
-	fillRect(scr,0,210,320,30,0,0,0,255);
-	if(which_medal!=0)TextOut(scr,100,0,text[EPILOGUE+3]);
+	fillRect(scr,0,0,640,60,0,0,0,255);
+	fillRect(scr,0,420,640,60,0,0,0,255);
+	if(which_medal!=0)TextOut(scr,200,0,text[EPILOGUE+3]);
 	if(phase==GET_MEDAL)drawTalking(scr);
 }
 
@@ -520,8 +520,8 @@ void drawEndingExplain(SDL_Surface* scr){
 			TextOut(scr,20,0,text[EPILOGUE+1]);
 		}
 		else if(phase==ENDING_ANIME){
-			drawKeyboard(scr,key.zC,0,220);
-			TextOut(scr,20,220,text[EPILOGUE]);
+			drawKeyboard(scr,key.zC,0,460);
+			TextOut(scr,20,460,text[EPILOGUE]);
 		}
 		else if(phase==WARNING){
 			drawKeyboard(scr,key.zC,0,0);
@@ -535,10 +535,10 @@ void drawEnding(SDL_Surface* scr){
 		int a=255;
 		if(count<20)a=count*13;
 		if(count>130)a=(150-count)*13;
-		fillRect(scr,0,0,320,240,0,0,0,255);
-		drawImage(scr,img.back,60,20,0,440,200,150,a);
-		if(CHAR_CODE==JAPANESE)drawImage(scr,img.back,100,190,200,440,120,40,a);
-		else drawImage(scr,img.back,100,190,200,480,120,40,a);
+		fillRect(scr,0,0,640,480,0,0,0,255);
+		drawImage(scr,img.back,120,40,0,880,400,300,a);
+		if(CHAR_CODE==JAPANESE)drawImage(scr,img.back,200,380,400,880,240,80,a);
+		else drawImage(scr,img.back,200,380,400,960,240,80,a);
 	}
 	else if(phase==ENDING_ANIME){
 		if(pause)drawEndingAnim(scr,(pausetime-timestamp)/16);
@@ -549,17 +549,17 @@ void drawEnding(SDL_Surface* scr){
 		else drawLastEndingAnim(scr,(SDL_GetTicks()-timestamp)/16);
 	}
 	else if(phase==WARNING){
-		fillRect(scr,0,0,320,240,0,0,64,255);
-		for(int i=0 ; i<16 ; i++)fillRect(scr,i*20,0,1,240,0,128,0,255);
-		for(int i=0 ; i<12 ; i++)fillRect(scr,0,i*20,320,1,0,128,0,255);
-		drawImage(scr,img.back,0,35,((count/5)%8)*110,(((count/5)/8)%2)*205,110,205,255);
-		drawImage(scr,img.back,160,80,880,0,80,80,abs(128-count%255)*2);
+		fillRect(scr,0,0,640,480,0,0,64,255);
+		for(int i=0 ; i<16 ; i++)fillRect(scr,i*40,0,1,240,0,128,0,255);
+		for(int i=0 ; i<12 ; i++)fillRect(scr,0,i*40,640,1,0,128,0,255);
+		drawImage(scr,img.back,0,70,((count/5)%8)*220,(((count/5)/8)%2)*410,220,410,255);
+		drawImage(scr,img.back,320,160,1760,0,160,160,abs(128-count%255)*2);
 		if(dataNo==index_num){
-			TextOut(scr,140,180,text[EPILOGUE+8]);
-			TextOut(scr,140,200,text[EPILOGUE+9]);	
+			TextOut(scr,280,360,text[EPILOGUE+8]);
+			TextOut(scr,280,400,text[EPILOGUE+9]);
 		}else{
-			TextOut(scr,140,180,text[EPILOGUE+6]);
-			TextOut(scr,140,200,text[EPILOGUE+7]);	
+			TextOut(scr,280,360,text[EPILOGUE+6]);
+			TextOut(scr,280,400,text[EPILOGUE+7]);
 		}
 	}
 	else if(phase==ANIME_GOD){
@@ -575,15 +575,15 @@ void drawEnding(SDL_Surface* scr){
 }
 
 void drawAnimeGod(SDL_Surface* scr){
-	fillRect(scr,0,0,320,240,96,136,216,255);
-	drawImage_x2(scr,img.back,-cameraX,-cameraY,(330.0+cameraZ)/420.0,880,170,420,340);
-	drawImage_x2(scr,img.back,-cameraX-cameraX2+150,-cameraY-cameraX2+80,(cameraZ+cameraX2*2)/110.0,((count/5)%8)*110,(((count/5)/8)%2)*205,110,205);
-	drawImage(scr,img.back,120,90,880,80,80,60,255);
-	drawImage(scr,img.back,20,20,880,140,20,30,255);
-	if(count%60<30)drawImage(scr,img.back,40,20,900,140,30,20,255);
+	fillRect(scr,0,0,640,480,96,136,216,255);
+	drawImage_x(scr,img.back,-cameraX,-cameraY,(330.0+cameraZ)/420.0,880,170,420,340,255);
+	drawImage_x(scr,img.back,-cameraX-cameraX2+150,-cameraY-cameraX2+80,(cameraZ+cameraX2*2)/110.0,((count/5)%8)*110,(((count/5)/8)%2)*205,110,205,255);
+	drawImage(scr,img.back,240,180,1760,160,160,120,255);
+	drawImage(scr,img.back,40,40,1760,280,40,60,255);
+	if(count%60<30)drawImage(scr,img.back,80,40,1800,280,60,40,255);
 	if((count/60)%60<10)sprintf_s(str,"%2d:0%d",count/3600,(count/60)%60);
 	else sprintf_s(str,"%2d:%d",count/3600,(count/60)%60);
-	TextOut(scr,260,20,str);
+	TextOut(scr,520,40,str);
 	if(start<50)drawTalking(scr);
 }
 
@@ -671,27 +671,27 @@ void makeMirrorImage(SDL_Surface *scr){
 	pitch3 = scr->pitch;
 	bypp3 = f3->BytesPerPixel;
 
-	for(int i=0 ; i<320 ; i++)for(int j=0 ; j<240 ; j++){
-		getRGB(img.back->RGB[(j+720)*(img.back->w)+(i+320)],&col.r,&col.g,&col.b);
+	for(int i=0 ; i<640 ; i++)for(int j=0 ; j<480 ; j++){
+		getRGB(img.back->RGB[(j+1440)*(img.back->w)+(i+640)],&col.r,&col.g,&col.b);
 		pixel3 = *(Uint32*)(px3 + pitch3*j + bypp3*i);
 		SDL_GetRGB(pixel3,f3,&col3.r,&col3.g,&col3.b);
 		if(col.r==255 && col.g==0 && col.b==0){
-			mirror->RGB[j*320+i]=setRGB(255,255,255);
+			mirror->RGB[j*640+i]=setRGB(255,255,255);
 		}
 		else if(col.r==0){
-			mirror->RGB[(j+240)*320+i]=setRGB(col3.r,col3.g,col3.b);
+			mirror->RGB[(j+480)*640+i]=setRGB(col3.r,col3.g,col3.b);
 		}
 		else if(col.r==64){
-			mirror->RGB[(j+480)*320+i]=setRGB(col3.r,col3.g,col3.b);
+			mirror->RGB[(j+960)*640+i]=setRGB(col3.r,col3.g,col3.b);
 		}
 		else if(col.r==128){
-			mirror->RGB[(j+720)*320+i]=setRGB(col3.r,col3.g,col3.b);
+			mirror->RGB[(j+1440)*640+i]=setRGB(col3.r,col3.g,col3.b);
 		}
 		else if(col.r==192){
-			mirror->RGB[(j+960)*320+i]=setRGB(col3.r,col3.g,col3.b);
+			mirror->RGB[(j+1920)*640+i]=setRGB(col3.r,col3.g,col3.b);
 		}
 		else if(col.r==255){
-			mirror->RGB[(j+1200)*320+i]=setRGB(col3.r,col3.g,col3.b);
+			mirror->RGB[(j+2400)*640+i]=setRGB(col3.r,col3.g,col3.b);
 		}
 	}
 

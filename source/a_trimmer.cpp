@@ -20,9 +20,9 @@ void draw(SDL_Surface* scr){
 	else if(mode==MIYAZAKI)drawMiyazaki(scr);
 	else if(mode==HAZIASHOP)drawHaziaShop(scr);
 	if(CHOSEON){
-		drawImage(scr,img.chr,15,15,230,10,22,17,255);
+		drawImage(scr,img.chr,30,30,460,20,44,34,255);
 	}else{
-		if(gd.ta_count==0 || gd.ta_count==87)drawImage(scr,img.chr,280,5,228,0,35,8,64);
+		if(gd.ta_count==0 || gd.ta_count==87)drawImage(scr,img.chr,560,10,456,0,70,16,64);
 	}
 	drawKick(scr);
 	if(scr_design!=NULL)changeScreenColor(scr);
@@ -46,7 +46,7 @@ void timer(){
 	else if(mode==HAZIASHOP)timerHaziaShop();
 	if(start>0)start--;
 	if(start<0)start++;
-	count++;
+	count++;bg_count++;
 	for(int i=0 ; i<20 ; i++)menu[i].animation();
 }
 
@@ -82,7 +82,6 @@ void key_counter(){
 	if(key.a>0 && key.a<60)key.a++;
 	if(key.F1>0 && key.F1<60)key.F1++;
 	if(key.F4>0 && key.F4<60)key.F4++;
-	if(key.F5>0 && key.F5<60)key.F5++;
 	if(key.F10>0 && key.F10<60)key.F10++;
 	if(key.count>0 && key.count<60)key.count++;
 }
@@ -108,7 +107,7 @@ void resumeMovie(){
 int main(int argc, char *argv[]) {
 	key.up=0;key.down=0;key.left=0;key.right=0;
 	key.z=0;key.x=0;key.c=0;key.a=0;
-	key.F1=0;key.F4=0;key.F5=0;key.F10=0;
+	key.F1=0;key.F4=0;key.F10=0;
 	int time=SDL_GetTicks();
 	double delay=16;
 	pause=FALSE;
@@ -124,8 +123,6 @@ int main(int argc, char *argv[]) {
 	window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
 	img.screen = SDL_GetWindowSurface(window);
 	if ( img.screen == NULL )exit(0);
-	if(SDL_BYTEORDER==SDL_BIG_ENDIAN)img.screen2=SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0xff000000,0x00ff0000,0x0000ff00,0);
-	else img.screen2=SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0x000000ff,0x0000ff00,0x00ff0000,0);
 	load_option();
 	Mix_VolumeMusic(BGM_VOLUME);
 	for(int i=0 ; i<4 ; i++)Mix_Volume(i,SE_VOLUME);
@@ -162,7 +159,6 @@ int main(int argc, char *argv[]) {
 				if(key.pressed==key.aC && key.a==0)key.a=1;
 				if(key.pressed==SDLK_F1 && key.F1==0)key.F1=1;
 				if(key.pressed==SDLK_F4 && key.F4==0)key.F4=1;
-				if(key.pressed==SDLK_F5 && key.F5==0)key.F5=1;
 				if(key.pressed==SDLK_F10 && key.F10==0)key.F10=1;
 				if(key.pressed==SDLK_ESCAPE)run=FALSE;
 				if(key.pressed==SDLK_a && !key_stop(key.a)){
@@ -183,25 +179,11 @@ int main(int argc, char *argv[]) {
 				}
 				if(key.pressed==SDLK_F4 && !key_stop(key.F4)){
 					if(FULLSCR){
-					    if(SCRSIZE==0)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, 0);
-					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
+						window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
 						FULLSCR=FALSE;
 					}else{
-					    if(SCRSIZE==0)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, SDL_WINDOW_FULLSCREEN);
-					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_FULLSCREEN);
+						window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_FULLSCREEN);
 						FULLSCR=TRUE;
-					}
-					img.screen = SDL_GetWindowSurface(window);
-				}
-				if(key.pressed==SDLK_F5 && !key_stop(key.F5)){
-					if(SCRSIZE==0){
-					    if(FULLSCR)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_FULLSCREEN);
-					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
-						SCRSIZE=1;
-					}else{
-					    if(FULLSCR)window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, SDL_WINDOW_FULLSCREEN);
-					    else window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, 0);
-						SCRSIZE=0;
 					}
 					img.screen = SDL_GetWindowSurface(window);
 				}
@@ -230,7 +212,6 @@ int main(int argc, char *argv[]) {
 				if(ev.key.keysym.sym==key.aC)key.a=0;
 				if(ev.key.keysym.sym==SDLK_F1)key.F1=0;
 				if(ev.key.keysym.sym==SDLK_F4)key.F4=0;
-				if(ev.key.keysym.sym==SDLK_F5)key.F5=0;
 				if(ev.key.keysym.sym==SDLK_F10)key.F10=0;
 				break;
 			case SDL_QUIT:
@@ -240,11 +221,7 @@ int main(int argc, char *argv[]) {
 		}
 		if(!run)break;
 
-		if(SCRSIZE==1){
-			draw(img.screen2);
-			drawZoom(img.screen);
-		}
-		else draw(img.screen);
+		draw(img.screen);
 		SDL_UpdateWindowSurface(window);
 	}
 
@@ -253,16 +230,15 @@ int main(int argc, char *argv[]) {
 	endFont();
 	SDL_FreeSurface(img.iwa);
 	SDL_FreeSurface(img.screen);
-	SDL_FreeSurface(img.screen2);
 	Mix_CloseAudio();
 	SDL_Quit();
 	return 1;
 }
 
 void initAll(){
-	img.pre_scr=new Image(320,240);
-	img.scr2=new Image(320,240);
-	for(int i=0 ; i<4 ; i++)img.buffer[i]=new Image(320,240);
+	img.pre_scr=new Image(640,480);
+	img.scr2=new Image(640,480);
+	for(int i=0 ; i<4 ; i++)img.buffer[i]=new Image(640,480);
 	checkEndian();
 	sf.decide=Mix_LoadWAV("file/se/3.wav");
 	sf.decide2=Mix_LoadWAV("file/se/2.wav");
@@ -343,29 +319,4 @@ void createAlphaKey(){
 	SDL_GetRGB(*px,f,&img.alphaR,&img.alphaG,&img.alphaB);
 	SDL_UnlockSurface(img2);
 	SDL_FreeSurface(img2);
-}
-
-void drawZoom(SDL_Surface* scr){
-	Uint32 *px,*px2;
-	SDL_LockSurface(scr);
-	Uint16 width=img.screen2->w;
-
-	px = (Uint32*)img.screen2->pixels;
-	px2 = (Uint32*)scr->pixels;
-	px=px+(img.screen2->w)*(img.screen2->h)-1;
-	px2=px2+(scr->w)*(scr->h)-1;
-
-	for(int j=239 ; j>=0 ; j--){
-		for(int i=319 ; i>=0 ; i--){
-			*px2=*px;px2--;
-			*px2=*px;px2--;px--;
-		}
-		px+=width;
-		for(int i=319 ; i>=0 ; i--){
-			*px2=*px;px2--;
-			*px2=*px;px2--;px--;
-		}
-	}
-
-	SDL_UnlockSurface(scr);
 }
