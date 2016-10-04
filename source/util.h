@@ -322,15 +322,8 @@ void fillRect(SDL_Surface* scr, int x, int y, int w, int h, int R, int G, int B,
 void fillRect(Image* scr, int x, int y, int w, int h, int R, int G, int B, int a);
 void setAlpha(Image* scr, int R,int G,int B);
 void drawSurface(SDL_Surface* scr, SDL_Surface* img, int x, int y, int x2, int y2, int w2, int h2, int a);
-void drawImage(Image* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a);
-void drawImage(SDL_Surface* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a);
-void drawImage(Image* img, SDL_Surface* scr, int x, int y, int x2, int y2, int w2, int h2, int a);
 void drawLight(SDL_Surface* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2,int a);
 void drawLight(Image* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a);
-void drawImage_x(SDL_Surface* scr, Image *img, int x, int y, double mag, int x2, int y2, int w2, int h2, int alpha);
-void drawImage_x(Image* scr, Image *img, int x, int y, double mag, int x2, int y2, int w2, int h2, int alpha);
-void illuminateImage(SDL_Surface* scr, Image* ima, int x, int y, int x2, int y2, int w2, int h2, int a);
-void illuminateImage(Image* scr, Image* ima, int x, int y, int x2, int y2, int w2, int h2, int a);
 
 #ifdef __APPLE__
 void sprintf_s(char *s, char *c, ...);
@@ -364,5 +357,6 @@ extern SDL_Event ev;
 #include "haziashop.h"
 #include "map_drawing.h"
 #include "animation.h"
+#include "drawimage.h"
 
 #endif
