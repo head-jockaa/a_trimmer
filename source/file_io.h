@@ -3,6 +3,8 @@
 
 #include "util.h"
 
+extern char hex[16];
+
 void load_text();
 void load_index();
 void load_haziashop();
@@ -11,6 +13,7 @@ void load_story(int n);
 void load_animebook();
 void save_animebook();
 void load_works(int n);
+void load_searchQueries();
 void load_towers();
 void load_mounts();
 void load_towns();

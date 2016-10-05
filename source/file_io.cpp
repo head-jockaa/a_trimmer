@@ -1,5 +1,7 @@
 #include "file_io.h"
 
+char hex[16]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
 void extra_station();
 void extra_work(int n, int mark, String title);
 void extra_tower();
@@ -346,6 +348,79 @@ void load_works(int n){
 		gd.timeslot[i]=fstr[i];
 	}
 	gd.timeslot[fsize]=EOF;
+	load_searchQueries();
+}
+
+void load_searchQueries(){
+	loadFile("file/data/work/search_query.dat");
+	int num = 0;
+	int j = 0;
+	String *query;
+	query=new String[allworks];
+
+	for(size_t i=0 ; i<fsize ; i++){
+		if(j<200){
+			query[num].str[0][j] = fstr[i];
+		}
+		j++;
+
+		if(fstr[i]==0){
+			j = 0;
+			num++;
+		}
+	}
+
+	int value, w;
+	for(int i=0 ; i<works ; i++){
+		j = 0;
+		w = work[i].tnum;
+		for(int k=0 ; k<200 ; k++){
+			if(query[w].str[0][k] == 0){
+				work[i].query[j] = 0;
+				break;
+			}
+			else if(query[w].str[0][k] == 32){
+				work[i].query[j] = '+';j++;
+			}
+			else if(query[w].str[0][k]<=-33 && query[w].str[0][k]>=-62){
+				work[i].query[j] = '%';j++;
+				value = query[i].str[0][k];
+				if(value < 0)value += 256;
+				work[i].query[j] = hex[value/16];j++;
+				work[i].query[j] = hex[value%16];j++;
+				k++;
+				work[i].query[j] = '%';j++;
+				value = query[i].str[0][k];
+				if(value < 0)value += 256;
+				work[i].query[j] = hex[value/16];j++;
+				work[i].query[j] = hex[value%16];j++;
+			}
+			else if(query[w].str[0][k]<=-17 && query[w].str[0][k]>=-32){
+				work[i].query[j] = '%';j++;
+				value = query[w].str[0][k];
+				if(value < 0)value += 256;
+				work[i].query[j] = hex[value/16];j++;
+				work[i].query[j] = hex[value%16];j++;
+				k++;
+				work[i].query[j] = '%';j++;
+				value = query[w].str[0][k];
+				if(value < 0)value += 256;
+				work[i].query[j] = hex[value/16];j++;
+				work[i].query[j] = hex[value%16];j++;
+				k++;
+				work[i].query[j] = '%';j++;
+				value = query[w].str[0][k];
+				if(value < 0)value += 256;
+				work[i].query[j] = hex[value/16];j++;
+				work[i].query[j] = hex[value%16];j++;
+			}
+			else{
+				work[i].query[j] = query[w].str[0][k];j++;
+			}
+		}
+	}
+
+	delete query;
 }
 
 void load_towers(){

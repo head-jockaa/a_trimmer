@@ -27,6 +27,7 @@ void drawPlayer(SDL_Surface *scr);
 void drawFishup(SDL_Surface *scr);
 void drawGameExplain(SDL_Surface *scr);
 void drawSMR(SDL_Surface* scr);
+void createSearchImage(int n);
 void estimate_rural();
 void initManekiTV();
 void setManekiData();
@@ -102,6 +103,7 @@ void initGame(){
 	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT)phase=GAMESTART;
 	else phase=READY;
 
+	img.searchImage=NULL;
 	gd.bs_ch=0;
 	menu[YNFORM].setMenu(40,200,6,2,2);
 	menu[YNFORM].stack(text[MENUTEXT+13]);
@@ -214,7 +216,14 @@ void endGame(){
 	freeImage(img.back);
 	freeImage(img.fishup);
 	freeImage(img.colorlight);
-	if(img.rod!=NULL){freeImage(img.rod);img.rod=NULL;}
+	if(img.rod!=NULL){
+		freeImage(img.rod);
+		img.rod=NULL;
+	}
+	if(img.searchImage!=NULL){
+		freeImage(img.searchImage);
+		img.searchImage=NULL;
+	}
 	Mix_FreeChunk(sf.water);
 	Mix_FreeChunk(sf.thunder);
 	Mix_FreeChunk(sf.meow);
@@ -277,6 +286,19 @@ void keyFishup(){
 					phase=PLAYING;
 					n=work[md.fish[0].title_num].tnum;
 					shiftFish_maneki();
+				}
+				else if(phase==THROW_PHOTO && start==0){
+					phase=ANTENNA;
+					n=work[sta[ant->station].ontv].tnum;
+				}
+				else if(phase==MANEKI_THROW_PHOTO && start==0){
+					phase=PLAYING;
+					n=work[sta[ant->station].ontv].tnum;
+					shiftFish_maneki();
+				}
+				else if(phase==BS_THROW_PHOTO && start==0){
+					phase=BS_CH;
+					n= work[sta[BSstation[gd.bs_ch]].ontv].tnum;
 				}
 				if(!animebook[n]){
 					animebook[n]=TRUE;
@@ -1248,7 +1270,11 @@ void keyGame(){
 		case FISHUP:
 		case GRADEUP:
 		case MANEKI_FISHUP:
-		case MANEKI_GRADEUP:keyFishup();break;
+		case MANEKI_GRADEUP:
+		case THROW_PHOTO:
+		case MANEKI_THROW_PHOTO:
+		case BS_THROW_PHOTO:
+			keyFishup();break;
 		case FINISH:keyFinish();break;
 		case RESULT:keyResult();break;
 		case GET_HAZIA:keyGetHazia();break;
@@ -1910,6 +1936,74 @@ void drawManekiTV(SDL_Surface *scr){
 	}
 }
 
+void drawThrowPhoto(SDL_Surface *scr){
+	int w=img.searchImage->w;
+	int h=img.searchImage->h;
+	if(start>=50){
+		rotateImage_x(scr,img.searchImage,320,240,start/4.0+0.3,(100-start)/50.0,0,0,w/2,h/2,w,h,255);
+	}else{
+		rotateImage(scr,img.searchImage,320,240,0.3,0,0,w/2,h/2,w,h,255);
+		if(strlen(tm.targetURL)>80){
+			drawImage(scr,img.menuback,0,440+start/2,0,0,320,40,128);
+			drawImage(scr,img.menuback,320,440+start/2,0,0,320,40,128);
+			TextOut(scr,0,440+start/2,tm.targetURL,80);
+			TextOut(scr,0,460+start/2,&tm.targetURL[80],80);
+		}else{
+			drawImage(scr,img.menuback,0,460+start/2,0,0,320,20,128);
+			drawImage(scr,img.menuback,320,460+start/2,0,0,320,20,128);
+			TextOut(scr,0,460+start/2,tm.targetURL,80);
+		}
+	}
+}
+
+void drawNetworkStatus(SDL_Surface* scr){
+	if(!tm.running && !ns.display)return;
+	if(ns.status==NS_IPADDRESS_FAILURE){
+		drawImage(scr,img.chr,0,440,0,840,40,40,255);
+	}
+	else if(ns.status==NS_CONNECT_FAILURE){
+		drawImage(scr,img.chr,0,440,40,840,40,40,255);
+	}
+	else if(ns.status==NS_RCV_ZERO_LENGTH){
+		drawImage(scr,img.chr,0,440,80,840,40,40,255);
+	}
+	else if(ns.status==NS_IMAGE_SEARCH){
+		if(count%20<10)drawImage(scr,img.chr,0,440,120,840,40,40,255);
+	}
+	else if(ns.status==NS_GET_IMAGE){
+		drawImage(scr,img.chr,40,440,(tm.idx-1)*40,880,40,40,255);
+		if(count%20<10)drawImage(scr,img.chr,0,440,160,840,40,40,255);
+	}
+	else if(ns.status==NS_RCV_JPEG){
+		drawImage(scr,img.chr,0,440,200,840,40,40,255);
+	}
+	else if(ns.status==NS_RCV_PNG){
+		drawImage(scr,img.chr,0,440,240,840,40,40,255);
+	}
+	else if(ns.status==NS_RCV_GIF){
+		drawImage(scr,img.chr,0,440,280,840,40,40,255);
+	}
+	if(ns.timeoutIcon){
+		drawImage(scr,img.chr,80,440,320,840,40,40,255);
+	}
+	if(ns.status==NS_RCV_JPEG || ns.status==NS_RCV_PNG || ns.status==NS_RCV_GIF){
+		drawImage(scr,img.chr,40,440,(tm.idx-1)*40,880,40,40,255);
+		if(ns.contentLength){
+			int n=ns.contentLength/28;
+			for(int i=0 ; i<ns.receiveLength/n ; i++){
+				drawImage(scr,img.chr,80+i*20,450,480,840,20,20,255);
+			}
+		}else{
+			for(int i=0 ; i<3; i++){
+				drawImage(scr,img.chr,80+i*40,440,400+(ns.receiveCounter)%40,840,40,40,255);
+			}
+		}
+	}
+	if(tm.failure){
+		drawImage(scr,img.chr,0,440,360,840,40,40,255);
+	}
+}
+
 void drawGame(SDL_Surface* scr){
 	if(phase==GAMESTART){
 		drawWeeklyComic(scr);
@@ -2014,8 +2108,11 @@ void drawGame(SDL_Surface* scr){
 		if(phase==MANEKI)drawTalking(scr,1,text[ANTENNATEXT+17+gd.scene_count]);
 		else if(phase==MANEKI_CONFIRM)drawTalking(scr,1,text[ANTENNATEXT+24+gd.scene_count]);
 		else if(phase!=CALLING)drawTalking(scr);
+
+		if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)drawThrowPhoto(scr);
 	}
 	drawGameExplain(scr);
+	drawNetworkStatus(scr);
 }
 
 void drawGameExplain(SDL_Surface* scr){
@@ -2200,6 +2297,56 @@ void drawGameExplain(SDL_Surface* scr){
 			drawKeyboard(scr,key.zC,70,0);
 			TextOut(scr,90,0,text[EPILOGUE+1]);
 		}
+	}
+}
+
+void createSearchImage(int n){
+	sprintf_s(str,"save/tmp_image/%d.jpg", n);
+	Image *img2;
+	getImage(img2,str);
+	if(img2){
+		if(img.searchImage)freeImage(img.searchImage);
+		getImage(img.searchImage,"file/img/image_search.png",0,0,0);
+
+		int w=img.searchImage->w, h=img.searchImage->h;
+		int w2=img2->w, h2=img2->h;
+		if(w2*1.2<h2){
+			if(w2-h >= 0 && h2-w < 0){
+				rotateImage_x(img.searchImage,img2,w/2,h/2,-PI/2,1.0*h/w2,0,0,w2/2,h2/2,w2,h2,255);
+			}
+			else if(w2-h < 0 && h2-w >= 0){
+				rotateImage_x(img.searchImage,img2,w/2,h/2,-PI/2,1.0*w/h2,0,0,w2/2,h2/2,w2,h2,255);
+			}
+			else{
+				if(1.0*h/w2 < 1.0*w/h2){
+					rotateImage_x(img.searchImage,img2,w/2,h/2,-PI/2,1.0*h/w2,0,0,w2/2,h2/2,w2,h2,255);
+				}else{
+					rotateImage_x(img.searchImage,img2,w/2,h/2,-PI/2,1.0*w/h2,0,0,w2/2,h2/2,w2,h2,255);
+				}
+			}
+		}else{
+			if(w2-w >= 0 && h2-h < 0){
+				drawImage_x(img.searchImage,img2,0,0,1.0*w/w2,0,0,w2,h2,255);
+			}
+			else if(w2-w < 0 && h2-h >= 0){
+				drawImage_x(img.searchImage,img2,0,0,1.0*h/h2,0,0,w2,h2,255);
+			}
+			else{
+				if(1.0*w/w2 < 1.0*h/h2){
+					drawImage_x(img.searchImage,img2,0,0,1.0*w/w2,0,0,w2,h2,255);
+				}else{
+					drawImage_x(img.searchImage,img2,0,0,1.0*h/h2,0,0,w2,h2,255);
+				}
+			}
+		}
+		freeImage(img2);
+	}else{
+		tm.idx++;
+		tm.timeout = 0;
+		tm.failure=true;
+		tm.finish=false;
+		parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		tm.halt = RESTART_GETIMAGE;
 	}
 }
 
@@ -2449,6 +2596,69 @@ void timerScore(){
 	}
 }
 
+void timerFishUp(){
+	if(start==149){
+		Mix_PlayChannel(1, sf.water, 0);
+		int n;
+		if(phase==FISHUP)n=sta[ant->station].ontv;
+		else n=md.fish[0].title_num;
+		strcpy_s(tm.query, work[n].query);
+		tm.selected=work[n].tnum;
+		tm.timeout=0;
+		tm.idx=1;
+		tm.finish=false;
+		tm.failure=false;
+		ns.timeoutIcon=false;
+		if(tm.running){
+			tm.halt=THREAD_END;
+			TCPshutdown();
+		}
+		thread = SDL_CreateThread(TestThread, "TestThread", nullptr);
+	}
+	if(start==72){
+		Mix_PlayChannel(0, sf.get, 0);
+		fishbox.text_count=1;
+	}
+	if(start==0 && tm.finish && !tm.failure){
+		createSearchImage(tm.selected);
+		if(!tm.failure){
+			start=100;
+			if(phase==FISHUP)phase=THROW_PHOTO;
+			else phase=MANEKI_THROW_PHOTO;
+		}
+	}
+}
+
+void timerBSAttack(){
+	if(start==49){
+		fishbox.text_count=1;
+		int n=sta[ BSstation[gd.bs_ch] ].ontv;
+		tm.selected=work[n].tnum;
+		strcpy_s(tm.query,work[n].query);
+		tm.timeout=0;
+		tm.idx=1;
+		tm.finish=false;
+		tm.failure=false;
+		ns.timeoutIcon=false;
+		if(tm.running){
+			tm.halt=THREAD_END;
+			TCPshutdown();
+		}
+		thread = SDL_CreateThread(TestThread, "TestThread", nullptr);
+	}
+	if(start==0 && tm.finish && !tm.failure){
+		createSearchImage(tm.selected);
+		if(!tm.failure){
+			start=100;
+			phase=BS_THROW_PHOTO;
+		}
+	}
+}
+
+void timerThrowPhoto(){
+	if(start==50)Mix_PlayChannel(0,sf.decide,0);
+}
+
 void timerGame(){
 	if(gd.game_mode!=BOSS && (gd.game_mode==STORYMODE||gd.game_mode==SELECT)){
 		if(count==1)Mix_PlayMusic(bgm,-1);
@@ -2497,14 +2707,10 @@ void timerGame(){
 	else if(phase==SAVING_RECORD)timerSavingRecord();
 	else if(phase==LEAVE_MAP)timerLeaveMap();
 	else if(phase==SUMMERWARS)timerSummerWars();
+	else if(phase==FISHUP || phase==MANEKI_FISHUP)timerFishUp();
+	else if(phase==BS_ATTACK)timerBSAttack();
+	else if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)timerThrowPhoto();
 
-	if(phase==FISHUP || phase==MANEKI_FISHUP){
-		if(start==149)Mix_PlayChannel(1, sf.water, 0);
-		if(start==72){
-			Mix_PlayChannel(0, sf.get, 0);
-			fishbox.text_count=1;
-		}
-	}
 	if(phase==TALKING || phase==GET_HAZIA && start==0 || phase==MANEKI || phase==MANEKI_CONFIRM || phase==SUMMERWARS && count>=660){
 		controlTextCount(TRUE);
 	}else{
@@ -2512,6 +2718,27 @@ void timerGame(){
 	}
 	timerGazing();
 	timerScore();
+	manageThread();
+}
+
+void manageThread(){
+	tm.timeout++;
+	if(tm.running && tm.timeout>200){
+		tm.idx++;
+		tm.finish=false;
+		tm.failure=false;
+		tm.halt=THREAD_END;
+		ns.timeoutIcon=true;
+		ns.display=300;
+		if(tm.tcpsock)TCPshutdown();
+		tm.timeout=0;
+		parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		thread = SDL_CreateThread(TestThread2, "TestThread2", nullptr);
+	}
+	if(!tm.running && tm.halt==RESTART_GETIMAGE){
+		thread = SDL_CreateThread(TestThread2, "TestThread2", nullptr);
+	}
+	if(ns.display>0)ns.display--;
 }
 
 void drawM(SDL_Surface* scr, int w, int m, int x, int y){

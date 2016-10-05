@@ -734,6 +734,43 @@ void getImage(Image*& img, char* st, int r, int g, int b){
 	setAlpha(img,r,g,b);
 }
 
+void getImage(Image*& im, char* st){
+	SDL_Surface *img2=NULL, *img3;
+	img2=IMG_Load(st);
+	if(img2==NULL){
+		im=NULL;
+		return;
+	}
+
+	if(SDL_BYTEORDER==SDL_BIG_ENDIAN)img3=SDL_CreateRGBSurface(SDL_SWSURFACE, img2->w, img2->h, 32, 0xff000000,0x00ff0000,0x0000ff00,0);
+	else img3=SDL_CreateRGBSurface(SDL_SWSURFACE, img2->w, img2->h, 32, 0x000000ff,0x0000ff00,0x00ff0000,0);
+	drawSurface(img3,img2,0,0,0,0,img2->w,img2->h,255);
+	SDL_FreeSurface(img2);
+
+	im=new Image(img3->w,img3->h);
+
+	SDL_LockSurface(img3);
+	SDL_PixelFormat *f = img3->format;
+	Uint8 bpp = f->BytesPerPixel;
+	Uint8 *px = (Uint8*)img3->pixels;
+	Uint16 pitch = img3->pitch;
+	Uint8 bypp = f->BytesPerPixel;
+	Uint8 *rgb = (Uint8*)im->RGB;
+	Uint8 R,G,B;
+
+	for(int j=0 ; j<(im->h) ; j++){
+		for(int i=0 ; i<(im->w) ; i++){
+			SDL_GetRGB(*(Uint32*)px,f,&R,&G,&B);
+			*(Uint32*)rgb = setRGB(R,G,B);
+			rgb+=4;px+=bypp;
+		}
+	}
+
+	SDL_UnlockSurface(img3);
+	SDL_FreeSurface(img3);
+	resetAlpha(im);
+}
+
 void setColorKey(Image *img, Uint8 r, Uint8 g, Uint8 b){
 	Uint32 color=setRGB(r,g,b);
 	for(int j=0 ; j<(img->h) ; j++)for(int i=0 ; i<(img->w) ; i++){
@@ -1125,6 +1162,16 @@ void setAlpha(Image* scr, int R,int G,int B){
 	}
 }
 
+void resetAlpha(Image* scr){
+	Uint8 *alpha = (Uint8*)scr->A;
+	for(int j=0 ; j<scr->h ; j++){
+		for(int i=0 ; i<scr->w ; i++){
+			*alpha=255;
+			alpha++;
+		}
+	}
+}
+
 void initFont(){
 	SDL_Surface *img2;
 	Image *font2;
@@ -1386,7 +1433,15 @@ void sprintf_s(char *s, char *c, ...){
 	va_start(c2, c);
 	vsprintf(s,c,c2);
 }
+void sprintf_s(char *s, int n, char *c, ...){
+	va_list c2;
+	va_start(c2, c);
+	vsprintf(s,c,c2);
+}
 void fopen_s(FILE **f, char* c1, char* c2){
     *f = fopen(c1, c2);
+}
+void strcpy_s(char *s1, char *s2){
+	strcpy(s1, s2);
 }
 #endif

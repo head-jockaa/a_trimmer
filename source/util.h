@@ -4,15 +4,18 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
+#include <SDL_net.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string>
 #include <iostream>
 
 #pragma comment(lib, "SDL.lib")
 #pragma comment(lib, "SDLmain.lib")
 #pragma comment(lib, "SDL_image.lib")
 #pragma comment(lib, "SDL_mixer.lib")
+#pragma comment(lib, "SDL2_net.lib")
 
 #define PI 3.1415
 #define TRUE 1
@@ -197,6 +200,7 @@ struct Prg{
 
 struct Work{
 	String title;
+	char query[600];
 	int mark,prg,num,tnum;
 	Uint8 r,g,b;
 	BOOL notExist;
@@ -295,6 +299,7 @@ struct ImageFile{
 	Image *back, *chr, *menuback, *facechip, *boss, *keyboard, *symbol, *pre_scr;
 	Image *rod, *circle, *fishup, *scr2, *colorlight, *tv_asahi;
 	Image *buffer[4], *photo[14];
+	Image *searchImage;
 	Uint8 alphaR, alphaG, alphaB;
 };
 extern ImageFile img;
@@ -313,6 +318,7 @@ void TextOut2(Image* img, int x, int y, String str, int strl);
 void TextOut2_lang(Image* img, int x, int y, String st, int l, int lang);
 void setColorKey(Image *img, Uint8 r, Uint8 g, Uint8 b);
 void getImage(Image*& img, char* st, int r, int g, int b);
+void getImage(Image*& im, char* st);
 void freeImage(Image* img);
 void drawTalking(SDL_Surface* scr);
 void drawTalking(SDL_Surface* scr, int fc, String st);
@@ -321,13 +327,16 @@ void drawRect(Image* scr, int x, int y, int w, int h, int R, int G, int B, int a
 void fillRect(SDL_Surface* scr, int x, int y, int w, int h, int R, int G, int B, int a);
 void fillRect(Image* scr, int x, int y, int w, int h, int R, int G, int B, int a);
 void setAlpha(Image* scr, int R,int G,int B);
+void resetAlpha(Image* scr);
 void drawSurface(SDL_Surface* scr, SDL_Surface* img, int x, int y, int x2, int y2, int w2, int h2, int a);
 void drawLight(SDL_Surface* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2,int a);
 void drawLight(Image* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a);
 
 #ifdef __APPLE__
 void sprintf_s(char *s, char *c, ...);
+void sprintf_s(char *s, int n, char *c, ...);
 void fopen_s(FILE **f, char* c1, char* c2);
+void strcpy_s(char *s1, char *s2);
 #endif
 
 extern Key key;
@@ -358,5 +367,6 @@ extern SDL_Event ev;
 #include "map_drawing.h"
 #include "animation.h"
 #include "drawimage.h"
+#include "image_search.h"
 
 #endif

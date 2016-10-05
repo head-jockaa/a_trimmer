@@ -43,6 +43,9 @@
 #define ADJUST_ZOOM 48
 #define GAME_OPTION_SETTING 49
 #define GAME_KEY_SETTING 50
+#define THROW_PHOTO 51
+#define MANEKI_THROW_PHOTO 52
+#define BS_THROW_PHOTO 53
 #define CARRYING 1
 #define PLUGGED_IN 2
 
@@ -63,6 +66,9 @@ void head_of_timeslot();
 void setManekiData();
 void makeColorLight();
 void walking();
+void manageThread();
+void drawNetworkStatus(SDL_Surface* scr);
+void drawThrowPhoto(SDL_Surface *scr);
 
 extern int mwave[68];
 

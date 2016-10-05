@@ -225,6 +225,11 @@ int main(int argc, char *argv[]) {
 		SDL_UpdateWindowSurface(window);
 	}
 
+	if(tm.running){
+		tm.halt = THREAD_END;
+	}
+	while(tm.running){}
+
 	end();
 	endAll();
 	endFont();
