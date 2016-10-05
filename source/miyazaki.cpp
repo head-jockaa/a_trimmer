@@ -1544,7 +1544,7 @@ void changeScreenColor(SDL_Surface* scr){
 
 	px = (Uint32*)scr->pixels;
 
-	for(int i=0 ; i<76800 ; i++){
+	for(int i=0 ; i<640*480 ; i++){
 		getRGB( *px, &col.r, &col.g, &col.b);
 		Y=257*col.r+504*col.g+98*col.b+16000;
 		if(scr_design==MONO){

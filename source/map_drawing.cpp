@@ -1458,7 +1458,7 @@ void make3dview_sky(){
 
 	Uint16 *px_z=map.z;
 	Uint32 *px_rgb=img.buffer[0]->RGB;
-	for(int i=0 ; i<76800 ; i++){
+	for(int i=0 ; i<640*480 ; i++){
 		if(*px_z==BEYOND){
 			*px_rgb=col;
 		}
@@ -1468,7 +1468,7 @@ void make3dview_sky(){
 
 void resetZ(){
 	Uint16 *p=map.z;
-	for(int i=0 ; i<76800 ; i++){
+	for(int i=0 ; i<640*480 ; i++){
 		*p=BEYOND;
 		p++;
 	}

@@ -45,8 +45,8 @@ struct Map{
 	Image *rgb;
 	bool moved,buffered,buffered2,rural_loaded;
 	Image *rpg;
-	Uint8 c[76800];
-	Uint16 z[76800];
+	Uint8 c[640*480];
+	Uint16 z[640*480];
 	void set();
 	void set2();
 	void reset();

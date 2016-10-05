@@ -82,7 +82,6 @@ void load_index(){
 			clear_num++;
 		}
 	}
-	for(int i=0 ; i<18 ; i++)gd.bought[i]=true;
 
 	for(int k=0 ; k<2 ; k++){
 		fc=0;
