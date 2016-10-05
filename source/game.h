@@ -86,6 +86,8 @@ struct GameData{
 	int zoom,height;
 	double x,y,speed,real_speed,speedX,speedY;
 	BOOL doze,m_waved,kulisaped,bought[18],memma_type;
+	bool secondMusic;
+	Uint8 randomNumber;
 };
 extern GameData gd;
 

@@ -89,6 +89,8 @@ void initGame(){
 	gd.height=10;
 	fix_scrXY();
 	pre_magnify=EOF;
+	srand(SDL_GetTicks());
+	gd.randomNumber=rand()%3;
 	if(MAP3D){
 		pre_magnify=MAGNIFY;
 		MAGNIFY=1;
@@ -421,6 +423,7 @@ void keyResult(){
 					gd.ta_count=0;start=75;count=-1;
 					Mix_PlayChannel(1, sf.decide, 0);
 					kick_count=1;
+					gd.randomNumber++;
 				}
 			}
 		}
@@ -2661,7 +2664,18 @@ void timerThrowPhoto(){
 
 void timerGame(){
 	if(gd.game_mode!=BOSS && (gd.game_mode==STORYMODE||gd.game_mode==SELECT)){
-		if(count==1)Mix_PlayMusic(bgm,-1);
+		if(count==1){
+			Mix_PlayMusic(bgm,0);
+			timestamp=SDL_GetTicks();
+			gd.secondMusic=false;
+		}
+		if(!gd.secondMusic && gd.hour>=22 && (SDL_GetTicks()-timestamp)/16>10000){
+			Mix_FreeMusic(bgm);
+			sprintf_s(str,"file/bgm/%d.ogg",20+gd.randomNumber%3);
+			bgm=Mix_LoadMUS(str);
+			Mix_PlayMusic(bgm,-1);
+			gd.secondMusic=true;
+		}
 	}
 	if(gd.ta_count<87 && count%2==0)gd.ta_count++;
 	if(fishbox.text_count<100 && count%2==0)fishbox.text_count++;

@@ -40,6 +40,8 @@
 #define GAMEBOY 1
 #define MONO 2
 
+#define NUM_OF_BGM 22
+
 #include "util.h"
 
 void initMiyazaki();

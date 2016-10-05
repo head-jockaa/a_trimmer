@@ -38,7 +38,7 @@ void initMiyazaki(){
 	menu[GUIDE_SEASON].setMenu(100,80,10,8,index_num);
 	for(int i=0 ; i<index_num ; i++)menu[GUIDE_SEASON].stack(indexName[i].name);
 	menu[BGM_TEST].setMenu(40,120,25,7,37);
-	for(int i=1 ; i<=18 ; i++){
+	for(int i=1 ; i<=NUM_OF_BGM ; i++){
 		sprintf_s(str,"Music No.%2d",i);
 		menu[BGM_TEST].stack(str);
 	}
@@ -133,7 +133,7 @@ void gotoTowerList(){
 }
 
 void gotoMovieTest(){
-	int n=menu[BGM_TEST].selected()-18;
+	int n=menu[BGM_TEST].selected()-NUM_OF_BGM;
 	if(n>=7 && n!=15){
 		endMiyazaki();
 		movie_test=TRUE;
@@ -606,7 +606,7 @@ void keyGuideTime(){
 
 void keyBgmTest(){
 	if(key.z && !key_stop(key.z)){
-		if(menu[BGM_TEST].selected()>=18){
+		if(menu[BGM_TEST].selected()>=NUM_OF_BGM){
 			Mix_FadeOutMusic(2000);
 			menu[BGM_TEST].setViewMode(HIDE);
 			phase=GOTO_MOVIE;
