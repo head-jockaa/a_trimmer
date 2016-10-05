@@ -18,8 +18,6 @@
 #pragma comment(lib, "SDL2_net.lib")
 
 #define PI 3.1415
-#define TRUE 1
-#define FALSE 0
 #define OPENING 0
 #define TITLE 1
 #define GAMEMENU 2
@@ -70,12 +68,11 @@
 #define EPILOGUE ANTENNATEXT+26
 #define MIYAZAKITEXT EPILOGUE+11
 
-typedef Uint8 BOOL;
 int to8int(char c);
 int to16int(char c1, char c2);
 int to32int(char c1, char c2, char c3, char c4);
-BOOL key_wait(int a);
-BOOL key_stop(int a);
+bool key_wait(int a);
+bool key_stop(int a);
 void TextOut(SDL_Surface* scr, int X, int Y, char* st);
 void TextOut(SDL_Surface* scr, int X, int Y, char* st, int strl);
 void TextOut_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang);
@@ -86,7 +83,7 @@ void getSymbolImage();
 void TalkingAt(int n);
 void drawKeyboard(SDL_Surface* scr, int k, int X, int Y);
 void drawKeyboard2(SDL_Surface* scr, int k, int X, int Y);
-BOOL loadFile(char* fn);
+bool loadFile(char* fn);
 void fix_scrXY();
 void fix_XY();
 void reset_key();
@@ -96,12 +93,12 @@ void setKick(SDL_Surface* scr);
 void drawKick(SDL_Surface* scr);
 void padSpace(int n, int k, int x);
 int controlTalking();
-void controlTextCount(BOOL ok);
+void controlTextCount(bool ok);
 inline Uint32 setRGB(Uint8 r, Uint8 g, Uint8 b);
 inline void getRGB(Uint32 px, Uint8 *r, Uint8 *g, Uint8 *b);
 
 extern SDL_Rect scr;
-extern BOOL pause,run,setSMR,map_loaded,*animebook,ABGR;
+extern bool pause,run,setSMR,map_loaded,*animebook,ABGR;
 extern Uint8 mode,mode2,dataNo,phase,kick_count;
 extern int stas,works,prgs,allworks,collection,areas,towers,mounts,towns,index_num,clear_num,mapW,mapH;
 extern int count,bg_count,face[1000],start;
@@ -120,7 +117,7 @@ extern int BSchannel[12],BSstation[12];
 
 struct String{
 	char str[2][200];
-	BOOL head[2][200];
+	bool head[2][200];
 };
 extern String text[1000],talk[1000];
 char* toChar(String s);
@@ -148,13 +145,12 @@ extern Mhz *mhz;
 
 class Menu{
 	String *st;
-	Uint8 width,raw,bg,combo,open_count,*R,*G,*B;
+	Uint8 v,width,raw,bg,combo,open_count,*R,*G,*B;
 	Uint16 *mark;
 	int show,pageOff,head,lim,x,y;
-	BOOL v;
 	void drawAnimation(SDL_Surface* scr);
 public:
-	BOOL *gray;
+	bool *gray;
 	int lang;
 	Menu(){lim=0;}
 	void setMenu(int X, int Y, int w, int r, int n);
@@ -203,7 +199,7 @@ struct Work{
 	char query[600];
 	int mark,prg,num,tnum;
 	Uint8 r,g,b;
-	BOOL notExist;
+	bool notExist;
 };
 
 struct Area{
@@ -221,13 +217,13 @@ struct Tower{
 	Uint16 x, y, h, x_3d, y_3d, work[10], r_dis[20],r_m[20];
 	float power[10];
 	float dir;
-	BOOL out[10],remove,v;
+	bool out[10],remove,v;
 };
 
 struct Mount{
 	Uint16 x, y, h, slope;
 	Uint8 range, city;
-	BOOL volcano;
+	bool volcano;
 	float dis, dir, dir1, dir2;
 };
 
@@ -237,7 +233,7 @@ struct Town{
 };
 
 struct Key{
-	BOOL left,right,up,down,z,x,c,a,F1,F4,F5,F10;
+	Uint8 left,right,up,down,z,x,c,a,F1,F4,F5,F10;
 	int leftC,rightC,upC,downC,zC,xC,cC,aC,count,pressed;
 };
 
@@ -251,7 +247,7 @@ struct Image{
 struct Fish{
 	Uint8 ch,hour,minute,week,rcv,mg_rcv;
 	int x,y,title_num,sta,tower,score;
-	BOOL bs;
+	bool bs;
 };
 
 class FishBox{
@@ -283,7 +279,7 @@ public:
 	int getM();
 	int getSC(int i);
 	int getData(int i, int k);
-	BOOL loaded();
+	bool loaded();
 	void setData(int i, int k, int data);
 };
 

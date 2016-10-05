@@ -60,7 +60,7 @@ void load_index(){
 	indexName=new Index[index_num];
 
 	if(!loadFile("save/clear.dat")){
-		for(int i=0 ; i<18 ; i++)gd.bought[i]=FALSE;
+		for(int i=0 ; i<18 ; i++)gd.bought[i]=false;
 		for(int i=0 ; i<index_num ; i++){
 			indexName[i].rate=0;
 			indexName[i].hiscore=0;
@@ -205,9 +205,9 @@ void load_animebook(){
 	allworks=0;collection=0;
 	loadFile("file/data/work/works.dat");
 	allworks=(int)(fsize/5);
-	animebook=new BOOL[allworks];
+	animebook=new bool[allworks];
 	if(!loadFile("save/animebook.dat")){
-		for(int i=0 ; i<allworks ; i++)animebook[i]=FALSE;
+		for(int i=0 ; i<allworks ; i++)animebook[i]=false;
 	}else{
 		for(int i=0 ; i<allworks ; i++){
 			animebook[i]=(fstr[i/8]>>i%8 & 1);
@@ -274,7 +274,7 @@ void load_works(int n){
 
 	for(int i=0 ; i<works ; i++){
 		work[i].num=0;
-		work[i].notExist=FALSE;
+		work[i].notExist=false;
 		work[i].prg=prgs;
 		work[i].tnum=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		while(fstr[fc]!=EOF || fstr[fc+1]!=EOF){
@@ -565,9 +565,9 @@ void load_mounts(){
 		fc++;
 		mt->range=to8int(fstr[fc])%64;
 		mt->city=0;
-		mt->volcano=FALSE;
+		mt->volcano=false;
 		if(to8int(fstr[fc])>=192){
-			mt->volcano=TRUE;
+			mt->volcano=true;
 		}
 		else if(to8int(fstr[fc])>=128){
 			mt->slope=mt->h;
@@ -824,16 +824,16 @@ void load_parameter(){
 void load_option(){
 	int fc=0;
 	if(!loadFile("save/option.dat")){
-		SHOW_TOWER=TRUE;
+		SHOW_TOWER=true;
 		AIR_IMG=TYPE1_EDGE;
 		DASH_TYPE=TYPE_MARIO;
 		CHAR_CODE=JAPANESE;
 		MAGNIFY=1;
 		ADJ_DIR=AUTO;
-		EXPLAIN=TRUE;
+		EXPLAIN=true;
 		BGM_VOLUME=64;
 		SE_VOLUME=64;
-		NHK_REMOVE=FALSE;
+		NHK_REMOVE=false;
 		WALKING_TYPE=SMOOTH;
 		ROD_TYPE=CONVENIENTROD;
 		reset_key();

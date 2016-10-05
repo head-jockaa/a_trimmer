@@ -10,7 +10,7 @@ void Antenna::setTmpFish(){
 	tmp_fish.hour=gd.hour;
 	tmp_fish.minute=gd.minute;
 	tmp_fish.sta=station;
-	tmp_fish.bs=FALSE;
+	tmp_fish.bs=false;
 	tmp_fish.tower=T;
 	tmp_fish.ch=ch;
 	if(rcv>100)tmp_fish.rcv=100;
@@ -934,14 +934,14 @@ void ConvenientRod::make_st_list(){
 	for(int i=0 ; i<st_num ; i++){
 		st_list.stack(sta[st[i]].name);
 		st_list.inputMark(i,sta[st[i]].mark);
-		if(rc[i]-mr[i]<100)st_list.gray[i]=TRUE;
+		if(rc[i]-mr[i]<100)st_list.gray[i]=true;
 	}
 	st_list.setViewMode(VISIBLE);
 }
 
 ConvenientRod::ConvenientRod(){
 	load_station();
-	rd.received=FALSE;
+	rd.received=false;
 	ch=1;A=0;T=0;ant_mode=TUNE;v=HIDE;st_num=0;
 	rc=new int[stas];
 	st=new int[stas];
@@ -1119,14 +1119,14 @@ void SuperHandyRod::make_st_list2(){
 		sprintf_s(s.str[1],"%s:%d:%s",s.str[1],tower[tw[i]].rcv[chn[i]],tower[tw[i]].name.str[1]);
 		st_list.stack(s);
 		st_list.inputMark(i,sta[st[i]].mark);
-		if(rc[i]-mr[i]<100)st_list.gray[i]=TRUE;
+		if(rc[i]-mr[i]<100)st_list.gray[i]=true;
 	}
 	st_list.setViewMode(VISIBLE);
 }
 
 SuperHandyRod::SuperHandyRod(){
 	ch=1;A=0;T=0;ant_mode=TUNE;v=HIDE;st_num=0;
-	rd.received=FALSE;
+	rd.received=false;
 	load_towers();
 	rc=new int[towers*10];
 	st=new int[towers*10];

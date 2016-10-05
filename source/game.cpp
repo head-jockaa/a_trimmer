@@ -20,7 +20,7 @@ void toStory();
 int getMissing();
 void ManekiTV_throw();
 void ManekiTV_catch();
-BOOL checkManekiTV();
+bool checkManekiTV();
 void save_game(int n);
 void load_game();
 void drawPlayer(SDL_Surface *scr);
@@ -100,8 +100,8 @@ void initGame(){
 	gd.pre_rural=0;gd.count_rural=0;gd.kirby_count=0;gd.kirby_count2=0;
 	gd.kulisaped=0;gd.ant_dir=270;gd.memma_count=0;gd.location=EOF;gd.gaze_count=0;
 	bd.bossHP=30000;bd.pre_bossHP=30000;bd.talking=0;
-	rd.received=FALSE;
-	setSMR=TRUE;
+	rd.received=false;
+	setSMR=true;
 	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT)phase=GAMESTART;
 	else phase=READY;
 
@@ -126,26 +126,26 @@ void initGame(){
 	menu[PREF_LIST].setMenu(60,40,20,8,areas);
 	for(int i=0 ; i<areas-1 ; i++)menu[PREF_LIST].stack(area[i].name);
 	if(gd.game_mode!=NO_RELAY){
-		BOOL ok;
+		bool ok;
 		for(int i=0 ; i<towers ; i++){
-			ok=FALSE;
+			ok=false;
 			if(NHK_REMOVE && tower[i].kw2!=0){
 				for(int j=0 ; j<10 ; j++)if(tower[i].ch[j]!=0){
 					if(sta[area[tower[i].area].station[j]].mark!=5 && sta[area[tower[i].area].station[j]].mark!=6){
-						ok=TRUE;break;
+						ok=true;break;
 					}
 				}
 			}
-			else ok=TRUE;
-			if(ok)tower[i].remove=FALSE;
-			else tower[i].remove=TRUE;
+			else ok=true;
+			if(ok)tower[i].remove=false;
+			else tower[i].remove=true;
 		}
 	}
 	createMap();
 	if(gd.game_mode==NO_RELAY){
 		for(int i=0 ; i<towers ; i++){
-			if(tower[i].kw2!=0)tower[i].remove=TRUE;
-			else tower[i].remove=FALSE;
+			if(tower[i].kw2!=0)tower[i].remove=true;
+			else tower[i].remove=false;
 		}
 		createMap_tower();
 	}
@@ -200,14 +200,14 @@ void initGame2(){
 
 	if(MAP3D)make3dview(gd.x,gd.y,gd.ant_dir);
 	else{
-		map.buffered=FALSE;
+		map.buffered=false;
 	}
 
 	if(gd.game_mode==SELECT)for(int i=0 ; i<works ; i++){
-		work[i].notExist=TRUE;
+		work[i].notExist=true;
 		for(int j=work[i].prg ; j<work[i].prg+work[i].num ; j++){
 			if(prg[j].week==gd.week || prg[j].week==(gd.week+6)%7 && in_time(prg[j].week,prg[j].hour,prg[j].minute,prg[j].time)){
-				work[i].notExist=FALSE;
+				work[i].notExist=false;
 				break;
 			}
 		}
@@ -250,7 +250,7 @@ void endGame(){
 	if(pre_magnify!=EOF)MAGNIFY=pre_magnify;
 	if(gd.game_mode==NO_RELAY){
 		for(int i=0 ; i<towers ; i++){
-			tower[i].remove=FALSE;
+			tower[i].remove=false;
 		}
 		createMap_tower();
 	}
@@ -267,7 +267,7 @@ void endGame(){
 void keyGameStart(){
 	if((key.z || key.x || key.c) && (!key_stop(key.z) || !key_stop(key.x) || !key_stop(key.c))){
 		if(count>=10){
-			map.buffered2=FALSE;
+			map.buffered2=false;
 			if(gd.week==0)phase=READY;
 			else phase=PLAYING;
 			count=2;
@@ -303,7 +303,7 @@ void keyFishup(){
 					n= work[sta[BSstation[gd.bs_ch]].ontv].tnum;
 				}
 				if(!animebook[n]){
-					animebook[n]=TRUE;
+					animebook[n]=true;
 					collection++;
 					save_animebook();
 				}
@@ -318,7 +318,7 @@ void keyBSAttack(){
 			if(start==0){
 				phase=BS_CH;
 				if(!animebook[ work[sta[BSstation[gd.bs_ch]].ontv].tnum ]){
-					animebook[ work[sta[BSstation[gd.bs_ch]].ontv].tnum ]=TRUE;
+					animebook[ work[sta[BSstation[gd.bs_ch]].ontv].tnum ]=true;
 					collection++;
 					save_animebook();
 				}
@@ -485,7 +485,7 @@ void walking_3d(){
 
 		make3dview(gd.x,gd.y,gd.ant_dir);
 
-		rd.received=FALSE;
+		rd.received=false;
 		fix_XY();
 	}
 }
@@ -638,9 +638,9 @@ void walking(){
 		}
 		if(WALKING_TYPE==BUMPY)walking_bumpy();
 		gd.real_speed=sqrt(gd.speedX*gd.speedX+gd.speedY*gd.speedY);
-		rd.received=FALSE;
+		rd.received=false;
 		gd.m_wave=0;
-		gd.m_waved=FALSE;
+		gd.m_waved=false;
 		if(DASH_TYPE==TYPE_KIRBY){
 			if(gd.kirby_count==0){gd.kirby_count=7;gd.kirby_count2=7;}
 			else if(gd.kirby_count>1)gd.kirby_count--;
@@ -658,7 +658,7 @@ void walking(){
 		if(!gd.m_waved){
 			if(gd.game_mode!=BOSS){
 				gd.m_wave=70;
-				gd.m_waved=TRUE;
+				gd.m_waved=true;
 			}
 			getH();
 		}
@@ -685,13 +685,13 @@ void walking(){
 	else if(key.right)gd.player_dir=1;
 	fix_XY();
 	fix_scrXY();
-	map.moved=FALSE;
+	map.moved=false;
 	map.slideX=gd.scrX-preX;
 	map.slideY=gd.scrY-preY;
 	if(!MAP3D && (map.slideX!=0 || map.slideY!=0)){
-		map.moved=TRUE;
-		map.buffered=FALSE;
-		map.buffered2=FALSE;
+		map.moved=true;
+		map.buffered=false;
+		map.buffered2=false;
 	}
 
 	if(MAGNIFY>=8 && (key.up||key.down||key.left||key.right)){
@@ -742,7 +742,7 @@ void keyPlaying(){
 			if(!rd.received)receiveAll(gd.dotX,gd.dotY);
 			ant->ant_mode=TUNE;
 			ant->hoist();
-			rd.received=TRUE;
+			rd.received=true;
 		}
 	}
 	if(key.c && !key_stop(key.c)){
@@ -753,12 +753,12 @@ void keyPlaying(){
 	if(key.x && gd.game_mode!=BOSS && !key_wait(key.x)){
 		if(!key.up && !key.down && !key.left && !key.right){
 			if(key.x==50)Mix_PlayChannel(1, sf.snore, 0);
-			gd.doze=TRUE;
+			gd.doze=true;
 			gd.speed-=0.5;
 			if(gd.speed<0)gd.speed=0;
 		}
 	}
-	else gd.doze=FALSE;
+	else gd.doze=false;
 	walking();
 }
 
@@ -863,12 +863,12 @@ void keyMenu(){
 				gd.scrX=(int)gd.x-160;
 				phase=MIYAZAKI_MUSEUM;
 				start=0;
-				MAP3D=FALSE;
+				MAP3D=false;
 			}
 		}
 	}
 	if((key.x || key.c) && (!key_stop(key.x) || !key_stop(key.c))){
-		if(MAP3D)rd.received=FALSE;
+		if(MAP3D)rd.received=false;
 		phase=PLAYING;
 	}
 
@@ -946,7 +946,7 @@ void keyAntennaMenu(){
 				phase=ANTENNA;
 				receiveAll(gd.dotX,gd.dotY);
 				ant->hoist();
-				rd.received=TRUE;
+				rd.received=true;
 			}
 		}
 	}
@@ -994,8 +994,8 @@ void keyPrefList_SMR(){
 	if(key.x && !key_stop(key.x)){
 		fix_XY();
 		fix_scrXY();
-		map.buffered=FALSE;
-		map.buffered2=FALSE;
+		map.buffered=false;
+		map.buffered2=false;
 		phase=ANTENNA_MENU;
 		menu[PREF_LIST].setViewMode(HIDE);
 	}
@@ -1032,11 +1032,11 @@ void keyTownList(){
 		gd.y=town[area[m].town+n].y;
 		fix_XY();
 		fix_scrXY();
-		map.buffered=FALSE;
-		map.buffered2=FALSE;
+		map.buffered=false;
+		map.buffered2=false;
 		gd.location=area[m].town+n;
 		gd.town_count=0;
-		rd.received=FALSE;
+		rd.received=false;
 		phase=READY;
 		count=100;
 		menu[PREF_LIST].setViewMode(HIDE);
@@ -1055,15 +1055,15 @@ void keyTownList(){
 
 void keySMR(){
 	if(key.z && !key_stop(key.z)){
-		BOOL ok=TRUE;
+		bool ok=true;
 		if(NHK_REMOVE && gd.game_mode!=NO_RELAY){
 			if(sta[area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]].mark==5
 			|| sta[area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]].mark==6){
-				ok=FALSE;
+				ok=false;
 			}
 		}
 		if(ok){
-			saveSMR=FALSE;
+			saveSMR=false;
 			for(int i=0 ; i<map.mapW ; i++)for(int j=0 ; j<map.mapH ; j++)map.smr[i][j]=0;
 			if(gd.game_mode!=NO_RELAY)load_smr(area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]);
 			SMRcount++;
@@ -1072,8 +1072,8 @@ void keySMR(){
 			MAGNIFY=1;
 			fix_XY();
 			fix_scrXY();
-			map.buffered=FALSE;
-			map.buffered2=FALSE;
+			map.buffered=false;
+			map.buffered2=false;
 			menu[SMR].setViewMode(HIDE);
 			menu[PREF_LIST].setViewMode(HIDE);
 		}
@@ -1319,7 +1319,7 @@ void setTmpFish_bs(){
 	tmp_fish.hour=gd.hour;
 	tmp_fish.minute=gd.minute;
 	tmp_fish.sta=BSstation[gd.bs_ch];
-	tmp_fish.bs=TRUE;
+	tmp_fish.bs=true;
 	tmp_fish.ch=gd.bs_ch+1;
 	tmp_fish.rcv=100;
 	tmp_fish.mg_rcv=0;
@@ -1386,15 +1386,15 @@ int getScore(int n, double pw, int x, int y){
 
 int getMissing(){
 	int a=0;
-	BOOL hit=FALSE;
+	bool hit=false;
 	for(int i=0 ; i<works ; i++){
 		if(fishbox.getSC(i)==0){
-			hit=FALSE;
+			hit=false;
 			for(int j=work[i].prg ; j<work[i].prg+work[i].num ; j++){
 				if(prg[j].week>gd.week||
 				   prg[j].week==gd.week&&prg[j].hour*100+prg[j].minute>=gd.hour*100+gd.minute
-				  )hit=TRUE;
-				if(in_time(prg[j].week,prg[j].hour,prg[j].minute,prg[j].time))hit=TRUE;
+				  )hit=true;
+				if(in_time(prg[j].week,prg[j].hour,prg[j].minute,prg[j].time))hit=true;
 			}
 			if(!hit)a++;
 		}
@@ -1402,7 +1402,7 @@ int getMissing(){
 	return a;
 }
 
-BOOL in_time(int w, int h, int m, int t){
+bool in_time(int w, int h, int m, int t){
 	int t1,t2,t3;
 	t1=h*100+m;
 	t2=t1;
@@ -1414,9 +1414,9 @@ BOOL in_time(int w, int h, int m, int t){
 	if(w==gd.week-1 && t2>2800){
 		t1-=2400;t2-=2400;
 	}
-	else if(w!=gd.week)return FALSE;
-	if(t1<=t3 && t3<t2)return TRUE;
-	else return FALSE;
+	else if(w!=gd.week)return false;
+	if(t1<=t3 && t3<t2)return true;
+	else return false;
 }
 
 void televise(){
@@ -1452,21 +1452,21 @@ void televise(){
 			}
 		}
 	}
-	BOOL a=FALSE, b=FALSE;
+	bool a=false, b=false;
 	for(int i=0 ; i<stas ; i++){
 		if(pre[i]!=sta[i].ontv){
 			if(sta[i].ontv!=EOF){
-				BOOL hit=FALSE;
+				bool hit=false;
 				for(int j=0 ; j<12 ; j++){
 					if(i==BSstation[j]){
-						hit=TRUE;
+						hit=true;
 						break;
 					}
 				}
-				if(hit)b=TRUE;
-				else a=TRUE;
+				if(hit)b=true;
+				else a=true;
 			}
-			map.buffered2=FALSE;
+			map.buffered2=false;
 		}
 	}
 	if(a)Mix_PlayChannel(1,sf.lamp,0);
@@ -2037,8 +2037,8 @@ void drawGame(SDL_Surface* scr){
 
 		if(MAP3D){
 			fillRect(scr,520,360,120,120,192,192,255,255);
-			drawGround(scr,(int)gd.x-60,(int)gd.y-60,520,360,120,120,1000,FALSE);
-			drawTowerSpot(scr,(int)gd.x-60,(int)gd.y-60,520,360,120,120,FALSE);
+			drawGround(scr,(int)gd.x-60,(int)gd.y-60,520,360,120,120,1000,false);
+			drawTowerSpot(scr,(int)gd.x-60,(int)gd.y-60,520,360,120,120,false);
 			int a,b;
 			for(int i=0 ; i<60 ; i++){
 				a=(int)(i*cos(gd.ant_dir*PI/180));
@@ -2525,7 +2525,7 @@ void timerCatchPhone(){
 
 void timerSMRcount(){
 	if(SMRcount!=0){
-		SMRscanned=FALSE;
+		SMRscanned=false;
 		for(int i=SMRcount ; i<640*480/SMRfast ; i++){
 		startSMR(area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]);
 			if(SMRscanned)break;
@@ -2541,7 +2541,7 @@ void timerSunMovement(){
 				make3dview_sky();
 			}
 			else{
-				map.buffered=FALSE;
+				map.buffered=false;
 			}
 		}
 		if(gd.minute==0){
@@ -2695,7 +2695,7 @@ void timerGame(){
 					TalkingAt(22);
 					gd.talk_open_count=1;
 					phase=TALKING;
-					talk_3dtv=FALSE;
+					talk_3dtv=false;
 				}
 			}
 			moveClock();
@@ -2726,9 +2726,9 @@ void timerGame(){
 	else if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)timerThrowPhoto();
 
 	if(phase==TALKING || phase==GET_HAZIA && start==0 || phase==MANEKI || phase==MANEKI_CONFIRM || phase==SUMMERWARS && count>=660){
-		controlTextCount(TRUE);
+		controlTextCount(true);
 	}else{
-		controlTextCount(FALSE);
+		controlTextCount(false);
 	}
 	timerGazing();
 	timerScore();
@@ -2829,7 +2829,7 @@ void estimate_rural(){
 }
 
 void initManekiTV(){
-	BOOL ok=FALSE;
+	bool ok=false;
 	int X,Y;
 	srand(SDL_GetTicks());
 	X=rand()%(map.ruralW-2)+1;
@@ -2837,7 +2837,7 @@ void initManekiTV(){
 	for(int j=0 ; j<map.ruralH ; j++){
 		for(int i=0 ; i<map.ruralW ; i++){
 			if(map.rural[X][Y]==NONE){
-				ok=TRUE;
+				ok=true;
 				break;
 			}
 			X=(X+1)%map.ruralW;
@@ -2902,7 +2902,7 @@ void boss_attack(){
 		tower[i].c1=0;
 		tower[i].c2=0;
 	}
-	map.buffered2=FALSE;
+	map.buffered2=false;
 	srand(SDL_GetTicks());
 	int wk=rand()%works;
 	bd.num=work[wk].num;
@@ -3019,7 +3019,7 @@ void timer_boss(){
 			if(bd.atk_count[i]==1){
 				sta[bd.station[i]].ontv=bd.color[i];
 				televise();
-				map.buffered2=FALSE;
+				map.buffered2=false;
 			}
 			if(bd.atk_count[i]>0)bd.atk_count[i]--;
 		}
@@ -3117,7 +3117,7 @@ void setManekiData(){
 	md.st_num=0;
 	for(int i=0 ; i<stas ; i++){
 		if(md.rcv[i]-md.mg_rcv[i]<RCV_LEVEL)break;
-		md.bs[md.st_num]=FALSE;
+		md.bs[md.st_num]=false;
 		md.st_num++;
 	}
 	for(int i=0 ; i<12 ; i++)if(BSstation[i]!=EOF){
@@ -3125,36 +3125,36 @@ void setManekiData(){
 		md.rcv[md.st_num]=100;
 		md.mg_rcv[md.st_num]=0;
 		md.ch[md.st_num]=i+1;
-		md.bs[md.st_num]=TRUE;
+		md.bs[md.st_num]=true;
 		md.st_num++;
 	}
 }
 
-BOOL checkManekiTV(){
+bool checkManekiTV(){
 	int a=map.rural[(int)md.manekiX/map.rural_size][(int)md.manekiY/map.rural_size];
-	BOOL hit;
+	bool hit;
 	for(int i=0 ; i<area[a].st_num ; i++){
-		hit=FALSE;
+		hit=false;
 		for(int j=0 ; j<md.st_num ; j++){
 			if(area[a].station[i]==md.station[j]){
-				hit=TRUE;break;
+				hit=true;break;
 			}
 		}
-		if(!hit)return FALSE;
+		if(!hit)return false;
 	}
-	return TRUE;
+	return true;
 }
 
 void ManekiTV_throw(){
 	if(md.fish_num>=300)return;
-	BOOL skip;
+	bool skip;
 	for(int i=0 ; i<md.st_num ; i++){
 		if(sta[md.station[i]].ontv!=EOF){
 			setTmpFish_maneki(i);
-			skip=FALSE;
+			skip=false;
 			for(int j=0 ; j<md.fish_num ; j++){
 				if(md.fish[j].title_num==tmp_fish.title_num && md.fish[j].sta==tmp_fish.sta && md.fish[j].tower==tmp_fish.tower){
-					skip=TRUE;
+					skip=true;
 					continue;
 				}
 			}

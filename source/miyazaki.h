@@ -51,7 +51,7 @@ void keyMiyazaki();
 void drawMiyazaki(SDL_Surface* scr);
 void changeScreenColor(SDL_Surface* scr);
 
-extern BOOL talk_3dtv,movie_test;
+extern bool talk_3dtv,movie_test;
 extern Uint8 scr_design;
 
 #endif

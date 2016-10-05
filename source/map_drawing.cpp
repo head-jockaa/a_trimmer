@@ -32,7 +32,7 @@ void Map::set2(){
 	for(int i=0 ; i<ruralW ; i++)rural[i]=new Uint8[ruralH];
 	for(int i=0 ; i<ruralW ; i++)for(int j=0 ; j<ruralH ; j++)rural[i][j]=0;
 	rural_rate=new Uint16[areas];
-	rural_loaded=TRUE;
+	rural_loaded=true;
 }
 
 void Map::setRPGchip(int bright){
@@ -66,7 +66,7 @@ void Map::reset(){
 		delete [] volcanoY;
 	}
 	freeImage(rpg);
-	rural_loaded=FALSE;
+	rural_loaded=false;
 }
 
 void createMap(){
@@ -122,7 +122,7 @@ void createMap(){
 	createMap_mount();
 	createMap_town();
 	createMap_tower();
-	map_loaded=TRUE;
+	map_loaded=true;
 }
 
 void createMap_shore(){
@@ -324,19 +324,19 @@ void drawMap(SDL_Surface* scr, int X, int Y){
 		if(SHOW_TOWER)drawImage(scr,img.buffer[1],0,0,0,0,640,480,a);
 	}else{
 		if(!map.buffered && !gd.doze){
-			drawGround(scr,X,Y,0,0,640,480,b,TRUE);
-			drawTowerSpot(scr,X,Y,0,0,640,480,TRUE);
+			drawGround(scr,X,Y,0,0,640,480,b,true);
+			drawTowerSpot(scr,X,Y,0,0,640,480,true);
 		}
 		if(!map.buffered2){
-			drawVolcano(X,Y,640,480,TRUE);
+			drawVolcano(X,Y,640,480,true);
 		}
 		if(map.moved){
-			drawGround(scr,X,Y,0,0,640,480,b,FALSE);
-			drawTowerSpot(scr,X,Y,0,0,640,480,FALSE);
-			drawVolcano(X,Y,640,480,FALSE);
+			drawGround(scr,X,Y,0,0,640,480,b,false);
+			drawTowerSpot(scr,X,Y,0,0,640,480,false);
+			drawVolcano(X,Y,640,480,false);
 		}
 		else if(!map.buffered && gd.doze){
-			drawGround(scr,X,Y,0,0,640,480,b,FALSE);
+			drawGround(scr,X,Y,0,0,640,480,b,false);
 			if(SHOW_TOWER)drawImage(scr,img.buffer[1],0,0,0,0,640,480,a);
 		}else{
 			drawImage(scr,img.buffer[0],0,0,0,0,640,480,255);
@@ -364,8 +364,8 @@ void drawMap(SDL_Surface* scr, int X, int Y){
 
 void drawMap2(SDL_Surface *scr, int X, int Y){
 	if(AIR_IMG==NULL)return;
-	if(map.moved && gd.ta_count>=87)drawColorLight(X,Y,640,480,FALSE);
-	else if(!map.buffered2)drawColorLight(X,Y,640,480,TRUE);
+	if(map.moved && gd.ta_count>=87)drawColorLight(X,Y,640,480,false);
+	else if(!map.buffered2)drawColorLight(X,Y,640,480,true);
 	int a=0;
 	if(count%200<80)a=(int)(6.3*(40-abs(count%200-40)));
 	if(phase!=GAMESTART)illuminateImage(scr,img.buffer[2],map.airX,map.airY,map.airX,map.airY,map.airW,map.airH,255);
@@ -468,7 +468,7 @@ void drawRPGchip(Uint8* px, Uint16 scrWidth, int x, int y, int mag, int n, int p
 	}
 }
 
-void drawGround(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, int bright, BOOL buf){
+void drawGround(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, int bright, bool buf){
 	x+=MAGNIFY/2;
 	y+=MAGNIFY/2;
 	if(x2<0){w+=x2;x2=0;}
@@ -621,11 +621,11 @@ void drawGround(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, in
 
 	if(buf){
 		setAlpha(img.buffer[0],0,0,0);
-		map.buffered=TRUE;
+		map.buffered=true;
 	}
 }
 
-void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, BOOL buf){
+void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, bool buf){
 	SDL_LockSurface(scr);
 	if(SHOW_TOWER==NULL)return;
 	x+=MAGNIFY/2;
@@ -1082,7 +1082,7 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 	if(buf){
 		setAlpha(img.buffer[0],0,0,0);
 		setAlpha(img.buffer[1],0,0,0);
-		map.buffered=TRUE;
+		map.buffered=true;
 	}
 
 	SDL_UnlockSurface(scr);
@@ -1118,7 +1118,7 @@ void drawFireWork(SDL_Surface *scr){
 	}
 }
 
-void drawColorLight(int x, int y, int w, int h, BOOL buf){
+void drawColorLight(int x, int y, int w, int h, bool buf){
 	if(AIR_IMG==NULL)return;
 	x-=gd.scrX;
 	y-=gd.scrY;
@@ -1193,10 +1193,10 @@ void drawColorLight(int x, int y, int w, int h, BOOL buf){
 	}
 
 	setAlpha(img.buffer[2],0,0,0);
-	if(buf)map.buffered2=TRUE;
+	if(buf)map.buffered2=true;
 }
 
-void drawVolcano(int x, int y, int w, int h, BOOL buf){
+void drawVolcano(int x, int y, int w, int h, bool buf){
 	if(AIR_IMG==NULL || mode==GAMEMENU || mode==MIYAZAKI)return;
 	x-=gd.scrX;
 	y-=gd.scrY;
@@ -1329,22 +1329,22 @@ void make3dview(double X, double Y, int D){
 		Uint32 *px_rgb=img.buffer[0]->RGB;
 		Uint32 col;
 		Uint8 R,G,B;
-		BOOL flat=FALSE,road=FALSE;
+		bool flat=false,road=false;
 
 		if(map.h[i][j]==0){
 			if(map.type[j*map.mapW+i]==SEA || map.type[j*map.mapW+i]==SHORE){
 				col=setRGB(0,0,0);
 			}
 			else col=setRGB((int)(128*aa),(int)(128*aa),0);
-			flat=TRUE;
+			flat=true;
 		}
 		else if(map.type[j*map.mapW+i]==SEA || map.type[j*map.mapW+i]==SHORE){
 			col=setRGB(0,0,0);
-			flat=TRUE;road=TRUE;
+			flat=true;road=true;
 		}
 		else if(map.type[j*map.mapW+i]==ROAD){
 			col=setRGB((int)(128*aa),(int)(128*aa),0);
-			flat=TRUE;road=TRUE;
+			flat=true;road=true;
 		}else{
 			getRGB(map.rgb->RGB[j*map.mapW+i],&R,&G,&B);
 			col=setRGB( (int)(R*aa),(int)(G*aa),(int)(B*aa) );
@@ -1356,7 +1356,7 @@ void make3dview(double X, double Y, int D){
 		half=cubeW/2;
 		int cubeX=160+(int)(80.0*xd/gd.zoom)-half;
 		int cubeY=120-(int)(80.0*zd/gd.zoom);
-		flat=TRUE;
+		flat=true;
 //		if(road||flat)cubeY+=half;
 
 		if(cubeX<0){cubeW+=cubeX;cubeX=0;}

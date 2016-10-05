@@ -21,7 +21,7 @@ SDL_Rect scr;
 char weekChar[7][2][4],str[1000],str3[60],*fstr;
 size_t fsize=0;
 String text[1000],talk[1000];
-BOOL run,setSMR,map_loaded=FALSE, *animebook, ABGR;
+bool run,setSMR,map_loaded=false, *animebook, ABGR;
 double test=0;
 int stas=0,works=0,prgs=0,allworks=0,collection=0,areas=0,towers=0,mounts=0,towns=0,index_num=0,clear_num=0;
 int count=0,bg_count=0,face[1000],start=0;
@@ -38,13 +38,13 @@ void Menu::setMenu(int X, int Y, int w, int r, int n){
 	if(n==0)return;
 	x=X;y=Y;width=w;raw=r;lim=n;combo=1;lang=EOF;
 	st=new String[lim];
-	gray=new BOOL[lim];
+	gray=new bool[lim];
 	mark=new Uint16[lim];
 	R=new Uint8[lim];
 	G=new Uint8[lim];
 	B=new Uint8[lim];
 	for(int i=0 ; i<lim ; i++){
-		gray[i]=FALSE;
+		gray[i]=false;
 		mark[i]=0;
 		R[i]=0;G[i]=0;B[i]=0;
 		st[i].str[0][0]=0;
@@ -276,7 +276,7 @@ void FishBox::initFishBox(int a){
 		fish[i].sta=0;fish[i].tower=0;fish[i].ch=0;
 		fish[i].hour=0;fish[i].minute=0;fish[i].week=0;
 		fish[i].rcv=0;fish[i].mg_rcv=0;fish[i].score=0;
-		fish[i].bs=FALSE;
+		fish[i].bs=false;
 		today[i]=EOF;
 	}
 	n=0;cx=0;cy=0;offset=0;max=a;text_count=60;
@@ -420,9 +420,9 @@ int FishBox::getSC(int i){
 	if(i<0 || i>=max)return 0;
 	return fish[i].score;
 }
-BOOL FishBox::loaded(){
-	if(max==0)return FALSE;
-	else return TRUE;
+bool FishBox::loaded(){
+	if(max==0)return false;
+	else return true;
 }
 int FishBox::getData(int i, int k){
 	if(i<0 || i>=max)return 0;
@@ -481,13 +481,13 @@ char* toChar(String s){
 	return str3;
 }
 
-BOOL key_wait(int a){
-	if(a==1 || a>=30)return FALSE;
-	else return TRUE;
+bool key_wait(int a){
+	if(a==1 || a>=30)return false;
+	else return true;
 }
-BOOL key_stop(int a){
-	if(a==1)return FALSE;
-	else return TRUE;
+bool key_stop(int a){
+	if(a==1)return false;
+	else return true;
 }
 
 void TextOut(SDL_Surface* scr, int X, int Y, char* st){
@@ -684,17 +684,17 @@ void putHeadMark(String &s){
 	//２バイト文字コードの頭にマークをつける
 	int a;
 	for(int k=0 ; k<2 ; k++){
-		for(int j=0 ; j<100 ; j++)s.head[k][j]=FALSE;
+		for(int j=0 ; j<100 ; j++)s.head[k][j]=false;
 		for(int j=0 ; j<100 ; j++){
 			a=s.str[k][j];
 			if(a==0)break;
 			if(a<0)a+=256;
 			if(k==0 && (a>=129 && a<=159 || a>=224)){//Japanese
-				s.head[0][j]=TRUE;
-				s.head[0][j+1]=FALSE;
+				s.head[0][j]=true;
+				s.head[0][j+1]=false;
 				j++;
 			}
-			else s.head[k][j]=TRUE;
+			else s.head[k][j]=true;
 		}
 	}
 }
@@ -1212,14 +1212,14 @@ void endFont(){
 	}
 }
 
-BOOL loadFile(char* fn){
+bool loadFile(char* fn){
 	fpos_t a=0,b=0;
 	FILE* hFile;
 
 	if(fsize)delete [] fstr;
 	fsize=0;
 	fopen_s(&hFile,fn,"rb");
-	if(hFile==NULL)return FALSE;
+	if(hFile==NULL)return false;
 
 	b=fseek(hFile,0,SEEK_END);
 	fgetpos(hFile,&a);
@@ -1229,7 +1229,7 @@ BOOL loadFile(char* fn){
 	fstr=new char[fsize];
 	fread(fstr, sizeof(fstr[0]), fsize/sizeof(fstr[0]), hFile);
 	fclose(hFile);
-	return TRUE;
+	return true;
 }
 
 void setKick(SDL_Surface* scr){
@@ -1277,7 +1277,7 @@ String jummingText(String s, int array_num, int rcv, int mg_rcv){
 	if(slash>0 && slash<3)slash=1;
 	else slash=slash*array_num/100;
 
-	for(int i=0 ; i<array_num ; i++)str[i]=FALSE;
+	for(int i=0 ; i<array_num ; i++)str[i]=false;
 	for(int k=0 ; k<2 ; k++){
 		for(int i=0 ; i<noize ; i++){
 			char chr='*';
@@ -1287,22 +1287,22 @@ String jummingText(String s, int array_num, int rcv, int mg_rcv){
 				offset=(a+j)%array_num;
 				if(s.str[k][offset]==0){
 					if(str[offset])continue;
-					str[offset]=TRUE;
+					str[offset]=true;
 					break;
 				}
 				if(!s.head[k][offset])continue;
 				if( offset<array_num-1 && s.head[k][offset] && !s.head[k][offset+1] ){
 					if(str[offset])continue;
-					str[offset]=TRUE;
-					str[offset+1]=TRUE;
+					str[offset]=true;
+					str[offset+1]=true;
 					s.str[k][offset]=chr;
 					s.str[k][offset+1]=chr;
-					s.head[k][offset+1]=TRUE;
+					s.head[k][offset+1]=true;
 					i++;
 					break;
 				}else{
 					if(str[offset])continue;
-					str[offset]=TRUE;
+					str[offset]=true;
 					s.str[k][offset]=chr;
 					break;
 				}
@@ -1333,7 +1333,7 @@ void padSpace(int n, int k, int x){
 					}
 					if(ii-i<sp){
 						talk[n].str[k][ii]=' ';
-						talk[n].head[k][ii]=TRUE;
+						talk[n].head[k][ii]=true;
 					}
 				}
 				i+=sp-1;
@@ -1412,7 +1412,7 @@ int controlTalking(){
 	return 0;
 }
 
-void controlTextCount(BOOL ok){
+void controlTextCount(bool ok){
 	if(gd.talk_open_count>0){
 		gd.talk_open_count++;
 		if(gd.talk_open_count==20)gd.talk_open_count=0;

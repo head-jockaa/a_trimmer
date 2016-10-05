@@ -118,9 +118,9 @@ void keyShopping(){
 	}
 	if(key.x && !key_stop(key.x)){
 		gd.text_count=0;
-		BOOL ok=TRUE;
+		bool ok=true;
 		for(int i=0 ; i<18 ; i++)if(!gd.bought[i]){
-			ok=FALSE;break;
+			ok=false;break;
 		}
 		menu[YNFORM].setViewMode(HIDE);
 		menu[SHOPPING].setViewMode(HIDE);
@@ -153,8 +153,8 @@ void keySelling(){
 			sprintf_s(s.str[0],"%10d%s",price[menu[SHOPPING].selected()],text[MIYAZAKITEXT+6].str[0]);
 			sprintf_s(s.str[1],"%10d%s",price[menu[SHOPPING].selected()],text[MIYAZAKITEXT+6].str[1]);
 			menu[SHOPPING].input(menu[SHOPPING].selected()*2+1,s);
-			menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=FALSE;
-			gd.bought[menu[SHOPPING].selected()]=FALSE;
+			menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=false;
+			gd.bought[menu[SHOPPING].selected()]=false;
 			gd.hazia2=price[menu[SHOPPING].selected()];
 			if(gd.talk_count!=EOF)gd.talk_open_count=1;
 			gd.talk_count=EOF;
@@ -164,12 +164,12 @@ void keySelling(){
 			else if(menu[SHOPPING].selected()==2 && ROD_TYPE==BUTTONROD)ROD_TYPE=SIMPLEROD;
 			else if(menu[SHOPPING].selected()==3 && ROD_TYPE==SUPERHANDYROD)ROD_TYPE=SIMPLEROD;
 			else if(menu[SHOPPING].selected()==4 && MAGNIFY>=8)MAGNIFY=1;
-			else if(menu[SHOPPING].selected()==10)NHK_REMOVE=FALSE;
+			else if(menu[SHOPPING].selected()==10)NHK_REMOVE=false;
 			else if(menu[SHOPPING].selected()==13 && (DASH_TYPE==TYPE_KIRBY||DASH_TYPE==TYPE_MEGAMAN))DASH_TYPE=TYPE_MARIO;
 			else if(menu[SHOPPING].selected()==14)WALKING_TYPE=SMOOTH;
 			else if(menu[SHOPPING].selected()==15)scr_design=NULL;
 			else if(menu[SHOPPING].selected()==16)scr_design=NULL;
-			else if(menu[SHOPPING].selected()==17)CHOSEON=FALSE;
+			else if(menu[SHOPPING].selected()==17)CHOSEON=false;
 		}
 		if(menu[YNFORM].selected()==2){
 			menu[YNFORM].setViewMode(HIDE);
@@ -207,8 +207,8 @@ void keyBuying(){
 					gd.scene_count=0;
 				}else{
 					menu[SHOPPING].input(menu[SHOPPING].selected()*2+1,text[MIYAZAKITEXT+12]);
-					menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=TRUE;
-					gd.bought[menu[SHOPPING].selected()]=TRUE;
+					menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=true;
+					gd.bought[menu[SHOPPING].selected()]=true;
 					gd.hazia2=price[menu[SHOPPING].selected()];
 					if(gd.talk_count!=EOF)gd.talk_open_count=1;
 					gd.talk_count=EOF;
@@ -256,8 +256,8 @@ void keyHaziaShopTalk(){
 					phase=BUYING;
 					menu[SHOP_CONFIRM].setViewMode(HIDE);
 					menu[SHOPPING].input(menu[SHOPPING].selected()*2+1,text[MIYAZAKITEXT+12]);
-					menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=TRUE;
-					gd.bought[menu[SHOPPING].selected()]=TRUE;
+					menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=true;
+					gd.bought[menu[SHOPPING].selected()]=true;
 					gd.hazia2=price[menu[SHOPPING].selected()];
 					if(gd.talk_count!=EOF)gd.talk_open_count=1;
 					gd.talk_count=EOF;
@@ -410,9 +410,9 @@ void timerHaziaShop(){
 		}
 	}
 	if(phase==SHOP_TALK || phase==SHOPPING || phase==BUYING || phase==SELLING || phase==SHOP_LASTTALK || phase==MEMMA_TALK || phase==SHOP_CONFIRM_TALK || phase==ARANCIA || phase==NAGANO_APPLE || phase==OHANA_TALK){
-		controlTextCount(TRUE);
+		controlTextCount(true);
 	}else{
-		controlTextCount(FALSE);
+		controlTextCount(false);
 	}
 }
 
@@ -526,7 +526,7 @@ void makeShoppingList(){
 		menu[SHOPPING].stack(text[MIYAZAKITEXT+34+i]);
 		if(gd.bought[i]){
 			menu[SHOPPING].stack(text[MIYAZAKITEXT+12]);
-			menu[SHOPPING].gray[i*2+1]=TRUE;
+			menu[SHOPPING].gray[i*2+1]=true;
 		}else{
 			String s;
 			sprintf_s(s.str[0],"%10d%s",price[i],text[MIYAZAKITEXT+6].str[0]);

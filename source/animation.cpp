@@ -1098,7 +1098,7 @@ void drawSummerWars(SDL_Surface* scr){
 	}
 	else if(count<300){
 		if(count==200){
-			map.buffered=FALSE;
+			map.buffered=false;
 		}
 		else{
 			walking();
@@ -1199,7 +1199,7 @@ void drawSummerWars(SDL_Surface* scr){
 		if(count==600){
 			gd.scrX=gd.summerX-160;
 			gd.scrY=gd.summerY-120;
-			map.buffered=FALSE;
+			map.buffered=false;
 		}
 		SDL_Color col=getSkyColor(gd.hour,gd.minute);
 		fillRect(scr,0,0,320,240,col.r,col.g,col.b,255);

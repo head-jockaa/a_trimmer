@@ -84,10 +84,10 @@ void gotoRecord(){
 }
 
 void gotoGame(){
-	BOOL c=FALSE;
+	bool c=false;
 	int n;
 	if(gd.mainmenu_selected==1){
-		c=TRUE;
+		c=true;
 		n=menu[SAVEDATA].selected();
 	}
 	if(dataNo==index_num+1)gd.game_mode=BOSS;
@@ -183,11 +183,11 @@ void timerGameMenu(){
 	if(phase==GOTO_GAME && count==1)gotoGame();
 	else if(phase==GOTO_RECORD && count==1)gotoRecord();
 	if(phase==PROLOGUE || phase==SEASIDE || phase==KOMORO){
-		if(start==0)controlTextCount(TRUE);
-		else controlTextCount(FALSE);
+		if(start==0)controlTextCount(true);
+		else controlTextCount(false);
 		if(count==1)Mix_PlayMusic(bgm,-1);
 	}else{
-		controlTextCount(FALSE);
+		controlTextCount(false);
 	}
 	if(phase==PROLOGUE)timerPrologue();
 	if(phase==SEASIDE)timerSeaSide();
@@ -333,7 +333,7 @@ void keyRecordMenu(){
 		load_record(n);
 		gd.scrX=fishbox.getX()-320;
 		gd.scrY=fishbox.getY()-240;
-		map.buffered=FALSE;
+		map.buffered=false;
 		phase=RECORD;
 		menu[RECORDMENU].setViewMode(GRAY);
 	}
@@ -359,7 +359,7 @@ void keyGameRecord(){
 	if(preX!=fishbox.getX() || preY!=fishbox.getY()){
 		gd.scrX=fishbox.getX()-320;
 		gd.scrY=fishbox.getY()-240;
-		map.buffered=FALSE;
+		map.buffered=false;
 	}
 }
 
@@ -571,7 +571,7 @@ void drawGameMenu(SDL_Surface* scr){
 	drawGamemenuExplain(scr);
 }
 
-BOOL makeSaveMenu(int n){
+bool makeSaveMenu(int n){
 	FILE* hf;
 	int a=0;
 	while(true){
@@ -593,11 +593,11 @@ BOOL makeSaveMenu(int n){
 		}
 		menu[n].stack(s);
 	}
-	if(a==0)return FALSE;
-	else return TRUE;
+	if(a==0)return false;
+	else return true;
 }
 
-BOOL makeRecordMenu(int n){
+bool makeRecordMenu(int n){
 	FILE* hf;
 	int a=0;
 	while(true){
@@ -621,6 +621,6 @@ BOOL makeRecordMenu(int n){
 		sprintf_s(s.str[1],"%s %10d",indexName[fstr[0]].name.str[1],sc);
 		menu[n].stack(s);
 	}
-	if(a==0)return FALSE;
-	else return TRUE;
+	if(a==0)return false;
+	else return true;
 }

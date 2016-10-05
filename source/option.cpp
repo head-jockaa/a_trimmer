@@ -1,7 +1,7 @@
 #include "option.h"
 
 void dupcheck(SDL_Keycode k);
-BOOL key_ok(int k);
+bool key_ok(int k);
 void keyOptionMenu();
 Uint8 key_setting=0;
 
@@ -70,11 +70,11 @@ void keySetting(){
 	if(phase!=OPTION_MENU && phase!=GAME_OPTION)Mix_PlayChannel(1, sf.decide2, 0);
 }
 
-void switchSetting(int n, BOOL up_key){
+void switchSetting(int n, bool up_key){
 	if(n==1){
-		if(SHOW_TOWER==TRUE)SHOW_TOWER=FALSE;
-		else SHOW_TOWER=TRUE;
-		if(mode==GAME)map.buffered=FALSE;
+		if(SHOW_TOWER==true)SHOW_TOWER=false;
+		else SHOW_TOWER=true;
+		if(mode==GAME)map.buffered=false;
 	}
 	else if(n==2){
 		if(up_key){
@@ -92,7 +92,7 @@ void switchSetting(int n, BOOL up_key){
 		}
 		if(mode==GAME){
 			makeColorLight();
-			map.buffered2=FALSE;
+			map.buffered2=false;
 		}
 	}
 	else if(n==3){
@@ -134,8 +134,8 @@ void switchSetting(int n, BOOL up_key){
 				gd.second*=MAGNIFY;
 				fix_XY();
 				fix_scrXY();
-				map.buffered=FALSE;
-				map.buffered2=FALSE;
+				map.buffered=false;
+				map.buffered2=false;
 			}
 			if(MAGNIFY<8)gd.location=EOF;
 		}
@@ -145,8 +145,8 @@ void switchSetting(int n, BOOL up_key){
 		else ADJ_DIR=MANUAL;
 	}
 	else if(n==7){
-		if(EXPLAIN==TRUE)EXPLAIN=FALSE;
-		else EXPLAIN=TRUE;
+		if(EXPLAIN==true)EXPLAIN=false;
+		else EXPLAIN=true;
 	}
 	else if(gd.option_selected==8){
 		if(up_key && BGM_VOLUME<128)BGM_VOLUME++;
@@ -159,27 +159,27 @@ void switchSetting(int n, BOOL up_key){
 		for(int i=0 ; i<4 ; i++)Mix_Volume(i,SE_VOLUME);
 	}
 	else if(n==10){
-		if(NHK_REMOVE==TRUE)NHK_REMOVE=FALSE;
-		else NHK_REMOVE=TRUE;
+		if(NHK_REMOVE==true)NHK_REMOVE=false;
+		else NHK_REMOVE=true;
 		if(mode==GAME && gd.game_mode!=NO_RELAY){
-			BOOL ok;
+			bool ok;
 			for(int i=0 ; i<towers ; i++){
-				ok=FALSE;
+				ok=false;
 				if(NHK_REMOVE && tower[i].kw2!=0){
 					for(int j=0 ; j<10 ; j++)if(tower[i].ch[j]!=0){
 						if(sta[area[tower[i].area].station[j]].mark!=5 && sta[area[tower[i].area].station[j]].mark!=6){
-							ok=TRUE;break;
+							ok=true;break;
 						}
 					}
 				}
-				else ok=TRUE;
-				if(ok)tower[i].remove=FALSE;
-				else tower[i].remove=TRUE;
+				else ok=true;
+				if(ok)tower[i].remove=false;
+				else tower[i].remove=true;
 			}
 			createMap_tower();
-			map.buffered=FALSE;
-			map.buffered2=FALSE;
-			rd.received=FALSE;
+			map.buffered=false;
+			map.buffered2=false;
+			rd.received=false;
 		}
 	}
 	else if(gd.option_selected==11){
@@ -197,7 +197,7 @@ void keyOptionMenu(){
 				phase=MENU;
 				delete ant;
 				setAntenna();
-				rd.received=FALSE;
+				rd.received=false;
 				Mix_PlayChannel(1, sf.decide, 0);
 			}else{
 				endOption();
@@ -224,7 +224,7 @@ void keyOptionMenu(){
 			phase=MENU;
 			delete ant;
 			setAntenna();
-			rd.received=FALSE;
+			rd.received=false;
 			Mix_PlayChannel(1, sf.decide, 0);
 		}else{
 			endOption();
@@ -264,12 +264,12 @@ void keyOptionMenu(){
 void keyOptionSetting(){
 	if((key.up||key.right) && (!key_wait(key.up)||!key_wait(key.right))){
 		Mix_PlayChannel(1, sf.cursor_move, 0);
-		switchSetting(gd.option_selected,TRUE);
+		switchSetting(gd.option_selected,true);
 	}
 
 	if((key.down||key.left) && (!key_wait(key.down)||!key_wait(key.left))){
 		Mix_PlayChannel(1, sf.cursor_move, 0);
-		switchSetting(gd.option_selected,FALSE);
+		switchSetting(gd.option_selected,false);
 	}
 
 	if((key.z||key.x||key.c) && (!(key_stop(key.z))||!key_stop(key.x)||!key_stop(key.c))){
@@ -358,8 +358,8 @@ void drawOptionSetting(SDL_Surface* scr, int x, int y){
 		else if(ADJ_DIR==AUTO)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+16]);
 	}
 	else if(gd.option_selected==7){
-		if(EXPLAIN==TRUE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+17]);
-		else if(EXPLAIN==FALSE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+18]);
+		if(EXPLAIN==true)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+17]);
+		else if(EXPLAIN==false)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+18]);
 	}
 	else if(gd.option_selected==8){
 		TextOut2(scr,x+20,y+4,text[OPTIONTEXT+19]);
@@ -373,8 +373,8 @@ void drawOptionSetting(SDL_Surface* scr, int x, int y){
 	}
 	else if(gd.option_selected==10){
 		if(gd.bought[10]){
-			if(NHK_REMOVE==FALSE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+21]);
-			else if(NHK_REMOVE==TRUE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+22]);
+			if(NHK_REMOVE==false)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+21]);
+			else if(NHK_REMOVE==true)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+22]);
 		}
 	}
 	else if(gd.option_selected==11){
@@ -443,9 +443,9 @@ void endOption(){
 void timerOption(){
 }
 
-BOOL key_ok(int k){
+bool key_ok(int k){
 	for(int i=0 ; i<82 ; i++){
-		if(k==key_enable[i])return TRUE;
+		if(k==key_enable[i])return true;
 	}
-	return FALSE;
+	return false;
 }

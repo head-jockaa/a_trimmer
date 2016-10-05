@@ -2,7 +2,7 @@
 
 int *prgs2;
 int this_tower[10],which_tower;
-BOOL talk_3dtv=FALSE, talk_seoiha=FALSE,movie_test=FALSE;
+bool talk_3dtv=false, talk_seoiha=false,movie_test=false;
 Uint8 scr_design=NULL;
 
 void makeGuideBook();
@@ -58,7 +58,7 @@ void initMiyazaki(){
 }
 
 void endMiyazaki(){
-	movie_test=FALSE;
+	movie_test=false;
 	Mix_FreeMusic(bgm);
 	Mix_FreeChunk(sf.thunder);
 	Mix_FreeChunk(sf.swish);
@@ -87,11 +87,11 @@ void timerSeoiHa(){
 		Mix_FreeMusic(bgm);
 		if(scr_design==GAMEBOY){
 			bgm=Mix_LoadMUS("file/bgm/17.ogg");
-			talk_seoiha=FALSE;
+			talk_seoiha=false;
 			scr_design=NULL;
 		}else{
 			bgm=Mix_LoadMUS("file/bgm/19.ogg");
-			talk_seoiha=TRUE;
+			talk_seoiha=true;
 			scr_design=GAMEBOY;
 		}
 		Mix_PlayMusic(bgm,-1);
@@ -128,7 +128,7 @@ void gotoTowerList(){
 	createMap_tower();
 	gd.scrX=(int)gd.x*MAGNIFY-320;
 	gd.scrY=(int)gd.y*MAGNIFY-240;
-	map.buffered=FALSE;
+	map.buffered=false;
 	phase=TOWERLIST;
 }
 
@@ -136,7 +136,7 @@ void gotoMovieTest(){
 	int n=menu[BGM_TEST].selected()-NUM_OF_BGM;
 	if(n>=7 && n!=15){
 		endMiyazaki();
-		movie_test=TRUE;
+		movie_test=true;
 	}
 	if(n<=6){
 		gd.week=n;
@@ -215,9 +215,9 @@ void timerMiyazaki(){
 		if(gd.talk_open_count==20)gd.talk_open_count=0;
 	}
 	if(phase==MIYAZAKI_TALK || phase==DEPLOMA_TALK){
-		controlTextCount(TRUE);
+		controlTextCount(true);
 	}else{
-		controlTextCount(FALSE);
+		controlTextCount(false);
 	}
 }
 
@@ -307,7 +307,7 @@ void keyMiyazakiMuseum(){
 		TalkingAt(23);
 		phase=MIYAZAKI_TALK;
 		gd.talk_open_count=1;
-		talk_seoiha=FALSE;
+		talk_seoiha=false;
 	}
 	if(gd.x<0){
 		phase=LEAVE_MIYAZAKI;
@@ -349,15 +349,15 @@ void keyGuideAll(){
 		int n=menu[GUIDE_ALL].selected();
 		if(animebook[n]){
 			int a=0,b=0;
-			BOOL *ok;
-			ok=new BOOL[index_num];
-			for(int i=0 ; i<index_num ; i++)ok[i]=FALSE;
+			bool *ok;
+			ok=new bool[index_num];
+			for(int i=0 ; i<index_num ; i++)ok[i]=false;
 			for(int i=0 ; i<prgs ; i++){
 				if(i==prgs2[b]){
 					a+=2;b++;
 				}
 				if(prg[i].work==n){
-					a++;ok[b-1]=TRUE;
+					a++;ok[b-1]=true;
 				}
 			}
 			String s;
@@ -619,7 +619,7 @@ void keyBgmTest(){
 		}
 	}
 	if(key.x && !key_stop(key.x)){
-		movie_test=FALSE;
+		movie_test=false;
 		phase=MIYAZAKI_MUSEUM;
 		menu[BGM_TEST].setViewMode(HIDE);
 	}
@@ -653,12 +653,12 @@ void keyPrefList_tower(){
 
 void keyStaList_tower(){
 	if(key.z && !key_stop(key.z)){
-		for(int i=0 ; i<towers ; i++)tower[i].remove=FALSE;
+		for(int i=0 ; i<towers ; i++)tower[i].remove=false;
 		for(int i=0 ; i<towers ; i++){
-			if(tower[i].area!=menu[PREF_LIST_MIYAZAKI].selected())tower[i].remove=TRUE;
+			if(tower[i].area!=menu[PREF_LIST_MIYAZAKI].selected())tower[i].remove=true;
 			if(menu[GUIDE_STA].selected()!=0){
-				if(tower[i].ch[menu[GUIDE_STA].selected()-1]==0)tower[i].remove=TRUE;
-				if(tower[i].ch[menu[GUIDE_STA].selected()-1]==CHANNELS+1)tower[i].remove=TRUE;
+				if(tower[i].ch[menu[GUIDE_STA].selected()-1]==0)tower[i].remove=true;
+				if(tower[i].ch[menu[GUIDE_STA].selected()-1]==CHANNELS+1)tower[i].remove=true;
 			}
 		}
 		for(int i=0 ; i<towers; i++){
@@ -718,18 +718,18 @@ void keyTowerList(){
 		}
 	}
 	if(key.x && !key_stop(key.x)){
-		for(int i=0 ; i<towers ; i++)tower[i].remove=FALSE;
+		for(int i=0 ; i<towers ; i++)tower[i].remove=false;
 		if(NHK_REMOVE){
-			BOOL ok;
+			bool ok;
 			for(int i=0 ; i<towers ; i++)if(tower[i].kw2!=0){
-				ok=FALSE;
+				ok=false;
 				for(int j=0 ; j<10 ; j++)if(tower[i].ch[j]!=0){
 					if(sta[area[tower[i].area].station[j]].mark!=5 && sta[area[tower[i].area].station[j]].mark!=6){
-						ok=TRUE;break;
+						ok=true;break;
 					}
 				}
-				if(ok)tower[i].remove=FALSE;
-				else tower[i].remove=TRUE;
+				if(ok)tower[i].remove=false;
+				else tower[i].remove=true;
 			}
 		}
 		createMap_tower();
@@ -745,7 +745,7 @@ void keyTowerList(){
 		if(key.right)gd.x++;
 		gd.scrX=(int)gd.x*MAGNIFY-320;
 		gd.scrY=(int)gd.y*MAGNIFY-240;
-		map.buffered=FALSE;
+		map.buffered=false;
 	}
 	if(key.left||key.right||key.up||key.down){
 		for(int i=0 ; i<10 ; i++)this_tower[i]=EOF;
@@ -1042,7 +1042,7 @@ void keyYNForm(){
 				TalkingAt(0);
 			}else{
 				TalkingAt(a+1);
-				if(a==9)talk_3dtv=TRUE;
+				if(a==9)talk_3dtv=true;
 			}
 			gd.talk_open_count=1;
 		}
@@ -1104,7 +1104,7 @@ void keyYNForm(){
 			}
 			if(gd.x>1980 && gd.x<2100 && gd.bought[9]){
 				gd.game_mode=WALKING;
-				MAP3D=TRUE;
+				MAP3D=true;
 				phase=GOTO_STROLL;
 				count=0;
 			}

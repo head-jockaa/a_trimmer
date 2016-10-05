@@ -139,7 +139,7 @@ void keyTitle(){
 				initOption();
 			}
 			else if(menu[0].selected()==2){
-				run=FALSE;
+				run=false;
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 #include "radio.h"
 
-BOOL saveSMR=FALSE, SMRscanned=FALSE;
+bool saveSMR=false, SMRscanned=false;
 int SMRcount=0,SMRfast=35;
 Uint16 atan_table[60000], asin_table[10001], acos_table[10001];
 void create_atan_table();
@@ -61,14 +61,14 @@ void estimate(){
 		mt++;
 	}
 	create_atan_table();
-	rd.estimated=TRUE;
+	rd.estimated=true;
 }
 
 void shield_each_tower(double X, double Y, Tower* T){
 	double dir=T->dir, dir1=0, dir2=0;
 	int dis=(int)sqrt(rd.tower_dis_multi2);
-	BOOL shadow=FALSE;
-	rd.seeDIS[0]=0;rd.seeH[0]=gd.height;rd.seeM[0]=0;rd.seeDIR[0]=0;rd.seeCITY[0]=FALSE;rd.see_mounts=1;
+	bool shadow=false;
+	rd.seeDIS[0]=0;rd.seeH[0]=gd.height;rd.seeM[0]=0;rd.seeDIR[0]=0;rd.seeCITY[0]=false;rd.see_mounts=1;
 
 	Mount *mt=mount;
 	for(int m=0 ; m<mounts ; m++){
@@ -100,7 +100,7 @@ void shield_each_tower(double X, double Y, Tower* T){
 	rd.seeDIS[rd.see_mounts]=dis;
 	rd.seeH[rd.see_mounts]=T->h;
 	rd.seeM[rd.see_mounts]=0;
-	rd.seeCITY[rd.see_mounts]=FALSE;
+	rd.seeCITY[rd.see_mounts]=false;
 	rd.see_mounts++;
 
 /*ÉvÉåÉCÉÑÅ[Ç…ãﬂÇ¢èáÇ…ï¿Ç◊ÇÈ*/
@@ -137,7 +137,7 @@ void shield_each_tower(double X, double Y, Tower* T){
 /*å©í Çµãóó£îªíË*/
 	for(int i=0 ; i<10 ; i++)T->out[i]=0;
 	double a;
-	BOOL in=FALSE;
+	bool in=false;
 	for(int m=0 ; m<rd.see_mounts ; m++){
 		if(rd.seeDIS[m]==EOF || rd.seeCITY[m])continue;
 		for(int n=m+1 ; n<rd.see_mounts ; n++){
@@ -149,10 +149,10 @@ void shield_each_tower(double X, double Y, Tower* T){
 					T->out[i]=2;
 				}
 				else if(rd.seeDIS[n]-rd.seeDIS[m]>a){
-					in=TRUE;
+					in=true;
 					T->out[i]=1;
 				}
-				else in=TRUE;
+				else in=true;
 			}
 			break;
 		}
@@ -276,9 +276,9 @@ void receiveAll(double X, double Y){
 			continue;
 		}
 		rd.tower_dis_multi2=1.0*MAP_SCALE*MAP_SCALE*( 1.0*(X-tw->x)*(X-tw->x)+1.0*(Y-tw->y)*(Y-tw->y) );
-		BOOL skip=TRUE;
+		bool skip=true;
 		for(int k=0 ; k<area[tw->area].st_num ; k++){
-			if(tw->power[k] >= rd.tower_dis_multi2/100)skip=FALSE;
+			if(tw->power[k] >= rd.tower_dis_multi2/100)skip=false;
 		}
 		if(skip){
 			for(int k=0 ; k<area[tw->area].st_num ; k++){
@@ -316,17 +316,17 @@ int receive_mg(int aim_tower, int CH, int DIR){
 }
 
 void startSMR(int st){
-	BOOL end=FALSE,end_mount_dis=FALSE;
+	bool end=false,end_mount_dis=false;
 
 	for(int a=0 ; a<SMRfast ; a++){
-		end=FALSE;
-		end_mount_dis=FALSE;
+		end=false;
+		end_mount_dis=false;
 		int ud=1;
 		if((SMRcount/(640/SMRfast))%2==0)ud=-1;
 		int X=gd.scrX+a+(SMRcount%(640/SMRfast))*SMRfast;
 		int Y=gd.scrY+240+(SMRcount/(640/SMRfast)+1)/2*ud;
 		if(map.smr[X][Y]!=0)continue;
-		saveSMR=TRUE;
+		saveSMR=true;
 
 		for(int i=0 ; i<areas ; i++){
 			int s=-1;
@@ -342,17 +342,17 @@ void startSMR(int st){
 
 				rd.tower_dis_multi2=1.0*MAP_SCALE*MAP_SCALE*( 1.0*(X-tw->x)*(X-tw->x)+1.0*(Y-tw->y)*(Y-tw->y) );
 				if(tw->power[s] < rd.tower_dis_multi2/100){tw++;continue;}
-				SMRscanned=TRUE;
+				SMRscanned=true;
 
 				tw->rcv[s]=(int)( 100.0 * tw->power[s] / rd.tower_dis_multi2 );
-				if(!end_mount_dis){mount_dis(X,Y);end_mount_dis=TRUE;}
+				if(!end_mount_dis){mount_dis(X,Y);end_mount_dis=true;}
 				receive_each_tower(X,Y,tw);
 				shield_each_tower(X,Y,tw);
 				receive_each_ch(X,Y,tw,s);
 				shield_each_ch(tw,s);
 				if(tw->rcv[s]>=100){
 					map.smr[X][Y]=7;
-					end=TRUE;
+					end=true;
 					break;
 				}
 				else if(tw->rcv[s]>=80 && map.smr[X][Y]<=6)map.smr[X][Y]=6;

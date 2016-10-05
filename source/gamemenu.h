@@ -24,7 +24,7 @@ void timerGameMenu();
 void keyGameMenu();
 void drawSeaSide(SDL_Surface* scr);
 void drawGameMenu(SDL_Surface* scr);
-BOOL makeSaveMenu(int n);
-BOOL makeRecordMenu(int n);
+bool makeSaveMenu(int n);
+bool makeRecordMenu(int n);
 
 #endif

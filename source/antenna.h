@@ -9,8 +9,7 @@
 
 class Antenna{
 protected:
-	BOOL v;
-	Uint8 ch,m_wave2;
+	Uint8 v,ch,m_wave2;
 	int rcv,mg_rcv, A,T,C;
 	void setTmpFish();
 	void receive();

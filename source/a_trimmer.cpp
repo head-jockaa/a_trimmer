@@ -5,7 +5,7 @@ void createAlphaKey();
 void drawZoom(SDL_Surface* scr);
 void initAll();
 void endAll();
-BOOL pause;
+bool pause;
 SDL_Window* window;
 SDL_Renderer *render;
 
@@ -110,9 +110,9 @@ int main(int argc, char *argv[]) {
 	key.F1=0;key.F4=0;key.F10=0;
 	int time=SDL_GetTicks();
 	double delay=16;
-	pause=FALSE;
+	pause=false;
 	scr.w=640;scr.h=480;
-	run=TRUE;
+	run=true;
 
 //	putenv("SDL_VIDEODRIVER=windib");	
 //	putenv("SDL_AUDIODRIVER=waveout");
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 				if(key.pressed==SDLK_F1 && key.F1==0)key.F1=1;
 				if(key.pressed==SDLK_F4 && key.F4==0)key.F4=1;
 				if(key.pressed==SDLK_F10 && key.F10==0)key.F10=1;
-				if(key.pressed==SDLK_ESCAPE)run=FALSE;
+				if(key.pressed==SDLK_ESCAPE)run=false;
 				if(key.pressed==SDLK_a && !key_stop(key.a)){
 					if(!(mode==OPTION&&phase==OPTION_KEY_SETTING)){
 						if(CHAR_CODE==JAPANESE)CHAR_CODE=EUROPEAN;
@@ -170,32 +170,32 @@ int main(int argc, char *argv[]) {
 				}
 				if(key.pressed==SDLK_F1 && !key_stop(key.F1)){
 					if(pause){
-						pause=FALSE;
+						pause=false;
 						resumeMovie();
 					}else{
-						pause=TRUE;
+						pause=true;
 						pauseMovie();
 					}
 				}
 				if(key.pressed==SDLK_F4 && !key_stop(key.F4)){
 					if(FULLSCR){
 						window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
-						FULLSCR=FALSE;
+						FULLSCR=false;
 					}else{
 						window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_FULLSCREEN);
-						FULLSCR=TRUE;
+						FULLSCR=true;
 					}
 					img.screen = SDL_GetWindowSurface(window);
 				}
 				if(key.pressed==SDLK_F10 && !key_stop(key.F10)){
 					if(gd.bought[17]){
-						if(CHOSEON)CHOSEON=FALSE;
-						else CHOSEON=TRUE;
+						if(CHOSEON)CHOSEON=false;
+						else CHOSEON=true;
 					}
 				}
 				if(key.pressed==SDLK_F11)reset_key();
 				if(key.pressed==SDLK_F12){
-					movie_test=FALSE;
+					movie_test=false;
 					end();
 					initOpening();
 				}
@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
 				if(ev.key.keysym.sym==SDLK_F10)key.F10=0;
 				break;
 			case SDL_QUIT:
-				run=FALSE;
+				run=false;
 				break;
 			default: break;
 		}
@@ -254,7 +254,7 @@ void initAll(){
 	getImage(img.facechip,"file/img/face.png",0,0,255);
 	getSymbolImage();
 	gd.timeslot=NULL;
-	map.rural_loaded=FALSE;
+	map.rural_loaded=false;
 	fishbox.initAll();
 	load_parameter();
 	load_text();
@@ -301,8 +301,8 @@ void checkEndian(){
 	Uint8 bypp = f->BytesPerPixel;
 
 	SDL_LockSurface(img.screen);
-	if(*(Uint32*)px%256==1)ABGR=TRUE;
-	else ABGR=FALSE;
+	if(*(Uint32*)px%256==1)ABGR=true;
+	else ABGR=false;
 	SDL_UnlockSurface(img.screen);
 }
 

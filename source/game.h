@@ -60,7 +60,7 @@ void timerGame();
 void drawTerop(SDL_Surface* scr, String str, int rcv, int mg_rcv);
 void drawM(SDL_Surface* scr, int w, int m, int x, int y);
 int getScore(int n, double pw, int x, int y);
-BOOL in_time(int w, int h, int m, int t);
+bool in_time(int w, int h, int m, int t);
 void head_of_talking();
 void head_of_timeslot();
 void setManekiData();
@@ -85,15 +85,16 @@ struct GameData{
 	int bs_ch;
 	int zoom,height;
 	double x,y,speed,real_speed,speedX,speedY;
-	BOOL doze,m_waved,kulisaped,bought[18],memma_type;
+	bool doze,m_waved,kulisaped,bought[18];
 	bool secondMusic;
-	Uint8 randomNumber;
+	Uint8 randomNumber,memma_type;
 };
 extern GameData gd;
 
 struct ManekiData{
 	Fish fish[300];
-	BOOL maneki_mode, bs[300];
+	Uint8 maneki_mode;
+	bool bs[300];
 	double manekiX,manekiY;
 	int maneki_count[300],fish_num;
 	int ch[300],tower[300],station[300],rcv[300],mg_rcv[300],st_num;

@@ -151,9 +151,9 @@ void keyWarning(){
 
 void keyEnding(){
 	if(phase==LEAVE_SHORE || phase==GET_MEDAL || phase==ANIME_GOD || phase==LAST_STORY){
-		BOOL ok=TRUE;
-		if(phase==ANIME_GOD && gd.scene_count==1)ok=FALSE;
-		if(phase==LAST_STORY && start!=0)ok=FALSE;
+		bool ok=true;
+		if(phase==ANIME_GOD && gd.scene_count==1)ok=false;
+		if(phase==LAST_STORY && start!=0)ok=false;
 		if(key.z && !key_stop(key.z) && ok){
 			int a=controlTalking();
 			if(a==COMMA){
@@ -424,10 +424,10 @@ void timerEnding(){
 	else if(phase==PRE_ENDING_ANIME || phase==ENDING_ANIME)timerEndingAnime();
 	else if(phase==LAST_ENDING)timerLastEnding();
 	if(phase==LEAVE_SHORE || phase==GET_MEDAL || phase==ANIME_GOD || phase==LAST_STORY){
-	  if(start==0 || phase==ANIME_GOD && start<50)controlTextCount(TRUE);
-	  else controlTextCount(FALSE);
+	  if(start==0 || phase==ANIME_GOD && start<50)controlTextCount(true);
+	  else controlTextCount(false);
 	}else{
-		controlTextCount(FALSE);
+		controlTextCount(false);
 	}
 }
 
