@@ -440,7 +440,6 @@ void getTargetImage(){
 	delete msg;
 
 	char get_msg[BUF_LEN];
-	bool start = false;
 	int length = 0;
 	char fn[100];
 

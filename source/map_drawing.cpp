@@ -73,7 +73,7 @@ void createMap(){
 	if(map_loaded)return;
 	map.set();
 	load_mounts();
-	SDL_Surface *img, *img2;
+	SDL_Surface *img, *img2=NULL;
 	SDL_PixelFormat *f;
 	Uint8 *px;
 	Uint16 pitch;
@@ -85,8 +85,11 @@ void createMap(){
 		else img=SDL_CreateRGBSurface(SDL_SWSURFACE, 300, 300, 32, 0x000000ff,0x0000ff00,0x00ff0000,0);
 		sprintf_s(str,"file/img/map/map%d%d.gif",j,i);
 		img2=IMG_Load(str);
-		drawSurface(img,img2,0,0,0,0,300,300,255);
-		SDL_FreeSurface(img2);
+		if(img2){
+			drawSurface(img,img2,0,0,0,0,300,300,255);
+			SDL_FreeSurface(img2);
+			img2=NULL;
+		}
 		SDL_LockSurface(img);
 		f = img->format;
 		px = (Uint8*)img->pixels;
@@ -110,6 +113,7 @@ void createMap(){
 		SDL_UnlockSurface(img);
 		SDL_FreeSurface(img);
 	}
+	setAlpha(map.rgb,0,0,0);
 
 	int a;
 	for(int i=0 ; i<640 ; i++)for(int j=0 ; j<480 ; j++){
@@ -627,7 +631,7 @@ void drawGround(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, in
 
 void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, bool buf){
 	SDL_LockSurface(scr);
-	if(SHOW_TOWER==NULL)return;
+	if(!SHOW_TOWER)return;
 	x+=MAGNIFY/2;
 	y+=MAGNIFY/2;
 	if(x<0)x=0;

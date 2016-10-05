@@ -70,7 +70,9 @@
 
 int to8int(char c);
 int to16int(char c1, char c2);
-int to32int(char c1, char c2, char c3, char c4);
+int to16int_signed(char c1, char c2);
+Uint32 to32int(char c1, char c2, char c3, char c4);
+bool toBool(char c);
 bool key_wait(int a);
 bool key_stop(int a);
 void TextOut(SDL_Surface* scr, int X, int Y, char* st);
@@ -104,7 +106,8 @@ extern int stas,works,prgs,allworks,collection,areas,towers,mounts,towns,index_n
 extern int count,bg_count,face[1000],start;
 extern int talk_kulisap,face_kulisap,ant_dir;
 extern Uint8 fontA;
-extern Uint8 CHAR_CODE,AIR_IMG,WALKING_TYPE,SHOW_TOWER,ROD_TYPE,ADJ_DIR,CHANNELS,EXPLAIN,FULLSCR,SCRSIZE,BGM_VOLUME,SE_VOLUME,CHOSEON,CURVE_TOP,MAGNIFY,MAP3D,DASH_TYPE,NHK_REMOVE;
+extern bool SHOW_TOWER, EXPLAIN, NHK_REMOVE;
+extern Uint8 CHAR_CODE,AIR_IMG,WALKING_TYPE,ROD_TYPE,ADJ_DIR,CHANNELS,FULLSCR,SCRSIZE,BGM_VOLUME,SE_VOLUME,CHOSEON,CURVE_TOP,MAGNIFY,MAP3D,DASH_TYPE;
 extern double CURVE_RISE;
 extern double test;
 extern double DIS1CH; // 1Ch 500kw ‚Ì“d”g‚ª”ò‚Ô‹——£
@@ -217,7 +220,8 @@ struct Tower{
 	Uint16 x, y, h, x_3d, y_3d, work[10], r_dis[20],r_m[20];
 	float power[10];
 	float dir;
-	bool out[10],remove,v;
+	bool remove, v;
+	Uint8 out[10];
 };
 
 struct Mount{
@@ -312,10 +316,9 @@ void TextOut2_lang(Image* img, int x, int y, char* st, int l, int lang);
 void TextOut2(Image* img, int X, int Y, String st);
 void TextOut2(Image* img, int x, int y, String str, int strl);
 void TextOut2_lang(Image* img, int x, int y, String st, int l, int lang);
-void setColorKey(Image *img, Uint8 r, Uint8 g, Uint8 b);
 void getImage(Image*& img, char* st, int r, int g, int b);
 void getImage(Image*& im, char* st);
-void freeImage(Image* img);
+void freeImage(Image*& im);
 void drawTalking(SDL_Surface* scr);
 void drawTalking(SDL_Surface* scr, int fc, String st);
 void drawRect(SDL_Surface* scr, int x, int y, int w, int h, int R, int G, int B, int a);

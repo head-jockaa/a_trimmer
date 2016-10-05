@@ -178,6 +178,8 @@ int main(int argc, char *argv[]) {
 					}
 				}
 				if(key.pressed==SDLK_F4 && !key_stop(key.F4)){
+					SDL_FreeSurface(img.screen);
+					SDL_DestroyWindow(window);
 					if(FULLSCR){
 						window = SDL_CreateWindow(text[0].str[0], SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
 						FULLSCR=false;
@@ -236,6 +238,8 @@ int main(int argc, char *argv[]) {
 	SDL_FreeSurface(img.iwa);
 	SDL_FreeSurface(img.screen);
 	Mix_CloseAudio();
+	SDL_DestroyWindow(window);
+	SDLNet_Quit();
 	SDL_Quit();
 	return 1;
 }
@@ -294,14 +298,9 @@ void endAll(){
 
 void checkEndian(){
 	fillRect(img.screen,0,0,1,1,1,0,0,255);
-	SDL_PixelFormat *f = img.screen->format;
-	Uint8 bpp = f->BytesPerPixel;
 	Uint8 *px = (Uint8*)img.screen->pixels;
-	Uint16 pitch = img.screen->pitch;
-	Uint8 bypp = f->BytesPerPixel;
-
 	SDL_LockSurface(img.screen);
-	if(*(Uint32*)px%256==1)ABGR=true;
+	if(*px==1)ABGR=true;
 	else ABGR=false;
 	SDL_UnlockSurface(img.screen);
 }

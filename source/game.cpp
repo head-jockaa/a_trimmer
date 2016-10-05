@@ -747,6 +747,7 @@ void keyPlaying(){
 	}
 	if(key.c && !key_stop(key.c)){
 		phase=MENU;
+		gd.menu_selected=0;
 		start=30;
 		Mix_PlayChannel(1, sf.decide2, 0);
 	}
@@ -811,7 +812,7 @@ void keyAntenna(){
 	}
 }
 
-void keyMenu(){
+void keyMenuWhileInGame(){
 	if(key.z && !key_stop(key.z)){
 		Mix_PlayChannel(1, sf.decide2, 0);
 		if(gd.menu_selected==0){
@@ -1282,7 +1283,7 @@ void keyGame(){
 		case RESULT:keyResult();break;
 		case GET_HAZIA:keyGetHazia();break;
 		case ANTENNA:keyAntenna();break;
-		case MENU:keyMenu();break;
+		case MENU:keyMenuWhileInGame();break;
 		case SAVEMENU:keySaveMenu();break;
 		case PREF_LIST_SMR:keyPrefList_SMR();break;
 		case SMR:keySMR();break;
@@ -1341,7 +1342,7 @@ void receiveBS(){
 			gd.get_score++;
 			gd.gradeup=1;
 			phase=BS_ATTACK;
-			start=30;
+			start=50;
 		}
 		fishbox.panelColor(tmp_fish.title_num);
 	}
@@ -1619,7 +1620,7 @@ void drawGetHazia(SDL_Surface *scr){
 		drawImage(scr,img.back,640-((count+70)%120)*12,240,600,280,320,120,255);
 		drawImage(scr,img.back,((count+20)%120)*12-320,280,920,320,320,80,255);
 
-		int X,Y,X2,Y2,W,H;
+		int X=0,Y=0,X2,Y2,W,H;
 
 		for(int k=0 ; k<2 ; k++){
 			if(k==0){X=((count+20)%120)*12-100;Y=240;}
@@ -2487,7 +2488,7 @@ void timerMemma(){
 	if(gd.memma_count>0)gd.memma_count--;
 	if(abs((int)gd.x-gd.memmaX)<20 && abs((int)gd.y-gd.memmaY)<20){
 		if(gd.memma_count==20){
-			gd.memma_type=rand()%2;
+			gd.memma_type=toBool(rand()%2);
 			if(gd.memma_type)Mix_PlayChannel(0,sf.decide,0);
 			else Mix_PlayChannel(0,sf.bupyo,0);
 		}
@@ -2547,9 +2548,11 @@ void timerSunMovement(){
 		if(gd.minute==0){
 			if(gd.hour==6){
 				createMap_color(1000);
+				map.buffered=false;
 			}
 			if(gd.hour==23){
 				createMap_color(200);
+				map.buffered=false;
 			}
 		}
 	}
@@ -3100,7 +3103,7 @@ void setManekiData(){
 				md.rcv[a]=tow->rcv[k];
 				md.station[a]=a;
 				md.tower[a]=i;
-				md.ch[a]=k;tower[i].ch[k];
+				md.ch[a]=k;
 				md.mg_rcv[a]=mr2;
 			}
 		}

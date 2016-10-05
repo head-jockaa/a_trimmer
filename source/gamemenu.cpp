@@ -85,7 +85,7 @@ void gotoRecord(){
 
 void gotoGame(){
 	bool c=false;
-	int n;
+	int n=0;
 	if(gd.mainmenu_selected==1){
 		c=true;
 		n=menu[SAVEDATA].selected();

@@ -67,7 +67,6 @@ void estimate(){
 void shield_each_tower(double X, double Y, Tower* T){
 	double dir=T->dir, dir1=0, dir2=0;
 	int dis=(int)sqrt(rd.tower_dis_multi2);
-	bool shadow=false;
 	rd.seeDIS[0]=0;rd.seeH[0]=gd.height;rd.seeM[0]=0;rd.seeDIR[0]=0;rd.seeCITY[0]=false;rd.see_mounts=1;
 
 	Mount *mt=mount;
@@ -106,9 +105,11 @@ void shield_each_tower(double X, double Y, Tower* T){
 /*プレイヤーに近い順に並べる*/
 	for(int m=rd.see_mounts-2 ; m>=2 ; m--)for(int n=1 ; n<m ; n++){
 		if(rd.seeDIS[n]>rd.seeDIS[n+1]){
-			int see2=rd.seeDIS[n],seeH2=rd.seeH[n],seeN2=rd.seeNUM[n],seeC2=rd.seeCITY[n];
+			int see2=rd.seeDIS[n],seeH2=rd.seeH[n],seeN2=rd.seeNUM[n];
+			Uint8 seeC2=rd.seeCITY[n];
 			rd.seeDIS[n]=rd.seeDIS[n+1];rd.seeH[n]=rd.seeH[n+1];rd.seeNUM[n]=rd.seeNUM[n+1];rd.seeCITY[n]=rd.seeCITY[n+1];
-			rd.seeDIS[n+1]=see2;rd.seeH[n+1]=seeH2;rd.seeNUM[n+1]=seeN2;rd.seeCITY[n+1]=seeC2;
+			rd.seeDIS[n+1]=see2;rd.seeH[n+1]=seeH2;rd.seeNUM[n+1]=seeN2;
+			rd.seeCITY[n+1]=seeC2;
 		}
 	}
 
@@ -190,7 +191,9 @@ void shield_each_ch(Tower* T, int k){
 /*山頂をかすった分だけ減衰*/
 	for(int n=1 ; n<rd.see_mounts-1 ; n++)if(rd.seeDIS[n]!=EOF){
 		rcv*=mhz[T->ch[k]-1].dif;
-		if(rd.seeCITY[n])for(int p=1 ; p<rd.seeCITY[n] ; p++)rcv*=mhz[T->ch[k]-1].dif;
+		if(rd.seeCITY[n])for(int p=1 ; p<rd.seeCITY[n] ; p++){
+			rcv*=mhz[T->ch[k]-1].dif;
+		}
 	}
 	T->rcv[k]=(int)rcv;
 	if(phase!=SMR_RESULT){

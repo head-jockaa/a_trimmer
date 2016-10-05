@@ -68,7 +68,7 @@ void load_index(){
 		clear_num=1;
 	}else{
 		for(int i=0 ; i<18 ; i++){
-			gd.bought[i]=fstr[fc];fc++;
+			gd.bought[i]=toBool(fstr[fc]);fc++;
 			if(gd.bought[i])gd.hazia-=price[i];
 		}
 		for(int i=0 ; i<index_num ; i++){
@@ -475,7 +475,7 @@ void load_towers(){
 			tw->kw2=fstr[fc];fc++;
 			tw->erp=fstr[fc];fc++;
 			tw->erp2=fstr[fc];fc++;
-			tw->v=fstr[fc];fc++;
+			tw->v=toBool(fstr[fc]);fc++;
 			tw->bias=to8int(fstr[fc]);fc++;
 			for(int j=0 ; j<area[i].st_num ; j++){
 				tw->ch[j]=fstr[fc];fc++;
@@ -527,6 +527,10 @@ void extra_tower(){
 	area[areas].st_num=1;
 	area[areas].station[0]=stas-1;
 	area[areas].tower=towers;
+	for(int j=0 ; j<10 ; j++){
+		area[areas].station[j]=0;
+		area[areas].button[j]=0;
+	}
 	tower[towers].area=areas;
 	tower[towers].bias=255;
 	tower[towers].ch[0]=CHANNELS;
@@ -626,7 +630,6 @@ void load_rural(){
 	if(map.rural_loaded)return;
 	load_towers();
 	size_t fc=0;
-	int a=0,b=0;
 
 	loadFile("file/data/rural.dat");
 	map.rural_size=fstr[fc];fc++;
@@ -656,22 +659,38 @@ void save_option(){
 	fstr[count]=NHK_REMOVE;count++;
 	fstr[count]=WALKING_TYPE;count++;
 	fstr[count]=ROD_TYPE;count++;
-	fstr[count]=key.aC%256;count++;
-	fstr[count]=key.aC/256;count++;
-	fstr[count]=key.zC%256;count++;
-	fstr[count]=key.zC/256;count++;
-	fstr[count]=key.xC%256;count++;
-	fstr[count]=key.xC/256;count++;
-	fstr[count]=key.cC%256;count++;
-	fstr[count]=key.cC/256;count++;
-	fstr[count]=key.upC%256;count++;
-	fstr[count]=key.upC/256;count++;
-	fstr[count]=key.downC%256;count++;
-	fstr[count]=key.downC/256;count++;
-	fstr[count]=key.leftC%256;count++;
-	fstr[count]=key.leftC/256;count++;
-	fstr[count]=key.rightC%256;count++;
-	fstr[count]=key.rightC/256;count++;
+	fstr[count]=key.aC&255;count++;
+	fstr[count]=key.aC>>8&255;count++;
+	fstr[count]=key.aC>>16&255;count++;
+	fstr[count]=key.aC>>24&255;count++;
+	fstr[count]=key.zC&255;count++;
+	fstr[count]=key.zC>>8&255;count++;
+	fstr[count]=key.zC>>16&255;count++;
+	fstr[count]=key.zC>>24&255;count++;
+	fstr[count]=key.xC&255;count++;
+	fstr[count]=key.xC>>8&255;count++;
+	fstr[count]=key.xC>>16&255;count++;
+	fstr[count]=key.xC>>24&255;count++;
+	fstr[count]=key.cC&255;count++;
+	fstr[count]=key.cC>>8&255;count++;
+	fstr[count]=key.cC>>16&255;count++;
+	fstr[count]=key.cC>>24&255;count++;
+	fstr[count]=key.upC&255;count++;
+	fstr[count]=key.upC>>8&255;count++;
+	fstr[count]=key.upC>>16&255;count++;
+	fstr[count]=key.upC>>24&255;count++;
+	fstr[count]=key.downC&255;count++;
+	fstr[count]=key.downC>>8&255;count++;
+	fstr[count]=key.downC>>16&255;count++;
+	fstr[count]=key.downC>>24&255;count++;
+	fstr[count]=key.leftC&255;count++;
+	fstr[count]=key.leftC>>8&255;count++;
+	fstr[count]=key.leftC>>16&255;count++;
+	fstr[count]=key.leftC>>24&255;count++;
+	fstr[count]=key.rightC&255;count++;
+	fstr[count]=key.rightC>>8&255;count++;
+	fstr[count]=key.rightC>>16&255;count++;
+	fstr[count]=key.rightC>>24&255;count++;
 
 	fopen_s(&hFile, "save/option.dat", "wb");
 	fwrite(fstr, sizeof(fstr[0]), count/sizeof(fstr[0]), hFile);
@@ -736,8 +755,11 @@ void load_parameter(){
 			mhz[i].mhz=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		}
 /*	}else{
-		map.mapW=1920;map.mapH=2600;
+		map.mapW=1970;map.mapH=2600;
 		gd.startX=1100;gd.startY=1046;
+		gd.summerX_start=700;gd.summerY_start=1300;
+		gd.summerX=1310;gd.summerY=970;
+		gd.memmaX=1370;gd.memmaY=990;
 		DIS1CH=78.7;
 		DIS62CH=22.1;
 		CURVE_TOP=214;
@@ -745,11 +767,11 @@ void load_parameter(){
 		DIF1CH=0.7;
 		DIF62CH=0.3;
 		SDW400H=3.1;
-		SDW62CH=0.1;
-		GROUND1CH=1.3;
+		SDW62CH=1.1;
+		GROUND1CH=20.8;
 		GROUND62CH=1.0;
-		ORI1CH=16.0;
-		ORI62CH=20.0;
+		ORI1CH=18.0;
+		ORI62CH=22.0;
 		RCV_LEVEL=20.0;
 		CHANNELS=62;
 		MAP_SCALE=1.3;
@@ -762,28 +784,33 @@ void load_parameter(){
 			if(i>=63)a+=11321;
 			mhz[i-1].mhz=a;
 		}
-		fstr=new char[33+CHANNELS*2];
-		fstr[0]=0;fstr[1]=0;
-		fstr[2]=map.mapW%256;fstr[3]=map.mapW/256;
-		fstr[4]=map.mapH%256;fstr[5]=map.mapH/256;
-		fstr[6]=gd.startX%256;fstr[7]=gd.startX/256;
-		fstr[8]=gd.startY%256;fstr[9]=gd.startY/256;
-		fstr[10]=-7;fstr[11]=0;fstr[12]=0;
-		fstr[13]=70;fstr[14]=0;
-		fstr[15]=-42;fstr[16]=0;
-		fstr[17]=15;
-		fstr[18]=7;fstr[19]=1;
-		fstr[20]=3;fstr[21]=1;
-		fstr[22]=31;fstr[23]=0;
-		fstr[24]=1;fstr[25]=0;
-		fstr[26]=13;fstr[27]=1;
-		fstr[28]=1;fstr[29]=0;
-		fstr[30]=18;
-		fstr[31]=22;
-		fstr[32]=20;fstr[33]=0;
-		fstr[34]=62;
-		fstr[35]=13;fstr[36]=1;
-		fc=37;
+		fstr=new char[49+CHANNELS*2];
+		fstr[0]=map.mapW%256;fstr[1]=map.mapW/256;
+		fstr[2]=map.mapH%256;fstr[3]=map.mapH/256;
+		fstr[4]=gd.startX%256;fstr[5]=gd.startX/256;
+		fstr[6]=gd.startY%256;fstr[7]=gd.startY/256;
+		fstr[8]=gd.summerX_start%256;fstr[9]=gd.summerX_start/256;
+		fstr[10]=gd.summerY_start%256;fstr[11]=gd.summerY_start/256;
+		fstr[12]=gd.summerX%256;fstr[13]=gd.summerX/256;
+		fstr[14]=gd.summerY%256;fstr[15]=gd.summerY/256;
+		fstr[16]=gd.memmaX%256;fstr[17]=gd.memmaX/256;
+		fstr[18]=gd.memmaY%256;fstr[19]=gd.memmaY/256;
+		fstr[20]=49;fstr[21]=3;fstr[22]=1;
+		fstr[23]=221-256;fstr[24]=0;fstr[25]=1;
+		fstr[26]=214-256;fstr[27]=0;
+		fstr[28]=47;fstr[29]=1;
+		fstr[30]=7;fstr[31]=1;
+		fstr[32]=3;fstr[33]=1;
+		fstr[34]=31;fstr[35]=1;
+		fstr[36]=1;fstr[37]=1;
+		fstr[38]=208-256;fstr[39]=1;
+		fstr[40]=1;fstr[41]=0;
+		fstr[42]=18;
+		fstr[43]=22;
+		fstr[44]=20;fstr[45]=0;
+		fstr[46]=62;
+		fstr[47]=13;fstr[48]=1;
+		fc=49;
 		for(int i=0 ; i<CHANNELS ; i++){
 			fstr[fc]=mhz[i].mhz%256;fc++;
 			fstr[fc]=mhz[i].mhz/256;fc++;
@@ -838,26 +865,26 @@ void load_option(){
 		ROD_TYPE=CONVENIENTROD;
 		reset_key();
 	}else{
-		SHOW_TOWER=fstr[fc];fc++;
+		SHOW_TOWER=toBool(fstr[fc]);fc++;
 		AIR_IMG=fstr[fc];fc++;
 		DASH_TYPE=fstr[fc];fc++;
 		CHAR_CODE=fstr[fc];fc++;
 		MAGNIFY=fstr[fc];fc++;
 		ADJ_DIR=fstr[fc];fc++;
-		EXPLAIN=fstr[fc];fc++;
+		EXPLAIN=toBool(fstr[fc]);fc++;
 		BGM_VOLUME=fstr[fc];fc++;
 		SE_VOLUME=fstr[fc];fc++;
-		NHK_REMOVE=fstr[fc];fc++;
+		NHK_REMOVE=toBool(fstr[fc]);fc++;
 		WALKING_TYPE=fstr[fc];fc++;
 		ROD_TYPE=fstr[fc];fc++;
-		key.aC=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		key.zC=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		key.xC=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		key.cC=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		key.upC=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		key.downC=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		key.leftC=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		key.rightC=to16int(fstr[fc],fstr[fc+1]);
+		key.aC=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+		key.zC=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+		key.xC=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+		key.cC=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+		key.upC=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+		key.downC=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+		key.leftC=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+		key.rightC=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);
 	}
 }
 
@@ -921,7 +948,6 @@ void save_record(int n){
 }
 
 void load_record(int n){
-	int a=0;
 	size_t fc=0;
 	sprintf_s(str,"save/record%d.dat",n);
 	loadFile(str);
@@ -1080,7 +1106,7 @@ void load_game(int n){
 		md.fish[i].x=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].y=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].sta=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		md.fish[i].bs=fstr[fc];fc++;
+		md.fish[i].bs=toBool(fstr[fc]);fc++;
 		md.fish[i].tower=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].ch=fstr[fc];fc++;
 		md.fish[i].hour=fstr[fc];fc++;
@@ -1094,7 +1120,7 @@ void load_game(int n){
 }
 
 void load_smr(int n){
-	sprintf_s(str,"file/smr/smr%d.dat",n);
+	sprintf_s(str,"save/smr/smr%d.dat",n);
 	if(!loadFile(str))return;
 	int fc=0,a=0,b=0;
 	for(int j=0 ; j<map.mapH ; j++){
@@ -1147,7 +1173,7 @@ void save_smr(int n){
 	fstr[fc]=EOF;fc++;
 	fsize=fc;
 
-	sprintf_s(str,"file/smr/smr%d.dat",n);
+	sprintf_s(str,"save/smr/smr%d.dat",n);
 	fopen_s(&hFile, str, "wb");
 	fwrite(fstr, sizeof(fstr[0]), fc/sizeof(fstr[0]), hFile);
 	fclose(hFile);

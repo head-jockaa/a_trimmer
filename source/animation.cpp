@@ -1035,7 +1035,7 @@ void drawLastEndingAnim(SDL_Surface* scr, int cn){
 	}
 	else if(cn<3350){
 		a=cn-3250;
-		int b,c=0;
+		int b=0,c=0;
 		if(a<85)b=a/3;
 		else c=(a-85)*4;
 		fillRect(scr,0,320-a*4,320,300,0,0,0,255);

@@ -901,7 +901,6 @@ void ConvenientRod::makeList(){
 			int a=area[tow->area].station[k];
 			if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
 
-				Uint32 dir2=0;
 				int mr2=0;
 				mr2=receive_mg(i,tow->ch[k],(int)tow->dir);
 

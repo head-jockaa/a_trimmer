@@ -859,7 +859,7 @@ void keySmrDelete_pref(){
 			int n=area[ menu[PREF_LIST_MIYAZAKI].selected() ].station[i];
 			sprintf_s(str2.str[0],"%s",sta[n].name.str[0]);
 			sprintf_s(str2.str[1],"%s",sta[n].name.str[1]);
-			sprintf_s(str,"file/smr/smr%d.dat",n);
+			sprintf_s(str,"save/smr/smr%d.dat",n);
 			if(loadFile(str)){
 				sprintf_s(str2.str[0],"%s (%dbyte)",str2.str[0],fsize);
 				sprintf_s(str2.str[1],"%s (%dbyte)",str2.str[1],fsize);
@@ -993,7 +993,7 @@ void keyDeleteYN(){
 		}
 		if(menu[DELETE_MENU].selected()==5){
 			int n=area[ menu[PREF_LIST_MIYAZAKI].selected() ].station[ menu[GUIDE_STA].selected() ];
-			sprintf_s(str,"file/smr/smr%d.dat",n);
+			sprintf_s(str,"save/smr/smr%d.dat",n);
 			fopen_s(&hf,str,"rb");
 			if(hf==NULL)phase=NODATA2;
 			else{
@@ -1297,7 +1297,7 @@ void drawComeMiyazaki(SDL_Surface* scr){
 }
 
 void drawLeaveMiyazaki(SDL_Surface* scr){
-	int x,y,a,x2,y2,x3,y3;
+	int x,y,a,x2,y2,x3=0,y3=0;
 	if(count<30)x=240+count*4;
 	else if(count<60)x=360;
 	else x=360-(count-60)*4;
@@ -1538,7 +1538,6 @@ void makeGuideBook(){
 
 void changeScreenColor(SDL_Surface* scr){
 	Uint32 *px;
-	Uint32 pixel=0;
 	SDL_Color col;
 	int Y;
 	SDL_LockSurface(scr);

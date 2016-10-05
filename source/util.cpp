@@ -26,9 +26,10 @@ double test=0;
 int stas=0,works=0,prgs=0,allworks=0,collection=0,areas=0,towers=0,mounts=0,towns=0,index_num=0,clear_num=0;
 int count=0,bg_count=0,face[1000],start=0;
 Uint8 mode=0,phase=0,dataNo=1,fontA=255,kick_count=0;
-Uint8 CHAR_CODE,AIR_IMG,WALKING_TYPE,SHOW_TOWER,ROD_TYPE,ADJ_DIR,MAP3D;
-Uint8 CHANNELS,EXPLAIN,FULLSCR,SCRSIZE=1,BGM_VOLUME,SE_VOLUME;
-Uint8 CHOSEON=0,CURVE_TOP,MAGNIFY,DASH_TYPE,NHK_REMOVE;
+bool SHOW_TOWER, EXPLAIN, NHK_REMOVE;
+Uint8 CHAR_CODE,AIR_IMG,WALKING_TYPE,ROD_TYPE,ADJ_DIR,MAP3D;
+Uint8 CHANNELS,FULLSCR,SCRSIZE=1,BGM_VOLUME,SE_VOLUME;
+Uint8 CHOSEON=0,CURVE_TOP,MAGNIFY,DASH_TYPE;
 double DIS1CH,DIS62CH,RCV_LEVEL,MAP_SCALE,CURVE_RISE;
 int BSchannel[12],BSstation[12];
 Mhz *mhz;
@@ -70,21 +71,21 @@ void Menu::animation(){
 void Menu::drawMenuText(SDL_Surface* scr){
 	int a=255;
 	if(v==GRAY)a=128;
-	drawImage(scr,img.chr, x,y+show*20, 140,120,20,20, a);
+	drawImage(scr,img.chr, x,y+show*40, 280,240,40,40, a);
 	for(int i=pageOff ; i<pageOff+raw ; i++){
 		if(i==lim)break;
 		if(v==GRAY || gray[i])a=128;
 		else a=255;
 		fontA=a;
 		if(mark[i]!=0){
-			drawImage(scr,img.symbol,x+20,y+(i-pageOff)*20,(mark[i]%16)*17,(mark[i]/16)*17,17,17,a);
-			if(lang==JAPANESE)TextOut_lang(scr, x+40, y+(i-pageOff)*20, st[i], width, JAPANESE);
-			else if(lang==EUROPEAN)TextOut_lang(scr, x+40, y+(i-pageOff)*20, st[i], width, EUROPEAN);
-			else TextOut(scr, x+40, y+(i-pageOff)*20, st[i], width);
+			drawImage(scr,img.symbol,x+40,y+(i-pageOff)*40,(mark[i]%16)*34,(mark[i]/16)*34,34,34,a);
+			if(lang==JAPANESE)TextOut2_lang(scr, x+80, y+(i-pageOff)*40, st[i], width, JAPANESE);
+			else if(lang==EUROPEAN)TextOut2_lang(scr, x+80, y+(i-pageOff)*40, st[i], width, EUROPEAN);
+			else TextOut2(scr, x+80, y+(i-pageOff)*40, st[i], width);
 		}else{
-			if(lang==JAPANESE)TextOut_lang(scr, x+20, y+(i-pageOff)*20, st[i], width, JAPANESE);
-			else if(lang==EUROPEAN)TextOut_lang(scr, x+20, y+(i-pageOff)*20, st[i], width, EUROPEAN);
-			else TextOut(scr, x+20, y+(i-pageOff)*20, st[i], width);
+			if(lang==JAPANESE)TextOut2_lang(scr, x+40, y+(i-pageOff)*40, st[i], width, JAPANESE);
+			else if(lang==EUROPEAN)TextOut2_lang(scr, x+40, y+(i-pageOff)*40, st[i], width, EUROPEAN);
+			else TextOut2(scr, x+40, y+(i-pageOff)*40, st[i], width);
 		}
 	}
 	fontA=255;
@@ -92,7 +93,7 @@ void Menu::drawMenuText(SDL_Surface* scr){
 void Menu::drawMenu(SDL_Surface* scr){
 	if(open_count!=0){drawAnimation(scr);return;}
 	if(v==HIDE)return;
-	drawImage(scr,img.menuback,x,y,0,0,(width+2)*10,raw*20,bg);
+	drawImage(scr,img.menuback,x,y,0,0,(width+2)*20,raw*40,bg);
 	drawMenuText(scr);
 }
 void Menu::drawColorMenu(SDL_Surface* scr){
@@ -102,17 +103,17 @@ void Menu::drawColorMenu(SDL_Surface* scr){
 	for(int i=0 ; i<raw ; i++){
 		if(pageOff+i>=lim)break;
 		for(int j=0 ; j<w ; j++){
-			fillRect(scr,x+j,y+i*20,1,20,R[pageOff+i],G[pageOff+i],B[pageOff+i],(w-j)*255/w);
+			fillRect(scr,x+j,y+i*40,1,40,R[pageOff+i],G[pageOff+i],B[pageOff+i],(w-j)*255/w);
 		}
 	}
 	drawMenuText(scr);
 }
 void Menu::drawAnimation(SDL_Surface* scr){
-	int w=(width+2)*10*open_count/20;
-	int h=raw*20*open_count/20;
+	int w=(width+2)*20*open_count/20;
+	int h=raw*40*open_count/20;
 	if(v==HIDE){
-		w=(width+2)*10-w;
-		h=raw*20-h;
+		w=(width+2)*20-w;
+		h=raw*40-h;
 	}
 	drawRect(scr,x,y,w,h,128,128,255,255);
 }
@@ -303,51 +304,51 @@ void FishBox::setFish(Fish f){
 void FishBox::drawFishBox(SDL_Surface* scr){
 	if(max==0)return;
 	panelColor(n);
-	drawImage(scr,img.menuback,20,30,0,0,280,120,128);
+	drawImage(scr,img.menuback,40,60,0,0,560,240,128);
 	for(int i=0 ; i<14 ; i++)for(int j=0 ; j<6 ; j++){
-		if((j+offset)*14+i>=max || work[(j+offset)*14+i].notExist)drawImage(scr,img.symbol,i*20+20,j*20+30,238,0,17,17,255);
-		else if(fish[(j+offset)*14+i].score!=0)drawImage(scr,img.symbol,i*20+20,j*20+30,(work[(j+offset)*14+i].mark%16)*17,(work[(j+offset)*14+i].mark/16)*17,17,17,255);
+		if((j+offset)*14+i>=max || work[(j+offset)*14+i].notExist)drawImage(scr,img.symbol,i*40+40,j*40+60,476,0,34,34,255);
+		else if(fish[(j+offset)*14+i].score!=0)drawImage(scr,img.symbol,i*40+40,j*40+60,(work[(j+offset)*14+i].mark%16)*34,(work[(j+offset)*14+i].mark/16)*34,34,34,255);
 	}
-	if(count%40<20)drawImage(scr,img.chr,cx*20+20,cy*20+30,283,0,20,20,255);
+	if(count%40<20)drawImage(scr,img.chr,cx*40+40,cy*40+60,566,0,40,40,255);
 	if(fish[n].score!=0)drawTable(scr,fish[n]);
 }
 void FishBox::drawTable(SDL_Surface* scr, Fish f){
 	if(max==0)return;
-	drawImage(scr,panel,10,150,0,200,300,90,255);
-	drawImage(scr,img.symbol,15,181,(work[f.title_num].mark%16)*17,(work[f.title_num].mark/16)*17,17,17,255);
-	TextOut_lang(scr, 32, 181, jummingText(work[f.title_num].title,60,f.rcv,f.mg_rcv), text_count, JAPANESE);
+	drawImage(scr,panel,20,300,0,400,600,180,255);
+	drawImage(scr,img.symbol,30,362,(work[f.title_num].mark%16)*34,(work[f.title_num].mark/16)*34,34,34,255);
+	TextOut2_lang(scr, 64, 362, jummingText(work[f.title_num].title,60,f.rcv,f.mg_rcv), text_count, JAPANESE);
 	int tc=text_count-(int)strlen(work[f.title_num].title.str[0]);
 	if(tc>=0){
 		fontA=192;
-		drawImage(scr,img.symbol,15,201,(sta[f.sta].mark%16)*17,(sta[f.sta].mark/16)*17,17,17,255);
+		drawImage(scr,img.symbol,30,402,(sta[f.sta].mark%16)*34,(sta[f.sta].mark/16)*34,34,34,255);
 		if(f.bs)sprintf_s(str,"%s",toChar(sta[f.sta].name));
 		else{
 			sprintf_s(str,"%s",toChar(sta[f.sta].name));
 			sprintf_s(str,"%s %s Ch%2d",str,toChar(tower[f.tower].name),f.ch);
 		}
-		TextOut(scr, 32, 201, str, (int)strlen(str));
+		TextOut(scr, 64, 402, str, (int)strlen(str));
 		sprintf_s(str,"%2d:%2d(%s)",f.hour,f.minute,weekChar[f.week][CHAR_CODE]);
-		TextOut(scr, 25, 221, str, (int)strlen(str));
+		TextOut(scr, 50, 442, str, (int)strlen(str));
 		fontA=255;
 		tc*=2;
 		if(tc>20)tc=20;
-		drawImage(scr,panel,10,201+tc,0,251+tc,300,20-tc,255);
-		drawImage(scr,panel,10,221+tc,0,271+tc,300,20-tc,255);
+		drawImage(scr,panel,20,402+tc,0,502+tc,600,40-tc,255);
+		drawImage(scr,panel,20,442+tc,0,542+tc,600,40-tc,255);
 	}
-	drawImage(scr,img.chr,185,155,140,60,50,25,255);
+	drawImage(scr,img.chr,370,310,280,120,100,50,255);
 	int N=16,Y1=0,Y2=0,Y3=0,Y4=0;
 	if(start>=34){
 		N=16-(start-34)/2;
-		Y1=mwave[N*4]*3/2;
-		Y2=mwave[N*4+1]*3/2;
-		Y3=mwave[N*4+2]*3/2;
-		Y4=mwave[N*4+3]*3/2;
+		Y1=mwave[N*4]*3;
+		Y2=mwave[N*4+1]*3;
+		Y3=mwave[N*4+2]*3;
+		Y4=mwave[N*4+3]*3;
 	}
-	if(f.score>=10000)drawImage(scr,img.chr,242,160-Y4,(f.score%100000)/10000*10,260,10,20,255);
-	if(f.score>=1000)drawImage(scr,img.chr,254,160-Y1,(f.score%10000)/1000*10,260,10,20,255);
-	if(f.score>=100)drawImage(scr,img.chr,266,160-Y2,(f.score%1000)/100*10,260,10,20,255);
-	if(f.score>=10)drawImage(scr,img.chr,278,160-Y3,(f.score%100)/10*10,260,10,20,255);
-	drawImage(scr,img.chr,290,160-Y4,f.score%10*10,260,10,20,255);
+	if(f.score>=10000)drawImage(scr,img.chr,484,320-Y4,(f.score%100000)/10000*20,520,20,40,255);
+	if(f.score>=1000)drawImage(scr,img.chr,508,320-Y1,(f.score%10000)/1000*20,520,20,40,255);
+	if(f.score>=100)drawImage(scr,img.chr,532,320-Y2,(f.score%1000)/100*20,520,20,40,255);
+	if(f.score>=10)drawImage(scr,img.chr,556,320-Y3,(f.score%100)/10*20,520,20,40,255);
+	drawImage(scr,img.chr,580,320-Y4,f.score%10*20,520,20,40,255);
 }
 void FishBox::panelColor(int r, int g, int b){
 	if(preR==r && preG==g && preB==b)return;
@@ -445,7 +446,7 @@ void FishBox::setData(int i, int k, int data){
 	if(k==0)fish[i].x=data;
 	if(k==1)fish[i].y=data;
 	if(k==2)fish[i].sta=data;
-	if(k==3)fish[i].bs=data;
+	if(k==3)fish[i].bs=toBool(data);
 	if(k==4)fish[i].tower=data;
 	if(k==5)fish[i].ch=data;
 	if(k==6)fish[i].hour=data;
@@ -467,13 +468,26 @@ int to16int(char c1, char c2){
 	if(b<0)b+=256;
 	return a+b*256;
 }
-int to32int(char c1, char c2, char c3, char c4){
+int to16int_signed(char c1, char c2){
+	int a=c1,b=c2;
+	if(a<0)a+=256;
+	if(b<0)b+=256;
+	if(b>=128){
+		return -32768+a+(b-128)*256;
+	}
+	return a+b*256;
+}
+Uint32 to32int(char c1, char c2, char c3, char c4){
 	int a=c1,b=c2, c=c3, d=c4;
 	if(a<0)a+=256;
 	if(b<0)b+=256;
 	if(c<0)c+=256;
 	if(d<0)d+=256;
 	return a+b*256+c*65536+d*16777216;
+}
+bool toBool(char c){
+	if(c)return true;
+	else return false;
 }
 char* toChar(String s){
 	if(CHAR_CODE==JAPANESE)sprintf_s(str3,s.str[0]);
@@ -699,12 +713,12 @@ void putHeadMark(String &s){
 	}
 }
 
-void getImage(Image*& img, char* st, int r, int g, int b){
+void getImage(Image*& im, char* st, int r, int g, int b){
 	//実際のimgにアクセスするために&を付けている(参照型の&)
 	SDL_Surface *img2=NULL, *img3;
 	img2=IMG_Load(st);
 	if(img2==NULL){
-		img=new Image(20,20);
+		im=NULL;
 		return;
 	}
 	if(SDL_BYTEORDER==SDL_BIG_ENDIAN)img3=SDL_CreateRGBSurface(SDL_SWSURFACE, img2->w, img2->h, 32, 0xff000000,0x00ff0000,0x0000ff00,0);
@@ -712,26 +726,24 @@ void getImage(Image*& img, char* st, int r, int g, int b){
 	drawSurface(img3,img2,0,0,0,0,img2->w,img2->h,255);
 	SDL_FreeSurface(img2);
 
-	img=new Image(img3->w,img3->h);
+	im=new Image(img3->w,img3->h);
 
 	SDL_LockSurface(img3);
 	SDL_PixelFormat *f = img3->format;
-	Uint8 bpp = f->BytesPerPixel;
 	Uint8 *px = (Uint8*)img3->pixels;
-	Uint16 pitch = img3->pitch;
 	Uint8 bypp = f->BytesPerPixel;
-	Uint8 *rgb = (Uint8*)img->RGB;
+	Uint8 *rgb = (Uint8*)im->RGB;
 	Uint8 R,G,B;
 
-	for(int j=0 ; j<(img->h) ; j++)for(int i=0 ; i<(img->w) ; i++){
+	for(int j=0 ; j<(im->h) ; j++)for(int i=0 ; i<(im->w) ; i++){
 		SDL_GetRGB(*(Uint32*)px,f,&R,&G,&B);
 		*(Uint32*)rgb = setRGB(R,G,B);
-		rgb+=4;px+=4;
+		rgb+=4;px+=bypp;
 	}
 
 	SDL_UnlockSurface(img3);
 	SDL_FreeSurface(img3);
-	setAlpha(img,r,g,b);
+	setAlpha(im,r,g,b);
 }
 
 void getImage(Image*& im, char* st){
@@ -751,9 +763,7 @@ void getImage(Image*& im, char* st){
 
 	SDL_LockSurface(img3);
 	SDL_PixelFormat *f = img3->format;
-	Uint8 bpp = f->BytesPerPixel;
 	Uint8 *px = (Uint8*)img3->pixels;
-	Uint16 pitch = img3->pitch;
 	Uint8 bypp = f->BytesPerPixel;
 	Uint8 *rgb = (Uint8*)im->RGB;
 	Uint8 R,G,B;
@@ -771,18 +781,13 @@ void getImage(Image*& im, char* st){
 	resetAlpha(im);
 }
 
-void setColorKey(Image *img, Uint8 r, Uint8 g, Uint8 b){
-	Uint32 color=setRGB(r,g,b);
-	for(int j=0 ; j<(img->h) ; j++)for(int i=0 ; i<(img->w) ; i++){
-		if(img->RGB[ j*(img->w)+i ]==color)img->A[ j*(img->w)+i ]=0;
-		else img->A[ j*(img->w)+i ]=255;
-	}
-}
-
-void freeImage(Image *img){
-	delete [] img->RGB;
-	delete [] img->A;
-	delete img;
+void freeImage(Image*& im){
+	if(!im){im=NULL;return;}
+	delete [] im->RGB;
+	delete [] im->A;
+	delete im;
+	
+	im=NULL;
 }
 
 void getSymbolImage(){
@@ -793,15 +798,15 @@ void getSymbolImage(){
 		if(!loadFile(str))break;
 		a++;
 	}
-	img.symbol=new Image(272,a*272);
-	fillRect(img.symbol,0,0,272,a*272,0,0,254,255);
+	img.symbol=new Image(544,a*544);
+	fillRect(img.symbol,0,0,544,a*544,0,0,254,255);
 	for(int i=0 ; i<a ; i++){
 		sprintf_s(str,"file/img/symbol%d.png",i);
 		getImage(img2,str,0,0,254);
-		drawImage(img.symbol,img2,0,i*272,0,0,272,272,255);
+		drawImage(img.symbol,img2,0,i*544,0,0,544,544,255);
 		freeImage(img2);
 	}
-	setColorKey(img.symbol,0,0,254);
+	setAlpha(img.symbol,0,0,254);
 }
 
 void drawLight(SDL_Surface* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a){
@@ -810,7 +815,6 @@ void drawLight(SDL_Surface* scr, Image* img, int x, int y, int x2, int y2, int w
 	if(a>255)a=255;
 	SDL_LockSurface(scr);
 	SDL_PixelFormat *f = scr->format;
-	Uint8 bpp = f->BytesPerPixel;
 	Uint8 *px = (Uint8*)scr->pixels;
 	Uint16 pitch = scr->pitch;
 	Uint8 bypp = f->BytesPerPixel;
@@ -961,12 +965,12 @@ void drawKeyboard2(SDL_Surface* scr, int k, int X, int Y){
 }
 
 void fix_scrXY(){
-	gd.scrX=(int)(gd.x*MAGNIFY)-160;
-	gd.scrY=(int)(gd.y*MAGNIFY)-120;
+	gd.scrX=(int)(gd.x*MAGNIFY)-320;
+	gd.scrY=(int)(gd.y*MAGNIFY)-240;
 	if(gd.scrX<0)gd.scrX=0;
-	if(gd.scrX>map.mapW*MAGNIFY-320)gd.scrX=map.mapW*MAGNIFY-320;
+	if(gd.scrX>map.mapW*MAGNIFY-640)gd.scrX=map.mapW*MAGNIFY-640;
 	if(gd.scrY<0)gd.scrY=0;
-	if(gd.scrY>map.mapH*MAGNIFY-240)gd.scrY=map.mapH*MAGNIFY-240;
+	if(gd.scrY>map.mapH*MAGNIFY-480)gd.scrY=map.mapH*MAGNIFY-480;
 }
 
 void fix_XY(){
@@ -1009,13 +1013,13 @@ void drawTalking(SDL_Surface* scr){
 
 void drawTalking(SDL_Surface* scr, int fc, String st){
 	if(gd.talk_open_count!=0){
-		int w=300*gd.talk_open_count/20;
-		int h=60*gd.talk_open_count/20;
+		int w=600*gd.talk_open_count/20;
+		int h=120*gd.talk_open_count/20;
 		if(gd.talk_count==EOF){
-			w=300-w;
-			h=60-h;
+			w=600-w;
+			h=120-h;
 		}
-		drawRect(scr,10,180,w,h,128,128,255,255);
+		drawRect(scr,20,360,w,h,128,128,255,255);
 		return;
 	}
 	if(gd.talk_count==EOF)return;
@@ -1024,18 +1028,17 @@ void drawTalking(SDL_Surface* scr, int fc, String st){
 	else if(gd.text_count<60){a=30;b=gd.text_count-30;}
 	else if(gd.text_count<90){a=30;b=30;c=gd.text_count-60;}
 	else{a=30;b=30;c=30;}
-	if(gd.shake_count>0)d=(3-abs(6-gd.shake_count%12))*gd.shake_count/12;
-	drawImage(scr,img.menuback,10+d,180,0,0,300,60,192);
-	drawImage(scr,img.facechip,10+d,185,((fc-1)%5)*50,((fc-1)/5)*50,50,50,255);
-	if(a!=0)TextOut(scr,60+d,180,&(st.str[CHAR_CODE][0]),a);
-	if(b!=0)TextOut(scr,60+d,200,&(st.str[CHAR_CODE][30]),b);
-	if(c!=0)TextOut(scr,60+d,220,&(st.str[CHAR_CODE][60]),c);
+	if(gd.shake_count>0)d=(3-abs(6-gd.shake_count%12))*gd.shake_count/6;
+	drawImage(scr,img.menuback,20+d,360,0,0,600,120,192);
+	drawImage(scr,img.facechip,20+d,370,((fc-1)%5)*100,((fc-1)/5)*100,100,100,255);
+	if(a!=0)TextOut2(scr,120+d,360,&(st.str[CHAR_CODE][0]),a);
+	if(b!=0)TextOut2(scr,120+d,400,&(st.str[CHAR_CODE][30]),b);
+	if(c!=0)TextOut2(scr,120+d,440,&(st.str[CHAR_CODE][60]),c);
 }
 
 void fillRect(SDL_Surface* scr, int x, int y, int w, int h, int R,int G,int B, int a){
 	SDL_LockSurface(scr);
 	SDL_PixelFormat *f = scr->format;
-	Uint8 bpp = f->BytesPerPixel;
 	Uint16 pitch = scr->pitch;
 	Uint8 bypp = f->BytesPerPixel;
 	Uint16 px_skip;
@@ -1201,7 +1204,7 @@ void initFont(){
 					}
 				}
 			}
-			setColorKey(font[k],img.alphaR,img.alphaG,img.alphaB);
+			setAlpha(font[k],img.alphaR,img.alphaG,img.alphaB);
 		}
 	}
 }
@@ -1234,18 +1237,18 @@ bool loadFile(char* fn){
 
 void setKick(SDL_Surface* scr){
 	if(kick_count==1){
-		drawImage(img.pre_scr,scr,0,0,0,0,320,240,255);
+		drawImage(img.pre_scr,scr,0,0,0,0,640,480,255);
 		Mix_PlayChannel(0,sf.decide,0);
 	}
 }
 
 void drawKick(SDL_Surface* scr){
 	if(kick_count>=1){
-		int X=kick_count*10,Y=(10-kick_count)*(10-kick_count)-100;
-		int X2=0,Y2=190;
-		if(kick_count<15){X2=kick_count*2-30;Y2=220-kick_count*2;}
-		drawImage(scr,img.pre_scr,X,Y,0,0,320,240,255);
-		drawImage(scr,img.facechip,X2,Y2,100,0,50,50,255);
+		int X=kick_count*20,Y=(10-kick_count)*(10-kick_count)-200;
+		int X2=0,Y2=380;
+		if(kick_count<15){X2=kick_count*4-60;Y2=440-kick_count*4;}
+		drawImage(scr,img.pre_scr,X,Y,0,0,640,480,255);
+		drawImage(scr,img.facechip,X2,Y2,200,0,100,100,255);
 		kick_count++;
 		if(kick_count==30)kick_count=0;
 	}
