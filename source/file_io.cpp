@@ -82,6 +82,7 @@ void load_index(){
 			clear_num++;
 		}
 	}
+	for(int i=0 ; i<18 ; i++)gd.bought[i]=true;
 
 	for(int k=0 ; k<2 ; k++){
 		fc=0;
@@ -767,7 +768,7 @@ void load_parameter(){
 		DIF1CH=0.7;
 		DIF62CH=0.3;
 		SDW400H=3.1;
-		SDW62CH=1.1;
+		SDW62CH=0.1;
 		GROUND1CH=20.8;
 		GROUND62CH=1.0;
 		ORI1CH=18.0;
@@ -823,13 +824,6 @@ void load_parameter(){
 		fsize=0;
 	}
 */
-
-//	DIS1CH=249.0;DIS62CH=70.0;
-//	CURVE_TOP=214;CURVE_RISE=15;
-//	SDW400H=31.0;SDW62CH=1.0;
-//	DIF1CH=0.7;DIF62CH=0.3;
-//	CHANNELS=62;MAP_SCALE=1.3;
-//	ORI1CH=18;ORI62CH=22;
 	double SDWFUNC_A=(SDW62CH*SDW62CH-SDW400H*SDW400H)/674.0;
 	double SDWFUNC_B=SDW400H*SDW400H-SDWFUNC_A*93;
 	double DIFFUNC_A=(DIF62CH*DIF62CH-DIF1CH*DIF1CH)/674.0;

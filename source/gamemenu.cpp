@@ -30,7 +30,7 @@ void initGameMenu(){
 }
 
 void initPrologue(){
-	Mix_FreeMusic(bgm);
+	freeMusic();
 	bgm=Mix_LoadMUS("file/bgm/15.ogg");
 	freeImage(img.back);
 	getImage(img.back,"file/img/prologue.png",0,0,255);
@@ -42,7 +42,7 @@ void initPrologue(){
 }
 
 void initKomoro(){
-	Mix_FreeMusic(bgm);
+	freeMusic();
 	bgm=Mix_LoadMUS("file/bgm/4.ogg");
 	freeImage(img.back);
 	getImage(img.back,"file/img/komoro.png",0,0,255);
@@ -66,10 +66,7 @@ void endGameMenu(){
 	if(img.boss!=NULL)freeImage(img.boss);
 	freeImage(img.back);
 	if(phase!=GOTO_GAME || dataNo!=index_num+1){
-		if(bgm!=NULL){
-			Mix_FreeMusic(bgm);
-			bgm=NULL;
-		}
+		freeMusic();
 	}
 	Mix_FreeChunk(sf.thunder);
 	Mix_FreeChunk(sf.swish);
@@ -126,7 +123,7 @@ void timerSeaSide(){
 				phase=GOTO_GAME;
 				freeImage(img.back);
 				getImage(img.back,"file/img/back.png",0,0,255);
-				Mix_FreeMusic(bgm);
+				freeMusic();
 				count=0;
 			}
 		}
@@ -150,7 +147,7 @@ void timerKomoro(){
 			freeImage(img.back);
 			getImage(img.back,"file/img/back.png",0,0,255);
 			for(int i=0 ; i<14 ; i++)freeImage(img.photo[i]);
-			Mix_FreeMusic(bgm);
+			freeMusic();
 			count=0;
 		}
 	}
@@ -167,7 +164,7 @@ void timerPrologue(){
 			start=0;
 			for(int i=0 ; i<30 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
-			Mix_FreeMusic(bgm);
+			freeMusic();
 			bgm=Mix_LoadMUS("file/bgm/4.ogg");
 			freeImage(img.back);
 			getImage(img.back,"file/img/shore.png",0,0,255);
@@ -267,7 +264,7 @@ void keyGameSeason(){
 		else if(dataNo==13){
 			initKomoro();
 		}else{
-			Mix_FreeMusic(bgm);
+			freeMusic();
 			bgm=Mix_LoadMUS("file/bgm/4.ogg");
 			freeImage(img.back);
 			getImage(img.back,"file/img/shore.png",0,0,255);
@@ -372,7 +369,7 @@ void keyPrologue(){
 			if(phase==KOMORO && gd.scene_count==4)start=20;
 			if(dataNo==index_num+1){//ÅIƒ{ƒX
 				if(gd.scene_count==1){
-					Mix_FreeMusic(bgm);
+					freeMusic();
 					bgm=Mix_LoadMUS("file/bgm/14.ogg");
 					Mix_PlayChannel(0,sf.thunder,0);
 					start=100;
@@ -399,7 +396,7 @@ void keyPrologue(){
 			for(int i=0 ; i<30 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			if(phase==PROLOGUE){
-				Mix_FreeMusic(bgm);
+				freeMusic();
 				bgm=Mix_LoadMUS("file/bgm/4.ogg");
 				freeImage(img.back);
 				getImage(img.back,"file/img/shore.png",0,0,255);
@@ -413,7 +410,7 @@ void keyPrologue(){
 					for(int i=0 ; i<14 ; i++)freeImage(img.photo[i]);
 				}
 				if(dataNo==index_num+1){
-					Mix_FreeMusic(bgm);
+					freeMusic();
 					bgm=Mix_LoadMUS("file/bgm/14.ogg");
 					Mix_PlayMusic(bgm,-1);
 				}

@@ -11,7 +11,7 @@ void initOpening(){
 }
 void endOpening(){
 	freeImage(img.back);
-	if(phase==2)Mix_FreeMusic(bgm);
+	if(phase==2)freeMusic();
 }
 
 void drawOpening(SDL_Surface* scr){
@@ -113,7 +113,7 @@ void initTitle2(){
 void endTitle(){
 	menu[0].setViewMode(HIDE);
 	freeImage(img.back);
-	Mix_FreeMusic(bgm);
+	freeMusic();
 	Mix_FreeChunk(sf.gaze);
 	kick_count=1;
 }

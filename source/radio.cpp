@@ -411,7 +411,8 @@ double atan_q(double X, double Y){
 		else return 270.0;
 	}
 	int a=(int)(1000.0*abs(Y)/abs(X)), b=0;
-	if(a>=60000)b=(int)abs(atan(1.0*Y/X)*180/PI*10.0);
+	if(a<0)return 0;
+	else if(a>=60000)b=(int)abs(atan(1.0*Y/X)*180/PI*10.0);
 	else b=atan_table[a];
 	if(X<0 && Y>=0)b=1800-b;
 	else if(X<0 && Y<0)b+=1800;

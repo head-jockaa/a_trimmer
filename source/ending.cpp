@@ -112,7 +112,7 @@ void endEnding(){
 	if(sf.alarm!=NULL)Mix_FreeChunk(sf.alarm);
 	if(sf.sunset!=NULL)Mix_FreeChunk(sf.sunset);
 	if(sf.swish!=NULL)Mix_FreeChunk(sf.swish);
-	if(bgm!=NULL)Mix_FreeMusic(bgm);
+	freeMusic();
 	kick_count=1;
 }
 

@@ -13,7 +13,7 @@ Menu menu[20];
 FishBox fishbox;
 Fish tmp_fish;
 Image *font[47];
-Mix_Music *bgm;
+Mix_Music *bgm=NULL;
 ImageFile img;
 SoundFile sf;
 SDL_Event ev;
@@ -330,8 +330,8 @@ void FishBox::drawTable(SDL_Surface* scr, Fish f){
 		sprintf_s(str,"%2d:%2d(%s)",f.hour,f.minute,weekChar[f.week][CHAR_CODE]);
 		TextOut(scr, 50, 442, str, (int)strlen(str));
 		fontA=255;
-		tc*=2;
-		if(tc>20)tc=20;
+		tc*=4;
+		if(tc>40)tc=40;
 		drawImage(scr,panel,20,402+tc,0,502+tc,600,40-tc,255);
 		drawImage(scr,panel,20,442+tc,0,542+tc,600,40-tc,255);
 	}
@@ -788,6 +788,13 @@ void freeImage(Image*& im){
 	delete im;
 	
 	im=NULL;
+}
+
+void freeMusic(){
+	if(bgm!=NULL){
+		Mix_FreeMusic(bgm);
+		bgm=NULL;
+	}
 }
 
 void getSymbolImage(){

@@ -59,7 +59,7 @@ void initMiyazaki(){
 
 void endMiyazaki(){
 	movie_test=false;
-	Mix_FreeMusic(bgm);
+	freeMusic();
 	Mix_FreeChunk(sf.thunder);
 	Mix_FreeChunk(sf.swish);
 	Mix_FreeChunk(sf.meow);
@@ -73,7 +73,7 @@ void endMiyazaki(){
 
 void toMiyazakiMuseum(){
 	phase=MIYAZAKI_MUSEUM;
-	Mix_FreeMusic(bgm);
+	freeMusic();
 	bgm=Mix_LoadMUS("file/bgm/17.ogg");
 	Mix_PlayMusic(bgm,-1);
 	kick_count=1;
@@ -84,7 +84,7 @@ void timerSeoiHa(){
 		phase=MIYAZAKI_TALK;
 		gd.talk_open_count=1;
 		TalkingAt(18);
-		Mix_FreeMusic(bgm);
+		freeMusic();
 		if(scr_design==GAMEBOY){
 			bgm=Mix_LoadMUS("file/bgm/17.ogg");
 			talk_seoiha=false;
@@ -143,7 +143,7 @@ void gotoMovieTest(){
 		freeImage(img.back);
 		sprintf_s(str,"file/img/weekly%d.png",n);
 		getImage(img.back,str,0,0,255);
-		Mix_FreeMusic(bgm);
+		freeMusic();
 		sprintf_s(str,"file/bgm/%d.ogg",n+5);
 		bgm=Mix_LoadMUS(str);
 		Mix_PlayMusic(bgm,-1);
@@ -612,7 +612,7 @@ void keyBgmTest(){
 			phase=GOTO_MOVIE;
 			count=0;
 		}else{
-			Mix_FreeMusic(bgm);
+			freeMusic();
 			sprintf_s(str,"file/bgm/%d.ogg",menu[BGM_TEST].selected()+1);
 			bgm=Mix_LoadMUS(str);
 			Mix_PlayMusic(bgm,-1);
@@ -1184,7 +1184,7 @@ void keyMiyazaki(){
 		phase=MIYAZAKI_MUSEUM;
 		freeImage(img.back);
 		getImage(img.back,"file/img/miyazaki.png",0,0,255);
-		Mix_FreeMusic(bgm);
+		freeMusic();
 		bgm=Mix_LoadMUS("file/bgm/17.ogg");
 		Mix_PlayMusic(bgm,-1);
 		start=0;

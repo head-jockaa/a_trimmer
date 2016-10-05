@@ -38,7 +38,7 @@ void endHaziaShop(){
 	Mix_FreeChunk(sf.swish);
 	Mix_FreeChunk(sf.water);
 	Mix_FreeChunk(sf.grumble);
-	Mix_FreeMusic(bgm);
+	freeMusic();
 	for(int i=0 ; i<15 ; i++)menu[i].reset();
 }
 

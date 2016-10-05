@@ -319,6 +319,7 @@ void TextOut2_lang(Image* img, int x, int y, String st, int l, int lang);
 void getImage(Image*& img, char* st, int r, int g, int b);
 void getImage(Image*& im, char* st);
 void freeImage(Image*& im);
+void freeMusic();
 void drawTalking(SDL_Surface* scr);
 void drawTalking(SDL_Surface* scr, int fc, String st);
 void drawRect(SDL_Surface* scr, int x, int y, int w, int h, int R, int G, int B, int a);

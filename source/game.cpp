@@ -246,7 +246,7 @@ void endGame(){
 	Mix_FreeChunk(sf.bubble);
 	Mix_FreeChunk(sf.gaze);
 	gd.ta_count=0;
-	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT||gd.game_mode==BOSS)Mix_FreeMusic(bgm);
+	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT||gd.game_mode==BOSS)freeMusic();
 	if(pre_magnify!=EOF)MAGNIFY=pre_magnify;
 	if(gd.game_mode==NO_RELAY){
 		for(int i=0 ; i<towers ; i++){
@@ -341,7 +341,7 @@ void keyFinish(){
 		phase=TODAYS_CROP;
 		freeImage(img.back);
 		getImage(img.back,"file/img/result.png",0,0,255);
-		Mix_FreeMusic(bgm);
+		freeMusic();
 		bgm=Mix_LoadMUS("file/bgm/12.ogg");
 		kick_count=1;count=-60;
 	}
@@ -364,7 +364,7 @@ void keyGetHazia(){
 						gd.face_count++;
 						gd.hazia2=gd.score-indexName[dataNo-1].hiscore;
 						if(gd.hazia2<0)gd.hazia2=0;
-						Mix_FreeMusic(bgm);
+						freeMusic();
 						bgm=Mix_LoadMUS("file/bgm/13.ogg");
 						Mix_PlayMusic(bgm,-1);
 					}
@@ -386,7 +386,7 @@ void keyGetHazia(){
 			if(start==0 && gd.hazia2==0){
 				gd.scene_count++;
 				gd.text_count=0;
-				Mix_FreeMusic(bgm);
+				freeMusic();
 				bgm=Mix_LoadMUS("file/bgm/12.ogg");
 				Mix_PlayMusic(bgm,-1);
 			}
@@ -407,7 +407,7 @@ void keyResult(){
 					start=200;
 					gd.scene_count=0;
 				}else{
-					Mix_FreeMusic(bgm);
+					freeMusic();
 					freeImage(img.back);
 					gd.week++;gd.hour=4;
 					sprintf_s(str,"file/img/weekly%d.png",gd.week);
@@ -1188,7 +1188,7 @@ void keyGameTalking(){
 					count=0;
 				}
 				if(gd.scene_count==1){
-					Mix_FreeMusic(bgm);
+					freeMusic();
 					bgm=Mix_LoadMUS("file/bgm/1.ogg");
 					Mix_PlayMusic(bgm,-1);
 				}
@@ -2673,7 +2673,7 @@ void timerGame(){
 			gd.secondMusic=false;
 		}
 		if(!gd.secondMusic && gd.hour>=22 && (SDL_GetTicks()-timestamp)/16>10000){
-			Mix_FreeMusic(bgm);
+			freeMusic();
 			sprintf_s(str,"file/bgm/%d.ogg",20+gd.randomNumber%3);
 			bgm=Mix_LoadMUS(str);
 			Mix_PlayMusic(bgm,-1);
