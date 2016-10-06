@@ -2619,7 +2619,7 @@ void timerFishUp(){
 			tm.halt=THREAD_END;
 			TCPshutdown();
 		}
-		thread = SDL_CreateThread(TestThread, "TestThread", nullptr);
+		thread = SDL_CreateThread(ImageSearchThread, "ImageSearchThread", nullptr);
 	}
 	if(start==72){
 		Mix_PlayChannel(0, sf.get, 0);
@@ -2650,7 +2650,7 @@ void timerBSAttack(){
 			tm.halt=THREAD_END;
 			TCPshutdown();
 		}
-		thread = SDL_CreateThread(TestThread, "TestThread", nullptr);
+		thread = SDL_CreateThread(ImageSearchThread, "ImageSearchThread", nullptr);
 	}
 	if(start==0 && tm.finish && !tm.failure){
 		createSearchImage(tm.selected);
@@ -2750,10 +2750,10 @@ void manageThread(){
 		if(tm.tcpsock)TCPshutdown();
 		tm.timeout=0;
 		parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-		thread = SDL_CreateThread(TestThread2, "TestThread2", nullptr);
+		thread = SDL_CreateThread(AnotherThread, "TestThread", nullptr);
 	}
 	if(!tm.running && tm.halt==RESTART_GETIMAGE){
-		thread = SDL_CreateThread(TestThread2, "TestThread2", nullptr);
+		thread = SDL_CreateThread(AnotherThread, "TestThread", nullptr);
 	}
 	if(ns.display>0)ns.display--;
 }

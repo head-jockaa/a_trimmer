@@ -2,35 +2,11 @@
 
 ThreadManager tm;
 NetworkStatus ns;
+ImageFormatReader ifr;
 char endHTML1[7]={'<','/','H','T','M','L','>'};
 char endHTML2[7]={'<','/','h','t','m','l','>'};
 
-struct ImageFormatReader {
-    bool jpgStart, pngStart, gifStart;
-    bool jpgEnd, pngEnd, gifEnd;
-    int jpgPointer, jpgBytes;
-    bool jpgImageDataStart;
-    int pngPointer1, pngPointer2;
-    int gifPointer, gifBytes, gifField;
-    void reset();
-    void checkJPG(char c);
-    void checkPNG(char c);
-    void checkGIF(char c);
-};
-ImageFormatReader ifr;
-#define GIF_HEADER 1
-#define GIF_GLOBAL_COLOR_TABLES 2
-#define GIF_GLAPHIC_CONTROL_EXTENSION_BLOCK 3
-#define GIF_COMMENT_EXTENSION_BLOCK 4
-#define GIF_PLAIN_TEXT_EXTENSION_BLOCK 5
-#define GIF_APPLICATION_EXTENSION_BLOCK 6
-#define GIF_IMAGE_DATA_HEADER 7
-#define GIF_IMAGE_DATA_BLOCK 8
-
-
-void getBingImageSearch(const char *query, const char *safe);
-void getAskImageSearch(const char *query);
-void getGoogleImageSearch(const char *query);
+void getGoogleImageSearch(char *query);
 void getTargetImage();
 SDL_Texture *createSprite(SDL_Surface *surface);
 SDL_Thread *thread;
@@ -47,21 +23,21 @@ tm.tcpsock=NULL;
 }
 
 
-int TestThread(void *ptr)
+int ImageSearchThread(void *ptr)
 {
+	std::cout << "thread: start image search thread\n";
 	tm.file=NULL;
     tm.running = true;
     tm.halt = 0;
 	tm.tcpsock=NULL;
-//    getBingImageSearch(query, "OFF");
-    getGoogleImageSearch(tm.query);
+	getGoogleImageSearch(tm.query);
     parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
     getTargetImage();
 
     if(tm.halt){
-        std::cout << "thread: start the next thread\n";
+        std::cout << "thread: image search thread is halted\n";
     }else{
-        std::cout << "thread: end successfully\n";
+        std::cout << "thread: image search thread ended successfully\n";
         tm.halt = THREAD_SUCCESS;
     }
 
@@ -69,8 +45,9 @@ int TestThread(void *ptr)
     return 0;
 }
 
-int TestThread2(void *ptr)
+int AnotherThread(void *ptr)
 {
+	std::cout << "thread: start another thread\n";
 	tm.file=NULL;
     tm.running = true;
     tm.halt = 0;
@@ -79,9 +56,9 @@ int TestThread2(void *ptr)
     getTargetImage();
 
     if(tm.halt){
-        std::cout << "thread: 次のスレッドを開始するフラグ\n";
+        std::cout << "thread: another thread is halted\n";
     }else{
-        std::cout << "thread: 正常終了フラグ\n";
+        std::cout << "thread: another thread ended successfully\n";
         tm.halt = THREAD_SUCCESS;
     }
 
@@ -91,6 +68,7 @@ int TestThread2(void *ptr)
 
 
 void imageSearch_https(const char *host, int port, const char *request){
+	std::cout << "imageSearch_https\n";
 	ns.status=NS_IMAGE_SEARCH;
 	int ret;
 	SSL *ssl;
@@ -110,9 +88,7 @@ void imageSearch_https(const char *host, int port, const char *request){
 		return;
 	}
 
-	std::cout << request;
-
-	//IPアドレス取得
+	//getting IP address
 	IPaddress ipaddress;
 	int res = SDLNet_ResolveHost(&ipaddress, host, port);
 	if(res){
@@ -121,7 +97,9 @@ void imageSearch_https(const char *host, int port, const char *request){
 		return;
 	}
 
-	//通信開始
+	std::cout << "resolved google.co.jp host\n";
+
+	//start comm.
 	while(tm.tcpsock){}
 	tm.tcpsock = SDLNet_TCP_Open(&ipaddress);
 	if(!tm.tcpsock) {
@@ -129,6 +107,8 @@ void imageSearch_https(const char *host, int port, const char *request){
 		ns.display=300;
 		return;
 	}
+
+	std::cout << "tcp opened\n";
 
 	ret = SSL_set_fd(ssl, tm.tcpsock->channel);
 	if (ret == 0){
@@ -156,14 +136,14 @@ void imageSearch_https(const char *host, int port, const char *request){
 
 	char fn[100];
 
-	//受け取る
+	//receive
 	char get_msg[BUF_LEN];
 	int length = 0;
 	int htmlCount1 = 0, htmlCount2 = 0;
 	ns.receiveLength=0;
 	ns.receiveCounter=0;
 	for(int i=0 ; i<1000 ; i++){
-		//強制終了
+		//forced termination
 		if(tm.halt){
 			break;
 		}
@@ -180,7 +160,7 @@ void imageSearch_https(const char *host, int port, const char *request){
 			ns.receiveCounter++;
 		}
 
-		//ファイルサイズ取得
+		//getting filesize info
 		if(i == 0){
 			ns.contentLength = 0;
 			char *result = strstr(get_msg, "Content-Length:");
@@ -206,6 +186,8 @@ void imageSearch_https(const char *host, int port, const char *request){
 			while(tm.file){}
 			sprintf_s(fn,"save/tmp_search/%d.html",tm.selected);
 			tm.file = fopen(fn, "w");
+			std::cout << fn;
+			std::cout << "\n";
 			if(!tm.file){
 				break;
 			}
@@ -255,6 +237,7 @@ void imageSearch_https(const char *host, int port, const char *request){
 
 	if(tm.tcpsock){
 		SDLNet_TCP_Close(tm.tcpsock);
+		std::cout << "close tcp socket (https google)\n";
 		tm.tcpsock = NULL;
 	}
 
@@ -313,8 +296,9 @@ char* getPath(const char *url){
     return path;
 }
 
-/** 画像検索結果HTMLから、n番目のURLを取り出す */
-void parseHTML(int n, const char *table_prefix, const char *url_prefix, char url_surfix){
+/** fetch the nth URL from an HTML of image search result */
+void parseHTML(int n, const char *table_prefix, const char *url_prefix, const char *url_surfix){
+	std::cout << "parseHTML\n";
     char fn[100];
     sprintf_s(fn, "save/tmp_search/%d.html", tm.selected);
     loadFile(fn);
@@ -323,7 +307,7 @@ void parseHTML(int n, const char *table_prefix, const char *url_prefix, char url
     }
     char *result = NULL, *url = NULL;
 
-    //URL文字列の取り出し
+    //fetch the nth URL string
     result = strstr(fstr, table_prefix);
     if(result){
         for(int i=0 ; i<n ; i++){
@@ -339,21 +323,33 @@ void parseHTML(int n, const char *table_prefix, const char *url_prefix, char url
         tm.targetURL[0] = 0;
         return;
     }
-    size_t size = 0;
-    for(size_t i=0 ; i<strlen(result) ; i++){
+	char *result2 = NULL;
+    result2 = strstr(result, url_surfix);
+    size_t size = result2-result;
+/*
+	for(size_t i=0 ; i<strlen(result) ; i++){
         if(result[i] == url_surfix){
             break;
         }
         size++;
     }
+*/
 
-    //url変数に入れる
+    //put into the variable "url"
     url = new char[size+1];
 	n=0;
     for(size_t i=0 ; i<size ; i++){
 		if(i<=size-3 && result[i]=='%' && result[i+1]=='2' && result[i+2]=='5'){
 			url[n] = '%';
 			i+=2;
+		}
+		else if(i<=size-6 && result[i]=='\\' && result[i+1]=='u' && result[i+2]=='0' && result[i+3]=='0' && result[i+4]=='2' && result[i+5]=='6'){
+			url[n] = '&';
+			i+=5;
+		}
+		else if(i<=size-6 && result[i]=='\\' && result[i+1]=='u' && result[i+2]=='0' && result[i+3]=='0' && result[i+4]=='3' && result[i+5]=='d'){
+			url[n] = '=';
+			i+=5;
 		}else{
 	        url[n] = result[i];
 		}
@@ -386,11 +382,13 @@ void parseHTML(int n, const char *table_prefix, const char *url_prefix, char url
 	FILE *hFile;
 	sprintf_s(fn,"save/tmp_url/%d.dat",tm.selected);
 	fopen_s(&hFile, fn, "wb");
+	std::cout << fn;
+	std::cout << "\n";
 	fwrite(tm.targetURL, sizeof(tm.targetURL[0]), n/sizeof(tm.targetURL[0]), hFile);
 	fclose(hFile);
 }
 
-/** URL先の画像を取得する */
+/** get an image file from the URL */
 void getTargetImage(){
 	if(tm.targetURL[0] == 0){
 		return;
@@ -400,12 +398,15 @@ void getTargetImage(){
 	char *host = getHostName(tm.targetURL);
 	char *path = getPath(tm.targetURL);
 
-	//IPアドレス取得
+	sprintf(str,"resolve host %s\n",host);
+	std::cout << str;
+
+	//getting IP address
 	IPaddress ipaddress;
 	int res = SDLNet_ResolveHost(&ipaddress, host, 80);
 
 	if(res){
-		//失敗したら次の画像
+		//go to the next image file if failed
 		delete host;
 		delete path;
 		tm.idx++;
@@ -413,15 +414,18 @@ void getTargetImage(){
 		ns.status=NS_IPADDRESS_FAILURE;
 		parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
+		std::cout << "resolving host failed\n";
 		return;
 	}
 
-	//通信開始
+	std::cout << "resolved\n";
+
+	//start comm.
 	while(tm.tcpsock){}
 	tm.tcpsock = SDLNet_TCP_Open(&ipaddress);
 
 	if(!tm.tcpsock) {
-		//失敗したら次の画像
+		//go to the next image file if failed
 		delete host;
 		delete path;
 		tm.idx++;
@@ -429,13 +433,19 @@ void getTargetImage(){
 		ns.status=NS_CONNECT_FAILURE;
 		parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
+		std::cout << "opening tcp failed\n";
 		return;
 	}
 
-	//リクエストする
+	std::cout << "connected\n";
+
+	//send request
 	int msg_size = strlen(path)+strlen(host)+30;
 	char *msg = new char[msg_size];
 	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", path, host);
+
+	std::cout << msg;
+
 	SDLNet_TCP_Send(tm.tcpsock, msg, (int)strlen(msg)+1);
 	delete msg;
 
@@ -448,10 +458,11 @@ void getTargetImage(){
 	ns.receiveLength=0;
 	ifr.reset();
 
-	//受け取る
+	//receive
 	for(int i=0 ; i<10000 ; i++){
-		//強制終了
+		//forced termination
 		if(tm.halt){
+			std::cout << "halted\n";
 			break;
 		}
 		length = SDLNet_TCP_Recv(tm.tcpsock, get_msg, 2048);
@@ -459,6 +470,7 @@ void getTargetImage(){
 		if(!ns.contentLength && !length){
 			ns.status=NS_RCV_ZERO_LENGTH;
 			ns.display=300;
+			std::cout << "received zero length\n";
 			break;
 		}
 		if(length){
@@ -467,29 +479,31 @@ void getTargetImage(){
 		}
 
 		if(i == 0){
-			//httpsは保留
+			//https (pending)
 			char *result = strstr(get_msg, "Location: https");
 			if(result){
 				tm.idx++;
 				tm.timeout = 0;
+				std::cout << "redirect to https (pass it)\n";
 				parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 				tm.halt = RESTART_GETIMAGE;
 				break;
 			}
-			//エラーは飛ばす
+			//this means that the url is wrong
 			result = strstr(get_msg, "200 OK");
 			if(!result){
 				tm.idx++;
 				tm.timeout = 0;
+				std::cout << "get text 200 OK (pass it)\n";
 				parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 				tm.halt = RESTART_GETIMAGE;
 				break;
 			}
 
-			//リダイレクト
+			//to redirect
 			result = strstr(get_msg, "Location:");
 			if(result){
-				std::cout << "thread: リダイレクト発生\n";
+				std::cout << "redirect to another url\n";
 				result += 10;
 				int size = 0;
 				for(size_t j=0 ; j<strlen(result) ; j++){
@@ -510,15 +524,17 @@ void getTargetImage(){
 				break;
 			}
 
-			//ファイルサイズ取得
+			//getting file size info
 			ns.contentLength = 0;
 			result = strstr(get_msg, "Content-Length:");
 			if(result){
+				std::cout << "response header has Content-Length\n";
 				result += 16;
 			}
 			if(!result){
 				result = strstr(get_msg, "x-oct-size:");
 				if(result){
+					std::cout << "response header has x-oct-size\n";
 					result += 12;
 				}
 			}
@@ -530,27 +546,30 @@ void getTargetImage(){
 					ns.contentLength *= 10;
 					ns.contentLength += result[j]-48;
 				}
+				sprintf(str,"content length is %d\n",ns.contentLength);
+				std::cout << str;
 			}
 		}
 
 		for( int j=0 ; j<length ; j++ ){
-			//画像ファイルの開始点
+			//check the startpoint of the image file
             if(!ifr.jpgStart && !ifr.pngStart && !ifr.gifStart){
                 ifr.checkPNG(get_msg[j]);
                 ifr.checkJPG(get_msg[j]);
                 ifr.checkGIF(get_msg[j]);
 
                 if(ifr.jpgStart || ifr.pngStart || ifr.gifStart){
-                    //画像ファイルを保存
+                    //save the image file
                     if(tm.file){
-                        std::cout << "thread: ファイルオープン 待機\n";
+                        std::cout << "Wait: another thread is opening file\n";
                     }
                     while(tm.file){}
-                    std::cout << "thread: ファイルオープン\n";
                     sprintf(fn, "save/tmp_image/%d.jpg", tm.selected);
                     tm.file = fopen(fn, "wb");
+					std::cout << fn;
+					std::cout << "\n";
                     if(!tm.file){
-                        std::cout << "thread: ファイルオープン失敗\n";
+                        std::cout << "failed to create new img file\n";
                         tm.halt = THREAD_END;
                         break;
                     }
@@ -558,6 +577,7 @@ void getTargetImage(){
                         fputc(-1, tm.file);
                         fputc(-40, tm.file);
 						ns.receiveLength = 2;
+						std::cout << "passed JPEG head\n";
 						ns.status = NS_RCV_JPEG;
                     }
                     else if(ifr.pngStart){
@@ -566,6 +586,7 @@ void getTargetImage(){
                         fputc('N', tm.file);
                         fputc('G', tm.file);
 						ns.receiveLength = 4;
+						std::cout << "passed PNG head\n";
 						ns.status = NS_RCV_PNG;
                     }
                     else if(ifr.gifStart){
@@ -574,6 +595,7 @@ void getTargetImage(){
                         fputc('F', tm.file);
                         fputc('8', tm.file);
 						ns.receiveLength = 4;
+						std::cout << "passed GIF head\n";
 						ns.status = NS_RCV_GIF;
                     }
                     continue;
@@ -581,12 +603,12 @@ void getTargetImage(){
             }
 
 
-            //ファイル書き込み
+            //writing new image file
             if(ifr.jpgStart || ifr.pngStart || ifr.gifStart){
                 fputc(get_msg[j], tm.file);
 				ns.receiveLength++;
 
-                //ファイルの終了点
+                //check the endpoint of the image file
                 if(!ns.contentLength){
                     ifr.checkPNG(get_msg[j]);
                     ifr.checkJPG(get_msg[j]);
@@ -594,7 +616,7 @@ void getTargetImage(){
                 }
             }
 
-			//書き込み完了
+			//finish writing a file
 			if((ns.contentLength && ns.receiveLength>=ns.contentLength) || ifr.jpgEnd || ifr.pngEnd || ifr.gifEnd){
 				tm.finish=true;
 				break;
@@ -611,9 +633,12 @@ void getTargetImage(){
 		tm.file = NULL;
 	}
 
+	std::cout << "finished writing img file\n";
+
 	if(tm.tcpsock){
 		SDLNet_TCP_Close(tm.tcpsock);
 		tm.tcpsock = NULL;
+		std::cout << "closed tcp socket\n";
 	}
 
 	ns.status=NULL;
@@ -621,157 +646,14 @@ void getTargetImage(){
 	delete path;
 }
 
-/** 画像検索結果HTMLを取得 */
-void imageSearch(const char *host, int port, const char *request){
-    //IPアドレス取得
-    IPaddress ipaddress;
-    std::cout << "thread: IPアドレス取得開始\n";
-    int res = SDLNet_ResolveHost(&ipaddress, host, port);
-    if(res){
-        std::cout << "thread: IPアドレス取得失敗\n";
-        return;
-    }
-
-    //通信開始
-    if(tm.tcpsock){
-        std::cout << "thread: TCP開始 待機\n";
-    }
-    while(tm.tcpsock){}
-    std::cout << "thread: TCP開始\n";
-    tm.tcpsock = SDLNet_TCP_Open(&ipaddress);
-    if(!tm.tcpsock) {
-        std::cout << "thread: TCP失敗\n";
-        return;
-    }
-
-    //リクエストする
-    SDLNet_TCP_Send(tm.tcpsock, request, (int)strlen(request)+1);
-
-    int contentLength = 0, written = 0;
-    char fn[100];
-
-    //受け取る
-    char get_msg[2048];
-    int length = 0;
-    int htmlCount1 = 0, htmlCount2 = 0;
-    for(int i=0 ; i<1000 ; i++){
-        //強制終了
-        if(tm.halt){
-            std::cout << "thread: TCP受信 強制終了\n";
-            break;
-        }
-        std::cout << "*";
-        length = SDLNet_TCP_Recv(tm.tcpsock, get_msg, 2048);
-
-        if(!contentLength && !length){
-            std::cout << "thread: TCP受信ゼロ Content-Length不明で終了\n";
-            break;
-        }
-
-        //ファイルサイズ取得
-        if(i == 0){
-            contentLength = 0;
-            char *result = strstr(get_msg, "Content-Length:");
-            if(result){
-                result += 16;
-            }
-            if(!result){
-                result = strstr(get_msg, "x-oct-size:");
-                if(result){
-                    result += 12;
-                }
-            }
-            if(result){
-                for(int j=0 ; j<2048 ; j++){
-                    if(result[j]==10 || result[j]==13){
-                        break;
-                    }
-                    contentLength *= 10;
-                    contentLength += result[j]-48;
-                }
-            }else{
-                std::cout << "thread: Content-Length なし\n";
-            }
-
-            if(tm.file){
-                std::cout << "thread: ファイルオープン 待機\n";
-            }
-            while(tm.file){}
-            std::cout << "thread: ファイルオープン\n";
-            sprintf_s(fn, "save/tmp_search/output%d.html", tm.selected);
-            tm.file = fopen(fn, "w");
-            if(!tm.file){
-                std::cout << "thread: ファイルオープン失敗\n";
-                break;
-            }
-        }
-
-        for( int j=0; j<length; j++ ){
-            fputc(get_msg[j], tm.file);
-            written++;
-
-            if(contentLength && written>=contentLength){
-                break;
-            }
-
-            if(htmlCount1 < 7){
-                if(get_msg[j] == endHTML1[htmlCount1]){
-                    htmlCount1++;
-                }else{
-                    htmlCount1 = 0;
-                }
-            }
-
-            if(htmlCount2 < 7){
-                if(get_msg[j] == endHTML2[htmlCount2]){
-                    htmlCount2++;
-                }else{
-                    htmlCount2 = 0;
-                }
-            }
-        }
-
-        if(htmlCount1==7 || htmlCount2==7){
-            std::cout << "thread: HTML終了タグ到達 受信完了\n";
-            break;
-        }
-        if(contentLength && written>=contentLength){
-            std::cout << "thread: contentLength到達 受信完了\n";
-            break;
-        }
-    }
-
-    if(tm.file){
-        std::cout << "thread: ファイルクローズ\n";
-        fclose(tm.file);
-        tm.file = NULL;
-    }
-
-    if(tm.tcpsock){
-        std::cout << "thread: TCP終了\n";
-        SDLNet_TCP_Close(tm.tcpsock);
-        tm.tcpsock = NULL;
-    }
-}
-
-
-void getGoogleImageSearch(const char *query){
+void getGoogleImageSearch(char *query){
+	std::cout << "getGoogleImageSearch request is below\n";
 	int request_size = strlen(query)+100+120;
     char *request = new char[request_size];
     sprintf_s(request, request_size, "GET /search?q=%s&source=lnms&tbm=isch HTTP/1.1\nHost: www.google.co.jp\nUser-Agent: %s\n\n", query, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36");
-    std::cout << "thread: send TCP \n";
+	std::cout << request;
+    std::cout << "\n";
     imageSearch_https("www.google.co.jp", 443, request);
-    delete request;
-}
-
-
-void getBingImageSearch(const char *query, const char *safe){
-    //リクエストする
-	int request_size = strlen(query)+100;
-    char *request = new char[request_size];
-    sprintf_s(request, request_size, "GET /images/search?q=%s HTTP/1.1\nHost: www.bing.com\nCookie: SRCHHPGUSR=ADLT=%s\n\n", query, safe);
-    std::cout << "thread: TCP送信\n";
-    imageSearch("www.bing.com", 80, request);
     delete request;
 }
 
@@ -808,7 +690,7 @@ void ImageFormatReader::checkPNG(char c){
         else if(pngPointer1 == 3){
             if(c == 'G'){
                 pngStart = true;
-                std::cout << "PNG START\n";
+                std::cout << "found PNG data\n";
             }else{
                 pngPointer1 = 0;
             }
@@ -893,12 +775,12 @@ void ImageFormatReader::checkJPG(char c){
         if(c == -40){
             jpgPointer = 0;
             jpgStart = true;
-            std::cout << "JPG START\n";
+            std::cout << "found JPG data\n";
             return;
         }
         else if(c == -38){
             jpgImageDataStart = true;
-            std::cout << "IMAGE DATA START\n";
+            std::cout << "came into JPG data part\n";
             return;
         }
     }
@@ -952,7 +834,7 @@ void ImageFormatReader::checkGIF(char c){
                 gifStart = true;
                 gifPointer = 4;
                 gifField = GIF_HEADER;
-                std::cout << "GIF START\n";
+                std::cout << "found GIF data\n";
             }else{
                 gifPointer = 0;
             }
@@ -965,7 +847,7 @@ void ImageFormatReader::checkGIF(char c){
             if(c == 44){
                 gifPointer = 1;
                 gifField = GIF_IMAGE_DATA_HEADER;
-                std::cout << "IMAGE DATA HEADER\n";
+                std::cout << "came into GIF header part\n";
                 return;
             }
             else if(c == 59){

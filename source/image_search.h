@@ -34,13 +34,7 @@ struct _TCPsocket {
 // Google
 #define TABLE_PREFIX "<div data-async-context="
 #define URL_PREFIX "\"ou\":\""
-#define URL_SURFIX '"'
-// Bing
-//#define TABLE_PREFIX "<div class=\"dg_u\""
-//#define URL_PREFIX "imgurl:&quot;"
-//#define URL_SURFIX '&'
-
-//int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings);
+#define URL_SURFIX "\""
 
 
 struct ThreadManager {
@@ -67,10 +61,33 @@ struct NetworkStatus {
 };
 extern NetworkStatus ns;
 
+struct ImageFormatReader {
+	bool jpgStart, pngStart, gifStart;
+	bool jpgEnd, pngEnd, gifEnd;
+	int jpgPointer, jpgBytes;
+	bool jpgImageDataStart;
+	int pngPointer1, pngPointer2;
+	int gifPointer, gifBytes, gifField;
+	void reset();
+	void checkJPG(char c);
+	void checkPNG(char c);
+	void checkGIF(char c);
+};
+extern ImageFormatReader ifr;
+#define GIF_HEADER 1
+#define GIF_GLOBAL_COLOR_TABLES 2
+#define GIF_GLAPHIC_CONTROL_EXTENSION_BLOCK 3
+#define GIF_COMMENT_EXTENSION_BLOCK 4
+#define GIF_PLAIN_TEXT_EXTENSION_BLOCK 5
+#define GIF_APPLICATION_EXTENSION_BLOCK 6
+#define GIF_IMAGE_DATA_HEADER 7
+#define GIF_IMAGE_DATA_BLOCK 8
+
+
 extern SDL_Thread *thread;
-int TestThread(void *ptr);
-int TestThread2(void *ptr);
+int ImageSearchThread(void *ptr);
+int AnotherThread(void *ptr);
 void TCPshutdown();
-void parseHTML(int n, const char *table_prefix, const char *url_prefix, char url_surfix);
+void parseHTML(int n, const char *table_prefix, const char *url_prefix, const char *url_surfix);
 
 #endif
