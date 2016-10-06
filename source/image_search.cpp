@@ -128,7 +128,7 @@ void imageSearch_https(const char *host, int port, const char *request){
 		return;
 	}
 
-	ret = SSL_write(ssl, request, strlen(request));
+	ret = SSL_write(ssl, request, (int)strlen(request));
 	if (ret < 1){
 		ERR_print_errors_fp(stderr);
 		return;
@@ -440,7 +440,7 @@ void getTargetImage(){
 	std::cout << "connected\n";
 
 	//send request
-	int msg_size = strlen(path)+strlen(host)+30;
+	long msg_size = strlen(path)+strlen(host)+30;
 	char *msg = new char[msg_size];
 	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", path, host);
 
@@ -648,7 +648,7 @@ void getTargetImage(){
 
 void getGoogleImageSearch(char *query){
 	std::cout << "getGoogleImageSearch request is below\n";
-	int request_size = strlen(query)+100+120;
+	long request_size = strlen(query)+100+120;
     char *request = new char[request_size];
     sprintf_s(request, request_size, "GET /search?q=%s&source=lnms&tbm=isch HTTP/1.1\nHost: www.google.co.jp\nUser-Agent: %s\n\n", query, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36");
 	std::cout << request;

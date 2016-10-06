@@ -183,7 +183,7 @@ void drawOpeningAnim(SDL_Surface* scr, int cn){
 		drawImage(scr,img.back,320-(int)(a*1.4),80+a/2,2760,400,120,400,255);
 		drawImage(scr,img.back,320-a*4,120-(int)(sin(a/30.0)*80),2440,400,320,400,255);
 		drawImage(scr,img.back,440-(int)(a*1.4),80+a/2,2880,400,200,400,255);
-		if((a>=30 && a<40 || a>=80) && a%10>=5)fillRect(scr,0,40,640,400,255,255,0,(5-a%5)*30);
+		if(((a>=30 && a<40) || a>=80) && a%10>=5)fillRect(scr,0,40,640,400,255,255,0,(5-a%5)*30);
 	}
 	else if(cn<1120){
 		a=cn-1100;
@@ -312,7 +312,7 @@ void drawOpeningAnim(SDL_Surface* scr, int cn){
 		if(a%8<4)drawImage(scr,img.back,160,40,3080,400,320,400,255);
 		if(a>=30)drawImage(scr,img.back,320,40,3440,0,320,200,255);
 	}
-	else if(cn<2000 || cn>=2080 && cn<2180){
+	else if(cn<2000 || (cn>=2080 && cn<2180)){
 		a=cn-1940;
 		drawImage(scr,img.back,300-a,80,3760,0,140,300,255);
 		drawImage(scr,img.back,310-a,100,2940+((a/3)%2)*120,2500,120,120,255);
@@ -471,7 +471,7 @@ void drawWeeklyComic(SDL_Surface* scr){
 		drawImage(scr,img.back,0,90,0,40,640,300,255);
 		drawImage(scr,img.back,a,280,((count/10)%2)*120,340,120,120,255);
 		drawImage(scr,img.back,a,230,b,460,120,120,255);
-		if(count>200&&count%20<10 || count>300)drawImage(scr,img.back,240,130,480,420,160,160,255);
+		if((count>200 && count%20<10) || count>300)drawImage(scr,img.back,240,130,480,420,160,160,255);
 		fillRect(scr,0,90,640,300,0,0,0,c);
 	}
 	else if(gd.week==1){
@@ -633,7 +633,7 @@ void drawWeeklyComic(SDL_Surface* scr){
 			if(count<300)b=count-16;
 			else if(count<425)b=284+(count-400);
 			else b=308+(count-425)*4;
-			if(count>=250 && count<260 || count>=450)c-=abs(count%10-4)*6;
+			if((count>=250 && count<260) || count>=450)c-=abs(count%10-4)*6;
 			drawImage(scr,img.back,0,90,0,40,640,300,255);
 			if(count>=250 && count<300)drawImage(scr,img.back,a,c,400,640,60,60,255);
 			else if(count>=450)drawImage(scr,img.back,a,c,460,640,60,60,255);
@@ -705,7 +705,7 @@ void drawEndingAnim(SDL_Surface *scr, int cn){
 	else if(cn<2050){
 		a=cn-1550;
 		int b=80,c=0;
-		if(a%100<8 || a%100>=10 && a%100<18)b+=8-abs(4-a%8)*2;
+		if(a%100<8 || (a%100>=10 && a%100<18))b+=8-abs(4-a%8)*2;
 		if(a>=100 && a<200)c=(a-100)*2/5;
 		if(a>=200 && a<250)c=40;
 		if(a>=250 && a<350)c=40-(a-250)*2/5;
@@ -716,8 +716,8 @@ void drawEndingAnim(SDL_Surface *scr, int cn){
 		for(int i=0 ; i<4 ; i++)drawImage(scr,img.back,i*240-(a%20)*12,340-c,0,1520,240,88,255);
 		drawImage(scr,img.back,-a/5,218+c,0,1708,240,30,255);
 		drawImage(scr,img.back,0,b,0,1200,640,320,255);
-		if(a>=100 && a<120 || a>=140 && a<160 || a>=400 && a<410 || a>=420 && a<430)drawImage(scr,img.back,492,100+b,14,1740,14,20,255);
-		else if(a>=120 && a<140 || a>=410 && a<420)drawImage(scr,img.back,492,100+b,28,1740,14,20,255);
+		if((a>=100 && a<120) || (a>=140 && a<160) || (a>=400 && a<410) || (a>=420 && a<430))drawImage(scr,img.back,492,100+b,14,1740,14,20,255);
+		else if((a>=120 && a<140) || (a>=410 && a<420))drawImage(scr,img.back,492,100+b,28,1740,14,20,255);
 		else drawImage(scr,img.back,492,100+b,0,1740,14,20,255);
 		drawImage(scr,img.back,640-a*4,120,1600,120,240,120,255);
 		drawImage(scr,img.back,1040-a*4,120,1600,1200,240,120,255);
@@ -789,7 +789,7 @@ void drawEndingAnim(SDL_Surface *scr, int cn){
 		int b=0;
 		if(a>=500)b=255;
 		else if(a>=245)b=(a-245);
-		if(a>=255 && a<260 || a>=285 && a<290)b=0;
+		if((a>=255 && a<260) || (a>=285 && a<290))b=0;
 		for(int i=0 ; i<400 ; i++)fillRect(img.scr2,0,i+40,640,1,i/2,i/2,192,255);
 		drawImage(img.scr2,img.back,a*2/5,a*2/5,960,800,640,400,255);
 		drawImage(img.scr2,img.back,a*2/5,-a*2/5,960,400,640,400,255);
@@ -837,7 +837,7 @@ void drawEndingAnim(SDL_Surface *scr, int cn){
 // このバージョンではまだ使わない
 void drawLastEndingAnim(SDL_Surface* scr, int cn){
 	if(cn>=1300 && cn<2800)fillRect(scr,0,20,320,120,255,192,192,255);
-	if(cn>=2800 && cn<3350 || cn>=3750)fillRect(scr,0,20,320,200,255,255,255,255);
+	if((cn>=2800 && cn<3350) || cn>=3750)fillRect(scr,0,20,320,200,255,255,255,255);
 	if(cn>=3350 && cn<3750)fillRect(scr,0,20,320,200,0,0,0,255);
 	if(cn>=1300 && cn<2800){
 		fillRect(scr,0,140,320,80,128,128,255,255);
@@ -1318,7 +1318,7 @@ void drawKomoro(SDL_Surface* scr){
 
     fillRect(scr,0,180,320,60,0,0,0,255);
 	if(w==0){
-		if(gd.scene_count==8&&count>=200 || gd.scene_count==13)drawImage(scr,img.scr2,0,0,x2,y2,320,240,255);
+		if((gd.scene_count==8 && count>=200) || gd.scene_count==13)drawImage(scr,img.scr2,0,0,x2,y2,320,240,255);
 		else drawImage(scr,img.photo[gd.scene_count],0,0,x2,y2,320,240,255);
 	}
 	else drawImage_x(scr,img.photo[gd.scene_count],0,0,w,x2,y2,(int)(320/w),(int)(240/w),255);

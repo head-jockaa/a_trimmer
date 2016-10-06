@@ -75,17 +75,17 @@ Uint32 to32int(char c1, char c2, char c3, char c4);
 bool toBool(char c);
 bool key_wait(int a);
 bool key_stop(int a);
-void TextOut(SDL_Surface* scr, int X, int Y, char* st);
-void TextOut(SDL_Surface* scr, int X, int Y, char* st, int strl);
-void TextOut_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang);
-void TextOut2(SDL_Surface* scr, int X, int Y, char* st);
-void TextOut2(SDL_Surface* scr, int X, int Y, char* st, int strl);
-void TextOut2_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang);
+void TextOut(SDL_Surface* scr, int X, int Y, const char* st);
+void TextOut(SDL_Surface* scr, int X, int Y, const char* st, int strl);
+void TextOut_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang);
+void TextOut2(SDL_Surface* scr, int X, int Y, const char* st);
+void TextOut2(SDL_Surface* scr, int X, int Y, const char* st, int strl);
+void TextOut2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang);
 void getSymbolImage();
 void TalkingAt(int n);
 void drawKeyboard(SDL_Surface* scr, int k, int X, int Y);
 void drawKeyboard2(SDL_Surface* scr, int k, int X, int Y);
-bool loadFile(char* fn);
+bool loadFile(const char* fn);
 void fix_scrXY();
 void fix_XY();
 void reset_key();
@@ -96,8 +96,8 @@ void drawKick(SDL_Surface* scr);
 void padSpace(int n, int k, int x);
 int controlTalking();
 void controlTextCount(bool ok);
-inline Uint32 setRGB(Uint8 r, Uint8 g, Uint8 b);
-inline void getRGB(Uint32 px, Uint8 *r, Uint8 *g, Uint8 *b);
+Uint32 setRGB(Uint8 r, Uint8 g, Uint8 b);
+void getRGB(Uint32 px, Uint8 *r, Uint8 *g, Uint8 *b);
 
 extern SDL_Rect scr;
 extern bool pause,run,setSMR,map_loaded,*animebook,ABGR;
@@ -164,7 +164,7 @@ public:
 	void drawMenu(SDL_Surface* scr);
 	void drawColorMenu(SDL_Surface* scr);
 	void drawMenuText(SDL_Surface* scr);
-	void stack(char *c);
+	void stack(const char *c);
 	void input(int n, char *c);
 	void insert(int n, char *c);
 	void stack(String s);
@@ -304,19 +304,19 @@ struct ImageFile{
 };
 extern ImageFile img;
 
-void TextOut(Image* img, int X, int Y, char* st);
-void TextOut(Image* img, int X, int Y, char* st, int strl);
-void TextOut_lang(Image* img, int x, int y, char* st, int l, int lang);
+void TextOut(Image* img, int X, int Y, const char* st);
+void TextOut(Image* img, int X, int Y, const char* st, int strl);
+void TextOut_lang(Image* img, int x, int y, const char* st, int l, int lang);
 void TextOut(Image* img, int X, int Y, String st);
 void TextOut(Image* img, int x, int y, String str, int strl);
 void TextOut_lang(Image* img, int x, int y, String st, int l, int lang);
-void TextOut2(Image* img, int X, int Y, char* st);
-void TextOut2(Image* img, int X, int Y, char* st, int strl);
-void TextOut2_lang(Image* img, int x, int y, char* st, int l, int lang);
+void TextOut2(Image* img, int X, int Y, const char* st);
+void TextOut2(Image* img, int X, int Y, const char* st, int strl);
+void TextOut2_lang(Image* img, int x, int y, const char* st, int l, int lang);
 void TextOut2(Image* img, int X, int Y, String st);
 void TextOut2(Image* img, int x, int y, String str, int strl);
 void TextOut2_lang(Image* img, int x, int y, String st, int l, int lang);
-void getImage(Image*& img, char* st, int r, int g, int b);
+void getImage(Image*& img, const char* st, int r, int g, int b);
 void getImage(Image*& im, char* st);
 void freeImage(Image*& im);
 void freeMusic();
@@ -333,9 +333,9 @@ void drawLight(SDL_Surface* scr, Image* img, int x, int y, int x2, int y2, int w
 void drawLight(Image* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a);
 
 #ifdef __APPLE__
-void sprintf_s(char *s, char *c, ...);
-void sprintf_s(char *s, int n, char *c, ...);
-void fopen_s(FILE **f, char* c1, char* c2);
+void sprintf_s(char *s, const char *c, ...);
+void sprintf_s(char *s, long n, const char *c, ...);
+void fopen_s(FILE **f, const char* c1, const char* c2);
 void strcpy_s(char *s1, char *s2);
 #endif
 

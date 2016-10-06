@@ -206,7 +206,7 @@ void initGame2(){
 	if(gd.game_mode==SELECT)for(int i=0 ; i<works ; i++){
 		work[i].notExist=true;
 		for(int j=work[i].prg ; j<work[i].prg+work[i].num ; j++){
-			if(prg[j].week==gd.week || prg[j].week==(gd.week+6)%7 && in_time(prg[j].week,prg[j].hour,prg[j].minute,prg[j].time)){
+			if(prg[j].week==gd.week || (prg[j].week==(gd.week+6)%7 && in_time(prg[j].week,prg[j].hour,prg[j].minute,prg[j].time))){
 				work[i].notExist=false;
 				break;
 			}
@@ -721,7 +721,7 @@ void walking(){
 void keyPlaying(){
 	if(key.z && !key_stop(key.z)){
 		if(md.maneki_mode!=CARRYING && md.manekiX-16<gd.x && gd.x<md.manekiX+16 && md.manekiY-20<gd.y && gd.y<md.manekiY+10){
-			if(md.maneki_mode==NULL){
+			if(md.maneki_mode==0){
 				phase=MANEKI;
 				gd.scene_count=0;
 				gd.talk_count=0;
@@ -934,7 +934,7 @@ void keyAntennaMenu(){
 			}
 		}else{
 			int n=gd.antenna_selected;
-			if(n<2 || n>=2 && gd.bought[n-2]){
+			if(n<2 || (n>=2 && gd.bought[n-2])){
 				delete ant;
 				if(img.rod!=NULL){
 					freeImage(img.rod);
@@ -1392,8 +1392,8 @@ int getMissing(){
 		if(fishbox.getSC(i)==0){
 			hit=false;
 			for(int j=work[i].prg ; j<work[i].prg+work[i].num ; j++){
-				if(prg[j].week>gd.week||
-				   prg[j].week==gd.week&&prg[j].hour*100+prg[j].minute>=gd.hour*100+gd.minute
+				if(prg[j].week>gd.week ||
+				   (prg[j].week==gd.week && prg[j].hour*100+prg[j].minute>=gd.hour*100+gd.minute)
 				  )hit=true;
 				if(in_time(prg[j].week,prg[j].hour,prg[j].minute,prg[j].time))hit=true;
 			}
@@ -1701,7 +1701,7 @@ void drawGetHazia(SDL_Surface *scr){
 		TextOut2(scr,200,310,text[MIYAZAKITEXT+6]);
 		int a=1;
 		for(int i=0 ; i<10 ; i++){
-			if(gd.hazia/a==0 && gd.hazia>0 || gd.hazia==0 && i>0)continue;
+			if((gd.hazia/a==0 && gd.hazia>0) || (gd.hazia==0 && i>0))continue;
 			drawImage(scr,img.chr,520-i*30,310,((gd.hazia/a)%10)*20,520,20,40,255);
 			a*=10;
 		}
@@ -1925,7 +1925,7 @@ void drawTimeSlot(SDL_Surface* scr){
 }
 
 void drawManekiTV(SDL_Surface *scr){
-	if(md.maneki_mode==NULL)drawImage(scr,img.chr,(int)(md.manekiX*MAGNIFY)-20-gd.scrX,(int)(md.manekiY*MAGNIFY)-30-gd.scrY,40+((count/20)%2)*40,360,40,40,255);
+	if(md.maneki_mode==0)drawImage(scr,img.chr,(int)(md.manekiX*MAGNIFY)-20-gd.scrX,(int)(md.manekiY*MAGNIFY)-30-gd.scrY,40+((count/20)%2)*40,360,40,40,255);
 	else if(md.maneki_mode==CARRYING)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-14-gd.scrX,(int)(gd.y*MAGNIFY)-76-gd.scrY,0,360,40,40,255);
 	else if(md.maneki_mode==PLUGGED_IN)drawImage(scr,img.chr,(int)(md.manekiX*MAGNIFY)-20-gd.scrX,(int)(md.manekiY*MAGNIFY)-30-gd.scrY,0,360,40,40,255);
 	for(int i=0 ; i<md.fish_num ; i++){
@@ -2163,7 +2163,7 @@ void drawGameExplain(SDL_Surface* scr){
 				}
 			}
 		}
-		else if(phase==SAVEMENU || phase==SMR || phase==MANEKI&&gd.scene_count==3){
+		else if(phase==SAVEMENU || phase==SMR || (phase==MANEKI && gd.scene_count==3)){
 			if(count%600<200){
 				drawKeyboard(scr,key.zC,80,0);
 				TextOut(scr,100,0,text[OPTIONTEXT+1]);
@@ -2297,7 +2297,7 @@ void drawGameExplain(SDL_Surface* scr){
 				TextOut(scr,40,460,text[MENUTEXT+15]);
 			}
 		}
-		else if(phase==TALKING || phase==MANEKI&&gd.scene_count<3 || phase==SUMMERWARS&&count>=660){
+		else if(phase==TALKING || (phase==MANEKI && gd.scene_count<3) || (phase==SUMMERWARS && count>=660)){
 			drawKeyboard(scr,key.zC,70,0);
 			TextOut(scr,90,0,text[EPILOGUE+1]);
 		}
@@ -2536,7 +2536,7 @@ void timerSMRcount(){
 
 void timerSunMovement(){
 	if(gd.second==0){
-		if(gd.hour==22 || gd.hour==6 || gd.hour==6&&gd.minute==0 || gd.hour==23&&gd.minute==0){
+		if(gd.hour==22 || gd.hour==6 || (gd.hour==6 && gd.minute==0) || (gd.hour==23 && gd.minute==0)){
 			if(MAP3D){
 				make3dview(gd.x,gd.y,gd.ant_dir);
 				make3dview_sky();
@@ -2728,7 +2728,7 @@ void timerGame(){
 	else if(phase==BS_ATTACK)timerBSAttack();
 	else if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)timerThrowPhoto();
 
-	if(phase==TALKING || phase==GET_HAZIA && start==0 || phase==MANEKI || phase==MANEKI_CONFIRM || phase==SUMMERWARS && count>=660){
+	if(phase==TALKING || (phase==GET_HAZIA && start==0) || phase==MANEKI || phase==MANEKI_CONFIRM || (phase==SUMMERWARS && count>=660)){
 		controlTextCount(true);
 	}else{
 		controlTextCount(false);
@@ -2862,8 +2862,8 @@ void head_of_talking(){
 	if(face[gd.face_count]==HANGUP){
 		while(gd.face_count<1000){
 			if(face[gd.face_count+1]<gd.week
-			|| face[gd.face_count+1]==gd.week && face[gd.face_count+2]<gd.hour
-			|| face[gd.face_count+1]==gd.week && face[gd.face_count+2]==gd.hour && face[gd.face_count+3]<gd.minute
+			|| (face[gd.face_count+1]==gd.week && face[gd.face_count+2]<gd.hour)
+			|| (face[gd.face_count+1]==gd.week && face[gd.face_count+2]==gd.hour && face[gd.face_count+3]<gd.minute)
 			){
 				gd.face_count+=4;
 				while(face[gd.face_count+1]!=HANGUP && face[gd.face_count]!=EOF){
@@ -2890,8 +2890,8 @@ void head_of_timeslot(){
 	gd.timeslot_count=0;
 	while(gd.timeslot[gd.timeslot_count]!=EOF){
 		if(gd.timeslot[gd.timeslot_count]<gd.week
-		|| gd.timeslot[gd.timeslot_count]==gd.week && gd.timeslot[gd.timeslot_count+1]<gd.hour
-		|| gd.timeslot[gd.timeslot_count]==gd.week && gd.timeslot[gd.timeslot_count+1]==gd.hour && gd.timeslot[gd.timeslot_count+2]<gd.minute
+		|| (gd.timeslot[gd.timeslot_count]==gd.week && gd.timeslot[gd.timeslot_count+1]<gd.hour)
+		|| (gd.timeslot[gd.timeslot_count]==gd.week && gd.timeslot[gd.timeslot_count+1]==gd.hour && gd.timeslot[gd.timeslot_count+2]<gd.minute)
 		){
 			gd.timeslot_count+=4;
 		}
@@ -3095,7 +3095,6 @@ void setManekiData(){
 			int a=area[tow->area].station[k];
 			if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
 
-				Uint32 dir2=0;
 				int mr2=0;
 				mr2=receive_mg(i,tow->ch[k],(int)tow->dir);
 
@@ -3162,7 +3161,7 @@ void ManekiTV_throw(){
 				}
 			}
 			if(skip)continue;
-			if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getData(tmp_fish.title_num,9)<tmp_fish.rcv-tmp_fish.mg_rcv){
+			if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getData(tmp_fish.title_num,9)<tmp_fish.rcv-tmp_fish.mg_rcv)){
 				if(md.fish_num==0)md.maneki_count[0]=40;
 				else{
 					if(md.maneki_count[md.fish_num-1]>30)md.maneki_count[md.fish_num]=md.maneki_count[md.fish_num-1]+10;

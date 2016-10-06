@@ -424,7 +424,7 @@ void drawHaziaShopExplain(SDL_Surface* scr){
 			drawKeyboard(scr,key.leftC,200,460);
 			drawKeyboard(scr,key.rightC,220,460);
 			TextOut(scr,480,440,text[GAMETEXT+12]);
-			if(gd.y==140 && gd.x<400 || gd.y==40 && gd.x>=400){
+			if((gd.y==140 && gd.x<400) || (gd.y==40 && gd.x>=400)){
 				drawKeyboard(scr,key.zC,0,0);
 				TextOut(scr,20,0,text[EPILOGUE+10]);
 			}
@@ -463,7 +463,7 @@ void drawHaziaShop(SDL_Surface* scr){
 		drawImage(scr,img.back,0,0,0,1320,640,360,255);
 		fillRect(scr,0,360,640,120,0,0,0,255);
 	}
-	else if(phase==SHOP_FLOOR || phase==OHANA_TALK || phase==OHANA_MENU || phase==MEMMA_TALK || phase==THROW_MEMMA || phase==STAY_IN&&count<30){
+	else if(phase==SHOP_FLOOR || phase==OHANA_TALK || phase==OHANA_MENU || phase==MEMMA_TALK || phase==THROW_MEMMA || (phase==STAY_IN && count<30)){
 		drawImage(scr,img.back,0,0,0,0,640,480,255);
 		drawImage(scr,img.back,160,80,640+((count/5)%2)*50,0,50,40,255);
 		if(phase==MEMMA_TALK && count<20)drawImage(scr,img.back,480,0,700,40,60,60,255);
@@ -494,7 +494,7 @@ void drawHaziaShop(SDL_Surface* scr){
 			TextOut(scr,230,400,text[MIYAZAKITEXT+6]);
 			int a=1;
 			for(int i=0 ; i<10 ; i++){
-				if(gd.hazia/a==0 && gd.hazia>0 || gd.hazia==0 && i>0)continue;
+				if((gd.hazia/a==0 && gd.hazia>0) || (gd.hazia==0 && i>0))continue;
 				drawImage(scr,img.chr,1200-i*30,400,((gd.hazia/a)%10)*20,520,20,40,255);
 				a*=10;
 			}

@@ -201,7 +201,6 @@ void load_story(int n){
 
 void load_animebook(){
 	if(allworks)return;
-	int fc=0;
 	allworks=0;collection=0;
 	loadFile("file/data/work/works.dat");
 	allworks=(int)(fsize/5);
@@ -343,7 +342,7 @@ void load_works(int n){
 	if(gd.timeslot!=NULL)delete [] gd.timeslot;
 	sprintf_s(str,"file/data/work/timeslot%d.dat",n);
 	loadFile(str);
-	gd.timeslot = new Uint8[fsize+1];
+	gd.timeslot = new int[fsize+1];
 	for(size_t i=0 ; i<fsize ; i++){
 		gd.timeslot[i]=fstr[i];
 	}

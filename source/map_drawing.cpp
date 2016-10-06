@@ -367,7 +367,7 @@ void drawMap(SDL_Surface* scr, int X, int Y){
 }
 
 void drawMap2(SDL_Surface *scr, int X, int Y){
-	if(AIR_IMG==NULL)return;
+	if(AIR_IMG==0)return;
 	if(map.moved && gd.ta_count>=87)drawColorLight(X,Y,640,480,false);
 	else if(!map.buffered2)drawColorLight(X,Y,640,480,true);
 	int a=0;
@@ -1123,7 +1123,7 @@ void drawFireWork(SDL_Surface *scr){
 }
 
 void drawColorLight(int x, int y, int w, int h, bool buf){
-	if(AIR_IMG==NULL)return;
+	if(AIR_IMG==0)return;
 	x-=gd.scrX;
 	y-=gd.scrY;
 
@@ -1201,7 +1201,7 @@ void drawColorLight(int x, int y, int w, int h, bool buf){
 }
 
 void drawVolcano(int x, int y, int w, int h, bool buf){
-	if(AIR_IMG==NULL || mode==GAMEMENU || mode==MIYAZAKI)return;
+	if(AIR_IMG==0 || mode==GAMEMENU || mode==MIYAZAKI)return;
 	x-=gd.scrX;
 	y-=gd.scrY;
 	int minX=640,maxX=0,minY=480,maxY=0;
@@ -1374,7 +1374,7 @@ void make3dview(double X, double Y, int D){
 		for(int a=0 ; a<cubeH ; a++){
 			for(int b=0 ; b<cubeW ; b++){
 				if(*px_z>(Uint16)dis){
-					if(flat || a>half || b>half-(int)(half*sin((PI/2)*a/half)) && b<half+(int)(half*sin((PI/2)*a/half))){
+					if(flat || a>half || (b>half-(int)(half*sin((PI/2)*a/half)) && b<half+(int)(half*sin((PI/2)*a/half)))){
 						*px_rgb=col;
 						*px_z=(Uint16)dis;
 					}

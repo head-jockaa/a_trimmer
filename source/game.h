@@ -81,7 +81,7 @@ struct GameData{
 	double dotX,dotY;
 	Uint8 week,minute,hour,sunset_hour,sunrise_hour,game_mode;
 	Uint8 menu_selected,antenna_selected,option_selected,mainmenu_selected;
-	Uint8 *timeslot;
+	int *timeslot;
 	int bs_ch;
 	int zoom,height;
 	double x,y,speed,real_speed,speedX,speedY;

@@ -549,8 +549,8 @@ void keyGuideSta(){
 		}
 		for(int i=a-2 ; i>=0 ; i--)for(int j=a-1 ; j>i ; j--){
 			if(prg[b[i]].week>prg[b[j]].week ||
-			   prg[b[i]].week==prg[b[j]].week && prg[b[i]].hour>prg[b[j]].hour ||
-			   prg[b[i]].week==prg[b[j]].week && prg[b[i]].hour==prg[b[j]].hour && prg[b[i]].minute>prg[b[j]].minute
+			   (prg[b[i]].week==prg[b[j]].week && prg[b[i]].hour>prg[b[j]].hour) ||
+			   (prg[b[i]].week==prg[b[j]].week && prg[b[i]].hour==prg[b[j]].hour && prg[b[i]].minute>prg[b[j]].minute)
 			  ){
 				int c=b[i];
 				b[i]=b[j];
@@ -1037,8 +1037,8 @@ void keyYNForm(){
 			gd.text_count=0;
 			phase=MIYAZAKI_TALK;
 			int a=((int)gd.x-180)/200;
-			if(a==6&&!gd.bought[15] || a==8&&!gd.bought[16] || a==5&&!gd.bought[6]
-			   || a==9&&!gd.bought[9] || a==10&&!gd.bought[11] || a==7&&!gd.bought[12]){
+			if((a==6 && !gd.bought[15]) || (a==8 && !gd.bought[16]) || (a==5 && !gd.bought[6])
+			   || (a==9 && !gd.bought[9]) || (a==10 && !gd.bought[11]) || (a==7 && !gd.bought[12])){
 				TalkingAt(0);
 			}else{
 				TalkingAt(a+1);
@@ -1251,8 +1251,8 @@ void drawMiyazakiMuseum(SDL_Surface* scr){
 		drawImage(scr,img.back,i*160-gd.scrX,abs(25-(count/2+(i%4)*8)%50)*2+a,(i%4)*100+200,560,100,100,255);
 	}
 	for(int i=0 ; i<14 ; i++){
-		if(i==7&&!gd.bought[15] || i==9&&!gd.bought[16] || i==6&&!gd.bought[6]
-		   || i==10&&!gd.bought[9] || i==11&&!gd.bought[11] || i==8&&!gd.bought[12]){
+		if((i==7 && !gd.bought[15]) || (i==9 && !gd.bought[16]) || (i==6 && !gd.bought[6])
+		   || (i==10 && !gd.bought[9]) || (i==11 && !gd.bought[11]) || (i==8 && !gd.bought[12])){
 			drawImage(scr,img.back,i*200-gd.scrX,400,0,480,80,80,255);
 		}
 		else drawImage(scr,img.back,i*200-gd.scrX,400,80+i*80,480,80,80,255);

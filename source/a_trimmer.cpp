@@ -25,7 +25,7 @@ void draw(SDL_Surface* scr){
 		if(gd.ta_count==0 || gd.ta_count==87)drawImage(scr,img.chr,560,10,456,0,70,16,64);
 	}
 	drawKick(scr);
-	if(scr_design!=NULL)changeScreenColor(scr);
+	if(scr_design!=0)changeScreenColor(scr);
 //	if(mode==GAME){
 //		sprintf_s(str,"%.12g",test);
 //		sprintf_s(str,"%10d",(Uint32)test);
@@ -87,14 +87,14 @@ void key_counter(){
 }
 
 void pauseMovie(){
-	if(mode==OPENING&&phase==2 || mode==ENDING&&(phase==ENDING_ANIME||phase==LAST_ENDING)){
+	if((mode==OPENING && phase==2) || (mode==ENDING && (phase==ENDING_ANIME || phase==LAST_ENDING))){
 		pausetime=SDL_GetTicks();
 		Mix_HaltMusic();
 //		Mix_PauseMusic();
 	}
 }
 void resumeMovie(){
-	if(mode==OPENING&&phase==2 || mode==ENDING&&(phase==ENDING_ANIME||phase==LAST_ENDING)){
+	if((mode==OPENING && phase==2) || (mode==ENDING && (phase==ENDING_ANIME || phase==LAST_ENDING))){
 		int n=SDL_GetTicks();
 		timestamp+=n-pausetime;
 //		Mix_ResumeMusic();

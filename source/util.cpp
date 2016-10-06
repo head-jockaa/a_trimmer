@@ -117,7 +117,7 @@ void Menu::drawAnimation(SDL_Surface* scr){
 	}
 	drawRect(scr,x,y,w,h,128,128,255,255);
 }
-void Menu::stack(char *c){
+void Menu::stack(const char *c){
 	if(head>=lim)return;
 	for(int i=0 ; i<60 ; i++){
 		st[head].str[0][i]=c[i];
@@ -504,7 +504,7 @@ bool key_stop(int a){
 	else return true;
 }
 
-void TextOut(SDL_Surface* scr, int X, int Y, char* st){
+void TextOut(SDL_Surface* scr, int X, int Y, const char* st){
 	TextOut_lang(scr,X,Y,st,0,CHAR_CODE);
 }
 void TextOut(SDL_Surface* scr, int X, int Y, String st){
@@ -515,10 +515,10 @@ void TextOut(SDL_Surface* scr, int X, int Y, String st, int l){
 	if(CHAR_CODE==JAPANESE)TextOut_lang(scr,X,Y,st.str[0],l,JAPANESE);
 	else TextOut_lang(scr,X,Y,st.str[1],l,EUROPEAN);
 }
-void TextOut(SDL_Surface* scr, int x, int y, char* st, int l){
+void TextOut(SDL_Surface* scr, int x, int y, const char* st, int l){
 	TextOut_lang(scr,x,y,st,l,CHAR_CODE);
 }
-void TextOut(Image* img, int X, int Y, char* st){
+void TextOut(Image* img, int X, int Y, const char* st){
 	TextOut_lang(img,X,Y,st,0,CHAR_CODE);
 }
 void TextOut(Image* img, int X, int Y, String st){
@@ -541,7 +541,7 @@ void TextOut_lang(Image* img, int x, int y, String st, int l, int lang){
 	else TextOut_lang(img,x,y,st.str[1],l,EUROPEAN);
 }
 
-void TextOut_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang){
+void TextOut_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang){
 	int i=0,s=0,s2=0,p=0;
 	if(l<0)l=0;
 	while(i<l || l==0){
@@ -552,7 +552,7 @@ void TextOut_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang){
 		if(s2<0)s2+=256;
 
 		if(lang==JAPANESE){
-			if((s>=129 && s<=159 || s>=224) && s2!=0){
+			if(((s>=129 && s<=159) || s>=224) && s2!=0){
 				if(s>=224)s-=64;
 				s=(s-129)*192;
 				s+=s2-64;
@@ -570,7 +570,7 @@ void TextOut_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang){
 	}
 }
 
-void TextOut_lang(Image* img, int x, int y, char* st, int l, int lang){
+void TextOut_lang(Image* img, int x, int y, const char* st, int l, int lang){
 	int i=0,s=0,s2=0,p=0;
 	if(l<0)l=0;
 	while(i<l || l==0){
@@ -581,7 +581,7 @@ void TextOut_lang(Image* img, int x, int y, char* st, int l, int lang){
 		if(s2<0)s2+=256;
 
 		if(lang==JAPANESE){
-			if((s>=129 && s<=159 || s>=224) && s2!=0){
+			if(((s>=129 && s<=159) || s>=224) && s2!=0){
 				if(s>=224)s-=64;
 				s=(s-129)*192;
 				s+=s2-64;
@@ -599,7 +599,7 @@ void TextOut_lang(Image* img, int x, int y, char* st, int l, int lang){
 	}
 }
 
-void TextOut2(SDL_Surface* scr, int X, int Y, char* st){
+void TextOut2(SDL_Surface* scr, int X, int Y, const char* st){
 	TextOut2_lang(scr,X,Y,st,0,CHAR_CODE);
 }
 void TextOut2(SDL_Surface* scr, int X, int Y, String st){
@@ -610,10 +610,10 @@ void TextOut2(SDL_Surface* scr, int X, int Y, String st, int l){
 	if(CHAR_CODE==JAPANESE)TextOut2_lang(scr,X,Y,st.str[0],l,JAPANESE);
 	else TextOut2_lang(scr,X,Y,st.str[1],l,EUROPEAN);
 }
-void TextOut2(SDL_Surface* scr, int x, int y, char* st, int l){
+void TextOut2(SDL_Surface* scr, int x, int y, const char* st, int l){
 	TextOut2_lang(scr,x,y,st,l,CHAR_CODE);
 }
-void TextOut2(Image* img, int X, int Y, char* st){
+void TextOut2(Image* img, int X, int Y, const char* st){
 	TextOut2_lang(img,X,Y,st,0,CHAR_CODE);
 }
 void TextOut2(Image* img, int X, int Y, String st){
@@ -624,7 +624,7 @@ void TextOut2(Image* img, int X, int Y, String st, int l){
 	if(CHAR_CODE==JAPANESE)TextOut2_lang(img,X,Y,st.str[0],l,JAPANESE);
 	else TextOut2_lang(img,X,Y,st.str[1],l,EUROPEAN);
 }
-void TextOut2(Image* img, int x, int y, char* st, int l){
+void TextOut2(Image* img, int x, int y, const char* st, int l){
 	TextOut2_lang(img,x,y,st,l,CHAR_CODE);
 }
 void TextOut2_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang){
@@ -636,7 +636,7 @@ void TextOut2_lang(Image* img, int x, int y, String st, int l, int lang){
 	else TextOut2_lang(img,x,y,st.str[1],l,EUROPEAN);
 }
 
-void TextOut2_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang){
+void TextOut2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang){
 	int i=0,s=0,s2=0,p=0;
 	if(l<0)l=0;
 	while(i<l || l==0){
@@ -647,7 +647,7 @@ void TextOut2_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang){
 		if(s2<0)s2+=256;
 
 		if(lang==JAPANESE){
-			if((s>=129 && s<=159 || s>=224) && s2!=0){
+			if(((s>=129 && s<=159) || s>=224) && s2!=0){
 				if(s>=224)s-=64;
 				s=(s-129)*192;
 				s+=s2-64;
@@ -665,7 +665,7 @@ void TextOut2_lang(SDL_Surface* scr, int x, int y, char* st, int l, int lang){
 	}
 }
 
-void TextOut2_lang(Image* img, int x, int y, char* st, int l, int lang){
+void TextOut2_lang(Image* img, int x, int y, const char* st, int l, int lang){
 	int i=0,s=0,s2=0,p=0;
 	if(l<0)l=0;
 	while(i<l || l==0){
@@ -676,7 +676,7 @@ void TextOut2_lang(Image* img, int x, int y, char* st, int l, int lang){
 		if(s2<0)s2+=256;
 
 		if(lang==JAPANESE){
-			if((s>=129 && s<=159 || s>=224) && s2!=0){
+			if(((s>=129 && s<=159) || s>=224) && s2!=0){
 				if(s>=224)s-=64;
 				s=(s-129)*192;
 				s+=s2-64;
@@ -703,7 +703,7 @@ void putHeadMark(String &s){
 			a=s.str[k][j];
 			if(a==0)break;
 			if(a<0)a+=256;
-			if(k==0 && (a>=129 && a<=159 || a>=224)){//Japanese
+			if(k==0 && ((a>=129 && a<=159) || a>=224)){//Japanese
 				s.head[0][j]=true;
 				s.head[0][j+1]=false;
 				j++;
@@ -713,7 +713,7 @@ void putHeadMark(String &s){
 	}
 }
 
-void getImage(Image*& im, char* st, int r, int g, int b){
+void getImage(Image*& im, const char* st, int r, int g, int b){
 	//実際のimgにアクセスするために&を付けている(参照型の&)
 	SDL_Surface *img2=NULL, *img3;
 	img2=IMG_Load(st);
@@ -1203,7 +1203,7 @@ void initFont(){
 				if(col.r==0 && col.g==0 && col.b==0)continue;
 				if(col.r==img.alphaR && col.g==img.alphaG && col.b==img.alphaB)continue;
 				for(int b=-1 ; b<=1 ; b++)for(int a=-1 ; a<=1 ; a++){
-					if(a==0&&b==0 || i+a<0 || i+a>=font[k]->w || j+b<0 || j+b>=font[k]->h)continue;
+					if((a==0 && b==0) || i+a<0 || i+a>=font[k]->w || j+b<0 || j+b>=font[k]->h)continue;
 					getRGB( font[k]->RGB[(j+b)*(font[k]->w)+(i+a)], &col.r, &col.g, &col.b);
 					//黒の縁取りをほどこす
 					if(col.r==img.alphaR && col.g==img.alphaG && col.b==img.alphaB){
@@ -1222,7 +1222,7 @@ void endFont(){
 	}
 }
 
-bool loadFile(char* fn){
+bool loadFile(const char* fn){
 	fpos_t a=0,b=0;
 	FILE* hFile;
 
@@ -1438,17 +1438,17 @@ void controlTextCount(bool ok){
 }
 
 #ifdef __APPLE__
-void sprintf_s(char *s, char *c, ...){
+void sprintf_s(char *s, const char *c, ...){
 	va_list c2;
 	va_start(c2, c);
 	vsprintf(s,c,c2);
 }
-void sprintf_s(char *s, int n, char *c, ...){
+void sprintf_s(char *s, long n, const char *c, ...){
 	va_list c2;
 	va_start(c2, c);
 	vsprintf(s,c,c2);
 }
-void fopen_s(FILE **f, char* c1, char* c2){
+void fopen_s(FILE **f, const char* c1, const char* c2){
     *f = fopen(c1, c2);
 }
 void strcpy_s(char *s1, char *s2){

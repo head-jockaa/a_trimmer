@@ -82,9 +82,9 @@ void switchSetting(int n, bool up_key){
 			else if(AIR_IMG==TYPE1_BARE)AIR_IMG=TYPE2_EDGE;
 			else if(AIR_IMG==TYPE2_EDGE)AIR_IMG=TYPE2_BARE;
 			else if(AIR_IMG==TYPE2_BARE)AIR_IMG=NULL;
-			else if(AIR_IMG==NULL)AIR_IMG=TYPE1_EDGE;
+			else if(AIR_IMG==0)AIR_IMG=TYPE1_EDGE;
 		}else{
-			if(AIR_IMG==NULL)AIR_IMG=TYPE2_BARE;
+			if(AIR_IMG==0)AIR_IMG=TYPE2_BARE;
 			else if(AIR_IMG==TYPE2_BARE)AIR_IMG=TYPE2_EDGE;
 			else if(AIR_IMG==TYPE2_EDGE)AIR_IMG=TYPE1_BARE;
 			else if(AIR_IMG==TYPE1_BARE)AIR_IMG=TYPE1_EDGE;
@@ -339,7 +339,7 @@ void drawOptionSetting(SDL_Surface* scr, int x, int y){
 		else if(AIR_IMG==TYPE1_BARE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+5]);
 		else if(AIR_IMG==TYPE2_EDGE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+6]);
 		else if(AIR_IMG==TYPE2_BARE)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+7]);
-		else if(AIR_IMG==NULL)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+8]);
+		else if(AIR_IMG==0)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+8]);
 	}
 	else if(gd.option_selected==3){
 		if(DASH_TYPE==TYPE_MARIO)TextOut2(scr,x+20,y+4,text[OPTIONTEXT+9]);

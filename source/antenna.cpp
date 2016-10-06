@@ -26,7 +26,6 @@ void Antenna::receive(){
 	station=EOF;rcv=0;A=0,T=0,C=0;m_wave2=70;
 	mg_rcv=0;
 	if(ADJ_DIR==AUTO && ant_mode==TUNE){
-		Uint32 dir2=0;
 		Tower *tw=tower;
 		for(int i=0 ; i<towers ; i++){
 			for(int j=0 ; j<area[tw->area].st_num ; j++){
@@ -66,7 +65,7 @@ void Antenna::receive(){
 void Antenna::catching(){
 	Uint32 dir2=abs((int)(tower[T].dir-gd.ant_dir));
 	if(dir2>180)dir2=360-dir2;
-	if((ant_mode==TURN||ROD_TYPE!=CONVENIENTROD&&ROD_TYPE!=SUPERHANDYROD) && rcv-mg_rcv>=RCV_LEVEL && dir2<10)Mix_PlayChannel(1,sf.noize,0);
+	if((ant_mode==TURN || (ROD_TYPE!=CONVENIENTROD && ROD_TYPE!=SUPERHANDYROD)) && rcv-mg_rcv>=RCV_LEVEL && dir2<10)Mix_PlayChannel(1,sf.noize,0);
 
 	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT||gd.game_mode==BOSS){
 		if(rcv-mg_rcv>=RCV_LEVEL && sta[station].ontv!=EOF){
@@ -82,7 +81,7 @@ void Antenna::catching(){
 				}
 			}else{
 				setTmpFish();
-				if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getData(tmp_fish.title_num,9)<tmp_fish.rcv-tmp_fish.mg_rcv){
+				if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getData(tmp_fish.title_num,9)<tmp_fish.rcv-tmp_fish.mg_rcv)){
 					if(fishbox.getSC(tmp_fish.title_num)==0){
 						phase=FISHUP;
 						start=150;
@@ -430,7 +429,6 @@ void ButtonRod::auto_set(){
 		for(int i=0 ; i<12 ; i++)button[i]=0;
 	}
 
-	int n=0;
 	if(count%30==0){
 		int i=set-5;
 		if(i==CHANNELS){
@@ -1069,7 +1067,6 @@ void SuperHandyRod::makeList2(){
 		for(int k=0 ; k<area[tow->area].st_num ; k++){
 			if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
 
-				Uint32 dir2=0;
 				int mr2=0;
 				mr2=receive_mg(i,tow->ch[k],(int)tow->dir);
 

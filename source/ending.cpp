@@ -234,7 +234,7 @@ void timerLeaveTorishima(){
 		if(count==1)Mix_PlayChannel(1,sf.tub,0);
 		if(count==150)Mix_PlayChannel(1,sf.sunset,0);
 	}
-	if(which_medal!=0 && count==100 || count==500){
+	if((which_medal!=0 && count==100) || count==500){
 		if(movie_test){
 			endEnding();
 			initMiyazaki();
@@ -424,7 +424,7 @@ void timerEnding(){
 	else if(phase==PRE_ENDING_ANIME || phase==ENDING_ANIME)timerEndingAnime();
 	else if(phase==LAST_ENDING)timerLastEnding();
 	if(phase==LEAVE_SHORE || phase==GET_MEDAL || phase==ANIME_GOD || phase==LAST_STORY){
-	  if(start==0 || phase==ANIME_GOD && start<50)controlTextCount(true);
+	  if(start==0 || (phase==ANIME_GOD && start<50))controlTextCount(true);
 	  else controlTextCount(false);
 	}else{
 		controlTextCount(false);
@@ -515,7 +515,7 @@ void drawTorishima(SDL_Surface *scr){
 
 void drawEndingExplain(SDL_Surface* scr){
 	if(EXPLAIN){
-		if(phase==GET_MEDAL || (phase==ANIME_GOD||phase==LAST_STORY)&&start==0){
+		if(phase==GET_MEDAL || ((phase==ANIME_GOD || phase==LAST_STORY) && start==0)){
 			drawKeyboard(scr,key.zC,0,0);
 			TextOut(scr,20,0,text[EPILOGUE+1]);
 		}
