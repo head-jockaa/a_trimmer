@@ -32,8 +32,8 @@ void drawOpening(SDL_Surface* scr){
 		fillRect(scr,0,0,640,40,0,0,0,255);
 		fillRect(scr,0,440,640,40,0,0,0,255);
 	}
-	else if(phase==2){
-		if(pause)drawOpeningAnim(scr,(pausetime-timestamp)/16);
+	else if(pauseGame==2){
+		if(pauseGame)drawOpeningAnim(scr,(pausetime-timestamp)/16);
 		else drawOpeningAnim(scr,(SDL_GetTicks()-timestamp)/16);
 	}
 	if(EXPLAIN){

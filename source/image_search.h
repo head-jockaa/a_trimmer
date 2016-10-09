@@ -15,6 +15,7 @@
 #pragma comment(lib, "ssleay32.lib")
 #pragma comment(lib, "ws2_32.lib")
 
+// expose a variable "channel" in SDL_net
 #define SOCKET  int
 struct _TCPsocket {
 	int ready;
@@ -29,18 +30,20 @@ struct _TCPsocket {
 #define RESTART_GETIMAGE 2
 #define THREAD_SUCCESS 3
 #define THREAD_END 4
+#define THREAD_SHUTDOWN 5
 #define BUF_LEN 2048
+
+#define OUTPUT_NETWORK_LOG false
 
 // Google
 #define TABLE_PREFIX "<div data-async-context="
 #define URL_PREFIX "\"ou\":\""
 #define URL_SURFIX "\""
-
+#define USER_AGENT "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"
 
 struct ThreadManager {
-	int selected, timeout, idx, halt;
+	int selected, timeout, which, halt, threadID;
 	TCPsocket tcpsock;
-	FILE *file;
 	char targetURL[1000];
 	char query[300];
 	bool running, finish, failure;
@@ -69,9 +72,9 @@ struct ImageFormatReader {
 	int pngPointer1, pngPointer2;
 	int gifPointer, gifBytes, gifField;
 	void reset();
-	void checkJPG(char c);
-	void checkPNG(char c);
-	void checkGIF(char c);
+	void checkJPG(int id, char c);
+	void checkPNG(int id, char c);
+	void checkGIF(int id, char c);
 };
 extern ImageFormatReader ifr;
 #define GIF_HEADER 1
@@ -87,7 +90,9 @@ extern ImageFormatReader ifr;
 extern SDL_Thread *thread;
 int ImageSearchThread(void *ptr);
 int AnotherThread(void *ptr);
-void TCPshutdown();
-void parseHTML(int n, const char *table_prefix, const char *url_prefix, const char *url_surfix);
+void TCPshutdown(int id);
+void parseHTML(int id, int n, const char *table_prefix, const char *url_prefix, const char *url_surfix);
+void networkLog_noparam(int id, const char *log);
+void networkLog(int id, const char *log, ...);
 
 #endif

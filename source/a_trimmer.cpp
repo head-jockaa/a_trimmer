@@ -5,7 +5,6 @@ void createAlphaKey();
 void drawZoom(SDL_Surface* scr);
 void initAll();
 void endAll();
-bool pause;
 SDL_Window* window;
 SDL_Renderer *render;
 
@@ -110,7 +109,7 @@ int main(int argc, char *argv[]) {
 	key.F1=0;key.F4=0;key.F10=0;
 	int time=SDL_GetTicks();
 	double delay=16;
-	pause=false;
+	pauseGame=false;
 	scr.w=640;scr.h=480;
 	run=true;
 
@@ -138,7 +137,7 @@ int main(int argc, char *argv[]) {
 		delay*=16.0/(SDL_GetTicks()-time);
 		time=SDL_GetTicks();
 		if(delay<1)delay=16;
-		if(!pause){
+		if(!pauseGame){
 			timer();
 			pushKey();
 		}
@@ -169,11 +168,11 @@ int main(int argc, char *argv[]) {
 					}
 				}
 				if(key.pressed==SDLK_F1 && !key_stop(key.F1)){
-					if(pause){
-						pause=false;
+					if(pauseGame){
+						pauseGame=false;
 						resumeMovie();
 					}else{
-						pause=true;
+						pauseGame=true;
 						pauseMovie();
 					}
 				}

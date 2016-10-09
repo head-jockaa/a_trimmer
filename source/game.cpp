@@ -1975,7 +1975,7 @@ void drawNetworkStatus(SDL_Surface* scr){
 		if(count%20<10)drawImage(scr,img.chr,0,440,120,840,40,40,255);
 	}
 	else if(ns.status==NS_GET_IMAGE){
-		drawImage(scr,img.chr,40,440,(tm.idx-1)*40,880,40,40,255);
+		drawImage(scr,img.chr,40,440,(tm.which-1)*40,880,40,40,255);
 		if(count%20<10)drawImage(scr,img.chr,0,440,160,840,40,40,255);
 	}
 	else if(ns.status==NS_RCV_JPEG){
@@ -1991,7 +1991,7 @@ void drawNetworkStatus(SDL_Surface* scr){
 		drawImage(scr,img.chr,80,440,320,840,40,40,255);
 	}
 	if(ns.status==NS_RCV_JPEG || ns.status==NS_RCV_PNG || ns.status==NS_RCV_GIF){
-		drawImage(scr,img.chr,40,440,(tm.idx-1)*40,880,40,40,255);
+		drawImage(scr,img.chr,40,440,(tm.which-1)*40,880,40,40,255);
 		if(ns.contentLength){
 			int n=ns.contentLength/28;
 			for(int i=0 ; i<ns.receiveLength/n ; i++){
@@ -2345,11 +2345,11 @@ void createSearchImage(int n){
 		}
 		freeImage(img2);
 	}else{
-		tm.idx++;
+		tm.which++;
 		tm.timeout = 0;
 		tm.failure=true;
 		tm.finish=false;
-		parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		parseHTML(0, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
 	}
 }
@@ -2608,18 +2608,7 @@ void timerFishUp(){
 		int n;
 		if(phase==FISHUP)n=sta[ant->station].ontv;
 		else n=md.fish[0].title_num;
-		strcpy_s(tm.query, work[n].query);
-		tm.selected=work[n].tnum;
-		tm.timeout=0;
-		tm.idx=1;
-		tm.finish=false;
-		tm.failure=false;
-		ns.timeoutIcon=false;
-		if(tm.running){
-			tm.halt=THREAD_END;
-			TCPshutdown();
-		}
-		thread = SDL_CreateThread(ImageSearchThread, "ImageSearchThread", nullptr);
+		startThread(n);
 	}
 	if(start==72){
 		Mix_PlayChannel(0, sf.get, 0);
@@ -2635,22 +2624,26 @@ void timerFishUp(){
 	}
 }
 
+void startThread(int n){
+	tm.selected=work[n].tnum;
+	strcpy_s(tm.query, work[n].query);
+	tm.timeout=0;
+	tm.which=1;
+	tm.finish=false;
+	tm.failure=false;
+	ns.timeoutIcon=false;
+	if(tm.running){
+		tm.halt=THREAD_SHUTDOWN;
+		TCPshutdown(0);
+	}
+	thread = SDL_CreateThread(ImageSearchThread, "ImageSearchThread", nullptr);
+}
+
 void timerBSAttack(){
 	if(start==49){
 		fishbox.text_count=1;
 		int n=sta[ BSstation[gd.bs_ch] ].ontv;
-		tm.selected=work[n].tnum;
-		strcpy_s(tm.query,work[n].query);
-		tm.timeout=0;
-		tm.idx=1;
-		tm.finish=false;
-		tm.failure=false;
-		ns.timeoutIcon=false;
-		if(tm.running){
-			tm.halt=THREAD_END;
-			TCPshutdown();
-		}
-		thread = SDL_CreateThread(ImageSearchThread, "ImageSearchThread", nullptr);
+		startThread(n);
 	}
 	if(start==0 && tm.finish && !tm.failure){
 		createSearchImage(tm.selected);
@@ -2741,19 +2734,20 @@ void timerGame(){
 void manageThread(){
 	tm.timeout++;
 	if(tm.running && tm.timeout>200){
-		tm.idx++;
+		networkLog(0, "timeout");
+		tm.which++;
 		tm.finish=false;
 		tm.failure=false;
-		tm.halt=THREAD_END;
+		tm.halt=THREAD_SHUTDOWN;
 		ns.timeoutIcon=true;
 		ns.display=300;
-		if(tm.tcpsock)TCPshutdown();
+		if(tm.tcpsock)TCPshutdown(0);
 		tm.timeout=0;
-		parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-		thread = SDL_CreateThread(AnotherThread, "TestThread", nullptr);
+		parseHTML(0, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		thread = SDL_CreateThread(AnotherThread, "AnotherThread", nullptr);
 	}
 	if(!tm.running && tm.halt==RESTART_GETIMAGE){
-		thread = SDL_CreateThread(AnotherThread, "TestThread", nullptr);
+		thread = SDL_CreateThread(AnotherThread, "AnotherThread", nullptr);
 	}
 	if(ns.display>0)ns.display--;
 }

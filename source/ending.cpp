@@ -541,11 +541,11 @@ void drawEnding(SDL_Surface* scr){
 		else drawImage(scr,img.back,200,380,400,960,240,80,a);
 	}
 	else if(phase==ENDING_ANIME){
-		if(pause)drawEndingAnim(scr,(pausetime-timestamp)/16);
+		if(pauseGame)drawEndingAnim(scr,(pausetime-timestamp)/16);
 		else drawEndingAnim(scr,(SDL_GetTicks()-timestamp)/16);
 	}
 	else if(phase==LAST_ENDING){
-		if(pause)drawLastEndingAnim(scr,(pausetime-timestamp)/16);
+		if(pauseGame)drawLastEndingAnim(scr,(pausetime-timestamp)/16);
 		else drawLastEndingAnim(scr,(SDL_GetTicks()-timestamp)/16);
 	}
 	else if(phase==WARNING){

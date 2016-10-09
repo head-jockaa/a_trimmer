@@ -3,6 +3,7 @@
 int *prgs2;
 int this_tower[10],which_tower;
 bool talk_3dtv=false, talk_seoiha=false,movie_test=false;
+bool showSearchImage=false;
 Uint8 scr_design=NULL;
 
 void makeGuideBook();
@@ -219,6 +220,16 @@ void timerMiyazaki(){
 	}else{
 		controlTextCount(false);
 	}
+
+	if(phase==GUIDE_ALL || phase==GUIDE_ANIME){
+		if(start==0 && tm.finish && !tm.failure && !showSearchImage){
+			createSearchImage(tm.selected);
+			tm.finish=false;
+			showSearchImage=true;
+		}
+	}
+
+	manageThread();
 }
 
 void keyMiyazakiMuseum(){
@@ -389,11 +400,21 @@ void keyGuideAll(){
 			menu[GUIDE_STALIST].setViewMode(VISIBLE);
 			menu[GUIDE_ALL].setViewMode(HIDE);
 		}
+		showSearchImage=false;
 	}
 	if(key.x && !key_stop(key.x)){
 		phase=GUIDE_TOP;
 		menu[GUIDE_ALL].setViewMode(HIDE);
 		menu[GUIDE_TOP].setViewMode(VISIBLE);
+		showSearchImage=false;
+	}
+	if(key.c && !key_stop(key.c)){
+		if(showSearchImage){
+			showSearchImage=false;
+		}
+		else if(tm.tcpsock==NULL){
+			startThread(menu[GUIDE_ALL].selected());
+		}
 	}
 	if(key.up && !key_wait(key.up))menu[GUIDE_ALL].cursorUp();
 	if(key.down && !key_wait(key.down))menu[GUIDE_ALL].cursorDown();
@@ -1367,6 +1388,20 @@ void drawMiyazaki(SDL_Surface* scr){
 		TextOut2(scr,240,200,text[MENUTEXT+16]);
 		TextOut2(scr,100,240,text[MENUTEXT+17]);
 	}
+	drawNetworkStatus(scr);
+	if(showSearchImage){
+		drawImage(scr,img.searchImage,0,0,0,0,640,480,255);
+		if(strlen(tm.targetURL)>80){
+			drawImage(scr,img.menuback,0,440,0,0,320,40,128);
+			drawImage(scr,img.menuback,320,440,0,0,320,40,128);
+			TextOut(scr,0,440+start/2,tm.targetURL,80);
+			TextOut(scr,0,460+start/2,&tm.targetURL[80],80);
+		}else{
+			drawImage(scr,img.menuback,0,460,0,0,320,20,128);
+			drawImage(scr,img.menuback,320,460,0,0,320,20,128);
+			TextOut(scr,0,460+start/2,tm.targetURL,80);
+		}
+	}
 }
 
 void drawMiyazakiExplain(SDL_Surface *scr){
@@ -1476,8 +1511,21 @@ void makeGuideBook(){
 	menu[GUIDE_ALL].setBG(192);
 	char fn[50];
 
-	if(works)delete [] prg;
-	if(prgs2)delete [] prgs2;
+	if(works){
+		delete [] work;
+		delete [] prg;
+	}
+	if(prgs2){
+		delete [] prgs2;
+	}
+
+	work=new Work[allworks];
+	for(int i=0 ; i<allworks ; i++){
+		work[i].tnum=i;
+	}
+	works=allworks;
+	load_searchQueries();
+
 	prgs=0;
 	prgs2=new int[index_num];
 	int *works2;

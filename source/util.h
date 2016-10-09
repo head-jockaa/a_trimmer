@@ -100,8 +100,8 @@ Uint32 setRGB(Uint8 r, Uint8 g, Uint8 b);
 void getRGB(Uint32 px, Uint8 *r, Uint8 *g, Uint8 *b);
 
 extern SDL_Rect scr;
-extern bool pause,run,setSMR,map_loaded,*animebook,ABGR;
-extern Uint8 mode,mode2,dataNo,phase,kick_count;
+extern bool run,setSMR,map_loaded,*animebook,ABGR;
+extern Uint8 mode,mode2,dataNo,phase,kick_count,pauseGame;
 extern int stas,works,prgs,allworks,collection,areas,towers,mounts,towns,index_num,clear_num,mapW,mapH;
 extern int count,bg_count,face[1000],start;
 extern int talk_kulisap,face_kulisap,ant_dir;

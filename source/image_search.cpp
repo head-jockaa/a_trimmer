@@ -6,69 +6,79 @@ ImageFormatReader ifr;
 char endHTML1[7]={'<','/','H','T','M','L','>'};
 char endHTML2[7]={'<','/','h','t','m','l','>'};
 
-void getGoogleImageSearch(char *query);
-void getTargetImage();
+void getGoogleImageSearch(int id, char *query);
+void getTargetImage(int id, char *url);
+void receivingImageFile(int id, char *url, SSL *ssl);
 SDL_Texture *createSprite(SDL_Surface *surface);
 SDL_Thread *thread;
 
-
-void TCPshutdown(){
-#ifdef __WIN32__
-shutdown(tm.tcpsock->channel,SD_RECEIVE);
-closesocket(tm.tcpsock->channel);
-#else
-SDLNet_TCP_Close(tm.tcpsock);
-#endif
-tm.tcpsock=NULL;
+/** SDLNet_TCP_Close causes trouble */
+void TCPshutdown(int id){
+	networkLog(id, "TCPshutdown()");
+	if(tm.tcpsock){
+		#ifdef __WIN32__
+			shutdown(tm.tcpsock->channel,SD_RECEIVE);
+			closesocket(tm.tcpsock->channel);
+		#else
+			SDLNet_TCP_Close(tm.tcpsock);
+		#endif
+		networkLog(id, "shuted down");
+	}else{
+		networkLog(id, "tcpsock is null");
+	}
+	tm.tcpsock=NULL;
 }
 
 
 int ImageSearchThread(void *ptr)
 {
-	std::cout << "thread: start image search thread\n";
-	tm.file=NULL;
+	tm.threadID++;
+	int id=tm.threadID;
+	networkLog(id, "ImageSearchThread()");
     tm.running = true;
     tm.halt = 0;
 	tm.tcpsock=NULL;
-	getGoogleImageSearch(tm.query);
-    parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-    getTargetImage();
+	getGoogleImageSearch(id, tm.query);
+	if(!tm.halt)parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+	if(!tm.halt)getTargetImage(id, tm.targetURL);
 
     if(tm.halt){
-        std::cout << "thread: image search thread is halted\n";
+		networkLog(id, "ImageSearchThread is halted");
     }else{
-        std::cout << "thread: image search thread ended successfully\n";
-        tm.halt = THREAD_SUCCESS;
+		networkLog(id, "ImageSearchThread ended successfully");
     }
 
     tm.running = false;
-    return 0;
+//	tm.threadID--;
+	return 0;
 }
 
 int AnotherThread(void *ptr)
 {
-	std::cout << "thread: start another thread\n";
-	tm.file=NULL;
+	tm.threadID++;
+	int id=tm.threadID;
+	networkLog(id, "AnotherThread()");
     tm.running = true;
     tm.halt = 0;
 	tm.failure=false;
 	tm.tcpsock=NULL;
-    getTargetImage();
+    getTargetImage(id, tm.targetURL);
 
     if(tm.halt){
-        std::cout << "thread: another thread is halted\n";
+		networkLog(id, "AnotherThread is halted");
     }else{
-        std::cout << "thread: another thread ended successfully\n";
+		networkLog(id, "AnothrtThread ended successfully");
         tm.halt = THREAD_SUCCESS;
     }
 
     tm.running = false;
+//	tm.threadID--;
     return 0;
 }
 
 
-void imageSearch_https(const char *host, int port, const char *request){
-	std::cout << "imageSearch_https\n";
+void imageSearch_https(int id, const char *host, int port, const char *request){
+	networkLog(id, "imageSearch_https()");
 	ns.status=NS_IMAGE_SEARCH;
 	int ret;
 	SSL *ssl;
@@ -97,9 +107,12 @@ void imageSearch_https(const char *host, int port, const char *request){
 		return;
 	}
 
-	std::cout << "resolved google.co.jp host\n";
+	networkLog(id, "resolved host google.co.jp");
 
 	//start comm.
+	if(tm.tcpsock){
+		networkLog(id, "Wait: another thread is opening socket");
+	}
 	while(tm.tcpsock){}
 	tm.tcpsock = SDLNet_TCP_Open(&ipaddress);
 	if(!tm.tcpsock) {
@@ -108,7 +121,7 @@ void imageSearch_https(const char *host, int port, const char *request){
 		return;
 	}
 
-	std::cout << "tcp opened\n";
+	networkLog(id, "google.co.jp tcp opened");
 
 	ret = SSL_set_fd(ssl, tm.tcpsock->channel);
 	if (ret == 0){
@@ -137,6 +150,7 @@ void imageSearch_https(const char *host, int port, const char *request){
 	char fn[100];
 
 	//receive
+	FILE *file=NULL;
 	char get_msg[BUF_LEN];
 	int length = 0;
 	int htmlCount1 = 0, htmlCount2 = 0;
@@ -183,17 +197,15 @@ void imageSearch_https(const char *host, int port, const char *request){
 				}
 			}
 
-			while(tm.file){}
 			sprintf_s(fn,"save/tmp_search/%d.html",tm.selected);
-			tm.file = fopen(fn, "w");
-			std::cout << fn;
-			std::cout << "\n";
-			if(!tm.file){
-				break;
-			}
+			file = fopen(fn, "w");
+			networkLog(id, fn);
+		}
+		if(!file){
+			break;
 		}
 		for( int j=0; j<length; j++ ){
-			fputc(get_msg[j], tm.file);
+			fputc(get_msg[j], file);
 			ns.receiveLength++;
 
 			if(ns.contentLength && ns.receiveLength>=ns.contentLength){
@@ -225,9 +237,9 @@ void imageSearch_https(const char *host, int port, const char *request){
 		}
 	}
 
-	if(tm.file){
-		fclose(tm.file);
-		tm.file = NULL;
+	if(file){
+		fclose(file);
+		file = NULL;
 	}
 
 	ret = SSL_shutdown(ssl);
@@ -235,10 +247,9 @@ void imageSearch_https(const char *host, int port, const char *request){
 		ERR_print_errors_fp(stderr);
 	}
 
-	if(tm.tcpsock){
-		SDLNet_TCP_Close(tm.tcpsock);
-		std::cout << "close tcp socket (https google)\n";
-		tm.tcpsock = NULL;
+	if(tm.tcpsock && tm.halt!=THREAD_SHUTDOWN){
+		TCPshutdown(id);
+		networkLog(id, "close tcp socket (https google)");
 	}
 
 	SSL_free(ssl);
@@ -246,7 +257,7 @@ void imageSearch_https(const char *host, int port, const char *request){
 	ERR_free_strings();
 }
 
-char* getHostName(const char *url){
+char* getHostName(int id, const char *url){
     int size = (int)strlen(url);
     char* host = new char[size];
     for(int i=0 ; i<size ; i++){
@@ -271,7 +282,7 @@ char* getHostName(const char *url){
     return host;
 }
 
-char* getPath(const char *url){
+char* getPath(int id, const char *url){
     int size = (int)strlen(url);
     char* path = new char[size];
     for(int i=0 ; i<size ; i++){
@@ -297,8 +308,8 @@ char* getPath(const char *url){
 }
 
 /** fetch the nth URL from an HTML of image search result */
-void parseHTML(int n, const char *table_prefix, const char *url_prefix, const char *url_surfix){
-	std::cout << "parseHTML\n";
+void parseHTML(int id, int n, const char *table_prefix, const char *url_prefix, const char *url_surfix){
+	networkLog(id, "parseHTML()");
     char fn[100];
     sprintf_s(fn, "save/tmp_search/%d.html", tm.selected);
     loadFile(fn);
@@ -326,14 +337,6 @@ void parseHTML(int n, const char *table_prefix, const char *url_prefix, const ch
 	char *result2 = NULL;
     result2 = strstr(result, url_surfix);
     size_t size = result2-result;
-/*
-	for(size_t i=0 ; i<strlen(result) ; i++){
-        if(result[i] == url_surfix){
-            break;
-        }
-        size++;
-    }
-*/
 
     //put into the variable "url"
     url = new char[size+1];
@@ -378,28 +381,34 @@ void parseHTML(int n, const char *table_prefix, const char *url_prefix, const ch
     }
 	url[n] = 0;
 
+	if(strstr(url, "images-amazon.")){
+		std::cout << "skip images-amazon.\n";
+		tm.which++;
+		parseHTML(id, tm.which, table_prefix, url_prefix, url_surfix);
+		return;
+	}
+
     strcpy_s(tm.targetURL, url);
 	FILE *hFile;
 	sprintf_s(fn,"save/tmp_url/%d.dat",tm.selected);
 	fopen_s(&hFile, fn, "wb");
-	std::cout << fn;
-	std::cout << "\n";
+	networkLog(id, fn);
 	fwrite(tm.targetURL, sizeof(tm.targetURL[0]), n/sizeof(tm.targetURL[0]), hFile);
 	fclose(hFile);
 }
 
 /** get an image file from the URL */
-void getTargetImage(){
-	if(tm.targetURL[0] == 0){
+void getTargetImage_http(int id, char *url){
+	networkLog(id, "getTargetImage_http()");
+	if(url[0] == 0){
 		return;
 	}
 	ns.status=NS_GET_IMAGE;
 
-	char *host = getHostName(tm.targetURL);
-	char *path = getPath(tm.targetURL);
+	char *host = getHostName(id, url);
+	char *path = getPath(id, url);
 
-	sprintf(str,"resolve host %s\n",host);
-	std::cout << str;
+	networkLog(id, "resolve host %s",host);
 
 	//getting IP address
 	IPaddress ipaddress;
@@ -409,18 +418,21 @@ void getTargetImage(){
 		//go to the next image file if failed
 		delete host;
 		delete path;
-		tm.idx++;
+		tm.which++;
 		tm.timeout = 0;
 		ns.status=NS_IPADDRESS_FAILURE;
-		parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
-		std::cout << "resolving host failed\n";
+		networkLog(id, "resolving host failed");
 		return;
 	}
 
-	std::cout << "resolved\n";
+	networkLog(id, "resolved");
 
 	//start comm.
+	if(tm.tcpsock){
+		networkLog(id, "Wait: another thread is opening socket");
+	}
 	while(tm.tcpsock){}
 	tm.tcpsock = SDLNet_TCP_Open(&ipaddress);
 
@@ -428,32 +440,183 @@ void getTargetImage(){
 		//go to the next image file if failed
 		delete host;
 		delete path;
-		tm.idx++;
+		tm.which++;
 		tm.timeout = 0;
 		ns.status=NS_CONNECT_FAILURE;
-		parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
-		std::cout << "opening tcp failed\n";
+		networkLog(id, "opening tcp failed");
 		return;
 	}
 
-	std::cout << "connected\n";
+	networkLog(id, "connected");
 
 	//send request
-	long msg_size = strlen(path)+strlen(host)+30;
+	long msg_size = strlen(path)+strlen(host)+strlen(USER_AGENT)+50;
 	char *msg = new char[msg_size];
-	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", path, host);
+	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", path, host, USER_AGENT);
 
-	std::cout << msg;
+	networkLog_noparam(id, msg);
 
 	SDLNet_TCP_Send(tm.tcpsock, msg, (int)strlen(msg)+1);
+	networkLog(id, SDLNet_GetError());
 	delete msg;
 
+	receivingImageFile(id, url, NULL);
+
+	if(tm.tcpsock && tm.halt!=THREAD_SHUTDOWN){
+		TCPshutdown(id);
+		networkLog(id, "closed tcp socket");
+	}
+
+	ns.status=NULL;
+	delete host;
+	delete path;
+}
+
+void getTargetImage_https(int id, char *url){
+	networkLog(id, "getTargetImage_https()");
+	if(url[0] == 0){
+		return;
+	}
+
+	int ret;
+	SSL *ssl;
+	SSL_CTX *ctx;
+
+	SSL_load_error_strings();
+	SSL_library_init();
+	ctx = SSL_CTX_new(SSLv23_client_method());
+	if (!ctx){
+		ERR_print_errors_fp(stderr);
+		return;
+	}
+
+	ssl = SSL_new(ctx);
+	if (!ssl){
+		ERR_print_errors_fp(stderr);
+		return;
+	}
+
+	ns.status=NS_GET_IMAGE;
+
+	char *host = getHostName(id, url);
+	char *path = getPath(id, url);
+
+	networkLog(id, "resolve host %s", host);
+
+	//getting IP address
+	IPaddress ipaddress;
+	int res = SDLNet_ResolveHost(&ipaddress, host, 443);
+
+	if(res){
+		//go to the next image file if failed
+		delete host;
+		delete path;
+		tm.which++;
+		tm.timeout = 0;
+		ns.status=NS_IPADDRESS_FAILURE;
+		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		tm.halt = RESTART_GETIMAGE;
+		networkLog(id, "resolving host failed");
+		return;
+	}
+
+	networkLog(id, "resolved");
+
+	//start comm.
+	if(tm.tcpsock){
+		networkLog(id, "Wait: another thread is opening socket");
+	}
+	while(tm.tcpsock){}
+	tm.tcpsock = SDLNet_TCP_Open(&ipaddress);
+	if(!tm.tcpsock) {
+		//go to the next image file if failed
+		delete host;
+		delete path;
+		tm.which++;
+		tm.timeout = 0;
+		ns.status=NS_CONNECT_FAILURE;
+		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		tm.halt = RESTART_GETIMAGE;
+		networkLog(id, "opening tcp failed");
+		return;
+	}
+
+	networkLog(id, "connected");
+
+	ret = SSL_set_fd(ssl, tm.tcpsock->channel);
+	if (ret == 0){
+		ERR_print_errors_fp(stderr);
+		return;
+	}
+
+	RAND_poll();
+	while (RAND_status() == 0){
+		unsigned short rand_ret = rand() % 65536;
+		RAND_seed(&rand_ret, sizeof(rand_ret));
+	}
+
+	ret = SSL_connect(ssl);
+	if (ret != 1){
+		ERR_print_errors_fp(stderr);
+		tm.which++;
+		tm.timeout = 0;
+		networkLog(id, "SSL error occurred");
+		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		tm.halt = RESTART_GETIMAGE;
+		return;
+	}
+
+	//send request
+	long msg_size = strlen(path)+strlen(host)+strlen(USER_AGENT)+50;
+	char *msg = new char[msg_size];
+	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", path, host, USER_AGENT);
+
+	networkLog_noparam(id, msg);
+
+	ret = SSL_write(ssl, msg, (int)strlen(msg));
+	if (ret < 1){
+		ERR_print_errors_fp(stderr);
+		return;
+	}
+	delete msg;
+
+	receivingImageFile(id, url, ssl);
+
+	ret = SSL_shutdown(ssl);
+	if (ret != 1){
+		ERR_print_errors_fp(stderr);
+	}
+
+	if(tm.tcpsock && tm.halt!=THREAD_SHUTDOWN){
+		TCPshutdown(id);
+		networkLog(id, "closed tcp socket");
+	}
+
+	SSL_free(ssl);
+	SSL_CTX_free(ctx);
+	ERR_free_strings();
+	ns.status=NULL;
+	delete host;
+	delete path;
+}
+
+void getTargetImage(int id, char *url){
+	if(strstr(url, "https://")){
+		getTargetImage_https(id, url);
+	}else{
+		getTargetImage_http(id, url);
+	}
+}
+
+void receivingImageFile(int id, char *url, SSL *ssl){
+	networkLog(id, "receivingImageFile()");
+	FILE *file=NULL;
 	char get_msg[BUF_LEN];
 	int length = 0;
 	char fn[100];
 
-	tm.file=NULL;
 	ns.receiveCounter=0;
 	ns.receiveLength=0;
 	ifr.reset();
@@ -462,15 +625,19 @@ void getTargetImage(){
 	for(int i=0 ; i<10000 ; i++){
 		//forced termination
 		if(tm.halt){
-			std::cout << "halted\n";
+			networkLog(id, "halted");
 			break;
 		}
-		length = SDLNet_TCP_Recv(tm.tcpsock, get_msg, 2048);
+		if(ssl){
+			length = SSL_read(ssl, get_msg, BUF_LEN);
+		}else{
+			length = SDLNet_TCP_Recv(tm.tcpsock, get_msg, BUF_LEN);
+		}
 
 		if(!ns.contentLength && !length){
 			ns.status=NS_RCV_ZERO_LENGTH;
 			ns.display=300;
-			std::cout << "received zero length\n";
+			networkLog(id, "received zero length");
 			break;
 		}
 		if(length){
@@ -479,23 +646,19 @@ void getTargetImage(){
 		}
 
 		if(i == 0){
-			//https (pending)
-			char *result = strstr(get_msg, "Location: https");
-			if(result){
-				tm.idx++;
-				tm.timeout = 0;
-				std::cout << "redirect to https (pass it)\n";
-				parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-				tm.halt = RESTART_GETIMAGE;
+			//error
+			if(length==-1){
+				networkLog(id, "error code -1 caused by shut-down");
 				break;
 			}
+
 			//this means that the url is wrong
-			result = strstr(get_msg, "200 OK");
+			char *result = strstr(get_msg, "200 OK");
 			if(!result){
-				tm.idx++;
+				tm.which++;
 				tm.timeout = 0;
-				std::cout << "get text 200 OK (pass it)\n";
-				parseHTML(tm.idx, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+				networkLog(id, "get text 200 OK (pass it)");
+				parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 				tm.halt = RESTART_GETIMAGE;
 				break;
 			}
@@ -503,7 +666,7 @@ void getTargetImage(){
 			//to redirect
 			result = strstr(get_msg, "Location:");
 			if(result){
-				std::cout << "redirect to another url\n";
+				networkLog(id, "redirect to another url");
 				result += 10;
 				int size = 0;
 				for(size_t j=0 ; j<strlen(result) ; j++){
@@ -519,7 +682,7 @@ void getTargetImage(){
 				url2[size] = 0;
 				tm.timeout = 0;
 				tm.halt = RESTART_GETIMAGE;
-				strcpy_s(tm.targetURL, url2);
+				strcpy_s(url, url2);
 				delete url2;
 				break;
 			}
@@ -528,13 +691,13 @@ void getTargetImage(){
 			ns.contentLength = 0;
 			result = strstr(get_msg, "Content-Length:");
 			if(result){
-				std::cout << "response header has Content-Length\n";
+				networkLog(id, "response header has Content-Length");
 				result += 16;
 			}
 			if(!result){
 				result = strstr(get_msg, "x-oct-size:");
 				if(result){
-					std::cout << "response header has x-oct-size\n";
+					networkLog(id, "response header has x-oct-size");
 					result += 12;
 				}
 			}
@@ -546,75 +709,68 @@ void getTargetImage(){
 					ns.contentLength *= 10;
 					ns.contentLength += result[j]-48;
 				}
-				sprintf(str,"content length is %d\n",ns.contentLength);
-				std::cout << str;
+				networkLog(id, "content length is %d\n", ns.contentLength);
 			}
 		}
 
 		for( int j=0 ; j<length ; j++ ){
 			//check the startpoint of the image file
-            if(!ifr.jpgStart && !ifr.pngStart && !ifr.gifStart){
-                ifr.checkPNG(get_msg[j]);
-                ifr.checkJPG(get_msg[j]);
-                ifr.checkGIF(get_msg[j]);
+			if(!ifr.jpgStart && !ifr.pngStart && !ifr.gifStart){
+				ifr.checkPNG(id, get_msg[j]);
+				ifr.checkJPG(id, get_msg[j]);
+				ifr.checkGIF(id, get_msg[j]);
 
-                if(ifr.jpgStart || ifr.pngStart || ifr.gifStart){
-                    //save the image file
-                    if(tm.file){
-                        std::cout << "Wait: another thread is opening file\n";
-                    }
-                    while(tm.file){}
-                    sprintf(fn, "save/tmp_image/%d.jpg", tm.selected);
-                    tm.file = fopen(fn, "wb");
-					std::cout << fn;
-					std::cout << "\n";
-                    if(!tm.file){
-                        std::cout << "failed to create new img file\n";
-                        tm.halt = THREAD_END;
-                        break;
-                    }
-                    if(ifr.jpgStart){
-                        fputc(-1, tm.file);
-                        fputc(-40, tm.file);
+				if(ifr.jpgStart || ifr.pngStart || ifr.gifStart){
+					//save the image file
+					sprintf(fn, "save/tmp_image/%d.jpg", tm.selected);
+					file = fopen(fn, "wb");
+					networkLog(id, fn);
+					if(!file){
+						networkLog(id, "failed to create new img file");
+						tm.halt = THREAD_END;
+						break;
+					}
+					if(ifr.jpgStart){
+						fputc(-1, file);
+						fputc(-40, file);
 						ns.receiveLength = 2;
-						std::cout << "passed JPEG head\n";
+						networkLog(id, "passed JPEG head");
 						ns.status = NS_RCV_JPEG;
-                    }
-                    else if(ifr.pngStart){
-                        fputc(-119, tm.file);
-                        fputc('P', tm.file);
-                        fputc('N', tm.file);
-                        fputc('G', tm.file);
+					}
+					else if(ifr.pngStart){
+						fputc(-119, file);
+						fputc('P', file);
+						fputc('N', file);
+						fputc('G', file);
 						ns.receiveLength = 4;
-						std::cout << "passed PNG head\n";
+						networkLog(id, "passed PNG head");
 						ns.status = NS_RCV_PNG;
-                    }
-                    else if(ifr.gifStart){
-                        fputc('G', tm.file);
-                        fputc('I', tm.file);
-                        fputc('F', tm.file);
-                        fputc('8', tm.file);
+					}
+					else if(ifr.gifStart){
+						fputc('G', file);
+						fputc('I', file);
+						fputc('F', file);
+						fputc('8', file);
 						ns.receiveLength = 4;
-						std::cout << "passed GIF head\n";
+						networkLog(id, "passed GIF head");
 						ns.status = NS_RCV_GIF;
-                    }
-                    continue;
-                }
-            }
+					}
+					continue;
+				}
+			}
 
-
-            //writing new image file
-            if(ifr.jpgStart || ifr.pngStart || ifr.gifStart){
-                fputc(get_msg[j], tm.file);
+			//writing new image file
+			if(ifr.jpgStart || ifr.pngStart || ifr.gifStart){
+				fputc(get_msg[j], file);
 				ns.receiveLength++;
-
-                //check the endpoint of the image file
-                if(!ns.contentLength){
-                    ifr.checkPNG(get_msg[j]);
-                    ifr.checkJPG(get_msg[j]);
-                    ifr.checkGIF(get_msg[j]);
-                }
-            }
+				
+				//check the endpoint of the image file
+				if(!ns.contentLength){
+					ifr.checkPNG(id, get_msg[j]);
+					ifr.checkJPG(id, get_msg[j]);
+					ifr.checkGIF(id, get_msg[j]);
+				}
+			}
 
 			//finish writing a file
 			if((ns.contentLength && ns.receiveLength>=ns.contentLength) || ifr.jpgEnd || ifr.pngEnd || ifr.gifEnd){
@@ -628,32 +784,19 @@ void getTargetImage(){
 		}
 	}
 
-	if(tm.file){
-		fclose(tm.file);
-		tm.file = NULL;
+	if(file){
+		networkLog(id, "finished writing img file");
+		fclose(file);
 	}
-
-	std::cout << "finished writing img file\n";
-
-	if(tm.tcpsock){
-		SDLNet_TCP_Close(tm.tcpsock);
-		tm.tcpsock = NULL;
-		std::cout << "closed tcp socket\n";
-	}
-
-	ns.status=NULL;
-	delete host;
-	delete path;
 }
 
-void getGoogleImageSearch(char *query){
-	std::cout << "getGoogleImageSearch request is below\n";
+void getGoogleImageSearch(int id, char *query){
+	networkLog(id, "getGoogleImageSearch()");
 	long request_size = strlen(query)+100+120;
     char *request = new char[request_size];
-    sprintf_s(request, request_size, "GET /search?q=%s&source=lnms&tbm=isch HTTP/1.1\nHost: www.google.co.jp\nUser-Agent: %s\n\n", query, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36");
-	std::cout << request;
-    std::cout << "\n";
-    imageSearch_https("www.google.co.jp", 443, request);
+    sprintf_s(request, request_size, "GET /search?q=%s&source=lnms&tbm=isch HTTP/1.1\r\nHost: www.google.co.jp\r\nUser-Agent: %s\r\n\r\n", query, USER_AGENT);
+	networkLog_noparam(id, request);
+    imageSearch_https(id, "www.google.co.jp", 443, request);
     delete request;
 }
 
@@ -666,7 +809,7 @@ void ImageFormatReader::reset(){
     gifPointer = 0;gifBytes = 0;gifField = 0;
 }
 
-void ImageFormatReader::checkPNG(char c){
+void ImageFormatReader::checkPNG(int id, char c){
     if(!pngStart){
         if(pngPointer1 == 0){
             if(c == -119){
@@ -690,7 +833,7 @@ void ImageFormatReader::checkPNG(char c){
         else if(pngPointer1 == 3){
             if(c == 'G'){
                 pngStart = true;
-                std::cout << "found PNG data\n";
+				networkLog(id, "found PNG data");
             }else{
                 pngPointer1 = 0;
             }
@@ -747,14 +890,14 @@ void ImageFormatReader::checkPNG(char c){
     else if(pngPointer2 == 7){
         if(c == -126){
             pngEnd = true;
-            std::cout << "PNG END\n";
+			networkLog(id, "PNG END");
         }else{
             pngPointer2 = 0;
         }
     }
 }
 
-void ImageFormatReader::checkJPG(char c){
+void ImageFormatReader::checkJPG(int id, char c){
     if(jpgImageDataStart){
         if(c == -1){
             jpgPointer = 0;
@@ -762,7 +905,7 @@ void ImageFormatReader::checkJPG(char c){
         else if(jpgPointer == 1 && c == -39){
             jpgPointer = 0;
             jpgEnd = true;
-            std::cout << "JPG END\n";
+			networkLog(id, "JPG END");
             return;
         }
     }
@@ -775,12 +918,12 @@ void ImageFormatReader::checkJPG(char c){
         if(c == -40){
             jpgPointer = 0;
             jpgStart = true;
-            std::cout << "found JPG data\n";
+			networkLog(id, "found JPG data");
             return;
         }
         else if(c == -38){
             jpgImageDataStart = true;
-            std::cout << "came into JPG data part\n";
+			networkLog(id, "came into JPG data part");
             return;
         }
     }
@@ -801,14 +944,14 @@ void ImageFormatReader::checkJPG(char c){
     else if(jpgPointer >= 4){
         if(!jpgImageDataStart && jpgPointer-1 == jpgBytes){
             jpgPointer = 0;
-            std::cout << "END CHUNK\n";
+			networkLog(id, "END CHUNK");
             return;
         }
     }
     jpgPointer++;
 }
 
-void ImageFormatReader::checkGIF(char c){
+void ImageFormatReader::checkGIF(int id, char c){
     if(!gifStart){
         if(gifPointer == 0){
             if(c == 'G'){
@@ -834,7 +977,7 @@ void ImageFormatReader::checkGIF(char c){
                 gifStart = true;
                 gifPointer = 4;
                 gifField = GIF_HEADER;
-                std::cout << "found GIF data\n";
+				networkLog(id, "found GIF data");
             }else{
                 gifPointer = 0;
             }
@@ -847,40 +990,40 @@ void ImageFormatReader::checkGIF(char c){
             if(c == 44){
                 gifPointer = 1;
                 gifField = GIF_IMAGE_DATA_HEADER;
-                std::cout << "came into GIF header part\n";
+				networkLog(id, "came into GIF header part");
                 return;
             }
             else if(c == 59){
                 gifEnd = true;
-                std::cout << "GIF END\n";
+				networkLog(id, "GIF END");
             }
         }
         else if(gifPointer == 1){
             if(c == -7){
                 gifPointer = 2;
                 gifField = GIF_GLAPHIC_CONTROL_EXTENSION_BLOCK;
-                std::cout << "GLAPHIC CONTROL EXTENSION BLOCK\n";
+				networkLog(id, "GLAPHIC CONTROL EXTENSION BLOCK");
                 return;
             }
             else if(c == -2){
                 gifPointer = 2;
                 gifField = GIF_COMMENT_EXTENSION_BLOCK;
                 gifBytes = 0;
-                std::cout << "COMMENT EXTENSION BLOCK\n";
+				networkLog(id, "COMMENT EXTENSION BLOCK");
                 return;
             }
             else if(c == 1){
                 gifPointer = 2;
                 gifField = GIF_PLAIN_TEXT_EXTENSION_BLOCK;
                 gifBytes = 0;
-                std::cout << "PLAIN TEXT EXTENSION BLOCK\n";
+				networkLog(id, "PLAIN TEXT EXTENSION BLOCK");
                 return;
             }
             else if(c == -1){
                 gifPointer = 2;
                 gifField = GIF_APPLICATION_EXTENSION_BLOCK;
                 gifBytes = 0;
-                std::cout << "APPLICATION EXTENSION BLOCK\n";
+				networkLog(id, "APPLICATION EXTENSION BLOCK");
                 return;
             }
         }
@@ -897,9 +1040,7 @@ void ImageFormatReader::checkGIF(char c){
         else if(gifPointer == 12){
             gifField = GIF_GLOBAL_COLOR_TABLES;
             gifPointer = 0;
-            std::cout << "GLOBAL COLOR TABLES: ";
-            std::cout << gifBytes;
-            std::cout << "\n";
+			networkLog(id, "GLOBAL COLOR TABLES: %d", gifBytes);
             return;
         }
     }
@@ -928,9 +1069,7 @@ void ImageFormatReader::checkGIF(char c){
                 gifPointer = 0;
                 return;
             }else{
-                std::cout << "COMMENT: ";
-                std::cout << a;
-                std::cout << "\n";
+				networkLog(id, "COMMENT: %d", a);
             }
             gifBytes = a+3;
         }
@@ -944,9 +1083,7 @@ void ImageFormatReader::checkGIF(char c){
                 gifPointer = 0;
                 return;
             }else{
-                std::cout << "COMMENT: ";
-                std::cout << a;
-                std::cout << "\n";
+				networkLog(id, "COMMENT: %d", a);
             }
             gifBytes += a+1;
         }
@@ -962,10 +1099,8 @@ void ImageFormatReader::checkGIF(char c){
                 gifPointer = 0;
                 return;
             }else{
-                std::cout << "DATA: ";
-                std::cout << a;
-                std::cout << "\n";
-            }
+				networkLog(id, "DATA: %d", a);
+			}
             gifBytes = a+16;
         }
         else if(gifPointer == gifBytes && gifBytes){
@@ -978,9 +1113,7 @@ void ImageFormatReader::checkGIF(char c){
                 gifPointer = 0;
                 return;
             }else{
-                std::cout << "DATA: ";
-                std::cout << a;
-                std::cout << "\n";
+				networkLog(id, "DATA: %d", a);
             }
             gifBytes += a+1;
         }
@@ -996,9 +1129,7 @@ void ImageFormatReader::checkGIF(char c){
                 gifPointer = 0;
                 return;
             }else{
-                std::cout << "DATA: ";
-                std::cout << a;
-                std::cout << "\n";
+				networkLog(id, "DATA: %d", a);
             }
             gifBytes = a+15;
         }
@@ -1012,10 +1143,8 @@ void ImageFormatReader::checkGIF(char c){
                 gifPointer = 0;
                 return;
             }else{
-                std::cout << "DATA: ";
-                std::cout << a;
-                std::cout << "\n";
-            }
+				networkLog(id, "DATA: %d", a);
+			}
             gifBytes += a+1;
         }
     }
@@ -1028,12 +1157,10 @@ void ImageFormatReader::checkGIF(char c){
                     gifBytes *= 2;
                 }
                 gifBytes *= 3;
-                std::cout << "LOCAL COLOR TABLES: ";
-                std::cout << gifBytes;
-                std::cout << "\n";
+				networkLog(id, "LOCAL COLOR TABLES: %d", gifBytes);
             }else{
                 gifBytes = 0;
-                std::cout << "LOCAL COLOR TABLES: none\n";
+				networkLog(id, "LOCAL COLOR TABLES: none");
             }
         }
         else if(gifPointer == 10+gifBytes){
@@ -1053,9 +1180,7 @@ void ImageFormatReader::checkGIF(char c){
                 gifPointer = 0;
                 return;
             }else{
-                std::cout << "IMAGE DATA BLOCK: ";
-                std::cout << gifBytes;
-                std::cout << "\n";
+				networkLog(id, "IMAGE DATA BLOCK: %d", gifBytes);
             }
         }
         else if(gifPointer == gifBytes){
@@ -1064,4 +1189,38 @@ void ImageFormatReader::checkGIF(char c){
         }
     }
     gifPointer++;
+}
+
+void networkLog_noparam(int id, const char *log) {
+	if(!OUTPUT_NETWORK_LOG)return;
+	for(int i=0 ; i<1000 ; i++){
+		if(log[i] == 0) {
+			str[i] = 10;
+			str[i+1] = 0;
+			break;
+		}
+		str[i] = log[i];
+	}
+
+	FILE* hFile;
+	char fn[100];
+	sprintf_s(fn,"log%d.txt",id);
+	fopen_s(&hFile, fn, "ab");
+	fwrite(str, sizeof(str[0]), strlen(str)/sizeof(str[0]), hFile);
+	fclose(hFile);
+}
+
+void networkLog(int id, const char *log, ...) {
+	if(!OUTPUT_NETWORK_LOG)return;
+	va_list c2;
+	va_start(c2, log);
+	vsprintf(str,log,c2);
+	sprintf_s(str,"%s\n",str);
+
+	FILE* hFile;
+	char fn[100];
+	sprintf_s(fn,"log%d.txt",id);
+	fopen_s(&hFile, fn, "ab");
+	fwrite(str, sizeof(fstr[0]), strlen(str)/sizeof(str[0]), hFile);
+	fclose(hFile);
 }

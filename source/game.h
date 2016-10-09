@@ -66,9 +66,11 @@ void head_of_timeslot();
 void setManekiData();
 void makeColorLight();
 void walking();
+void startThread(int n);
 void manageThread();
 void drawNetworkStatus(SDL_Surface* scr);
 void drawThrowPhoto(SDL_Surface *scr);
+void createSearchImage(int n);
 
 extern int mwave[68];
 
