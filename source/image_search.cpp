@@ -101,6 +101,7 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 	//getting IP address
 	IPaddress ipaddress;
 	int res = SDLNet_ResolveHost(&ipaddress, host, port);
+	networkLog(id, " : %d : %d : ", ipaddress.host,res);
 	if(res){
 		ns.status=NS_IPADDRESS_FAILURE;
 		ns.display=300;
@@ -198,7 +199,7 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 			}
 
 			sprintf_s(fn,"save/tmp_search/%d.html",tm.selected);
-			file = fopen(fn, "w");
+			fopen_s(&file, fn, "w");
 			networkLog(id, fn);
 		}
 		if(!file){
@@ -388,7 +389,7 @@ void parseHTML(int id, int n, const char *table_prefix, const char *url_prefix, 
 		return;
 	}
 
-    strcpy_s(tm.targetURL, url);
+    strcpy_s(tm.targetURL, 1000, url);
 	FILE *hFile;
 	sprintf_s(fn,"save/tmp_url/%d.dat",tm.selected);
 	fopen_s(&hFile, fn, "wb");
@@ -682,7 +683,7 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 				url2[size] = 0;
 				tm.timeout = 0;
 				tm.halt = RESTART_GETIMAGE;
-				strcpy_s(url, url2);
+				strcpy_s(url, 1000, url2);
 				delete url2;
 				break;
 			}
@@ -722,8 +723,8 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 
 				if(ifr.jpgStart || ifr.pngStart || ifr.gifStart){
 					//save the image file
-					sprintf(fn, "save/tmp_image/%d.jpg", tm.selected);
-					file = fopen(fn, "wb");
+					sprintf_s(fn, "save/tmp_image/%d.jpg", tm.selected);
+					fopen_s(&file, fn, "wb");
 					networkLog(id, fn);
 					if(!file){
 						networkLog(id, "failed to create new img file");
@@ -1195,8 +1196,9 @@ void networkLog_noparam(int id, const char *log) {
 	if(!OUTPUT_NETWORK_LOG)return;
 	for(int i=0 ; i<1000 ; i++){
 		if(log[i] == 0) {
-			str[i] = 10;
-			str[i+1] = 0;
+			str[i] = 13;
+			str[i+1] = 10;
+			str[i+2] = 0;
 			break;
 		}
 		str[i] = log[i];
@@ -1214,7 +1216,11 @@ void networkLog(int id, const char *log, ...) {
 	if(!OUTPUT_NETWORK_LOG)return;
 	va_list c2;
 	va_start(c2, log);
+	#ifdef __WIN32__
+	vsprintf_s(str,log,c2);
+	#else
 	vsprintf(str,log,c2);
+	#endif
 	sprintf_s(str,"%s\n",str);
 
 	FILE* hFile;

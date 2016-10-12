@@ -1217,22 +1217,22 @@ void drawTowerList(SDL_Surface* scr){
 	drawMap(scr,(int)gd.x-320,(int)gd.y-240);
 	drawImage(scr,img.chr,290,210,180,60,60,60,255);
 	if(phase==SHOW_TOWERDATA){
-		TextOut(scr,0,0,tower[this_tower[which_tower]].name);
+		drawText(scr,0,0,tower[this_tower[which_tower]].name);
 		double n=tower[this_tower[which_tower]].kw*1.0;
 		for(int m=0 ; m<tower[this_tower[which_tower]].kw2 ; m++)n/=10.0;
 		sprintf_s(str,"%.6gkw",n);
-		TextOut(scr,0,40,str);
+		drawText(scr,0,40,str);
 		for(int i=0 ; i<area[tower[this_tower[which_tower]].area].st_num ; i++){
 			drawImage(scr,img.symbol,0,i*40+80,
 					  (sta[area[tower[this_tower[which_tower]].area].station[i]].mark%17)*34,
 					  (sta[area[tower[this_tower[which_tower]].area].station[i]].mark/17)*34,
 					  34,34,255);
-			TextOut(scr,40,i*40+80,sta[area[tower[this_tower[which_tower]].area].station[i]].name);
-			if(tower[this_tower[which_tower]].ch[i]==0)TextOut(scr,400,i*40+80,"----");
-			else if(tower[this_tower[which_tower]].ch[i]==CHANNELS+1)TextOut(scr,400,i*40+80,"****");
+			drawText(scr,40,i*40+80,sta[area[tower[this_tower[which_tower]].area].station[i]].name);
+			if(tower[this_tower[which_tower]].ch[i]==0)drawText(scr,400,i*40+80,"----");
+			else if(tower[this_tower[which_tower]].ch[i]==CHANNELS+1)drawText(scr,400,i*40+80,"****");
 			else{
 				sprintf_s(str,"ch%2d",tower[this_tower[which_tower]].ch[i]);
-				TextOut(scr,400,i*40+80,str);
+				drawText(scr,400,i*40+80,str);
 			}
 		}
 		if(tower[this_tower[which_tower]].v)drawImage(scr,img.back,560,0,1240,640,80,80,255);
@@ -1247,7 +1247,7 @@ void drawTowerList(SDL_Surface* scr){
 	}else{
 		for(int i=0 ; i<10 ; i++){
 			if(this_tower[i]==EOF)break;
-			TextOut(scr,0,i*40,tower[this_tower[i]].name);
+			drawText(scr,0,i*40,tower[this_tower[i]].name);
 		}
 	}
 }
@@ -1260,8 +1260,8 @@ void drawMiyazakiMuseum(SDL_Surface* scr){
 	if(start>0){
 		if(start>180)fontA=(200-start)*13;
 		if(start<20)fontA=start*13;
-		TextOut2(scr,start/3,120,text[MIYAZAKITEXT+71]);
-		TextOut2(scr,50+start/2,200,text[MIYAZAKITEXT+72]);
+		drawText2(scr,start/3,120,text[MIYAZAKITEXT+71]);
+		drawText2(scr,50+start/2,200,text[MIYAZAKITEXT+72]);
 		fontA=255;
 	}
 	int a=0;
@@ -1285,12 +1285,12 @@ void drawMiyazakiMuseum(SDL_Surface* scr){
 	if(key.left || key.right)drawImage(scr,img.chr,(int)gd.x-gd.scrX-26,440,((count/5)%2)*60,110,60,60,255);
 	if(phase==GUIDE_ALL){
 		sprintf_s(str,"%4d/%4d",menu[GUIDE_ALL].selected()+1,allworks);
-		TextOut2(scr,0,0,str,(int)strlen(str));
+		drawText2(scr,0,0,str,(int)strlen(str));
 	}
 	if(phase==GUIDE_TOP){
 		drawImage(scr,img.back,300,240,0,660,240,120,255);
 		sprintf_s(str,"%4d/%4d",collection,allworks);
-		TextOut2(scr,380,300,str);
+		drawText2(scr,380,300,str);
 	}
 }
 
@@ -1365,7 +1365,7 @@ void drawMiyazaki(SDL_Surface* scr){
 	else if(phase==GOTO_MOVIE){
 		fillRect(scr,0,0,640,480,0,0,0,255);
 		for(int i=0 ; i<640 ; i++)fillRect(scr,i,216,1,42,0,0,255-(int)(i*0.4),255);
-		TextOut2(scr,60,220,text[MIYAZAKITEXT+menu[BGM_TEST].selected()+30]);
+		drawText2(scr,60,220,text[MIYAZAKITEXT+menu[BGM_TEST].selected()+30]);
 		if(count>=50)fillRect(scr,0,216,640,42,0,0,0,(count-50)*5);
 	}
 	else if(phase==GAMESTART){
@@ -1381,12 +1381,12 @@ void drawMiyazaki(SDL_Surface* scr){
 		else menu[i].drawMenu(scr);
 	}
 	drawTalking(scr);
-	if(phase==NODATA1 || phase==NODATA2)TextOut(scr,100,400,text[MENUTEXT+18]);
+	if(phase==NODATA1 || phase==NODATA2)drawText(scr,100,400,text[MENUTEXT+18]);
 	drawMiyazakiExplain(scr);
 	if(phase==GOTO_STROLL || phase==GOTO_TOWERLIST){
 		drawImage(scr,img.menuback,0,180,0,0,640,120,128);
-		TextOut2(scr,240,200,text[MENUTEXT+16]);
-		TextOut2(scr,100,240,text[MENUTEXT+17]);
+		drawText2(scr,240,200,text[MENUTEXT+16]);
+		drawText2(scr,100,240,text[MENUTEXT+17]);
 	}
 	drawNetworkStatus(scr);
 	if(showSearchImage){
@@ -1394,12 +1394,12 @@ void drawMiyazaki(SDL_Surface* scr){
 		if(strlen(tm.targetURL)>80){
 			drawImage(scr,img.menuback,0,440,0,0,320,40,128);
 			drawImage(scr,img.menuback,320,440,0,0,320,40,128);
-			TextOut(scr,0,440+start/2,tm.targetURL,80);
-			TextOut(scr,0,460+start/2,&tm.targetURL[80],80);
+			drawText(scr,0,440+start/2,tm.targetURL,80);
+			drawText(scr,0,460+start/2,&tm.targetURL[80],80);
 		}else{
 			drawImage(scr,img.menuback,0,460,0,0,320,20,128);
 			drawImage(scr,img.menuback,320,460,0,0,320,20,128);
-			TextOut(scr,0,460+start/2,tm.targetURL,80);
+			drawText(scr,0,460+start/2,tm.targetURL,80);
 		}
 	}
 }
@@ -1411,10 +1411,10 @@ void drawMiyazakiExplain(SDL_Surface *scr){
 		if(phase==MIYAZAKI_MUSEUM){
 			drawKeyboard(scr,key.leftC,0,0);
 			drawKeyboard(scr,key.rightC,20,0);
-			TextOut(scr,40,0,text[GAMETEXT+12]);
+			drawText(scr,40,0,text[GAMETEXT+12]);
 			if(gd.x>180 && ((int)gd.x-180)%200<120){
 				drawKeyboard(scr,key.zC,100,0);
-				TextOut(scr,120,0,text[OPTIONTEXT+1]);
+				drawText(scr,120,0,text[OPTIONTEXT+1]);
 			}
 		}
 		else if(phase==GUIDE_ALL || phase==GUIDE_ANIME || phase==GUIDE_STALIST_ALL || phase==PREF_LIST || phase==BGM_TEST || phase==PREF_LIST_TOWER || phase==SMR_DELETE_PREF){
@@ -1423,14 +1423,14 @@ void drawMiyazakiExplain(SDL_Surface *scr){
 				drawKeyboard(scr,key.downC,20,460);
 				drawKeyboard(scr,key.leftC,40,460);
 				drawKeyboard(scr,key.rightC,60,460);
-				TextOut(scr,80,460,text[MENUTEXT+15]);
+				drawText(scr,80,460,text[MENUTEXT+15]);
 			}
 			else if(count%600<400){
 				drawKeyboard(scr,key.zC,0,460);
-				TextOut(scr,20,460,text[OPTIONTEXT+1]);
+				drawText(scr,20,460,text[OPTIONTEXT+1]);
 			}else{
 				drawKeyboard(scr,key.xC,0,460);
-				TextOut(scr,20,460,text[MENUTEXT+4]);
+				drawText(scr,20,460,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==GUIDE_STALIST || phase==GUIDE_STALIST_ALL || phase==GUIDE_PRGLIST || phase==GUIDE_TIME){
@@ -1439,48 +1439,48 @@ void drawMiyazakiExplain(SDL_Surface *scr){
 				drawKeyboard(scr,key.downC,20,460);
 				drawKeyboard(scr,key.leftC,40,460);
 				drawKeyboard(scr,key.rightC,60,460);
-				TextOut(scr,80,460,text[MENUTEXT+15]);
+				drawText(scr,80,460,text[MENUTEXT+15]);
 			}else{
 				drawKeyboard(scr,key.xC,0,460);
-				TextOut(scr,20,460,text[MENUTEXT+4]);
+				drawText(scr,20,460,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==GAMESTART || phase==DEPLOMA){
 			drawKeyboard(scr,key.zC,0,460);
-			TextOut(scr,20,460,text[MENUTEXT+4]);
+			drawText(scr,20,460,text[MENUTEXT+4]);
 		}
 		else if(phase==TOWERLIST){
 			drawKeyboard(scr,key.upC,180,460);
 			drawKeyboard(scr,key.downC,200,460);
 			drawKeyboard(scr,key.leftC,220,460);
 			drawKeyboard(scr,key.rightC,240,460);
-			TextOut(scr,260,460,text[GAMETEXT+12]);
+			drawText(scr,260,460,text[GAMETEXT+12]);
 			if(this_tower[0]!=EOF){
 				drawKeyboard(scr,key.zC,200,440);
-				TextOut(scr,220,440,text[MENUTEXT+15]);
+				drawText(scr,220,440,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==SHOW_TOWERDATA){
 			drawKeyboard(scr,key.zC,240,460);
 			drawKeyboard(scr,key.xC,260,460);
-			TextOut(scr,280,460,text[MENUTEXT+4]);
+			drawText(scr,280,460,text[MENUTEXT+4]);
 		}
 		else if(phase==MIYAZAKI_TALK || phase==DEPLOMA_TALK){
 			drawKeyboard(scr,key.zC,0,0);
-			TextOut(scr,20,0,text[EPILOGUE+1]);
+			drawText(scr,20,0,text[EPILOGUE+1]);
 		}
 		else{
 			if(count%600<200){
 				drawKeyboard(scr,key.upC,0,0);
 				drawKeyboard(scr,key.downC,20,0);
-				TextOut(scr,40,0,text[MENUTEXT+15]);
+				drawText(scr,40,0,text[MENUTEXT+15]);
 			}
 			else if(count%600<400){
 				drawKeyboard(scr,key.zC,0,0);
-				TextOut(scr,20,0,text[OPTIONTEXT+1]);
+				drawText(scr,20,0,text[OPTIONTEXT+1]);
 			}else{
 				drawKeyboard(scr,key.xC,0,0);
-				TextOut(scr,20,0,text[MENUTEXT+4]);
+				drawText(scr,20,0,text[MENUTEXT+4]);
 			}
 		}
 	}

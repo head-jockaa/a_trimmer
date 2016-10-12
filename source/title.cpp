@@ -32,14 +32,14 @@ void drawOpening(SDL_Surface* scr){
 		fillRect(scr,0,0,640,40,0,0,0,255);
 		fillRect(scr,0,440,640,40,0,0,0,255);
 	}
-	else if(pauseGame==2){
+	else if(phase==2){
 		if(pauseGame)drawOpeningAnim(scr,(pausetime-timestamp)/16);
 		else drawOpeningAnim(scr,(SDL_GetTicks()-timestamp)/16);
 	}
 	if(EXPLAIN){
 		drawKeyboard(scr,key.zC,0,460);
-		if(phase==0)TextOut(scr,20,460,text[TITLETEXT]);
-		else TextOut(scr,20,460,text[EPILOGUE]);
+		if(phase==0)drawText(scr,20,460,text[TITLETEXT]);
+		else drawText(scr,20,460,text[EPILOGUE]);
 	}
 }
 
@@ -179,12 +179,12 @@ void drawTitle(SDL_Surface* scr){
 		if(start==0){
 			if(count%400<200){
 				drawKeyboard(scr,key.zC,0,460);
-				TextOut(scr,20,460,text[OPTIONTEXT+1]);
+				drawText(scr,20,460,text[OPTIONTEXT+1]);
 			}
 			else{
 				drawKeyboard(scr,key.upC,0,460);
 				drawKeyboard(scr,key.downC,20,460);
-				TextOut(scr,40,460,text[MENUTEXT+15]);
+				drawText(scr,40,460,text[MENUTEXT+15]);
 			}
 		}
 	}

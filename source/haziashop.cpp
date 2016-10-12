@@ -423,32 +423,32 @@ void drawHaziaShopExplain(SDL_Surface* scr){
 			drawKeyboard(scr,key.downC,180,460);
 			drawKeyboard(scr,key.leftC,200,460);
 			drawKeyboard(scr,key.rightC,220,460);
-			TextOut(scr,480,440,text[GAMETEXT+12]);
+			drawText(scr,480,440,text[GAMETEXT+12]);
 			if((gd.y==140 && gd.x<400) || (gd.y==40 && gd.x>=400)){
 				drawKeyboard(scr,key.zC,0,0);
-				TextOut(scr,20,0,text[EPILOGUE+10]);
+				drawText(scr,20,0,text[EPILOGUE+10]);
 			}
 			if((gd.y==140 && gd.x>300 && gd.x<400)||(gd.y>240 && gd.y<340 && gd.x>400 && gd.x<500)||(gd.x==560 && gd.y>=120 && gd.y<=200)){
 				drawKeyboard(scr,key.zC,0,0);
-				TextOut(scr,20,0,text[MIYAZAKITEXT+30]);
+				drawText(scr,20,0,text[MIYAZAKITEXT+30]);
 			}
 		}
 		else if(phase==SHOP_TALK || phase==SHOP_LASTTALK || phase==MEMMA_TALK || phase==SHOP_CONFIRM_TALK || phase==OHANA_TALK){
 			drawKeyboard(scr,key.zC,0,0);
-			TextOut(scr,20,0,text[EPILOGUE+1]);
+			drawText(scr,20,0,text[EPILOGUE+1]);
 		}
 		else if(phase!=STAY_IN){
 			if(count%600<200){
 				drawKeyboard(scr,key.upC,0,0);
 				drawKeyboard(scr,key.downC,20,0);
-				TextOut(scr,40,0,text[MENUTEXT+15]);
+				drawText(scr,40,0,text[MENUTEXT+15]);
 			}
 			else if(count%600<400){
 				drawKeyboard(scr,key.zC,0,0);
-				TextOut(scr,20,0,text[OPTIONTEXT+1]);
+				drawText(scr,20,0,text[OPTIONTEXT+1]);
 			}else{
 				drawKeyboard(scr,key.xC,0,0);
-				TextOut(scr,20,0,text[MENUTEXT+4]);
+				drawText(scr,20,0,text[MENUTEXT+4]);
 			}
 		}
 	}
@@ -491,7 +491,7 @@ void drawHaziaShop(SDL_Surface* scr){
 		else drawImage(scr,img.back,80,170,640,740,160,80,255);
 		drawImage(scr,img.back,360,80,640,100+((count/5)%2)*280,160,280,255);
 		if(phase==SHOPPING || phase==BUYING || phase==SELLING){
-			TextOut(scr,230,400,text[MIYAZAKITEXT+6]);
+			drawText(scr,230,400,text[MIYAZAKITEXT+6]);
 			int a=1;
 			for(int i=0 ; i<10 ; i++){
 				if((gd.hazia/a==0 && gd.hazia>0) || (gd.hazia==0 && i>0))continue;

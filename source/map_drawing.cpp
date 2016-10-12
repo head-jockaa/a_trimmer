@@ -359,7 +359,7 @@ void drawMap(SDL_Surface* scr, int X, int Y){
 					drawImage(scr,img.chr,100,0,220,240,20,50,255);
 					for(int i=0 ; i<20 ; i++)drawImage(scr,img.chr,120+i*20,0,240,240,20,50,255);
 					drawImage(scr,img.chr,520,0,260,240,20,50,255);
-					if(gd.location!=EOF)TextOut2(scr,320-(int)strlen(town[gd.location].name.str[CHAR_CODE])*8,8,town[gd.location].name);
+					if(gd.location!=EOF)drawText2(scr,320-(int)strlen(town[gd.location].name.str[CHAR_CODE])*8,8,town[gd.location].name);
 				}
 			}
 		}

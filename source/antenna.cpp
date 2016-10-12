@@ -219,7 +219,7 @@ void Antenna::drawRader(SDL_Surface* scr){
 	if(rcv>0){
 		sprintf_s(str,"%s",toChar(tower[T].name));
 		drawImage(scr,img.menuback,120,0,0,0,(int)strlen(str)*18,40,128);
-		TextOut2(scr,120,0,str,(int)strlen(str));
+		drawText2(scr,120,0,str,(int)strlen(str));
 	}
 	if(MAGNIFY>=8)drawDirectionLine(scr);
 }
@@ -231,21 +231,21 @@ void Antenna::drawExplain2(SDL_Surface* scr){
 	if(ant_mode==TURN){
 		if(count%800<200){
 			drawKeyboard(scr,key.cC,100,380);
-			if(gd.bought[5])TextOut(scr,120,380,text[ANTENNATEXT+13]);
-			else TextOut(scr,120,380,text[ANTENNATEXT]);
+			if(gd.bought[5])drawText(scr,120,380,text[ANTENNATEXT+13]);
+			else drawText(scr,120,380,text[ANTENNATEXT]);
 		}
 		else if(count%800<400){
 			drawKeyboard(scr,key.leftC,100,380);
 			drawKeyboard(scr,key.upC,120,380);
-			TextOut(scr,140,380,text[ANTENNATEXT+1]);
+			drawText(scr,140,380,text[ANTENNATEXT+1]);
 		}
 		else if(count%800<600){
 			drawKeyboard(scr,key.rightC,100,380);
 			drawKeyboard(scr,key.downC,120,380);
-			TextOut(scr,140,380,text[ANTENNATEXT+2]);
+			drawText(scr,140,380,text[ANTENNATEXT+2]);
 		}else{
 			drawKeyboard(scr,key.xC,100,380);
-			TextOut(scr,120,380,text[MENUTEXT+4]);
+			drawText(scr,120,380,text[MENUTEXT+4]);
 		}
 	}
 	else if(ant_mode==TROLL){
@@ -254,14 +254,14 @@ void Antenna::drawExplain2(SDL_Surface* scr){
 			drawKeyboard(scr,key.downC,140,460);
 			drawKeyboard(scr,key.leftC,160,460);
 			drawKeyboard(scr,key.rightC,180,460);
-			TextOut(scr,200,460,text[GAMETEXT+12]);
+			drawText(scr,200,460,text[GAMETEXT+12]);
 		}
 		else if(count%600<400){
 			drawKeyboard(scr,key.cC,120,460);
-			TextOut(scr,140,460,text[ANTENNATEXT]);
+			drawText(scr,140,460,text[ANTENNATEXT]);
 		}else{
 			drawKeyboard(scr,key.xC,120,460);
-			TextOut(scr,140,460,text[MENUTEXT+4]);
+			drawText(scr,140,460,text[MENUTEXT+4]);
 		}
 	}
 }
@@ -324,20 +324,20 @@ void SimpleRod::drawExplain(SDL_Surface* scr){
 	if(ant_mode!=TUNE){drawExplain2(scr);return;}
 	if(count%800<200){
 		drawKeyboard(scr,key.cC,100,380);
-		TextOut(scr,120,380,text[ANTENNATEXT+3]);
+		drawText(scr,120,380,text[ANTENNATEXT+3]);
 	}
 	else if(count%800<400){
 		drawKeyboard(scr,key.leftC,100,380);
 		drawKeyboard(scr,key.upC,120,380);
-		TextOut(scr,140,380,text[ANTENNATEXT+4]);
+		drawText(scr,140,380,text[ANTENNATEXT+4]);
 	}
 	else if(count%800<600){
 		drawKeyboard(scr,key.rightC,100,380);
 		drawKeyboard(scr,key.downC,120,380);
-		TextOut(scr,140,380,text[ANTENNATEXT+5]);
+		drawText(scr,140,380,text[ANTENNATEXT+5]);
 	}else{
 		drawKeyboard(scr,key.xC,100,380);
-		TextOut(scr,120,380,text[MENUTEXT+4]);
+		drawText(scr,120,380,text[MENUTEXT+4]);
 	}
 }
 void SimpleRod::drawAntenna(SDL_Surface* scr){
@@ -374,7 +374,7 @@ void SimpleRod::drawTrolling(SDL_Surface* scr){
 	drawAntennaMode(scr);
 	for(int i=0 ; i<62 ; i++){
 		sprintf_s(str,"%2d",i+1);
-		TextOut(scr,(i/13)*60,(i%13)*17,str);
+		drawText(scr,(i/13)*60,(i%13)*17,str);
 		drawImage(scr,img.chr,(i/13)*60+20,(i%13)*17,0,290,rc[i]*40/100,10,255);
 	}
 }
@@ -583,21 +583,21 @@ void ButtonRod::drawExplain(SDL_Surface* scr){
 	if(ant_mode!=TUNE){drawExplain2(scr);return;}
 	if(count%800<200){
 		drawKeyboard(scr,key.zC,100,380);
-		TextOut(scr,120,380,text[ANTENNATEXT+9]);
+		drawText(scr,120,380,text[ANTENNATEXT+9]);
 	}
 	else if(count%800<400){
 		drawKeyboard(scr,key.cC,100,380);
-		TextOut(scr,120,380,text[ANTENNATEXT+3]);
+		drawText(scr,120,380,text[ANTENNATEXT+3]);
 	}
 	else if(count%800<600){
 		drawKeyboard(scr,key.leftC,100,380);
 		drawKeyboard(scr,key.upC,120,380);
 		drawKeyboard(scr,key.rightC,140,380);
 		drawKeyboard(scr,key.downC,160,380);
-		TextOut(scr,180,380,text[ANTENNATEXT+10]);
+		drawText(scr,180,380,text[ANTENNATEXT+10]);
 	}else{
 		drawKeyboard(scr,key.xC,100,380);
-		TextOut(scr,120,380,text[MENUTEXT+4]);
+		drawText(scr,120,380,text[MENUTEXT+4]);
 	}
 }
 void ButtonRod::drawAntenna(SDL_Surface* scr){
@@ -613,13 +613,13 @@ void ButtonRod::drawAntenna(SDL_Surface* scr){
 	else if(set>=1 && set<=3){
 		drawImage(scr,img.menuback,60,0,0,0,300,120,192);
 		drawImage(scr,img.chr, 60,set*40-40, 280,240,40,40, 255);
-		TextOut2(scr,100,0,toChar(text[ANTENNATEXT+11]),30);
-		TextOut2(scr,100,40,toChar(text[ANTENNATEXT+12]),30);
-		TextOut2(scr,100,80,toChar(text[MENUTEXT+4]),30);
+		drawText2(scr,100,0,toChar(text[ANTENNATEXT+11]),30);
+		drawText2(scr,100,40,toChar(text[ANTENNATEXT+12]),30);
+		drawText2(scr,100,80,toChar(text[MENUTEXT+4]),30);
 	}
 	else if(set==4){
 		sprintf_s(str,"[%3d]%s",code,areaname[code].str[CHAR_CODE]);
-		TextOut(scr,180,40,str,(int)strlen(str));
+		drawText(scr,180,40,str,(int)strlen(str));
 	}
 	else if(set>=5)auto_set();
 
@@ -627,10 +627,10 @@ void ButtonRod::drawAntenna(SDL_Surface* scr){
 		drawImage(scr,img.menuback,120,120,0,0,340,240,128);
 		for(int i=0 ; i<12 ; i++){
 			sprintf_s(str,"%2d",i+1);
-			TextOut2(scr,(i/6)*200+120,(i%6)*40+120,str,2);
+			drawText2(scr,(i/6)*200+120,(i%6)*40+120,str,2);
 			if(button[i]==0)sprintf_s(str,"-");
 			else sprintf_s(str,"%2d",button[i]);
-			TextOut(scr,(i/6)*200+200,(i%6)*40+120,str,2);
+			drawText(scr,(i/6)*200+200,(i%6)*40+120,str,2);
 		}
 	}
 }
@@ -643,10 +643,10 @@ void ButtonRod::drawTrolling(SDL_Surface* scr){
 	drawImage(scr,img.menuback,60,60,0,0,170,120,128);
 	for(int i=0 ; i<12 ; i++){
 		sprintf_s(str,"%2d",i+1);
-		TextOut(scr,(i/6)*100+60,(i%6)*20+60,str,2);
+		drawText(scr,(i/6)*100+60,(i%6)*20+60,str,2);
 		if(button2[i]==0)sprintf_s(str,"-");
 		else sprintf_s(str,"%2d",button2[i]);
-		TextOut(scr,(i/6)*100+100,(i%6)*20+60,str,2);
+		drawText(scr,(i/6)*100+100,(i%6)*20+60,str,2);
 	}
 	drawAntennaMode(scr);
 }
@@ -721,20 +721,20 @@ void UVRod::drawExplain(SDL_Surface* scr){
 	if(ant_mode!=TUNE){drawExplain2(scr);return;}
 	if(count%800<200){
 		drawKeyboard(scr,key.cC,100,380);
-		TextOut(scr,120,380,text[ANTENNATEXT+3]);
+		drawText(scr,120,380,text[ANTENNATEXT+3]);
 	}
 	else if(count%800<400){
 		drawKeyboard(scr,key.leftC,100,380);
 		drawKeyboard(scr,key.rightC,120,380);
-		TextOut(scr,140,380,text[ANTENNATEXT+7]);
+		drawText(scr,140,380,text[ANTENNATEXT+7]);
 	}
 	else if(count%800<600){
 		drawKeyboard(scr,key.upC,100,380);
 		drawKeyboard(scr,key.downC,120,380);
-		TextOut(scr,140,380,text[ANTENNATEXT+8]);
+		drawText(scr,140,380,text[ANTENNATEXT+8]);
 	}else{
 		drawKeyboard(scr,key.xC,100,380);
-		TextOut(scr,120,380,text[MENUTEXT+4]);
+		drawText(scr,120,380,text[MENUTEXT+4]);
 	}
 }
 void UVRod::drawAntenna(SDL_Surface* scr){
@@ -841,20 +841,20 @@ void MHzRod::drawExplain(SDL_Surface* scr){
 	if(ant_mode!=TUNE){drawExplain2(scr);return;}
 	if(count%800<200){
 		drawKeyboard(scr,key.cC,100,380);
-		TextOut(scr,120,380,text[ANTENNATEXT+3]);
+		drawText(scr,120,380,text[ANTENNATEXT+3]);
 	}
 	else if(count%800<400){
 		drawKeyboard(scr,key.leftC,100,380);
 		drawKeyboard(scr,key.upC,120,380);
-		TextOut(scr,140,380,text[ANTENNATEXT+4]);
+		drawText(scr,140,380,text[ANTENNATEXT+4]);
 	}
 	else if(count%800<600){
 		drawKeyboard(scr,key.rightC,100,380);
 		drawKeyboard(scr,key.downC,120,380);
-		TextOut(scr,140,380,text[ANTENNATEXT+5]);
+		drawText(scr,140,380,text[ANTENNATEXT+5]);
 	}else{
 		drawKeyboard(scr,key.xC,100,380);
-		TextOut(scr,120,380,text[MENUTEXT+4]);
+		drawText(scr,120,380,text[MENUTEXT+4]);
 	}
 }
 void MHzRod::drawAntenna(SDL_Surface* scr){
@@ -865,7 +865,7 @@ void MHzRod::drawAntenna(SDL_Surface* scr){
 	drawImage(scr,img.rod,mh*2/3+20,40,600,0,20,40,255);
 	drawImage(scr,img.menuback,440,0,0,0,160,40,128);
 	sprintf_s(str,"%5d Mhz",mh,ch);
-	TextOut2(scr, 440, 0, str, 9);
+	drawText2(scr, 440, 0, str, 9);
 }
 void MHzRod::trolling(){
 	for(int i=0 ; i<62 ; i++)rc[i]=0;
@@ -1012,24 +1012,24 @@ void ConvenientRod::drawExplain(SDL_Surface* scr){
 	if(ant_mode!=TUNE){drawExplain2(scr);return;}
 	if(count%1000<200){
 		drawKeyboard(scr,key.zC,100,380);
-		TextOut(scr,120,380,text[OPTIONTEXT+1]);
+		drawText(scr,120,380,text[OPTIONTEXT+1]);
 	}
 	else if(count%1000<400){
 		drawKeyboard(scr,key.cC,100,380);
-		TextOut(scr,120,380,text[ANTENNATEXT+3]);
+		drawText(scr,120,380,text[ANTENNATEXT+3]);
 	}
 	else if(count%1000<600){
 		drawKeyboard(scr,key.upC,100,380);
 		drawKeyboard(scr,key.downC,120,380);
-		TextOut(scr,140,380,text[MENUTEXT+15]);
+		drawText(scr,140,380,text[MENUTEXT+15]);
 	}
 	else if(count%1000<800){
 		drawKeyboard(scr,key.leftC,100,380);
 		drawKeyboard(scr,key.rightC,120,380);
-		TextOut(scr,140,380,text[ANTENNATEXT+6]);
+		drawText(scr,140,380,text[ANTENNATEXT+6]);
 	}else{
 		drawKeyboard(scr,key.xC,100,380);
-		TextOut(scr,120,380,text[MENUTEXT+4]);
+		drawText(scr,120,380,text[MENUTEXT+4]);
 	}
 }
 void ConvenientRod::drawAntenna(SDL_Surface* scr){
@@ -1052,7 +1052,7 @@ void ConvenientRod::drawTrolling(SDL_Surface* scr){
 		int a=255;
 		if(rc[i]-mr[i]<100)a=128;
 		fontA=a;
-		TextOut(scr,(i/8)*160+20,(i%8)*20+20,sta[st[i]].name,60);
+		drawText(scr,(i/8)*160+20,(i%8)*20+20,sta[st[i]].name,60);
 		drawImage(scr,img.symbol,(i/8)*160,(i%8)*20+20,(sta[st[i]].mark%16)*17,(sta[st[i]].mark/16)*17,17,17,a);
 	}
 	fontA=255;
@@ -1161,7 +1161,7 @@ void SuperHandyRod::drawTrolling(SDL_Surface* scr){
 		int a=255;
 		if(rc2[i]<100)a=128;
 		fontA=a;
-		TextOut(scr,(i/8)*160+20,(i%8)*20+20,tower[tw2[i]].name,60);
+		drawText(scr,(i/8)*160+20,(i%8)*20+20,tower[tw2[i]].name,60);
 	}
 	fontA=255;
 }

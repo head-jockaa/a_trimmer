@@ -1491,11 +1491,11 @@ void drawSMR(SDL_Surface* scr){
 		else if(a==3)fillRect(scr,i,j,1,1,255,255,255,50);
 		else if(a==2)fillRect(scr,i,j,1,1,255,255,255,33);
 	}
-	TextOut(scr,120,0,sta[area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]].name);
-	if(SMRcount<480*(640/SMRfast))TextOut(scr,120,20,text[GAMETEXT+22]);
+	drawText(scr,120,0,sta[area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]].name);
+	if(SMRcount<480*(640/SMRfast))drawText(scr,120,20,text[GAMETEXT+22]);
 	if(EXPLAIN){
 		drawKeyboard(scr,key.xC,0,460);
-		TextOut(scr,20,460,text[GAMETEXT+23]);
+		drawText(scr,20,460,text[GAMETEXT+23]);
 	}
 }
 
@@ -1547,19 +1547,19 @@ void drawResult(SDL_Surface* scr){
 	drawImage(scr,img.back,340,40,360,0,240,400,255);
 	drawImage(scr,img.back,60,160,520,400,240,280,255);
 
-	TextOut2(scr,200,120,text[GAMETEXT+2]);
+	drawText2(scr,200,120,text[GAMETEXT+2]);
 	sprintf_s(str,"%3d/%3d",gd.crops,works);
 	if(phase==TODAYS_CROP){
 		drawImage(scr,img.menuback,20,160,0,0,200,40,128);
-		TextOut2(scr,100,160,str);
+		drawText2(scr,100,160,str);
 	}
 	else if(phase==RESULT){
 		if(start>30){
 			drawImage(scr,img.menuback,300-(start-30)*14,160,0,0,200,40,128);
-			TextOut2(scr,380-(start-30)*14,160,str);
+			drawText2(scr,380-(start-30)*14,160,str);
 		}else{
 			drawImage(scr,img.menuback,300,160,0,0,200,40,128);
-			TextOut2(scr,380,160,str);
+			drawText2(scr,380,160,str);
 		}
 	}
 
@@ -1572,25 +1572,25 @@ void drawResult(SDL_Surface* scr){
 			if(fishbox.today[n]==EOF)break;
 			if(n<0)continue;
 			drawImage(scr,img.symbol,110,200+i*40,(work[fishbox.today[n]].mark%16)*34,(work[fishbox.today[n]].mark/16)*34,34,34,255);
-			TextOut2_lang(scr,140,200+i*40,work[fishbox.today[n]].title,60,JAPANESE);
+			drawText2_lang(scr,140,200+i*40,work[fishbox.today[n]].title,60,JAPANESE);
 		}
 	}
 	if(phase==RESULT){
 		if(start<10){
-			TextOut2(scr,200,220,text[GAMETEXT+6]);
+			drawText2(scr,200,220,text[GAMETEXT+6]);
 			drawImage(scr,img.menuback,300,260,0,0,200,40,128);
 			sprintf_s(str,"%6d",gd.score);
-			TextOut2(scr,376,260,str);
+			drawText2(scr,376,260,str);
 		}else{
-			TextOut2(scr,200+(start-10)*16,220,text[GAMETEXT+6]);
+			drawText2(scr,200+(start-10)*16,220,text[GAMETEXT+6]);
 			drawImage(scr,img.menuback,300+(start-10)*16,260,0,0,200,40,128);
 			sprintf_s(str,"%6d",gd.score);
-			TextOut2(scr,376+(start-10)*16,260,str);
+			drawText2(scr,376+(start-10)*16,260,str);
 		}
-		TextOut2(scr,200+start*16,320,text[GAMETEXT+5]);
+		drawText2(scr,200+start*16,320,text[GAMETEXT+5]);
 		drawImage(scr,img.menuback,300+start*16,360,0,0,200,40,128);
 		sprintf_s(str,"%3d%c",100*gd.crops/works,37);
-		TextOut2(scr,406+start*16,360,str);
+		drawText2(scr,406+start*16,360,str);
 	}
 }
 
@@ -1676,29 +1676,29 @@ void drawGetHazia(SDL_Surface *scr){
 
 		fillRect(scr,0,0,640,40,0,0,0,255);
 		fillRect(scr,0,440,640,40,0,0,0,255);
-		TextOut2(scr,240,40,text[EPILOGUE+2]);
+		drawText2(scr,240,40,text[EPILOGUE+2]);
 
 		sprintf_s(str,"%10d",indexName[dataNo-1].hiscore);
 		if(start>250){
-			TextOut2(scr,200+(start-250)*10,80,text[GAMETEXT+7]);
+			drawText2(scr,200+(start-250)*10,80,text[GAMETEXT+7]);
 			drawImage(scr,img.menuback,340+(start-250)*10,120,0,0,200,40,128);
-			TextOut2(scr,340+(start-250)*10,120,str);
+			drawText2(scr,340+(start-250)*10,120,str);
 		}else{
-			TextOut2(scr,200,80,text[GAMETEXT+7]);
+			drawText2(scr,200,80,text[GAMETEXT+7]);
 			drawImage(scr,img.menuback,340,120,0,0,200,40,128);
-			TextOut2(scr,340,120,str);
+			drawText2(scr,340,120,str);
 		}
 		sprintf_s(str,"%10d",gd.score);
 		if(start>200){
-			TextOut2(scr,200+(start-200)*10,180,text[GAMETEXT+6]);
+			drawText2(scr,200+(start-200)*10,180,text[GAMETEXT+6]);
 			drawImage(scr,img.menuback,340+(start-200)*10,220,0,0,200,40,128);
-			TextOut2(scr,340+(start-200)*10,220,str);
+			drawText2(scr,340+(start-200)*10,220,str);
 		}else{
-			TextOut2(scr,200,180,text[GAMETEXT+6]);
+			drawText2(scr,200,180,text[GAMETEXT+6]);
 			drawImage(scr,img.menuback,340,220,0,0,200,40,128);
-			TextOut2(scr,340,220,str);
+			drawText2(scr,340,220,str);
 		}
-		TextOut2(scr,200,310,text[MIYAZAKITEXT+6]);
+		drawText2(scr,200,310,text[MIYAZAKITEXT+6]);
 		int a=1;
 		for(int i=0 ; i<10 ; i++){
 			if((gd.hazia/a==0 && gd.hazia>0) || (gd.hazia==0 && i>0))continue;
@@ -1708,7 +1708,7 @@ void drawGetHazia(SDL_Surface *scr){
 
 		if(start==100){
 			sprintf_s(str,"+%d",inc);
-			TextOut2(img.back,960,40,str);
+			drawText2(img.back,960,40,str);
 		}
 		if(start<100 && start>=50){
 			int a=100-abs((start-50)-25)*4;
@@ -1720,7 +1720,7 @@ void drawGetHazia(SDL_Surface *scr){
 		}
 		if(start==0){
 			sprintf_s(str,"(+%d)",gd.hazia2);
-			TextOut(scr,460,360,str);
+			drawText(scr,460,360,str);
 		}
 	}else{
 		if(gd.scene_count==2)drawTalking(scr);
@@ -1773,13 +1773,13 @@ void drawFishup(SDL_Surface* scr){
 		if(!animebook[ work[sta[BSstation[gd.bs_ch]].ontv].tnum ]){
 			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 			sprintf_s(str,"%4d/%4d",collection+1,allworks);
-			TextOut2(scr,380,220,str);
+			drawText2(scr,380,220,str);
 		}
 	}
 	if(phase==CROP){
 		fishbox.drawFishBox(scr);
 		sprintf_s(str,"%s %d",toChar(text[GAMETEXT+13]),getMissing());
-		TextOut2(scr,200,0,str,(int)strlen(str));
+		drawText2(scr,200,0,str,(int)strlen(str));
 	}
 	if(phase==BS_CH){
 		drawImage(scr,img.fishup,160,80,200,0,320,240,255);
@@ -1789,7 +1789,7 @@ void drawFishup(SDL_Surface* scr){
 		}
 		sprintf_s(str,"%s",toChar(sta[BSstation[gd.bs_ch]].name));
 		drawImage(scr,img.menuback,120,0,0,0,(int)strlen(str)*18,40,128);
-		TextOut2(scr,120,0,str,(int)strlen(str));
+		drawText2(scr,120,0,str,(int)strlen(str));
 		drawImage(scr,img.chr,520,50,220,450,40,30,255);
 		drawImage(scr,img.chr,560,40,(BSchannel[gd.bs_ch]/10)*20,480,20,40,255);
 		drawImage(scr,img.chr,580,40,(BSchannel[gd.bs_ch]%10)*20,480,20,40,255);
@@ -1803,7 +1803,7 @@ void drawFishup(SDL_Surface* scr){
 		if(start<70 && !animebook[n]){
 			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 			sprintf_s(str,"%4d/%4d",collection+1,allworks);
-			TextOut2(scr,380,220,str);
+			drawText2(scr,380,220,str);
 		}
 	}
 	if(phase==GRADEUP || phase==MANEKI_GRADEUP){
@@ -1811,7 +1811,7 @@ void drawFishup(SDL_Surface* scr){
 		if(a<0)a=0;
 		drawImage(scr,img.chr,480+a*8,200,460,60,140,100,255);
 		sprintf_s(str,"+%d",gd.gradeup);
-		TextOut(scr,510+a*8,240,str);
+		drawText(scr,510+a*8,240,str);
 	}
 }
 
@@ -1832,27 +1832,27 @@ void drawMenuBox(SDL_Surface* scr){
 	drawImage(scr,img.chr,(gd.menu_selected%3)*120+140,(gd.menu_selected/3)*120+120,320,300+((count/20)%2)*80,80,80,255);
 
 	drawImage(scr,img.menuback,120,360,0,0,400,40,128);
-	if(gd.menu_selected==0)TextOut2(scr,140,364,text[GAMETEXT]);
-	else if(gd.menu_selected==1)TextOut2(scr,140,364,text[GAMETEXT+1]);
-	else if(gd.menu_selected==2)TextOut2(scr,140,364,text[TITLETEXT+1]);
+	if(gd.menu_selected==0)drawText2(scr,140,364,text[GAMETEXT]);
+	else if(gd.menu_selected==1)drawText2(scr,140,364,text[GAMETEXT+1]);
+	else if(gd.menu_selected==2)drawText2(scr,140,364,text[TITLETEXT+1]);
 	else if(gd.menu_selected==3){
-		if(gd.game_mode==STORYMODE)TextOut2(scr,140,364,text[GAMETEXT+2]);
+		if(gd.game_mode==STORYMODE)drawText2(scr,140,364,text[GAMETEXT+2]);
 		else if(MAP3D){
 			sprintf_s(str,"%d",gd.height);
-			TextOut2(scr,140,364,text[GAMETEXT+26]);
-			TextOut2(scr,400,364,str);
+			drawText2(scr,140,364,text[GAMETEXT+26]);
+			drawText2(scr,400,364,str);
 		}
-		else TextOut2(scr,140,364,text[GAMETEXT+28]);
+		else drawText2(scr,140,364,text[GAMETEXT+28]);
 	}
 	else if(gd.menu_selected==4){
-		if(gd.game_mode==STORYMODE)TextOut2(scr,140,364,text[GAMETEXT+3]);
+		if(gd.game_mode==STORYMODE)drawText2(scr,140,364,text[GAMETEXT+3]);
 		else if(MAP3D){
 			sprintf_s(str,"%d",gd.zoom);
-			TextOut2(scr,140,364,text[GAMETEXT+27]);
-			TextOut2(scr,400,364,str);
+			drawText2(scr,140,364,text[GAMETEXT+27]);
+			drawText2(scr,400,364,str);
 		}
 	}
-	else if(gd.menu_selected==5)TextOut2(scr,140,364,text[GAMETEXT+4]);
+	else if(gd.menu_selected==5)drawText2(scr,140,364,text[GAMETEXT+4]);
 }
 
 void drawAntennaMenuBox(SDL_Surface* scr){
@@ -1882,13 +1882,13 @@ void drawAntennaMenuBox(SDL_Surface* scr){
 	else drawImage(scr,img.chr,(gd.antenna_selected%3)*120+140,(gd.antenna_selected/3)*120+120,320,300+((count/20)%2)*80,80,80,255);
 
 	drawImage(scr,img.menuback,120,360,0,0,400,40,128);
-	if(gd.antenna_selected==0)TextOut2(scr,140,364,text[GAMETEXT+14]);
-	else if(gd.antenna_selected==1)TextOut2(scr,140,364,text[GAMETEXT+15]);
-	else if(gd.antenna_selected==2 && gd.bought[0])TextOut2(scr,140,364,text[GAMETEXT+16]);
-	else if(gd.antenna_selected==3 && gd.bought[1])TextOut2(scr,140,364,text[GAMETEXT+17]);
-	else if(gd.antenna_selected==4 && gd.bought[2])TextOut2(scr,140,364,text[GAMETEXT+18]);
-	else if(gd.antenna_selected==5 && gd.bought[3])TextOut2(scr,140,364,text[GAMETEXT+19]);
-	else if(gd.antenna_selected==6 && gd.bought[8])TextOut2(scr,140,364,text[GAMETEXT+20]);
+	if(gd.antenna_selected==0)drawText2(scr,140,364,text[GAMETEXT+14]);
+	else if(gd.antenna_selected==1)drawText2(scr,140,364,text[GAMETEXT+15]);
+	else if(gd.antenna_selected==2 && gd.bought[0])drawText2(scr,140,364,text[GAMETEXT+16]);
+	else if(gd.antenna_selected==3 && gd.bought[1])drawText2(scr,140,364,text[GAMETEXT+17]);
+	else if(gd.antenna_selected==4 && gd.bought[2])drawText2(scr,140,364,text[GAMETEXT+18]);
+	else if(gd.antenna_selected==5 && gd.bought[3])drawText2(scr,140,364,text[GAMETEXT+19]);
+	else if(gd.antenna_selected==6 && gd.bought[8])drawText2(scr,140,364,text[GAMETEXT+20]);
 }
 
 void drawRural(SDL_Surface* scr){
@@ -1950,12 +1950,12 @@ void drawThrowPhoto(SDL_Surface *scr){
 		if(strlen(tm.targetURL)>80){
 			drawImage(scr,img.menuback,0,440+start/2,0,0,320,40,128);
 			drawImage(scr,img.menuback,320,440+start/2,0,0,320,40,128);
-			TextOut(scr,0,440+start/2,tm.targetURL,80);
-			TextOut(scr,0,460+start/2,&tm.targetURL[80],80);
+			drawText(scr,0,440+start/2,tm.targetURL,80);
+			drawText(scr,0,460+start/2,&tm.targetURL[80],80);
 		}else{
 			drawImage(scr,img.menuback,0,460+start/2,0,0,320,20,128);
 			drawImage(scr,img.menuback,320,460+start/2,0,0,320,20,128);
-			TextOut(scr,0,460+start/2,tm.targetURL,80);
+			drawText(scr,0,460+start/2,tm.targetURL,80);
 		}
 	}
 }
@@ -2032,7 +2032,7 @@ void drawGame(SDL_Surface* scr){
 		if(phase==CALLING)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-20,(int)(gd.y*MAGNIFY)-gd.scrY-100,320,60,40,40,255);
 		if(phase==FINISH){
 			drawImage(scr,img.menuback,0,180,0,0,640,80,128);
-			TextOut2(scr,200,200,text[GAMETEXT+4],20);
+			drawText2(scr,200,200,text[GAMETEXT+4],20);
 		}
 		if(!MAP3D)drawMap2(scr,gd.scrX,gd.scrY);
 
@@ -2050,14 +2050,14 @@ void drawGame(SDL_Surface* scr){
 			if(phase==ADJUST_HEIGHT){
 				sprintf_s(str,"%d",gd.height);
 				drawImage(scr,img.menuback,120,120,0,0,400,40,128);
-				TextOut2(scr,140,124,text[GAMETEXT+26]);
-				TextOut2(scr,400,124,str);
+				drawText2(scr,140,124,text[GAMETEXT+26]);
+				drawText2(scr,400,124,str);
 			}
 			if(phase==ADJUST_ZOOM){
 				sprintf_s(str,"%d",gd.zoom);
 				drawImage(scr,img.menuback,120,120,0,0,400,40,128);
-				TextOut2(scr,140,124,text[GAMETEXT+26]);
-				TextOut2(scr,400,124,str);
+				drawText2(scr,140,124,text[GAMETEXT+26]);
+				drawText2(scr,400,124,str);
 			}
 		}
 
@@ -2069,7 +2069,7 @@ void drawGame(SDL_Surface* scr){
 		if(gd.m_wave>0)drawM(scr,gd.m_wave,rd.seeH[0],(int)(gd.x*MAGNIFY)-gd.scrX-20,(int)(gd.y*MAGNIFY)-gd.scrY+30);
 		if(phase==READY){
 			if(count>=100)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX,(int)(gd.y*MAGNIFY)-gd.scrY-(125-count)*12-50,550,0,10,60,255);
-			else if(count%20<10)TextOut2(scr,300,200,"READY");
+			else if(count%20<10)drawText2(scr,300,200,"READY");
 		}
 		if(phase==LEAVE_MAP){
 			if(count<50){
@@ -2086,9 +2086,9 @@ void drawGame(SDL_Surface* scr){
 
 		drawRural(scr);
 		if(gd.speed>0)drawSpeedMeter(scr);
-		if(phase==PREF_LIST_SMR || phase==SMR)TextOut2(scr,120,440,text[GAMETEXT+21]);
+		if(phase==PREF_LIST_SMR || phase==SMR)drawText2(scr,120,440,text[GAMETEXT+21]);
 		if(phase==SMR_RESULT)drawSMR(scr);
-		if(phase==END_YN)TextOut2(scr,0,60,text[EPILOGUE+4],50);
+		if(phase==END_YN)drawText2(scr,0,60,text[EPILOGUE+4],50);
 		if(ant->ant_mode==TROLL)ant->drawTrolling(scr);
 		else ant->drawAntenna(scr);
 		drawFishup(scr);
@@ -2107,8 +2107,8 @@ void drawGame(SDL_Surface* scr){
 		if(phase==GAME_KEY_SETTING)drawKeySetting(scr);
 
 		for(int i=0 ; i<15 ; i++)menu[i].drawMenu(scr);
-		if(phase==SAVING && count>=150)TextOut2(scr,160,60,text[GAMETEXT+29]);
-		if(phase==SAVING_RECORD && count>=150)TextOut2(scr,160,60,text[EPILOGUE+5]);
+		if(phase==SAVING && count>=150)drawText2(scr,160,60,text[GAMETEXT+29]);
+		if(phase==SAVING_RECORD && count>=150)drawText2(scr,160,60,text[EPILOGUE+5]);
 		if(phase==MANEKI)drawTalking(scr,1,text[ANTENNATEXT+17+gd.scene_count]);
 		else if(phase==MANEKI_CONFIRM)drawTalking(scr,1,text[ANTENNATEXT+24+gd.scene_count]);
 		else if(phase!=CALLING)drawTalking(scr);
@@ -2123,124 +2123,124 @@ void drawGameExplain(SDL_Surface* scr){
 	if(EXPLAIN){
 		if(phase==GAMESTART){
 			drawKeyboard(scr,key.zC,0,460);
-			TextOut(scr,20,460,text[TITLETEXT]);
+			drawText(scr,20,460,text[TITLETEXT]);
 		}
 		else if(phase==PLAYING){
 			if(count%1000<200){
 				drawKeyboard(scr,key.zC,0,460);
-				TextOut(scr,20,460,text[GAMETEXT+8]);
+				drawText(scr,20,460,text[GAMETEXT+8]);
 			}
 			else if(count%1000<400){
 				if(gd.game_mode==BOSS){
 					drawKeyboard(scr,key.xC,0,460);
-					TextOut(scr,20,460,text[GAMETEXT+11]);
+					drawText(scr,20,460,text[GAMETEXT+11]);
 				}else{
 					drawKeyboard(scr,key.xC,0,460);
-					TextOut(scr,20,460,text[GAMETEXT+10]);
+					drawText(scr,20,460,text[GAMETEXT+10]);
 				}
 			}
 			else if(count%1000<600){
 				drawKeyboard(scr,key.cC,0,460);
-				TextOut(scr,20,460,text[GAMETEXT+9]);
+				drawText(scr,20,460,text[GAMETEXT+9]);
 			}
 			else if(count%1000<800){
 				drawKeyboard(scr,key.leftC,0,460);
 				drawKeyboard(scr,key.rightC,20,460);
 				drawKeyboard(scr,key.upC,40,460);
 				drawKeyboard(scr,key.downC,60,460);
-				TextOut(scr,80,460,text[GAMETEXT+12]);
+				drawText(scr,80,460,text[GAMETEXT+12]);
 			}else{
 				if(DASH_TYPE==TYPE_MARIO || DASH_TYPE==TYPE_MEGAMAN){
 					drawKeyboard(scr,key.xC,0,460);
-					TextOut(scr,20,460,text[GAMETEXT+24]);
+					drawText(scr,20,460,text[GAMETEXT+24]);
 				}
 				if(DASH_TYPE==TYPE_KIRBY){
 					drawKeyboard(scr,key.leftC,0,460);
 					drawKeyboard(scr,key.rightC,20,460);
 					drawKeyboard(scr,key.upC,40,460);
 					drawKeyboard(scr,key.downC,60,460);
-					TextOut(scr,80,460,text[GAMETEXT+25]);
+					drawText(scr,80,460,text[GAMETEXT+25]);
 				}
 			}
 		}
 		else if(phase==SAVEMENU || phase==SMR || (phase==MANEKI && gd.scene_count==3)){
 			if(count%600<200){
 				drawKeyboard(scr,key.zC,80,0);
-				TextOut(scr,100,0,text[OPTIONTEXT+1]);
+				drawText(scr,100,0,text[OPTIONTEXT+1]);
 			}
 			else if(count%600<400){
 				drawKeyboard(scr,key.xC,80,0);
-				TextOut(scr,100,0,text[MENUTEXT+4]);
+				drawText(scr,100,0,text[MENUTEXT+4]);
 			}else{
 				drawKeyboard(scr,key.upC,80,0);
 				drawKeyboard(scr,key.downC,100,0);
-				TextOut(scr,120,0,text[MENUTEXT+15]);
+				drawText(scr,120,0,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==MENU || phase==ANTENNA_MENU){
 			if(count%600<200){
 				drawKeyboard(scr,key.zC,80,0);
-				TextOut(scr,100,0,text[OPTIONTEXT+1]);
+				drawText(scr,100,0,text[OPTIONTEXT+1]);
 			}
 			else if(count%600<400){
 				drawKeyboard(scr,key.xC,80,0);
-				TextOut(scr,100,0,text[MENUTEXT+4]);
+				drawText(scr,100,0,text[MENUTEXT+4]);
 			}else{
 				drawKeyboard(scr,key.upC,80,0);
 				drawKeyboard(scr,key.downC,100,0);
 				drawKeyboard(scr,key.leftC,120,0);
 				drawKeyboard(scr,key.rightC,140,0);
-				TextOut(scr,160,0,text[MENUTEXT+15]);
+				drawText(scr,160,0,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==ADJUST_HEIGHT || phase==ADJUST_ZOOM){
 			if(count%400<200){
 				drawKeyboard(scr,key.cC,80,0);
-				TextOut(scr,100,0,text[MENUTEXT+4]);
+				drawText(scr,100,0,text[MENUTEXT+4]);
 			}else{
 				drawKeyboard(scr,key.upC,80,0);
 				drawKeyboard(scr,key.downC,100,0);
-				TextOut(scr,120,0,text[MENUTEXT+15]);
+				drawText(scr,120,0,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==PREF_LIST_TRANS || phase==TOWN_LIST || phase==PREF_LIST_SMR){
 			if(count%600<200){
 				drawKeyboard(scr,key.zC,80,0);
-				TextOut(scr,100,0,text[OPTIONTEXT+1]);
+				drawText(scr,100,0,text[OPTIONTEXT+1]);
 			}
 			else if(count%600<400){
 				drawKeyboard(scr,key.xC,80,0);
-				TextOut(scr,100,0,text[MENUTEXT+4]);
+				drawText(scr,100,0,text[MENUTEXT+4]);
 			}else{
 				drawKeyboard(scr,key.upC,80,0);
 				drawKeyboard(scr,key.downC,100,0);
 				drawKeyboard(scr,key.leftC,120,0);
 				drawKeyboard(scr,key.rightC,140,0);
-				TextOut(scr,160,0,text[MENUTEXT+15]);
+				drawText(scr,160,0,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==SAVING){
 			if(count>=150){
 				drawKeyboard(scr,key.zC,80,0);
 				drawKeyboard(scr,key.xC,100,0);
-				TextOut(scr,120,0,text[MENUTEXT+4]);
+				drawText(scr,120,0,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==BS_CH || phase==BS_ATTACK){
 			if(count%400<200){
 				drawKeyboard(scr,key.xC,80,20);
-				TextOut(scr,100,20,text[MENUTEXT+4]);
+				drawText(scr,100,20,text[MENUTEXT+4]);
 			}else{
 				drawKeyboard(scr,key.leftC,80,20);
 				drawKeyboard(scr,key.rightC,100,20);
 				drawKeyboard(scr,key.upC,120,20);
 				drawKeyboard(scr,key.downC,140,20);
-				TextOut(scr,160,20,text[MENUTEXT+15]);
+				drawText(scr,160,20,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==FISHUP || phase==GRADEUP){
 			drawKeyboard(scr,key.zC,40,320);
-			TextOut(scr,60,320,text[MENUTEXT+4]);
+			drawText(scr,60,320,text[MENUTEXT+4]);
 		}
 		else if(phase==CROP){
 			if(count%400<200){
@@ -2248,27 +2248,27 @@ void drawGameExplain(SDL_Surface* scr){
 				drawKeyboard(scr,key.downC,20,320);
 				drawKeyboard(scr,key.leftC,40,320);
 				drawKeyboard(scr,key.rightC,60,320);
-				TextOut(scr,80,320,text[MENUTEXT+15]);
+				drawText(scr,80,320,text[MENUTEXT+15]);
 			}else{
 				drawKeyboard(scr,key.xC,0,320);
-				TextOut(scr,20,320,text[MENUTEXT+4]);
+				drawText(scr,20,320,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==GAME_OPTION){
 			if(count%600<200){
 				drawKeyboard(scr,key.zC,0,460);
-				TextOut(scr,20,460,text[OPTIONTEXT+1]);
+				drawText(scr,20,460,text[OPTIONTEXT+1]);
 			}
 			else if(count%600<400){
 				drawKeyboard(scr,key.upC,0,460);
 				drawKeyboard(scr,key.downC,20,460);
 				drawKeyboard(scr,key.leftC,40,460);
 				drawKeyboard(scr,key.rightC,60,460);
-				TextOut(scr,80,460,text[MENUTEXT+15]);
+				drawText(scr,80,460,text[MENUTEXT+15]);
 			}
 			else{
 				drawKeyboard(scr,key.xC,0,460);
-				TextOut(scr,20,460,text[MENUTEXT+4]);
+				drawText(scr,20,460,text[MENUTEXT+4]);
 			}
 		}
 		else if(phase==GAME_OPTION_SETTING){
@@ -2277,29 +2277,29 @@ void drawGameExplain(SDL_Surface* scr){
 				drawKeyboard(scr,key.downC,20,460);
 				drawKeyboard(scr,key.leftC,40,460);
 				drawKeyboard(scr,key.rightC,60,460);
-				TextOut(scr,80,460,text[MENUTEXT+15]);
+				drawText(scr,80,460,text[MENUTEXT+15]);
 			}else{
 				drawKeyboard(scr,key.zC,0,460);
-				TextOut(scr,20,460,text[OPTIONTEXT+1]);
+				drawText(scr,20,460,text[OPTIONTEXT+1]);
 			}
 		}
 		else if(phase==END_YN){
 			if(count%600<200){
 				drawKeyboard(scr,key.zC,0,460);
-				TextOut(scr,20,460,text[OPTIONTEXT+1]);
+				drawText(scr,20,460,text[OPTIONTEXT+1]);
 			}
 			else if(count%600<400){
 				drawKeyboard(scr,key.xC,0,460);
-				TextOut(scr,20,460,text[MENUTEXT+4]);
+				drawText(scr,20,460,text[MENUTEXT+4]);
 			}else{
 				drawKeyboard(scr,key.upC,0,460);
 				drawKeyboard(scr,key.downC,20,460);
-				TextOut(scr,40,460,text[MENUTEXT+15]);
+				drawText(scr,40,460,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==TALKING || (phase==MANEKI && gd.scene_count<3) || (phase==SUMMERWARS && count>=660)){
 			drawKeyboard(scr,key.zC,70,0);
-			TextOut(scr,90,0,text[EPILOGUE+1]);
+			drawText(scr,90,0,text[EPILOGUE+1]);
 		}
 	}
 }
@@ -2626,7 +2626,7 @@ void timerFishUp(){
 
 void startThread(int n){
 	tm.selected=work[n].tnum;
-	strcpy_s(tm.query, work[n].query);
+	strcpy_s(tm.query, 300, work[n].query);
 	tm.timeout=0;
 	tm.which=1;
 	tm.finish=false;
@@ -2783,7 +2783,7 @@ void drawTerop(SDL_Surface* scr, String str, int rcv, int mg_rcv){
 		s.str[k][40]=0;
 	}
 	drawImage(scr,img.menuback,100,440,0,0,540,50,128);
-	TextOut2(scr,80-((count)%9)*2,440,jummingText(s,40,rcv,mg_rcv),36);
+	drawText2(scr,80-((count)%9)*2,440,jummingText(s,40,rcv,mg_rcv),36);
 }
 
 void estimate_rural(){

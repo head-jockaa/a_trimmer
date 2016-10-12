@@ -509,7 +509,7 @@ void drawTorishima(SDL_Surface *scr){
 	}
 	fillRect(scr,0,0,640,60,0,0,0,255);
 	fillRect(scr,0,420,640,60,0,0,0,255);
-	if(which_medal!=0)TextOut(scr,200,0,text[EPILOGUE+3]);
+	if(which_medal!=0)drawText(scr,200,0,text[EPILOGUE+3]);
 	if(phase==GET_MEDAL)drawTalking(scr);
 }
 
@@ -517,15 +517,15 @@ void drawEndingExplain(SDL_Surface* scr){
 	if(EXPLAIN){
 		if(phase==GET_MEDAL || ((phase==ANIME_GOD || phase==LAST_STORY) && start==0)){
 			drawKeyboard(scr,key.zC,0,0);
-			TextOut(scr,20,0,text[EPILOGUE+1]);
+			drawText(scr,20,0,text[EPILOGUE+1]);
 		}
 		else if(phase==ENDING_ANIME){
 			drawKeyboard(scr,key.zC,0,460);
-			TextOut(scr,20,460,text[EPILOGUE]);
+			drawText(scr,20,460,text[EPILOGUE]);
 		}
 		else if(phase==WARNING){
 			drawKeyboard(scr,key.zC,0,0);
-			TextOut(scr,20,0,text[MENUTEXT+4]);
+			drawText(scr,20,0,text[MENUTEXT+4]);
 		}
 	}
 }
@@ -555,11 +555,11 @@ void drawEnding(SDL_Surface* scr){
 		drawImage(scr,img.back,0,70,((count/5)%8)*220,(((count/5)/8)%2)*410,220,410,255);
 		drawImage(scr,img.back,320,160,1760,0,160,160,abs(128-count%255)*2);
 		if(dataNo==index_num){
-			TextOut(scr,280,360,text[EPILOGUE+8]);
-			TextOut(scr,280,400,text[EPILOGUE+9]);
+			drawText(scr,280,360,text[EPILOGUE+8]);
+			drawText(scr,280,400,text[EPILOGUE+9]);
 		}else{
-			TextOut(scr,280,360,text[EPILOGUE+6]);
-			TextOut(scr,280,400,text[EPILOGUE+7]);
+			drawText(scr,280,360,text[EPILOGUE+6]);
+			drawText(scr,280,400,text[EPILOGUE+7]);
 		}
 	}
 	else if(phase==ANIME_GOD){
@@ -583,7 +583,7 @@ void drawAnimeGod(SDL_Surface* scr){
 	if(count%60<30)drawImage(scr,img.back,80,40,1800,280,60,40,255);
 	if((count/60)%60<10)sprintf_s(str,"%2d:0%d",count/3600,(count/60)%60);
 	else sprintf_s(str,"%2d:%d",count/3600,(count/60)%60);
-	TextOut(scr,520,40,str);
+	drawText(scr,520,40,str);
 	if(start<50)drawTalking(scr);
 }
 
@@ -623,9 +623,9 @@ void drawLastStory(SDL_Surface* scr){
 		if(a<350)fillRect(scr,0,0,320,240,0,0,192,255);
 		else fillRect(scr,0,180,320,60,0,0,0,255);
 		if(a<350){
-			if(a/5>0)TextOut(scr,90,60,"Anime Trimmer X",a/5);
-			if(a/5-15>0)TextOut(scr,70,90,"Episode7 Eng Sub (1/3)",a/5-15);
-			if(a/5-37>0)TextOut(scr,120,120,"uploaded",a/5-37);
+			if(a/5>0)drawText(scr,90,60,"Anime Trimmer X",a/5);
+			if(a/5-15>0)drawText(scr,70,90,"Episode7 Eng Sub (1/3)",a/5-15);
+			if(a/5-37>0)drawText(scr,120,120,"uploaded",a/5-37);
 		}else{
 			if(a<450)drawImage(scr,img.back,0,0,640,180,320,180,255);
 			else if(a<750){

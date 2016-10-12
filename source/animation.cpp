@@ -210,10 +210,10 @@ void drawOpeningAnim(SDL_Surface* scr, int cn){
 		if(loadtime<1200){
 			drawImage(scr,img.back,0,40,640,2400,640,400,255);
 			drawImage(scr,img.back,0,40,3240,2800,640,400,255);
-			drawImage(img.scr2,scr,0,0,0,40,640,400,255);
+			drawImage(img.cache,scr,0,0,0,40,640,400,255);
 			loadtime=cn;
 		}
-		drawImage_x(scr,img.scr2,-a*16,40-a*8,(320.0+a*40)/320.0,0,0,640,400,255);
+		drawImage_x(scr,img.cache,-a*16,40-a*8,(320.0+a*40)/320.0,0,0,640,400,255);
 	}
 	else if(cn<1350){
 		a=cn-1250;
@@ -446,7 +446,7 @@ void drawOpeningAnim(SDL_Surface* scr, int cn){
 	fillRect(scr,0,0,640,40,0,0,0,255);
 	fillRect(scr,0,440,640,40,0,0,0,255);
 //	sprintf_s(str,"%d",cn);
-//	TextOut(scr,0,0,str,5);
+//	drawText(scr,0,0,str,5);
 }
 
 // scene0.png - scene6.png
@@ -790,17 +790,17 @@ void drawEndingAnim(SDL_Surface *scr, int cn){
 		if(a>=500)b=255;
 		else if(a>=245)b=(a-245);
 		if((a>=255 && a<260) || (a>=285 && a<290))b=0;
-		for(int i=0 ; i<400 ; i++)fillRect(img.scr2,0,i+40,640,1,i/2,i/2,192,255);
-		drawImage(img.scr2,img.back,a*2/5,a*2/5,960,800,640,400,255);
-		drawImage(img.scr2,img.back,a*2/5,-a*2/5,960,400,640,400,255);
-		drawImage(img.scr2,img.back,-a*2/5,0,960,0,640,400,255);
-		drawImage(img.scr2,img.back,280,80,1000,1400,160,320,b);
-		drawImage(img.scr2,img.back,120+a/10,160-a/10,1200,1200+((a/5)%2)*300,200,300,255);
-		drawImage(img.scr2,img.back,268,90+a/10,640,1400,104,350,255);
-		drawImage(img.scr2,img.back,-190+a/3,250-a/6,760,1700,240,240,255);
-		drawImage(img.scr2,img.back,580-a/3,250-a/6,760,1460,240,240,255);
-		if(a<300)drawImage_x(scr,img.scr2,-(300-a)*320/300,40-(300-a)*200/300,1+(300-a)/300.0,0,0,640,400,255);
-		else drawImage(scr,img.scr2,0,40,0,0,640,400,255);
+		for(int i=0 ; i<400 ; i++)fillRect(img.cache,0,i+40,640,1,i/2,i/2,192,255);
+		drawImage(img.cache,img.back,a*2/5,a*2/5,960,800,640,400,255);
+		drawImage(img.cache,img.back,a*2/5,-a*2/5,960,400,640,400,255);
+		drawImage(img.cache,img.back,-a*2/5,0,960,0,640,400,255);
+		drawImage(img.cache,img.back,280,80,1000,1400,160,320,b);
+		drawImage(img.cache,img.back,120+a/10,160-a/10,1200,1200+((a/5)%2)*300,200,300,255);
+		drawImage(img.cache,img.back,268,90+a/10,640,1400,104,350,255);
+		drawImage(img.cache,img.back,-190+a/3,250-a/6,760,1700,240,240,255);
+		drawImage(img.cache,img.back,580-a/3,250-a/6,760,1460,240,240,255);
+		if(a<300)drawImage_x(scr,img.cache,-(300-a)*320/300,40-(300-a)*200/300,1+(300-a)/300.0,0,0,640,400,255);
+		else drawImage(scr,img.cache,0,40,0,0,640,400,255);
 		if(a>=550)fillRect(scr,0,40,640,400,0,0,0,255);
 		else if(a>=500)fillRect(scr,0,40,640,400,0,0,0,(a-500)*5);
 		if(a<255)fillRect(scr,0,40,640,400,255,255,255,255-a);
@@ -1107,11 +1107,11 @@ void drawSummerWars(SDL_Surface* scr){
 		fillRect(scr,0,0,320,240,col.r,col.g,col.b,255);
 		drawMap(scr,gd.scrX,gd.scrY);
 		if(count==299){
-			drawImage(img.scr2,scr,0,0,0,0,320,240,255);
+			drawImage(img.cache,scr,0,0,0,0,320,240,255);
 		}
 	}
 	else if(count<400){
-		drawImage_x(scr,img.scr2,0,0,(320.0+(count-300)*4)/320.0,count-300,(int)((count-300)/1.2),320,240,255);
+		drawImage_x(scr,img.cache,0,0,(320.0+(count-300)*4)/320.0,count-300,(int)((count-300)/1.2),320,240,255);
 	}
 	else if(count<500){
 		int a=count-400;
@@ -1297,7 +1297,7 @@ void drawKomoro(SDL_Surface* scr){
 			y2=(200-count)*3;
 		}
 		else if(count==200){
-			drawImage_x(img.scr2,img.photo[8],0,0,0.5,0,0,640,480,255);
+			drawImage_x(img.cache,img.photo[8],0,0,0.5,0,0,640,480,255);
 		}
 	}
 	else if(gd.scene_count==12){
@@ -1307,7 +1307,7 @@ void drawKomoro(SDL_Surface* scr){
 	else if(gd.scene_count==13){
 		if(start==0){
 			if(count==2){
-				drawImage_x(img.scr2,img.photo[13],0,0,0.5,0,0,640,480,255);
+				drawImage_x(img.cache,img.photo[13],0,0,0.5,0,0,640,480,255);
 			}
 		}
 		else if(start<100){
@@ -1318,7 +1318,7 @@ void drawKomoro(SDL_Surface* scr){
 
     fillRect(scr,0,180,320,60,0,0,0,255);
 	if(w==0){
-		if((gd.scene_count==8 && count>=200) || gd.scene_count==13)drawImage(scr,img.scr2,0,0,x2,y2,320,240,255);
+		if((gd.scene_count==8 && count>=200) || gd.scene_count==13)drawImage(scr,img.cache,0,0,x2,y2,320,240,255);
 		else drawImage(scr,img.photo[gd.scene_count],0,0,x2,y2,320,240,255);
 	}
 	else drawImage_x(scr,img.photo[gd.scene_count],0,0,w,x2,y2,(int)(320/w),(int)(240/w),255);

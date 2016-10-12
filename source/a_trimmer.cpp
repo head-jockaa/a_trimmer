@@ -28,9 +28,9 @@ void draw(SDL_Surface* scr){
 //	if(mode==GAME){
 //		sprintf_s(str,"%.12g",test);
 //		sprintf_s(str,"%10d",(Uint32)test);
-//		TextOut(scr,0,0,str);
+//		drawText(scr,0,0,str);
 //	}
-//	TextOut(scr,0,0,SDL_VideoDriverName(str,1000));
+//	drawText(scr,0,0,SDL_VideoDriverName(str,1000));
 }
 
 void timer(){
@@ -125,6 +125,7 @@ int main(int argc, char *argv[]) {
 	load_option();
 	Mix_VolumeMusic(BGM_VOLUME);
 	for(int i=0 ; i<4 ; i++)Mix_Volume(i,SE_VOLUME);
+	SDLNet_Init();
 	createAlphaKey();
 	initFont();
 	initAll();
@@ -245,7 +246,7 @@ int main(int argc, char *argv[]) {
 
 void initAll(){
 	img.pre_scr=new Image(640,480);
-	img.scr2=new Image(640,480);
+	img.cache=new Image(640,480);
 	for(int i=0 ; i<4 ; i++)img.buffer[i]=new Image(640,480);
 	checkEndian();
 	sf.decide=Mix_LoadWAV("file/se/3.wav");
@@ -283,7 +284,7 @@ void endAll(){
 	fishbox.endAll();
 	if(map_loaded)map.reset();
 	for(int i=0 ; i<20 ; i++)menu[i].reset();
-	freeImage(img.scr2);
+	freeImage(img.cache);
 	freeImage(img.chr);
 	freeImage(img.symbol);
 	freeImage(img.keyboard);

@@ -11,11 +11,13 @@
 #include <string>
 #include <iostream>
 
-#pragma comment(lib, "SDL.lib")
-#pragma comment(lib, "SDLmain.lib")
-#pragma comment(lib, "SDL_image.lib")
-#pragma comment(lib, "SDL_mixer.lib")
+#pragma comment(lib, "SDL2.lib")
+#pragma comment(lib, "SDL2main.lib")
+#pragma comment(lib, "SDL2_image.lib")
+#pragma comment(lib, "SDL2_mixer.lib")
 #pragma comment(lib, "SDL2_net.lib")
+#pragma comment(lib, "libeay32.lib")
+#pragma comment(lib, "ssleay32.lib")
 
 #define PI 3.1415
 #define OPENING 0
@@ -75,12 +77,12 @@ Uint32 to32int(char c1, char c2, char c3, char c4);
 bool toBool(char c);
 bool key_wait(int a);
 bool key_stop(int a);
-void TextOut(SDL_Surface* scr, int X, int Y, const char* st);
-void TextOut(SDL_Surface* scr, int X, int Y, const char* st, int strl);
-void TextOut_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang);
-void TextOut2(SDL_Surface* scr, int X, int Y, const char* st);
-void TextOut2(SDL_Surface* scr, int X, int Y, const char* st, int strl);
-void TextOut2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang);
+void drawText(SDL_Surface* scr, int X, int Y, const char* st);
+void drawText(SDL_Surface* scr, int X, int Y, const char* st, int strl);
+void drawText_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang);
+void drawText2(SDL_Surface* scr, int X, int Y, const char* st);
+void drawText2(SDL_Surface* scr, int X, int Y, const char* st, int strl);
+void drawText2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang);
 void getSymbolImage();
 void TalkingAt(int n);
 void drawKeyboard(SDL_Surface* scr, int k, int X, int Y);
@@ -124,12 +126,12 @@ struct String{
 };
 extern String text[1000],talk[1000];
 char* toChar(String s);
-void TextOut(SDL_Surface* scr, int X, int Y, String st);
-void TextOut(SDL_Surface* scr, int x, int y, String str, int strl);
-void TextOut_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang);
-void TextOut2(SDL_Surface* scr, int X, int Y, String st);
-void TextOut2(SDL_Surface* scr, int x, int y, String str, int strl);
-void TextOut2_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang);
+void drawText(SDL_Surface* scr, int X, int Y, String st);
+void drawText(SDL_Surface* scr, int x, int y, String str, int strl);
+void drawText_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang);
+void drawText2(SDL_Surface* scr, int X, int Y, String st);
+void drawText2(SDL_Surface* scr, int x, int y, String str, int strl);
+void drawText2_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang);
 void putHeadMark(String &s);
 String jummingText(String s, int strl, int rcv, int mg_rcv);
 
@@ -295,27 +297,27 @@ struct SoundFile{
 extern SoundFile sf;
 
 struct ImageFile{
-	SDL_Surface *iwa, *screen, *screen2;
+	SDL_Surface *iwa, *screen;
 	Image *back, *chr, *menuback, *facechip, *boss, *keyboard, *symbol, *pre_scr;
-	Image *rod, *circle, *fishup, *scr2, *colorlight, *tv_asahi;
+	Image *rod, *circle, *fishup, *cache, *colorlight, *tv_asahi;
 	Image *buffer[4], *photo[14];
 	Image *searchImage;
 	Uint8 alphaR, alphaG, alphaB;
 };
 extern ImageFile img;
 
-void TextOut(Image* img, int X, int Y, const char* st);
-void TextOut(Image* img, int X, int Y, const char* st, int strl);
-void TextOut_lang(Image* img, int x, int y, const char* st, int l, int lang);
-void TextOut(Image* img, int X, int Y, String st);
-void TextOut(Image* img, int x, int y, String str, int strl);
-void TextOut_lang(Image* img, int x, int y, String st, int l, int lang);
-void TextOut2(Image* img, int X, int Y, const char* st);
-void TextOut2(Image* img, int X, int Y, const char* st, int strl);
-void TextOut2_lang(Image* img, int x, int y, const char* st, int l, int lang);
-void TextOut2(Image* img, int X, int Y, String st);
-void TextOut2(Image* img, int x, int y, String str, int strl);
-void TextOut2_lang(Image* img, int x, int y, String st, int l, int lang);
+void drawText(Image* img, int X, int Y, const char* st);
+void drawText(Image* img, int X, int Y, const char* st, int strl);
+void drawText_lang(Image* img, int x, int y, const char* st, int l, int lang);
+void drawText(Image* img, int X, int Y, String st);
+void drawText(Image* img, int x, int y, String str, int strl);
+void drawText_lang(Image* img, int x, int y, String st, int l, int lang);
+void drawText2(Image* img, int X, int Y, const char* st);
+void drawText2(Image* img, int X, int Y, const char* st, int strl);
+void drawText2_lang(Image* img, int x, int y, const char* st, int l, int lang);
+void drawText2(Image* img, int X, int Y, String st);
+void drawText2(Image* img, int x, int y, String str, int strl);
+void drawText2_lang(Image* img, int x, int y, String st, int l, int lang);
 void getImage(Image*& img, const char* st, int r, int g, int b);
 void getImage(Image*& im, char* st);
 void freeImage(Image*& im);
@@ -337,6 +339,7 @@ void sprintf_s(char *s, const char *c, ...);
 void sprintf_s(char *s, long n, const char *c, ...);
 void fopen_s(FILE **f, const char* c1, const char* c2);
 void strcpy_s(char *s1, char *s2);
+void strcpy_s(char *s1, long n, char *s2);
 #endif
 
 extern Key key;

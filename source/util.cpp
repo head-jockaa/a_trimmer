@@ -79,13 +79,13 @@ void Menu::drawMenuText(SDL_Surface* scr){
 		fontA=a;
 		if(mark[i]!=0){
 			drawImage(scr,img.symbol,x+40,y+(i-pageOff)*40,(mark[i]%16)*34,(mark[i]/16)*34,34,34,a);
-			if(lang==JAPANESE)TextOut2_lang(scr, x+80, y+(i-pageOff)*40, st[i], width, JAPANESE);
-			else if(lang==EUROPEAN)TextOut2_lang(scr, x+80, y+(i-pageOff)*40, st[i], width, EUROPEAN);
-			else TextOut2(scr, x+80, y+(i-pageOff)*40, st[i], width);
+			if(lang==JAPANESE)drawText2_lang(scr, x+80, y+(i-pageOff)*40, st[i], width, JAPANESE);
+			else if(lang==EUROPEAN)drawText2_lang(scr, x+80, y+(i-pageOff)*40, st[i], width, EUROPEAN);
+			else drawText2(scr, x+80, y+(i-pageOff)*40, st[i], width);
 		}else{
-			if(lang==JAPANESE)TextOut2_lang(scr, x+40, y+(i-pageOff)*40, st[i], width, JAPANESE);
-			else if(lang==EUROPEAN)TextOut2_lang(scr, x+40, y+(i-pageOff)*40, st[i], width, EUROPEAN);
-			else TextOut2(scr, x+40, y+(i-pageOff)*40, st[i], width);
+			if(lang==JAPANESE)drawText2_lang(scr, x+40, y+(i-pageOff)*40, st[i], width, JAPANESE);
+			else if(lang==EUROPEAN)drawText2_lang(scr, x+40, y+(i-pageOff)*40, st[i], width, EUROPEAN);
+			else drawText2(scr, x+40, y+(i-pageOff)*40, st[i], width);
 		}
 	}
 	fontA=255;
@@ -316,7 +316,7 @@ void FishBox::drawTable(SDL_Surface* scr, Fish f){
 	if(max==0)return;
 	drawImage(scr,panel,20,300,0,400,600,180,255);
 	drawImage(scr,img.symbol,30,362,(work[f.title_num].mark%16)*34,(work[f.title_num].mark/16)*34,34,34,255);
-	TextOut2_lang(scr, 64, 362, jummingText(work[f.title_num].title,60,f.rcv,f.mg_rcv), text_count, JAPANESE);
+	drawText2_lang(scr, 64, 362, jummingText(work[f.title_num].title,60,f.rcv,f.mg_rcv), text_count, JAPANESE);
 	int tc=text_count-(int)strlen(work[f.title_num].title.str[0]);
 	if(tc>=0){
 		fontA=192;
@@ -326,9 +326,9 @@ void FishBox::drawTable(SDL_Surface* scr, Fish f){
 			sprintf_s(str,"%s",toChar(sta[f.sta].name));
 			sprintf_s(str,"%s %s Ch%2d",str,toChar(tower[f.tower].name),f.ch);
 		}
-		TextOut(scr, 64, 402, str, (int)strlen(str));
+		drawText(scr, 64, 402, str, (int)strlen(str));
 		sprintf_s(str,"%2d:%2d(%s)",f.hour,f.minute,weekChar[f.week][CHAR_CODE]);
-		TextOut(scr, 50, 442, str, (int)strlen(str));
+		drawText(scr, 50, 442, str, (int)strlen(str));
 		fontA=255;
 		tc*=4;
 		if(tc>40)tc=40;
@@ -504,44 +504,44 @@ bool key_stop(int a){
 	else return true;
 }
 
-void TextOut(SDL_Surface* scr, int X, int Y, const char* st){
-	TextOut_lang(scr,X,Y,st,0,CHAR_CODE);
+void drawText(SDL_Surface* scr, int X, int Y, const char* st){
+	drawText_lang(scr,X,Y,st,0,CHAR_CODE);
 }
-void TextOut(SDL_Surface* scr, int X, int Y, String st){
-	if(CHAR_CODE==JAPANESE)TextOut_lang(scr,X,Y,st.str[0],0,JAPANESE);
-	else TextOut_lang(scr,X,Y,st.str[1],0,EUROPEAN);
+void drawText(SDL_Surface* scr, int X, int Y, String st){
+	if(CHAR_CODE==JAPANESE)drawText_lang(scr,X,Y,st.str[0],0,JAPANESE);
+	else drawText_lang(scr,X,Y,st.str[1],0,EUROPEAN);
 }
-void TextOut(SDL_Surface* scr, int X, int Y, String st, int l){
-	if(CHAR_CODE==JAPANESE)TextOut_lang(scr,X,Y,st.str[0],l,JAPANESE);
-	else TextOut_lang(scr,X,Y,st.str[1],l,EUROPEAN);
+void drawText(SDL_Surface* scr, int X, int Y, String st, int l){
+	if(CHAR_CODE==JAPANESE)drawText_lang(scr,X,Y,st.str[0],l,JAPANESE);
+	else drawText_lang(scr,X,Y,st.str[1],l,EUROPEAN);
 }
-void TextOut(SDL_Surface* scr, int x, int y, const char* st, int l){
-	TextOut_lang(scr,x,y,st,l,CHAR_CODE);
+void drawText(SDL_Surface* scr, int x, int y, const char* st, int l){
+	drawText_lang(scr,x,y,st,l,CHAR_CODE);
 }
-void TextOut(Image* img, int X, int Y, const char* st){
-	TextOut_lang(img,X,Y,st,0,CHAR_CODE);
+void drawText(Image* img, int X, int Y, const char* st){
+	drawText_lang(img,X,Y,st,0,CHAR_CODE);
 }
-void TextOut(Image* img, int X, int Y, String st){
-	if(CHAR_CODE==JAPANESE)TextOut_lang(img,X,Y,st.str[0],0,JAPANESE);
-	else TextOut_lang(img,X,Y,st.str[1],0,EUROPEAN);
+void drawText(Image* img, int X, int Y, String st){
+	if(CHAR_CODE==JAPANESE)drawText_lang(img,X,Y,st.str[0],0,JAPANESE);
+	else drawText_lang(img,X,Y,st.str[1],0,EUROPEAN);
 }
-void TextOut(Image* img, int X, int Y, String st, int l){
-	if(CHAR_CODE==JAPANESE)TextOut_lang(img,X,Y,st.str[0],l,JAPANESE);
-	else TextOut_lang(img,X,Y,st.str[1],l,EUROPEAN);
+void drawText(Image* img, int X, int Y, String st, int l){
+	if(CHAR_CODE==JAPANESE)drawText_lang(img,X,Y,st.str[0],l,JAPANESE);
+	else drawText_lang(img,X,Y,st.str[1],l,EUROPEAN);
 }
-void TextOut(Image* img, int x, int y, char* st, int l){
-	TextOut_lang(img,x,y,st,l,CHAR_CODE);
+void drawText(Image* img, int x, int y, char* st, int l){
+	drawText_lang(img,x,y,st,l,CHAR_CODE);
 }
-void TextOut_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang){
-	if(lang==JAPANESE)TextOut_lang(scr,x,y,st.str[0],l,JAPANESE);
-	else TextOut_lang(scr,x,y,st.str[1],l,EUROPEAN);
+void drawText_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang){
+	if(lang==JAPANESE)drawText_lang(scr,x,y,st.str[0],l,JAPANESE);
+	else drawText_lang(scr,x,y,st.str[1],l,EUROPEAN);
 }
-void TextOut_lang(Image* img, int x, int y, String st, int l, int lang){
-	if(lang==JAPANESE)TextOut_lang(img,x,y,st.str[0],l,JAPANESE);
-	else TextOut_lang(img,x,y,st.str[1],l,EUROPEAN);
+void drawText_lang(Image* img, int x, int y, String st, int l, int lang){
+	if(lang==JAPANESE)drawText_lang(img,x,y,st.str[0],l,JAPANESE);
+	else drawText_lang(img,x,y,st.str[1],l,EUROPEAN);
 }
 
-void TextOut_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang){
+void drawText_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang){
 	int i=0,s=0,s2=0,p=0;
 	if(l<0)l=0;
 	while(i<l || l==0){
@@ -570,7 +570,7 @@ void TextOut_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lan
 	}
 }
 
-void TextOut_lang(Image* img, int x, int y, const char* st, int l, int lang){
+void drawText_lang(Image* img, int x, int y, const char* st, int l, int lang){
 	int i=0,s=0,s2=0,p=0;
 	if(l<0)l=0;
 	while(i<l || l==0){
@@ -599,44 +599,44 @@ void TextOut_lang(Image* img, int x, int y, const char* st, int l, int lang){
 	}
 }
 
-void TextOut2(SDL_Surface* scr, int X, int Y, const char* st){
-	TextOut2_lang(scr,X,Y,st,0,CHAR_CODE);
+void drawText2(SDL_Surface* scr, int X, int Y, const char* st){
+	drawText2_lang(scr,X,Y,st,0,CHAR_CODE);
 }
-void TextOut2(SDL_Surface* scr, int X, int Y, String st){
-	if(CHAR_CODE==JAPANESE)TextOut2_lang(scr,X,Y,st.str[0],0,JAPANESE);
-	else TextOut2_lang(scr,X,Y,st.str[1],0,EUROPEAN);
+void drawText2(SDL_Surface* scr, int X, int Y, String st){
+	if(CHAR_CODE==JAPANESE)drawText2_lang(scr,X,Y,st.str[0],0,JAPANESE);
+	else drawText2_lang(scr,X,Y,st.str[1],0,EUROPEAN);
 }
-void TextOut2(SDL_Surface* scr, int X, int Y, String st, int l){
-	if(CHAR_CODE==JAPANESE)TextOut2_lang(scr,X,Y,st.str[0],l,JAPANESE);
-	else TextOut2_lang(scr,X,Y,st.str[1],l,EUROPEAN);
+void drawText2(SDL_Surface* scr, int X, int Y, String st, int l){
+	if(CHAR_CODE==JAPANESE)drawText2_lang(scr,X,Y,st.str[0],l,JAPANESE);
+	else drawText2_lang(scr,X,Y,st.str[1],l,EUROPEAN);
 }
-void TextOut2(SDL_Surface* scr, int x, int y, const char* st, int l){
-	TextOut2_lang(scr,x,y,st,l,CHAR_CODE);
+void drawText2(SDL_Surface* scr, int x, int y, const char* st, int l){
+	drawText2_lang(scr,x,y,st,l,CHAR_CODE);
 }
-void TextOut2(Image* img, int X, int Y, const char* st){
-	TextOut2_lang(img,X,Y,st,0,CHAR_CODE);
+void drawText2(Image* img, int X, int Y, const char* st){
+	drawText2_lang(img,X,Y,st,0,CHAR_CODE);
 }
-void TextOut2(Image* img, int X, int Y, String st){
-	if(CHAR_CODE==JAPANESE)TextOut2_lang(img,X,Y,st.str[0],0,JAPANESE);
-	else TextOut2_lang(img,X,Y,st.str[1],0,EUROPEAN);
+void drawText2(Image* img, int X, int Y, String st){
+	if(CHAR_CODE==JAPANESE)drawText2_lang(img,X,Y,st.str[0],0,JAPANESE);
+	else drawText2_lang(img,X,Y,st.str[1],0,EUROPEAN);
 }
-void TextOut2(Image* img, int X, int Y, String st, int l){
-	if(CHAR_CODE==JAPANESE)TextOut2_lang(img,X,Y,st.str[0],l,JAPANESE);
-	else TextOut2_lang(img,X,Y,st.str[1],l,EUROPEAN);
+void drawText2(Image* img, int X, int Y, String st, int l){
+	if(CHAR_CODE==JAPANESE)drawText2_lang(img,X,Y,st.str[0],l,JAPANESE);
+	else drawText2_lang(img,X,Y,st.str[1],l,EUROPEAN);
 }
-void TextOut2(Image* img, int x, int y, const char* st, int l){
-	TextOut2_lang(img,x,y,st,l,CHAR_CODE);
+void drawText2(Image* img, int x, int y, const char* st, int l){
+	drawText2_lang(img,x,y,st,l,CHAR_CODE);
 }
-void TextOut2_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang){
-	if(lang==JAPANESE)TextOut2_lang(scr,x,y,st.str[0],l,JAPANESE);
-	else TextOut2_lang(scr,x,y,st.str[1],l,EUROPEAN);
+void drawText2_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang){
+	if(lang==JAPANESE)drawText2_lang(scr,x,y,st.str[0],l,JAPANESE);
+	else drawText2_lang(scr,x,y,st.str[1],l,EUROPEAN);
 }
-void TextOut2_lang(Image* img, int x, int y, String st, int l, int lang){
-	if(lang==JAPANESE)TextOut2_lang(img,x,y,st.str[0],l,JAPANESE);
-	else TextOut2_lang(img,x,y,st.str[1],l,EUROPEAN);
+void drawText2_lang(Image* img, int x, int y, String st, int l, int lang){
+	if(lang==JAPANESE)drawText2_lang(img,x,y,st.str[0],l,JAPANESE);
+	else drawText2_lang(img,x,y,st.str[1],l,EUROPEAN);
 }
 
-void TextOut2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang){
+void drawText2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang){
 	int i=0,s=0,s2=0,p=0;
 	if(l<0)l=0;
 	while(i<l || l==0){
@@ -665,7 +665,7 @@ void TextOut2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int la
 	}
 }
 
-void TextOut2_lang(Image* img, int x, int y, const char* st, int l, int lang){
+void drawText2_lang(Image* img, int x, int y, const char* st, int l, int lang){
 	int i=0,s=0,s2=0,p=0;
 	if(l<0)l=0;
 	while(i<l || l==0){
@@ -1038,9 +1038,9 @@ void drawTalking(SDL_Surface* scr, int fc, String st){
 	if(gd.shake_count>0)d=(3-abs(6-gd.shake_count%12))*gd.shake_count/6;
 	drawImage(scr,img.menuback,20+d,360,0,0,600,120,192);
 	drawImage(scr,img.facechip,20+d,370,((fc-1)%5)*100,((fc-1)/5)*100,100,100,255);
-	if(a!=0)TextOut2(scr,120+d,360,&(st.str[CHAR_CODE][0]),a);
-	if(b!=0)TextOut2(scr,120+d,400,&(st.str[CHAR_CODE][30]),b);
-	if(c!=0)TextOut2(scr,120+d,440,&(st.str[CHAR_CODE][60]),c);
+	if(a!=0)drawText2(scr,120+d,360,&(st.str[CHAR_CODE][0]),a);
+	if(b!=0)drawText2(scr,120+d,400,&(st.str[CHAR_CODE][30]),b);
+	if(c!=0)drawText2(scr,120+d,440,&(st.str[CHAR_CODE][60]),c);
 }
 
 void fillRect(SDL_Surface* scr, int x, int y, int w, int h, int R,int G,int B, int a){
@@ -1452,6 +1452,9 @@ void fopen_s(FILE **f, const char* c1, const char* c2){
     *f = fopen(c1, c2);
 }
 void strcpy_s(char *s1, char *s2){
+	strcpy(s1, s2);
+}
+void strcpy_s(char *s1, long n, char *s2){
 	strcpy(s1, s2);
 }
 #endif

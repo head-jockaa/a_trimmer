@@ -9,7 +9,8 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #ifdef __WIN32__
-#include <winsock2.h>
+//#include <winsock2.h>
+#define SD_RECEIVE 0
 #endif
 #pragma comment(lib, "libeay32.lib")
 #pragma comment(lib, "ssleay32.lib")
@@ -33,7 +34,7 @@ struct _TCPsocket {
 #define THREAD_SHUTDOWN 5
 #define BUF_LEN 2048
 
-#define OUTPUT_NETWORK_LOG false
+#define OUTPUT_NETWORK_LOG true
 
 // Google
 #define TABLE_PREFIX "<div data-async-context="
