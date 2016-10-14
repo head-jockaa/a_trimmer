@@ -1,6 +1,8 @@
 #ifndef UTILITY__
 #define UTILITY__
 
+#define _CRT_SECURE_NO_WARNINGS 
+
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
@@ -16,8 +18,6 @@
 #pragma comment(lib, "SDL2_image.lib")
 #pragma comment(lib, "SDL2_mixer.lib")
 #pragma comment(lib, "SDL2_net.lib")
-#pragma comment(lib, "libeay32.lib")
-#pragma comment(lib, "ssleay32.lib")
 
 #define PI 3.1415
 #define OPENING 0

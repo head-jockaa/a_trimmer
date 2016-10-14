@@ -27,7 +27,6 @@ void drawPlayer(SDL_Surface *scr);
 void drawFishup(SDL_Surface *scr);
 void drawGameExplain(SDL_Surface *scr);
 void drawSMR(SDL_Surface* scr);
-void createSearchImage(int n);
 void estimate_rural();
 void initManekiTV();
 void setManekiData();
@@ -2304,12 +2303,14 @@ void drawGameExplain(SDL_Surface* scr){
 	}
 }
 
-void createSearchImage(int n){
+bool createSearchImage(int n){
+	if (img.searchImage)freeImage(img.searchImage);
 	sprintf_s(str,"save/tmp_image/%d.jpg", n);
 	Image *img2;
 	getImage(img2,str);
+
+	//sometimes fails to load a file because of bad timing
 	if(img2){
-		if(img.searchImage)freeImage(img.searchImage);
 		getImage(img.searchImage,"file/img/image_search.png",0,0,0);
 
 		int w=img.searchImage->w, h=img.searchImage->h;
@@ -2344,13 +2345,18 @@ void createSearchImage(int n){
 			}
 		}
 		freeImage(img2);
+		return true;
 	}else{
+		/*
 		tm.which++;
 		tm.timeout = 0;
 		tm.failure=true;
 		tm.finish=false;
 		parseHTML(0, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
+		*/
+		networkLog(0, "failed to open the saved image file");
+		return false;
 	}
 }
 
@@ -2615,8 +2621,7 @@ void timerFishUp(){
 		fishbox.text_count=1;
 	}
 	if(start==0 && tm.finish && !tm.failure){
-		createSearchImage(tm.selected);
-		if(!tm.failure){
+		if(createSearchImage(tm.selected)){
 			start=100;
 			if(phase==FISHUP)phase=THROW_PHOTO;
 			else phase=MANEKI_THROW_PHOTO;
@@ -2634,6 +2639,7 @@ void startThread(int n){
 	ns.timeoutIcon=false;
 	if(tm.running){
 		tm.halt=THREAD_SHUTDOWN;
+		networkLog(0, "shutdown TCP before starting new thread");
 		TCPshutdown(0);
 	}
 	thread = SDL_CreateThread(ImageSearchThread, "ImageSearchThread", nullptr);

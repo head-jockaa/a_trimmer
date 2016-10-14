@@ -864,7 +864,7 @@ void MHzRod::drawAntenna(SDL_Surface* scr){
 	drawImage(scr,img.rod,20,40,0,0,600,40,255);
 	drawImage(scr,img.rod,mh*2/3+20,40,600,0,20,40,255);
 	drawImage(scr,img.menuback,440,0,0,0,160,40,128);
-	sprintf_s(str,"%5d Mhz",mh,ch);
+	sprintf_s(str,"%5d Mhz",mh);
 	drawText2(scr, 440, 0, str, 9);
 }
 void MHzRod::trolling(){

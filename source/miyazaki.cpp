@@ -223,9 +223,10 @@ void timerMiyazaki(){
 
 	if(phase==GUIDE_ALL || phase==GUIDE_ANIME){
 		if(start==0 && tm.finish && !tm.failure && !showSearchImage){
-			createSearchImage(tm.selected);
-			tm.finish=false;
-			showSearchImage=true;
+			if (createSearchImage(tm.selected)) {
+				tm.finish = false;
+				showSearchImage = true;
+			}
 		}
 	}
 

@@ -20,7 +20,7 @@ struct RadioData{
 	int bias_dir;
 	double tower_dis_multi2;
 	int seeDIS[1000], seeH[1000], seeNUM[1000], seeM[1000], see_mounts;
-	bool seeCITY[1000];
+	Uint8 seeCITY[1000];
 	double seeDIR[1000];
 };
 extern RadioData rd;

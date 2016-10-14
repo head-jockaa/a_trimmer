@@ -1,5 +1,10 @@
 #include "image_search.h"
 
+// to solve an error of no OpenSSL_AppLink
+#ifdef __WIN32__
+#include <openssl/applink.c>
+#endif
+
 ThreadManager tm;
 NetworkStatus ns;
 ImageFormatReader ifr;
@@ -101,7 +106,6 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 	//getting IP address
 	IPaddress ipaddress;
 	int res = SDLNet_ResolveHost(&ipaddress, host, port);
-	networkLog(id, " : %d : %d : ", ipaddress.host,res);
 	if(res){
 		ns.status=NS_IPADDRESS_FAILURE;
 		ns.display=300;
@@ -548,6 +552,7 @@ void getTargetImage_https(int id, char *url){
 
 	ret = SSL_set_fd(ssl, tm.tcpsock->channel);
 	if (ret == 0){
+		networkLog(id, "SSL_set_fd() failed");
 		ERR_print_errors_fp(stderr);
 		return;
 	}
@@ -560,10 +565,10 @@ void getTargetImage_https(int id, char *url){
 
 	ret = SSL_connect(ssl);
 	if (ret != 1){
+		networkLog(id, "SSL error occurred");
 		ERR_print_errors_fp(stderr);
 		tm.which++;
 		tm.timeout = 0;
-		networkLog(id, "SSL error occurred");
 		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
 		return;

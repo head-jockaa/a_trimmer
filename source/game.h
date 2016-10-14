@@ -70,7 +70,7 @@ void startThread(int n);
 void manageThread();
 void drawNetworkStatus(SDL_Surface* scr);
 void drawThrowPhoto(SDL_Surface *scr);
-void createSearchImage(int n);
+bool createSearchImage(int n);
 
 extern int mwave[68];
 
