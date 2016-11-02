@@ -1,8 +1,6 @@
 #include "title.h"
 
 void initTitle2();
-void drawOpeningAnim(SDL_Surface* scr, int cn);
-int timestamp,loadtime,pausetime;
 
 void initOpening(){
 	mode=OPENING;
@@ -33,8 +31,7 @@ void drawOpening(SDL_Surface* scr){
 		fillRect(scr,0,440,640,40,0,0,0,255);
 	}
 	else if(phase==2){
-		if(pauseGame)drawOpeningAnim(scr,(pausetime-timestamp)/16);
-		else drawOpeningAnim(scr,(SDL_GetTicks()-timestamp)/16);
+		drawAnimationCut(scr);
 	}
 	if(EXPLAIN){
 		drawKeyboard(scr,key.zC,0,460);
@@ -71,7 +68,11 @@ void timerOpening(){
 		initOpeningMainAnime();
 	}
 	else if(phase==2){
-		if((SDL_GetTicks()-timestamp)/16>=3350){
+		int t=(int)((SDL_GetTicks()-loadtime)/16);
+		for(int i=0 ; i<t-playtime ; i++){
+			nextCut();
+		}
+		if(playtime>=3350){
 			if(movie_test){
 				endOpening();
 				initMiyazaki();
@@ -89,12 +90,18 @@ void timerOpening(){
 }
 
 void initOpeningMainAnime(){
-	getImage(img.back,"file/img/opening.png",0,0,255);
-	bgm=Mix_LoadMUS("file/bgm/1.ogg");
-	Mix_PlayMusic(bgm,-1);
-	count=-1;
-	timestamp=SDL_GetTicks();
-	loadtime=0;
+	count=0;
+	cartoonNextTime=0;
+	loadFile("file/data/cartoon/opening.json");
+	if(cartoonJsonSize)delete [] cartoonJson;
+	cartoonJsonSize=fsize;
+	cartoonJson=new char[cartoonJsonSize];
+	strcpy_s(cartoonJson,fstr);
+	for(int i=0 ; i<1000 ; i++){
+		resetObject(i);
+	}
+	nextCut();
+	loadtime=SDL_GetTicks();
 }
 
 void initTitle2(){

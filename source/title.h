@@ -3,7 +3,6 @@
 
 #include "util.h"
 
-extern int timestamp,loadtime,pausetime;
 extern SDL_Surface *fade;
 void initOpening();
 void endOpening();

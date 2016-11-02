@@ -3,7 +3,14 @@
 
 #include "util.h"
 
-void drawOpeningAnim(SDL_Surface* scr, int cn);
+extern int playtime, cartoonNextTime;
+extern int timestamp,loadtime,pausetime;
+extern size_t cartoonJsonSize;
+extern char *cartoonJson;
+void drawAnimationCut(SDL_Surface* scr);
+void nextCut();
+void resetObject(int n);
+
 void drawEndingAnim(SDL_Surface *scr, int cn);
 void drawLastEndingAnim(SDL_Surface* scr, int cn);
 void drawWeeklyComic(SDL_Surface* scr);
