@@ -19,7 +19,7 @@
 #define CARTOON_COL 17
 #define CARTOON_SHAKE 18
 #define CARTOON_WAVE 19
-#define CARTOON_ANIME 20
+#define CARTOON_SLIDE 20
 #define CARTOON_FLIP 21
 #define CARTOON_JUMP 22
 #define CARTOON_FROM 23
@@ -53,7 +53,7 @@
 
 void readSetObject(char *json, int timer);
 void readMoveObject(char *json, int timer);
-void readMoveAnime(char *json, int timer);
+void readSlideAnime(char *json, int timer);
 void readFlipAnime(char *json, int timer);
 void readJumpAnime(char *json, int timer);
 void readColorGrad(char *json, int timer);
@@ -292,22 +292,23 @@ void readCartoon(char *json, int timer){
 			}
 		}
 		else if(mode==JSON_GETNAME) {
-			if(startsWith(c, "load-image")) {
+			fetchString(c,str);
+			if(strcmp(str, "load-image")==0) {
 				datamode=CARTOON_LOAD_IMAGE;
 			}
-			else if(startsWith(c, "load-bgm")) {
+			else if(strcmp(str, "load-bgm")==0) {
 				datamode=CARTOON_LOAD_BGM;
 			}
-			else if(startsWith(c, "set")) {
+			else if(strcmp(str, "set")==0) {
 				datamode=CARTOON_SET;
 			}
-			else if(startsWith(c, "move")) {
+			else if(strcmp(str, "move")==0) {
 				datamode=CARTOON_MOVE;
 			}
-			else if(startsWith(c, "reset")) {
+			else if(strcmp(str, "reset")==0) {
 				datamode=CARTOON_RESET;
 			}
-			else if(startsWith(c, "note")) {
+			else if(strcmp(str, "note")==0) {
 				datamode=CARTOON_NOTE;
 			}
 			mode=JSON_COLON;
@@ -386,47 +387,49 @@ void readSetObject(char *json, int timer){
 		else if(mode==JSON_GETNAME) {
 			if(*c=='}') {
 				mode=JSON_ENDDATA;
+				continue;
 			}
-			else if(startsWith(c, "id")) {
+			fetchString(c,str);
+			if(strcmp(str, "id")==0) {
 				datamode=CARTOON_ID;
 			}
-			else if(startsWith(c, "x")) {
+			else if(strcmp(str, "x")==0) {
 				datamode=CARTOON_X;
 			}
-			else if(startsWith(c, "y")) {
+			else if(strcmp(str, "y")==0) {
 				datamode=CARTOON_Y;
 			}
-			else if(startsWith(c, "ix")) {
+			else if(strcmp(str, "ix")==0) {
 				datamode=CARTOON_IX;
 			}
-			else if(startsWith(c, "iy")) {
+			else if(strcmp(str, "iy")==0) {
 				datamode=CARTOON_IY;
 			}
-			else if(startsWith(c, "wave")) {
+			else if(strcmp(str, "wave")==0) {
 				datamode=CARTOON_WAVE;
 			}
-			else if(startsWith(c, "w")) {
+			else if(strcmp(str, "w")==0) {
 				datamode=CARTOON_W;
 			}
-			else if(startsWith(c, "h")) {
+			else if(strcmp(str, "h")==0) {
 				datamode=CARTOON_H;
 			}
-			else if(startsWith(c, "a")) {
+			else if(strcmp(str, "a")==0) {
 				datamode=CARTOON_ALPHA;
 			}
-			else if(startsWith(c, "mag")) {
+			else if(strcmp(str, "mag")==0) {
 				datamode=CARTOON_MAG;
 			}
-			else if(startsWith(c, "col_grad_y")) {
+			else if(strcmp(str, "col_grad_y")==0) {
 				datamode=CARTOON_COL_GRAD_Y;
 			}
-			else if(startsWith(c, "col")) {
+			else if(strcmp(str, "col")==0) {
 				datamode=CARTOON_COL;
 			}
-			else if(startsWith(c, "shake")) {
+			else if(strcmp(str, "shake")==0) {
 				datamode=CARTOON_SHAKE;
 			}
-			else if(startsWith(c, "note")) {
+			else if(strcmp(str, "note")==0) {
 				datamode=CARTOON_NOTE;
 			}
 			mode=JSON_COLON;
@@ -536,47 +539,49 @@ void readMoveObject(char *json, int timer){
 		else if(mode==JSON_GETNAME) {
 			if(*c=='}') {
 				mode=JSON_ENDDATA;
+				continue;
 			}
-			else if(startsWith(c, "id")) {
+			fetchString(c,str);
+			if(strcmp(str, "id")==0) {
 				datamode=CARTOON_ID;
 			}
-			else if(startsWith(c, "x")) {
+			else if(strcmp(str, "x")==0) {
 				datamode=CARTOON_X;
 			}
-			else if(startsWith(c, "y")) {
+			else if(strcmp(str, "y")==0) {
 				datamode=CARTOON_Y;
 			}
-			else if(startsWith(c, "mag")) {
+			else if(strcmp(str, "mag")==0) {
 				datamode=CARTOON_MAG;
 			}
-			else if(startsWith(c, "anime")) {
-				datamode=CARTOON_ANIME;
+			else if(strcmp(str, "slide")==0) {
+				datamode=CARTOON_SLIDE;
 			}
-			else if(startsWith(c, "flip")) {
+			else if(strcmp(str, "flip")==0) {
 				datamode=CARTOON_FLIP;
 			}
-			else if(startsWith(c, "jump")) {
+			else if(strcmp(str, "jump")==0) {
 				datamode=CARTOON_JUMP;
 			}
-			else if(startsWith(c, "a")) {
+			else if(strcmp(str, "a")==0) {
 				datamode=CARTOON_ALPHA;
 			}
-			else if(startsWith(c, "ix")) {
+			else if(strcmp(str, "ix")==0) {
 				datamode=CARTOON_IX;
 			}
-			else if(startsWith(c, "iy")) {
+			else if(strcmp(str, "iy")==0) {
 				datamode=CARTOON_IY;
 			}
-			else if(startsWith(c, "w")) {
+			else if(strcmp(str, "w")==0) {
 				datamode=CARTOON_W;
 			}
-			else if(startsWith(c, "h")) {
+			else if(strcmp(str, "h")==0) {
 				datamode=CARTOON_H;
 			}
-			else if(startsWith(c, "shake")) {
+			else if(strcmp(str, "shake")==0) {
 				datamode=CARTOON_SHAKE;
 			}
-			else if(startsWith(c, "note")) {
+			else if(strcmp(str, "note")==0) {
 				datamode=CARTOON_NOTE;
 			}
 			mode=JSON_COLON;
@@ -614,8 +619,8 @@ void readMoveObject(char *json, int timer){
 			if(datamode==CARTOON_ALPHA) {
 				obj[this_id].move.alpha=fetchDouble(c);
 			}
-			if(datamode==CARTOON_ANIME) {
-				readMoveAnime(json,timer);
+			if(datamode==CARTOON_SLIDE) {
+				readSlideAnime(json,timer);
 			}
 			if(datamode==CARTOON_JUMP) {
 				readJumpAnime(json,timer);
@@ -674,10 +679,11 @@ void readColorGrad(char *json, int timer){
 			if(*c=='}') {
 				return;
 			}
-			else if(startsWith(c, "from")) {
+			fetchString(c,str);
+			if(strcmp(str, "from")==0) {
 				datamode=CARTOON_FROM;
 			}
-			else if(startsWith(c, "to")) {
+			else if(strcmp(str, "to")==0) {
 				datamode=CARTOON_TO;
 			}
 			mode=JSON_COLON;
@@ -734,10 +740,11 @@ void readWaveAnime(char *json, int timer){
 			if(*c=='}') {
 				return;
 			}
-			else if(startsWith(c, "sin")) {
+			fetchString(c,str);
+			if(strcmp(str, "sin")==0) {
 				datamode=CARTOON_SIN;
 			}
-			else if(startsWith(c, "range")) {
+			else if(strcmp(str, "range")==0) {
 				datamode=CARTOON_RANGE;
 			}
 			mode=JSON_COLON;
@@ -786,16 +793,17 @@ void readFlipAnime(char *json, int timer){
 			if(*c=='}') {
 				return;
 			}
-			else if(startsWith(c, "in")) {
+			fetchString(c,str);
+			if(strcmp(str, "in")==0) {
 				datamode=CARTOON_INTERVAL;
 			}
-			else if(startsWith(c, "ix")) {
+			else if(strcmp(str, "ix")==0) {
 				datamode=CARTOON_IX;
 			}
-			else if(startsWith(c, "iy")) {
+			else if(strcmp(str, "iy")==0) {
 				datamode=CARTOON_IY;
 			}
-			else if(startsWith(c, "n")) {
+			else if(strcmp(str, "n")==0) {
 				datamode=CARTOON_NUM;
 			}
 			mode=JSON_COLON;
@@ -832,7 +840,7 @@ void readFlipAnime(char *json, int timer){
 	}
 }
 
-void readMoveAnime(char *json, int timer){
+void readSlideAnime(char *json, int timer){
 	int mode=JSON_DATA_START;
 	int datamode1=0,datamode2=0;
 	while(json[cartoonPointer]) {
@@ -847,16 +855,17 @@ void readMoveAnime(char *json, int timer){
 			}
 		}
 		else if(mode==JSON_GETNAME) {
-			if(startsWith(c, "a")) {
+			fetchString(c,str);
+			if(strcmp(str, "a")==0) {
 				datamode1=CARTOON_ALPHA;
 			}
-			else if(startsWith(c, "x")) {
+			else if(strcmp(str, "x")==0) {
 				datamode1=CARTOON_X;
 			}
-			else if(startsWith(c, "y")) {
+			else if(strcmp(str, "y")==0) {
 				datamode1=CARTOON_Y;
 			}
-			else if(startsWith(c, "mag")) {
+			else if(strcmp(str, "mag")==0) {
 				datamode1=CARTOON_MAG;
 			}
 			mode=JSON_COLON;
@@ -872,16 +881,17 @@ void readMoveAnime(char *json, int timer){
 			}
 		}
 		else if(mode==JSON_GETNAME2) {
-			if(startsWith(c, "step")) {
+			fetchString(c,str);
+			if(strcmp(str, "step")==0) {
 				datamode2=CARTOON_STEP;
 			}
-			else if(startsWith(c, "from")) {
+			else if(strcmp(str, "from")==0) {
 				datamode2=CARTOON_FROM;
 			}
-			else if(startsWith(c, "to")) {
+			else if(strcmp(str, "to")==0) {
 				datamode2=CARTOON_TO;
 			}
-			else if(startsWith(c, "fade")) {
+			else if(strcmp(str, "fade")==0) {
 				datamode2=CARTOON_FADE;
 			}
 			mode=JSON_COLON2;
@@ -956,10 +966,11 @@ void readJumpAnime(char *json, int timer){
 			if(*c=='}') {
 				return;
 			}
-			else if(startsWith(c, "g")) {
+			fetchString(c,str);
+			if(strcmp(str, "g")==0) {
 				datamode=CARTOON_G;
 			}
-			else if(startsWith(c, "y")) {
+			else if(strcmp(str, "y")==0) {
 				datamode=CARTOON_Y;
 			}
 			mode=JSON_COLON;
