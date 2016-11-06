@@ -5,7 +5,6 @@ int camera_count,cameraX2;
 int which_medal;
 Image *mirror;
 
-void drawEndingAnim(SDL_Surface* scr, int cn);
 void drawLastEndingAnim(SDL_Surface* scr, int cn);
 void drawAnimeGod(SDL_Surface* scr);
 void drawLastStory(SDL_Surface* scr);
@@ -50,16 +49,12 @@ void initEndingAnime(){
 }
 
 void initEndingMainAnime(){
-	getImage(img.back,"file/img/ending.png",0,0,255);
-	bgm=Mix_LoadMUS("file/bgm/16.ogg");
-	Mix_PlayMusic(bgm,-1);
 	mode=ENDING;
 	phase=ENDING_ANIME;
 	mirror=NULL;
 	sf.thunder=NULL;sf.tub=NULL;sf.alarm=NULL;sf.noize=NULL;sf.sunset=NULL;sf.swish=NULL;
-	timestamp=SDL_GetTicks();
-	loadtime=0;
 	count=0;
+	loadCartoon("file/data/cartoon/ending.json");
 }
 
 void initLastStory(){
@@ -366,7 +361,11 @@ void timerEndingAnime(){
 		}
 	}
 	else if(phase==ENDING_ANIME){
-		if((SDL_GetTicks()-timestamp)/16>=4360){
+		int t=(int)((SDL_GetTicks()-loadtime)/16);
+		for(int i=0 ; i<t-playtime ; i++){
+			nextCut();
+		}
+		if(playtime>=4360){
 			if(movie_test){
 				endEnding();
 				initMiyazaki();
@@ -541,8 +540,7 @@ void drawEnding(SDL_Surface* scr){
 		else drawImage(scr,img.back,200,380,400,960,240,80,a);
 	}
 	else if(phase==ENDING_ANIME){
-		if(pauseGame)drawEndingAnim(scr,(pausetime-timestamp)/16);
-		else drawEndingAnim(scr,(SDL_GetTicks()-timestamp)/16);
+		drawAnimationCut(scr);
 	}
 	else if(phase==LAST_ENDING){
 		if(pauseGame)drawLastEndingAnim(scr,(pausetime-timestamp)/16);

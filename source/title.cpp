@@ -91,17 +91,7 @@ void timerOpening(){
 
 void initOpeningMainAnime(){
 	count=0;
-	cartoonNextTime=0;
-	loadFile("file/data/cartoon/opening.json");
-	if(cartoonJsonSize)delete [] cartoonJson;
-	cartoonJsonSize=fsize;
-	cartoonJson=new char[cartoonJsonSize];
-	strcpy_s(cartoonJson,fstr);
-	for(int i=0 ; i<1000 ; i++){
-		resetObject(i);
-	}
-	nextCut();
-	loadtime=SDL_GetTicks();
+	loadCartoon("file/data/cartoon/opening.json");
 }
 
 void initTitle2(){

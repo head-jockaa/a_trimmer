@@ -35,6 +35,12 @@
 #define CARTOON_FILLRECT 33
 #define CARTOON_FILLRECT_GRAD 34
 #define CARTOON_DRAWIMAGE_WAVE 35
+#define CARTOON_CACHE 36
+#define CARTOON_CACHE_TO 37
+#define CARTOON_TURNBACK 38
+#define CARTOON_COL_R 39
+#define CARTOON_COL_G 40
+#define CARTOON_COL_B 41
 
 #define JSON_ARRAY_START 1
 #define JSON_STARTTIME 2
@@ -57,6 +63,7 @@ void readSlideAnime(char *json, int timer);
 void readFlipAnime(char *json, int timer);
 void readJumpAnime(char *json, int timer);
 void readColorGrad(char *json, int timer);
+void readColorGrad_shift(char *json, int timer);
 void readWaveAnime(char *json, int timer);
 void resetObject(char *json, int timer);
 
@@ -68,17 +75,19 @@ char *cartoonJson;
 
 struct ObjectSetting{
 	double x,y,ix,iy,w,h,mag,alpha,shake;
-	int type;
+	int type,cacheTo;
 	double R,G,B;
-	double Rfrom,Gfrom,Bfrom;
-	double Rto,Gto,Bto;
+	double gradRfrom,gradGfrom,gradBfrom;
+	double gradRto,gradGto,gradBto;
 };
 struct ObjectMoving{
 	double x,y,ix,iy,mag,w,h,alpha,shake;
+	double R,G,B,gradRfrom,gradGfrom,gradBfrom,gradRto,gradGto,gradBto;
 };
 struct ObjectFlipping{
 	double ix,iy;
 	int interval,num,count;
+	bool turnBack;
 };
 struct ObjectSliding{
 	double step,fade,fadeRate;
@@ -98,17 +107,19 @@ CartoonObject obj[1000];
 
 void resetObjectSetting(ObjectSetting &s){
 	s.x=0;s.y=0;s.ix=0;s.iy=0;s.w=0;s.h=0;
-	s.mag=1;s.alpha=255;s.shake=0;s.type=0;
+	s.mag=1;s.alpha=255;s.shake=0;s.type=0;s.cacheTo=-1;
 	s.R=0;s.G=0;s.B=0;
-	s.Rfrom=0;s.Gfrom=0;s.Bfrom=0;
-	s.Rto=0;s.Gto=0;s.Bto=0;
+	s.gradRfrom=0;s.gradGfrom=0;s.gradBfrom=0;
+	s.gradRto=0;s.gradGto=0;s.gradBto=0;
 }
 void resetObjectMoving(ObjectMoving &m){
-	m.x=0;m.y=0;m.ix=0;m.iy=0;m.mag=0;m.w=0;m.h=0;m.alpha=0;
-	m.shake=0;
+	m.x=0;m.y=0;m.ix=0;m.iy=0;m.mag=0;m.w=0;m.h=0;m.alpha=0;m.shake=0;
+	m.R=0;m.G=0;m.B=0;
+	m.gradRfrom=0;m.gradGfrom=0;m.gradBfrom=0;
+	m.gradRto=0;m.gradGto=0;m.gradBto=0;
 }
 void resetObjectFlipping(ObjectFlipping &f){
-	f.ix=0;f.iy=0;f.interval=1;f.num=0;f.count=0;
+	f.ix=0;f.iy=0;f.interval=1;f.num=0;f.count=0;f.turnBack=true;
 }
 void resetObjectSliding(ObjectSliding &s){
 	s.step=0;s.from=0;s.to=0;s.fade=1;s.fadeRate=0;s.turnBack=false;
@@ -248,6 +259,27 @@ bool startsWith(char* s, const char *target) {
 	}
 	cartoonPointer+=(int)strlen(target)-1;
 	return true;
+}
+
+void freeCartoon(){
+	max_obj=0;
+	playtime=0;
+	cartoonPointer=0;
+	cartoonNextTime=0;
+	if(cartoonJsonSize)delete [] cartoonJson;
+	for(int i=0 ; i<1000 ; i++){
+		resetObject(i);
+	}
+}
+
+void loadCartoon(const char *filename){
+	freeCartoon();
+	loadFile(filename);
+	cartoonJsonSize=fsize;
+	cartoonJson=new char[cartoonJsonSize];
+	strcpy_s(cartoonJson,fstr);
+	nextCut();
+	loadtime=SDL_GetTicks();
 }
 
 void readCartoon(char *json, int timer){
@@ -429,6 +461,12 @@ void readSetObject(char *json, int timer){
 			else if(strcmp(str, "shake")==0) {
 				datamode=CARTOON_SHAKE;
 			}
+			else if(strcmp(str, "cache_to")==0) {
+				datamode=CARTOON_CACHE_TO;
+			}
+			else if(strcmp(str, "cache")==0) {
+				datamode=CARTOON_CACHE;
+			}
 			else if(strcmp(str, "note")==0) {
 				datamode=CARTOON_NOTE;
 			}
@@ -455,37 +493,37 @@ void readSetObject(char *json, int timer){
 				}
 				this_id=id;
 			}
-			if(datamode==CARTOON_X) {
+			else if(datamode==CARTOON_X) {
 				obj[this_id].set.x=fetchDouble(c);
 			}
-			if(datamode==CARTOON_Y) {
+			else if(datamode==CARTOON_Y) {
 				obj[this_id].set.y=fetchDouble(c);
 			}
-			if(datamode==CARTOON_IX) {
+			else if(datamode==CARTOON_IX) {
 				obj[this_id].set.ix=fetchDouble(c);
 				obj[this_id].set.type=CARTOON_DRAWIMAGE;
 			}
-			if(datamode==CARTOON_IY) {
+			else if(datamode==CARTOON_IY) {
 				obj[this_id].set.iy=fetchDouble(c);
 				obj[this_id].set.type=CARTOON_DRAWIMAGE;
 			}
-			if(datamode==CARTOON_W) {
+			else if(datamode==CARTOON_W) {
 				obj[this_id].set.w=fetchDouble(c);
 			}
-			if(datamode==CARTOON_H) {
+			else if(datamode==CARTOON_H) {
 				obj[this_id].set.h=fetchDouble(c);
 			}
-			if(datamode==CARTOON_ALPHA) {
+			else if(datamode==CARTOON_ALPHA) {
 				obj[this_id].set.alpha=fetchDouble(c);
 			}
-			if(datamode==CARTOON_MAG) {
+			else if(datamode==CARTOON_MAG) {
 				obj[this_id].set.mag=fetchDouble(c);
 			}
-			if(datamode==CARTOON_COL_GRAD_Y) {
+			else if(datamode==CARTOON_COL_GRAD_Y) {
 				readColorGrad(json,timer);
 				obj[this_id].set.type=CARTOON_FILLRECT_GRAD;
 			}
-			if(datamode==CARTOON_COL) {
+			else if(datamode==CARTOON_COL) {
 				SDL_Color col;
 				fetchColor(c,&col);
 				obj[this_id].set.type=CARTOON_FILLRECT;
@@ -493,14 +531,22 @@ void readSetObject(char *json, int timer){
 				obj[this_id].set.G=col.g;
 				obj[this_id].set.B=col.b;
 			}
-			if(datamode==CARTOON_SHAKE) {
+			else if(datamode==CARTOON_SHAKE) {
 				obj[this_id].set.shake=fetchDouble(c);
 			}
-			if(datamode==CARTOON_WAVE) {
+			else if(datamode==CARTOON_WAVE) {
 				readWaveAnime(json,timer);
 				obj[this_id].set.type=CARTOON_DRAWIMAGE_WAVE;
 			}
-			if(datamode==CARTOON_NOTE) {
+			else if(datamode==CARTOON_CACHE_TO) {
+				obj[this_id].set.cacheTo=fetchInt(c);
+			}
+			else if(datamode==CARTOON_CACHE) {
+				if(startsWith(c,"true")){
+					obj[this_id].set.type=CARTOON_CACHE;
+				}
+			}
+			else if(datamode==CARTOON_NOTE) {
 				fetchString(c,str);
 			}
 			mode=JSON_NEXTDATA;
@@ -584,6 +630,18 @@ void readMoveObject(char *json, int timer){
 			else if(strcmp(str, "note")==0) {
 				datamode=CARTOON_NOTE;
 			}
+			else if(strcmp(str, "col_grad_y")==0) {
+				datamode=CARTOON_COL_GRAD_Y;
+			}
+			else if(strcmp(str, "col_r")==0) {
+				datamode=CARTOON_COL_R;
+			}
+			else if(strcmp(str, "col_g")==0) {
+				datamode=CARTOON_COL_G;
+			}
+			else if(strcmp(str, "col_b")==0) {
+				datamode=CARTOON_COL_B;
+			}
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_ENDDATA) {
@@ -607,45 +665,57 @@ void readMoveObject(char *json, int timer){
 				}
 				this_id=id;
 			}
-			if(datamode==CARTOON_X) {
+			else if(datamode==CARTOON_X) {
 				obj[this_id].move.x=fetchDouble(c);
 			}
-			if(datamode==CARTOON_Y) {
+			else if(datamode==CARTOON_Y) {
 				obj[this_id].move.y=fetchDouble(c);
 			}
-			if(datamode==CARTOON_MAG) {
+			else if(datamode==CARTOON_MAG) {
 				obj[this_id].move.mag=fetchDouble(c);
 			}
-			if(datamode==CARTOON_ALPHA) {
+			else if(datamode==CARTOON_ALPHA) {
 				obj[this_id].move.alpha=fetchDouble(c);
 			}
-			if(datamode==CARTOON_SLIDE) {
+			else if(datamode==CARTOON_SLIDE) {
 				readSlideAnime(json,timer);
 			}
-			if(datamode==CARTOON_JUMP) {
+			else if(datamode==CARTOON_JUMP) {
 				readJumpAnime(json,timer);
 			}
-			if(datamode==CARTOON_IX) {
+			else if(datamode==CARTOON_IX) {
 				obj[this_id].move.ix=fetchDouble(c);
 			}
-			if(datamode==CARTOON_IY) {
+			else if(datamode==CARTOON_IY) {
 				obj[this_id].move.iy=fetchDouble(c);
 			}
-			if(datamode==CARTOON_W) {
+			else if(datamode==CARTOON_W) {
 				obj[this_id].move.w=fetchDouble(c);
 			}
-			if(datamode==CARTOON_H) {
+			else if(datamode==CARTOON_H) {
 				obj[this_id].move.h=fetchDouble(c);
 			}
-			if(datamode==CARTOON_SHAKE) {
+			else if(datamode==CARTOON_SHAKE) {
 				obj[this_id].move.shake=fetchDouble(c);
 			}
-			if(datamode==CARTOON_FLIP) {
+			else if(datamode==CARTOON_FLIP) {
 				obj[this_id].flip.count=0;
 				readFlipAnime(json,timer);
 			}
-			if(datamode==CARTOON_NOTE) {
+			else if(datamode==CARTOON_NOTE) {
 				fetchString(c,str);
+			}
+			else if(datamode==CARTOON_COL_GRAD_Y) {
+				readColorGrad_shift(json,timer);
+			}
+			else if(datamode==CARTOON_COL_R) {
+				obj[this_id].move.R=fetchDouble(c);
+			}
+			else if(datamode==CARTOON_COL_G) {
+				obj[this_id].move.R=fetchDouble(c);
+			}
+			else if(datamode==CARTOON_COL_B) {
+				obj[this_id].move.R=fetchDouble(c);
 			}
 			mode=JSON_NEXTDATA;
 		}
@@ -697,20 +767,105 @@ void readColorGrad(char *json, int timer){
 			if(datamode==CARTOON_FROM) {
 				SDL_Color col;
 				fetchColor(c,&col);
-				obj[this_id].set.Rfrom=col.r;
-				obj[this_id].set.Gfrom=col.g;
-				obj[this_id].set.Bfrom=col.b;
+				obj[this_id].set.gradRfrom=col.r;
+				obj[this_id].set.gradGfrom=col.g;
+				obj[this_id].set.gradBfrom=col.b;
 			}
-			if(datamode==CARTOON_TO) {
+			else if(datamode==CARTOON_TO) {
 				SDL_Color col;
 				fetchColor(c,&col);
-				obj[this_id].set.Rto=col.r;
-				obj[this_id].set.Gto=col.g;
-				obj[this_id].set.Bto=col.b;
+				obj[this_id].set.gradRto=col.r;
+				obj[this_id].set.gradGto=col.g;
+				obj[this_id].set.gradBto=col.b;
 			}
 			mode=JSON_NEXTDATA;
 		}
 		else if(mode==JSON_NEXTDATA) {
+			if(*c==',') {
+				mode=JSON_GETNAME;
+			}
+			else if(*c=='}') {
+				return;
+			}
+		}
+		cartoonPointer++;
+	}
+}
+
+void readColorGrad_shift(char *json, int timer){
+	int mode=JSON_DATA_START;
+	int datamode1=0,datamode2=0;
+	while(json[cartoonPointer]) {
+		char *c = &json[cartoonPointer];
+		if(*c==' ' || *c==10 || *c==13) {
+			cartoonPointer++;
+			continue;
+		}
+		if(mode==JSON_DATA_START) {
+			if(*c=='{') {
+				mode=JSON_GETNAME;
+			}
+		}
+		else if(mode==JSON_GETNAME) {
+			fetchString(c,str);
+			if(strcmp(str, "from")==0) {
+				datamode1=CARTOON_FROM;
+			}
+			else if(strcmp(str, "to")==0) {
+				datamode1=CARTOON_TO;
+			}
+			mode=JSON_COLON;
+		}
+		else if(mode==JSON_COLON) {
+			if(*c==':') {
+				mode=JSON_DATA_START2;
+			}
+		}
+		else if(mode==JSON_DATA_START2) {
+			if(*c=='{') {
+				mode=JSON_GETNAME2;
+			}
+		}
+		else if(mode==JSON_GETNAME2) {
+			fetchString(c,str);
+			if(strcmp(str, "col_r")==0) {
+				datamode2=CARTOON_COL_R;
+			}
+			else if(strcmp(str, "col_g")==0) {
+				datamode2=CARTOON_COL_G;
+			}
+			else if(strcmp(str, "col_b")==0) {
+				datamode2=CARTOON_COL_B;
+			}
+			mode=JSON_COLON2;
+		}
+		else if(mode==JSON_COLON2) {
+			if(*c==':') {
+				mode=JSON_GETVALUE2;
+			}
+		}
+		else if(mode==JSON_GETVALUE2) {
+			if(datamode1==CARTOON_FROM) {
+				if(datamode2==CARTOON_COL_R)obj[this_id].move.gradRfrom=fetchDouble(c);
+				else if(datamode2==CARTOON_COL_G)obj[this_id].move.gradGfrom=fetchDouble(c);
+				else if(datamode2==CARTOON_COL_B)obj[this_id].move.gradBfrom=fetchDouble(c);
+			}
+			else if(datamode1==CARTOON_TO) {
+				if(datamode2==CARTOON_COL_R)obj[this_id].move.gradRto=fetchDouble(c);
+				else if(datamode2==CARTOON_COL_G)obj[this_id].move.gradGto=fetchDouble(c);
+				else if(datamode2==CARTOON_COL_B)obj[this_id].move.gradBto=fetchDouble(c);
+			}
+			mode=JSON_NEXTDATA;
+		}
+		else if(mode==JSON_NEXTDATA) {
+			if(*c==',') {
+				mode=JSON_GETNAME2;
+			}
+			else if(*c=='}') {
+				mode=JSON_ENDDATA;
+			}
+		}
+		else if(mode==JSON_ENDDATA) {
 			if(*c==',') {
 				mode=JSON_GETNAME;
 			}
@@ -806,6 +961,9 @@ void readFlipAnime(char *json, int timer){
 			else if(strcmp(str, "n")==0) {
 				datamode=CARTOON_NUM;
 			}
+			else if(strcmp(str, "turnback")==0) {
+				datamode=CARTOON_TURNBACK;
+			}
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_COLON) {
@@ -817,14 +975,22 @@ void readFlipAnime(char *json, int timer){
 			if(datamode==CARTOON_INTERVAL) {
 				obj[this_id].flip.interval=fetchInt(c);
 			}
-			if(datamode==CARTOON_IX) {
+			else if(datamode==CARTOON_IX) {
 				obj[this_id].flip.ix=fetchInt(c);
 			}
-			if(datamode==CARTOON_IY) {
+			else if(datamode==CARTOON_IY) {
 				obj[this_id].flip.iy=fetchInt(c);
 			}
-			if(datamode==CARTOON_NUM) {
+			else if(datamode==CARTOON_NUM) {
 				obj[this_id].flip.num=fetchInt(c);
+			}
+			else if(datamode==CARTOON_TURNBACK) {
+				if(startsWith(c,"true")){
+					obj[this_id].flip.turnBack=true;
+				}
+				else if(startsWith(c,"false")){
+					obj[this_id].flip.turnBack=false;
+				}
 			}
 			mode=JSON_NEXTDATA;
 		}
@@ -984,7 +1150,7 @@ void readJumpAnime(char *json, int timer){
 			if(datamode==CARTOON_G) {
 				obj[this_id].jumpG=fetchDouble(c);
 			}
-			if(datamode==CARTOON_Y) {
+			else if(datamode==CARTOON_Y) {
 				obj[this_id].jumpY=fetchDouble(c);
 			}
 			mode=JSON_NEXTDATA;
@@ -1048,22 +1214,44 @@ void nextCut(){
 			obj[i].set.mag+=obj[i].move.mag;
 			obj[i].set.alpha+=obj[i].move.alpha;
 			obj[i].set.shake+=obj[i].move.shake;
+			obj[i].set.R+=obj[i].move.R;
+			obj[i].set.G+=obj[i].move.G;
+			obj[i].set.B+=obj[i].move.B;
+			obj[i].set.gradRfrom+=obj[i].move.gradRfrom;
+			obj[i].set.gradGfrom+=obj[i].move.gradGfrom;
+			obj[i].set.gradBfrom+=obj[i].move.gradBfrom;
+			obj[i].set.gradRto+=obj[i].move.gradRto;
+			obj[i].set.gradGto+=obj[i].move.gradGto;
+			obj[i].set.gradBto+=obj[i].move.gradBto;
 
 			obj[i].flip.count++;
 			if(obj[i].flip.num!=0){
-				if(obj[i].flip.count%obj[i].flip.interval==0){
-					if(obj[i].flip.count<obj[i].flip.interval*obj[i].flip.num){
+				if(obj[i].flip.turnBack){
+					if(obj[i].flip.count%obj[i].flip.interval==0){
+						if(obj[i].flip.count<obj[i].flip.interval*obj[i].flip.num){
+							obj[i].set.ix+=obj[i].flip.ix;
+							obj[i].set.iy+=obj[i].flip.iy;
+						}else{
+							obj[i].set.ix-=obj[i].flip.ix;
+							obj[i].set.iy-=obj[i].flip.iy;
+						}
+						if(obj[i].flip.count==obj[i].flip.interval*(obj[i].flip.num-1)*2){
+							obj[i].flip.count=0;
+						}
+					}
+				}else{
+					if(obj[i].flip.count%obj[i].flip.interval==0){
 						obj[i].set.ix+=obj[i].flip.ix;
 						obj[i].set.iy+=obj[i].flip.iy;
-					}else{
-						obj[i].set.ix-=obj[i].flip.ix;
-						obj[i].set.iy-=obj[i].flip.iy;
 					}
-					if(obj[i].flip.count==obj[i].flip.interval*(obj[i].flip.num-1)*2){
+					if(obj[i].flip.count==obj[i].flip.interval*obj[i].flip.num){
+						obj[i].set.ix-=obj[i].flip.ix*obj[i].flip.num;
+						obj[i].set.iy-=obj[i].flip.iy*obj[i].flip.num;
 						obj[i].flip.count=0;
 					}
 				}
 			}
+
 			if(obj[i].slideAlpha.step!=0){
 				if(obj[i].slideAlpha.turnBack){
 					obj[i].set.alpha-=obj[i].slideAlpha.step;
@@ -1153,6 +1341,7 @@ void drawAnimationCut(SDL_Surface* scr){
 			obj[i].slideAlpha.fade+=obj[i].slideAlpha.fadeRate;
 			fade=obj[i].slideAlpha.fade;
 		}
+
 		int x=(int)(obj[i].set.x+dx);
 		int y=(int)(obj[i].set.y+dy);
 		int ix=(int)obj[i].set.ix;
@@ -1160,24 +1349,61 @@ void drawAnimationCut(SDL_Surface* scr){
 		int w=(int)obj[i].set.w;
 		int h=(int)obj[i].set.h;
 		int a=(int)(obj[i].set.alpha*fade);
-		if(obj[i].set.type==CARTOON_DRAWIMAGE){
+		if(obj[i].set.type==CARTOON_CACHE){
 			if(obj[i].set.mag==1){
-				drawImage(scr,img.back,x,y,ix,iy,w,h,a);
+				drawImage(scr,img.cache,x,y,ix,iy,w,h,a);
 			}else{
-				drawImage_x(scr,img.back,x,y,obj[i].set.mag,ix,iy,w,h,a);
+				drawImage_x(scr,img.cache,x,y,obj[i].set.mag,ix,iy,w,h,a);
 			}
-		}
-		else if(obj[i].set.type==CARTOON_FILLRECT){
-			fillRect(scr,x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
-		}
-		else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
-			for(int j=0 ; j<h ; j++){
-				fillRect(scr,x,y+j,w,1,(int)(obj[i].set.Rfrom+obj[i].set.Rto*j/h),(int)(obj[i].set.Gfrom+obj[i].set.Gto*j/h),(int)(obj[i].set.Bfrom+obj[i].set.Bto*j/h),a);
-			}
-		}
-		else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
-			for(int j=0 ; j<h ; j++){
-				drawImage(scr,img.back,x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
+		}else{
+			if(obj[i].set.cacheTo!=-1){
+				if(obj[i].set.type==CARTOON_DRAWIMAGE){
+					if(obj[i].set.mag==1){
+						drawImage(img.cache,img.back,x,y,ix,iy,w,h,a);
+					}else{
+						drawImage_x(img.cache,img.back,x,y,obj[i].set.mag,ix,iy,w,h,a);
+					}
+				}
+				else if(obj[i].set.type==CARTOON_FILLRECT){
+					fillRect(img.cache,x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+				}
+				else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
+					for(int j=0 ; j<h ; j++){
+						int R=(int)(obj[i].set.gradRfrom+(obj[i].set.gradRto-obj[i].set.gradRfrom)*j/h);
+						int G=(int)(obj[i].set.gradGfrom+(obj[i].set.gradGto-obj[i].set.gradGfrom)*j/h);
+						int B=(int)(obj[i].set.gradBfrom+(obj[i].set.gradBto-obj[i].set.gradBfrom)*j/h);
+						fillRect(img.cache,x,y+j,w,1,R,G,B,a);
+					}
+				}
+				else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
+					for(int j=0 ; j<h ; j++){
+						drawImage(img.cache,img.back,x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
+					}
+				}
+			}else{
+				if(obj[i].set.type==CARTOON_DRAWIMAGE){
+					if(obj[i].set.mag==1){
+						drawImage(scr,img.back,x,y,ix,iy,w,h,a);
+					}else{
+						drawImage_x(scr,img.back,x,y,obj[i].set.mag,ix,iy,w,h,a);
+					}
+				}
+				else if(obj[i].set.type==CARTOON_FILLRECT){
+					fillRect(scr,x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+				}
+				else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
+					for(int j=0 ; j<h ; j++){
+						int R=(int)(obj[i].set.gradRfrom+(obj[i].set.gradRto-obj[i].set.gradRfrom)*j/h);
+						int G=(int)(obj[i].set.gradGfrom+(obj[i].set.gradGto-obj[i].set.gradGfrom)*j/h);
+						int B=(int)(obj[i].set.gradBfrom+(obj[i].set.gradBto-obj[i].set.gradBfrom)*j/h);
+						fillRect(scr,x,y+j,w,1,R,G,B,a);
+					}
+				}
+				else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
+					for(int j=0 ; j<h ; j++){
+						drawImage(scr,img.back,x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
+					}
+				}
 			}
 		}
 	}
@@ -1380,191 +1606,6 @@ void drawWeeklyComic(SDL_Surface* scr){
 	fillRect(scr, 0,0,640,start*2+90, 0,0,0,255);
 	fillRect(scr, 0,390-start*2,640,start*2+90, 0,0,0,255);
 	drawImage(scr,img.back,340,410,0,0,300,38,255);
-}
-
-
-// ending.png
-void drawEndingAnim(SDL_Surface *scr, int cn){
-	int a,b;
-	if(cn<250){
-		a=cn;
-		fillRect(scr,0,0,640,480,0,0,0,255);
-		drawImage(scr,img.back,120,40,240,1520,400,400,255);
-		drawImage(scr,img.back,180,170-a/5,240,0,240,320,255);
-		drawImage(scr,img.back,360+a/5,120+a/10,480,0,240,320,255);
-		drawImage(scr,img.back,40-a/5,120+a/15,0,0,240,320,255);
-	}
-	else if(cn<550){
-		a=cn-250;
-		fillRect(scr,0,40,640,400,192,192,255,255);
-		drawImage(scr,img.back,380+a/8,140-a+a/4,0,320,240,120,128);
-		drawImage(scr,img.back,220+a/8,320-a+a/4,240,320,240,120,128);
-		drawImage(scr,img.back,280+a/8,520-a+a/4,480,320,240,120,128);
-		drawImage(scr,img.back,360,120-a,0,320,240,120,255);
-		drawImage(scr,img.back,200,300-a,240,320,240,120,255);
-		drawImage(scr,img.back,260,500-a,480,320,240,120,255);
-		drawImage(scr,img.back,60,-560+a*2,0,440,160,280,255);
-		drawImage(scr,img.back,160,-240+a*2,160,440,160,280,255);
-		drawImage(scr,img.back,100,80+a*2,320,440,160,280,255);
-		if(a>20 && a<230)drawImage(scr,img.back,360,200,1600,0,240,120,255);
-	}
-	else if(cn<1050){
-		a=cn-550;
-		fillRect(scr,0,40,640,400,0,0,0,255);
-		for(int i=0 ; i<3 ; i++){
-			drawImage(scr,img.back,-a+i*640,220,0,760,640,200,255);
-		}
-		if(a%250<20)b=(20-a%250)*32;
-		else if(a%250<230)b=0;
-		else b=-(a%250-230)*32;
-		drawImage(scr,img.back,b+40,80,1600,(a/250)*240+240,240,120,255);
-		drawImage(scr,img.back,b+360,80,1600,(a/250)*240+360,240,120,255);
-	}
-	else if(cn<1550){
-		a=cn-1050;
-		fillRect(scr,0,40,640,400,0,0,0,255);
-		drawImage(scr,img.back,60,120,0,960,300,240,255);
-		if(a%100>=50 && a%100!=80 && a%100!=90)drawImage(scr,img.back,138,120,300,960,90,240,255);
-		drawImage(scr,img.back,200,120+abs(10-(a/3)%20)*2,400,1120,56,50,255);
-		drawImage(scr,img.back,60,270,520,960+((a/10)%2)*50,100,90,255);
-		drawImage(scr,img.back,260,270,520,1050-((a/10)%2)*90,100,90,255);
-		drawImage(scr,img.back,170+abs(10-(a/20)%20)*2,200+abs(20-a%40)*2,400,960,120,160,255);
-		fillRect(scr,170,360,140,40,0,0,0,255);
-		if(a%250<20)b=(20-a%250)*20;
-		else if(a%250<230)b=0;
-		else b=-(a%250-230)*20;
-		drawImage(scr,img.back,380,b+80,1600,(a/250)*240+720,240,120,255);
-		drawImage(scr,img.back,380,b+280,1600,(a/250)*240+840,240,120,255);
-	}
-	else if(cn<2050){
-		a=cn-1550;
-		int b=80,c=0;
-		if(a%100<8 || (a%100>=10 && a%100<18))b+=8-abs(4-a%8)*2;
-		if(a>=100 && a<200)c=(a-100)*2/5;
-		if(a>=200 && a<250)c=40;
-		if(a>=250 && a<350)c=40-(a-250)*2/5;
-		fillRect(scr,0,80,640,180,192,192,192,255);
-		fillRect(scr,0,240+c,640,160,32,32,255,255);
-		for(int i=0 ; i<4 ; i++)drawImage(scr,img.back,i*240-(a%60)*4,290,0,1666,240,40,255);
-		for(int i=0 ; i<4 ; i++)drawImage(scr,img.back,i*240-(a%30)*8,320-c/2,0,1608,240,60,255);
-		for(int i=0 ; i<4 ; i++)drawImage(scr,img.back,i*240-(a%20)*12,340-c,0,1520,240,88,255);
-		drawImage(scr,img.back,-a/5,218+c,0,1708,240,30,255);
-		drawImage(scr,img.back,0,b,0,1200,640,320,255);
-		if((a>=100 && a<120) || (a>=140 && a<160) || (a>=400 && a<410) || (a>=420 && a<430))drawImage(scr,img.back,492,100+b,14,1740,14,20,255);
-		else if((a>=120 && a<140) || (a>=410 && a<420))drawImage(scr,img.back,492,100+b,28,1740,14,20,255);
-		else drawImage(scr,img.back,492,100+b,0,1740,14,20,255);
-		drawImage(scr,img.back,640-a*4,120,1600,120,240,120,255);
-		drawImage(scr,img.back,1040-a*4,120,1600,1200,240,120,255);
-		drawImage(scr,img.back,1440-a*4,120,1600,1320,240,120,255);
-		drawImage(scr,img.back,1840-a*4,120,1600,1440,240,120,255);
-		fillRect(scr,0,40,640,48,0,0,0,255);
-		fillRect(scr,0,400,640,40,0,0,0,255);
-	}
-	else if(cn<2550){
-		a=cn-2050;
-		fillRect(scr,0,40,640,400,0,0,0,255);
-		drawImage(scr,img.back,360,24+a/20,1400,1200,200,420,255);
-		drawImage(scr,img.back,400,320+a/20,480,440+((a/8)%3)*80,120,80,255);
-		drawImage(scr,img.back,390,448-a/3,1400,1620,60,160,255);
-		drawImage(scr,img.back,374,504-a/3,1460+((a/2)%2)*70,1710,70,60,255);
-		drawImage(scr,img.back,360,440-a/3,1460,1620,100,90,255);
-		drawImage(scr,img.back,360,422-a/6,1400,1780,200,100,255);
-		if(a%250<20)b=(20-a%250)*20;
-		else if(a%250<230)b=0;
-		else b=-(a%250-230)*20;
-		drawImage(scr,img.back,40,b+80,1600,(a/250)*240+1560,240,120,255);
-		drawImage(scr,img.back,40,b+280,1600,(a/250)*240+1680,240,120,255);
-	}
-	else if(cn<2850){
-		a=cn-2550;
-		for(int i=0 ; i<400 ; i++)fillRect(scr,0,i+40,640,1,i/6+(300-a)/6,i/6+(300-a)/6,255,255);
-		drawImage(scr,img.back,-300,a*2/3,0,1880,640,120,128);
-		drawImage(scr,img.back,200,a,0,1880,640,120,128);
-		drawImage(scr,img.back,-200,a,0,1880,640,120,128);
-		drawImage(scr,img.back,200,a+130,820,440,140,320,255);
-		drawImage(scr,img.back,360,a+250,820,760,140,200,255);
-		drawImage(scr,img.back,280,a-290,640,440,180,720,255);
-		drawImage(scr,img.back,-200,a-200,0,1880,640,120,128);
-		drawImage(scr,img.back,0,a*4-600,0,1880,640,120,128);
-		drawImage(scr,img.back,100,a*6-1000,0,1880,640,120,128);
-		drawImage(scr,img.back,-100,a*8-1000,0,1880,640,120,128);
-	}
-	else if(cn<3150){
-		a=cn-2850;
-		for(int i=0 ; i<400 ; i++)fillRect(scr,0,i+40,640,1,96+i/4,96+i/4,96+i/4,255);
-		if(a<150){
-			fillRect(scr,0,260+a/5,640,180,0,64,64,255);
-			drawImage_x(scr,img.back,300,160+a/5,20/60.0,640,1400,120,360,255);
-			drawImage_x(scr,img.back,180,210+a/8,60/140.0,640,1200,280,200,255);
-			drawImage_x(scr,img.back,340,210+a/8,60/140.0,920,1200,280,200,255);
-			drawImage_x(scr,img.back,70,220-a/6,100/140.0,640,1200,280,200,255);
-			drawImage_x(scr,img.back,370,220-a/6,100/140.0,920,1200,280,200,255);
-			drawImage(scr,img.back,-40,240-a/2,640,1200,280,200,255);
-			drawImage(scr,img.back,400,240-a/2,920,1200,280,200,255);
-			drawImage_x(scr,img.back,320,280+a/25,20/40.0,840,1400,80,60,255);
-			drawImage_x(scr,img.back,260,320-a/3,40/40.0,760,1400,80,60,255);
-		}else{
-			fillRect(scr,0,290+(a-150)*2,640,150,0,64,64,255);
-			if(a>=225)drawImage_x(scr,img.back,300-(a-150),-34+(a-225)*4,(20.0+(a-150))/60.0,640,1400,120,360,255);
-			else drawImage_x(scr,img.back,300-(a-150),190-(a-150)*3,(20.0+(a-150))/60.0,640,1400,120,360,255);
-			drawImage_x(scr,img.back,180-(a-150)*5,228+(a-150)*2,(60.0+(a-150)*1.5)/140.0,640,1200,280,200,255);
-			drawImage_x(scr,img.back,340+(a-150)*2,228+(a-150)*2,(60.0+(a-150)*1.5)/140.0,920,1200,280,200,255);
-			drawImage_x(scr,img.back,70-(a-150)*8,196+(a-150),(100.0+(a-150)*2)/140.0,640,1200,280,200,255);
-			drawImage_x(scr,img.back,370+(a-150)*4,196+(a-150),(100.0+(a-150)*2)/140.0,920,1200,280,200,255);
-			drawImage_x(scr,img.back,-40-(a-150)*10,166,(140.0+(a-150)*3)/140.0,640,1200,280,200,255);
-			drawImage_x(scr,img.back,400+(a-150)*6,166,(140.0+(a-150)*3)/140.0,920,1200,280,200,255);
-			drawImage_x(scr,img.back,320,290+(a-150),(20.0+(a-150)*2)/40.0,840,1400,80,60,255);
-			drawImage_x(scr,img.back,260-(a-150)*5,290-(a-150),(40.0+(a-150)*4)/40.0,760,1400,80,60,255);
-		}
-		if(a>=250)fillRect(scr,0,0,640,480,255,255,255,(a-250)*5);
-	}
-	else if(cn<3750){
-		a=cn-3150;
-		int b=0;
-		if(a>=500)b=255;
-		else if(a>=245)b=(a-245);
-		if((a>=255 && a<260) || (a>=285 && a<290))b=0;
-		for(int i=0 ; i<400 ; i++)fillRect(img.cache,0,i+40,640,1,i/2,i/2,192,255);
-		drawImage(img.cache,img.back,a*2/5,a*2/5,960,800,640,400,255);
-		drawImage(img.cache,img.back,a*2/5,-a*2/5,960,400,640,400,255);
-		drawImage(img.cache,img.back,-a*2/5,0,960,0,640,400,255);
-		drawImage(img.cache,img.back,280,80,1000,1400,160,320,b);
-		drawImage(img.cache,img.back,120+a/10,160-a/10,1200,1200+((a/5)%2)*300,200,300,255);
-		drawImage(img.cache,img.back,268,90+a/10,640,1400,104,350,255);
-		drawImage(img.cache,img.back,-190+a/3,250-a/6,760,1700,240,240,255);
-		drawImage(img.cache,img.back,580-a/3,250-a/6,760,1460,240,240,255);
-		if(a<300)drawImage_x(scr,img.cache,-(300-a)*320/300,40-(300-a)*200/300,1+(300-a)/300.0,0,0,640,400,255);
-		else drawImage(scr,img.cache,0,40,0,0,640,400,255);
-		if(a>=550)fillRect(scr,0,40,640,400,0,0,0,255);
-		else if(a>=500)fillRect(scr,0,40,640,400,0,0,0,(a-500)*5);
-		if(a<255)fillRect(scr,0,40,640,400,255,255,255,255-a);
-		if(a>=250)drawImage(scr,img.back,220,200,1000,1720,200,80,255);
-	}else{
-		a=cn-3750;
-		if(loadtime<3750){
-			freeImage(img.back);
-			getImage(img.back,"file/img/prologue.png",0,0,255);
-			loadtime=cn;
-		}
-		drawImage(scr,img.back,0,60,0,1080,640,360,255);
-		drawImage(scr,img.back,40,120+abs(10-count%20)*2,1440,600,300,300,255);
-		drawImage(scr,img.back,240,200,1280,920,400,220,255);
-		fillRect(scr,0,40,640,400,0,0,255,128);
-		fillRect(scr,0,40,640,20,0,0,0,255);
-		fillRect(scr,0,420,640,20,0,0,0,255);
-		if(a<450){
-			drawImage(scr,img.back,220,60,1280,1200,220,80,255);
-			if(a<220)drawImage(scr,img.back,100,240,1280,1280,440,50,255);
-			else{
-				drawImage(scr,img.back,100,180,1280,1330,440,50,255);
-				drawImage(scr,img.back,100,280,1280,1380,440,50,255);
-			}
-		}
-	}
-	if(cn>=2600 && cn<3000)drawImage(scr,img.back,300,320,1000,1800,340,100,255);
-
-	fillRect(scr,0,0,640,40,0,0,0,255);
-	fillRect(scr,0,440,640,40,0,0,0,255);
 }
 
 // ending2.png

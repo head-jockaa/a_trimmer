@@ -3,15 +3,13 @@
 
 #include "util.h"
 
-extern int playtime, cartoonNextTime;
+extern int playtime;
 extern int timestamp,loadtime,pausetime;
-extern size_t cartoonJsonSize;
-extern char *cartoonJson;
 void drawAnimationCut(SDL_Surface* scr);
 void nextCut();
-void resetObject(int n);
+void freeCartoon();
+void loadCartoon(const char *filename);
 
-void drawEndingAnim(SDL_Surface *scr, int cn);
 void drawLastEndingAnim(SDL_Surface* scr, int cn);
 void drawWeeklyComic(SDL_Surface* scr);
 void drawSummerWars(SDL_Surface* scr);
