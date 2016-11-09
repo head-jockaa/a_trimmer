@@ -189,8 +189,8 @@ void initGame2(){
 	if(gd.game_mode==BOSS){
 		getImage(img.back,"file/img/epilogue.png",0,0,255);
 	}else{
-		sprintf_s(str,"file/img/weekly%d.png",gd.week);
-		getImage(img.back,str,0,0,255);
+		sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
+		loadCartoon(str);
 	}
 	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT){
 		sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
@@ -409,8 +409,6 @@ void keyResult(){
 					freeMusic();
 					freeImage(img.back);
 					gd.week++;gd.hour=4;
-					sprintf_s(str,"file/img/weekly%d.png",gd.week);
-					getImage(img.back,str,0,0,255);
 					sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
 					bgm=Mix_LoadMUS(str);
 					freeImage(img.tv_asahi);
@@ -418,6 +416,8 @@ void keyResult(){
 					getImage(img.tv_asahi,str,0,0,0);
 					createMap_color(1000);
 					phase=GAMESTART;
+					sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
+					loadCartoon(str);
 					for(int i=0 ; i<works ; i++)fishbox.today[i]=EOF;
 					gd.ta_count=0;start=75;count=-1;
 					Mix_PlayChannel(1, sf.decide, 0);
@@ -2009,7 +2009,7 @@ void drawNetworkStatus(SDL_Surface* scr){
 
 void drawGame(SDL_Surface* scr){
 	if(phase==GAMESTART){
-		drawWeeklyComic(scr);
+		drawAnimationCut(scr);
 		drawMap2(scr,gd.scrX,gd.scrY);
 	}
 	else if(phase==RESULT || phase==TODAYS_CROP)drawResult(scr);
@@ -2715,6 +2715,9 @@ void timerGame(){
 				}
 			}
 		}
+	}
+	else if(phase==GAMESTART){
+		nextCut();
 	}
 	else if(phase==CALLING)timerCalling();
 	else if(phase==TODAYS_CROP)timerTodaysCrop();

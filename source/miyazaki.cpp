@@ -141,15 +141,14 @@ void gotoMovieTest(){
 	}
 	if(n<=6){
 		gd.week=n;
-		freeImage(img.back);
-		sprintf_s(str,"file/img/weekly%d.png",n);
-		getImage(img.back,str,0,0,255);
 		freeMusic();
 		sprintf_s(str,"file/bgm/%d.ogg",n+5);
 		bgm=Mix_LoadMUS(str);
 		Mix_PlayMusic(bgm,-1);
 		phase=GAMESTART;
 		count=0;start=75;
+		sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
+		loadCartoon(str);
 	}
 	else if(n>=7 && n<=10){
 		initEnding();
@@ -211,10 +210,15 @@ void timerMiyazaki(){
 	}
 	else if(phase==SUMMERWARS)timerSummerWars_miyazaki();
 	else if(phase==SEOI_HA)timerSeoiHa();
+	else if(phase==GAMESTART){
+		nextCut();
+	}
+
 	if(gd.talk_open_count>0){
 		gd.talk_open_count++;
 		if(gd.talk_open_count==20)gd.talk_open_count=0;
 	}
+
 	if(phase==MIYAZAKI_TALK || phase==DEPLOMA_TALK){
 		controlTextCount(true);
 	}else{
@@ -1370,7 +1374,7 @@ void drawMiyazaki(SDL_Surface* scr){
 		if(count>=50)fillRect(scr,0,216,640,42,0,0,0,(count-50)*5);
 	}
 	else if(phase==GAMESTART){
-		drawWeeklyComic(scr);
+		drawAnimationCut(scr);
 	}
 	else if(phase==SUMMERWARS){
 		drawSummerWars(scr);

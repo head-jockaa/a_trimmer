@@ -41,6 +41,8 @@
 #define CARTOON_COL_R 39
 #define CARTOON_COL_G 40
 #define CARTOON_COL_B 41
+#define CARTOON_POS 42
+#define CARTOON_LANG 43
 
 #define JSON_ARRAY_START 1
 #define JSON_STARTTIME 2
@@ -75,7 +77,7 @@ char *cartoonJson;
 
 struct ObjectSetting{
 	double x,y,ix,iy,w,h,mag,alpha,shake;
-	int type,cacheTo;
+	int type,cacheTo,lang;
 	double R,G,B;
 	double gradRfrom,gradGfrom,gradBfrom;
 	double gradRto,gradGto,gradBto;
@@ -90,16 +92,15 @@ struct ObjectFlipping{
 	bool turnBack;
 };
 struct ObjectSliding{
-	double step,fade,fadeRate;
-	double from,to;
-	bool turnBack;
+	double step,from,to,position,fade,fadeRate;
+	bool turnBack,back;
 };
 struct CartoonObject{
 	int id;
 	ObjectSetting set;
 	ObjectMoving move;
 	ObjectFlipping flip;
-	ObjectSliding slideX,slideY,slideMag,slideAlpha;
+	ObjectSliding slideX,slideY,slideIX,slideIY,slideMag,slideAlpha;
 	double jumpG,jumpY;
 	double waveSIN,waveRange;
 };
@@ -107,7 +108,7 @@ CartoonObject obj[1000];
 
 void resetObjectSetting(ObjectSetting &s){
 	s.x=0;s.y=0;s.ix=0;s.iy=0;s.w=0;s.h=0;
-	s.mag=1;s.alpha=255;s.shake=0;s.type=0;s.cacheTo=-1;
+	s.mag=1;s.alpha=255;s.shake=0;s.type=0;s.cacheTo=-1;s.lang=-1;
 	s.R=0;s.G=0;s.B=0;
 	s.gradRfrom=0;s.gradGfrom=0;s.gradBfrom=0;
 	s.gradRto=0;s.gradGto=0;s.gradBto=0;
@@ -122,7 +123,8 @@ void resetObjectFlipping(ObjectFlipping &f){
 	f.ix=0;f.iy=0;f.interval=1;f.num=0;f.count=0;f.turnBack=true;
 }
 void resetObjectSliding(ObjectSliding &s){
-	s.step=0;s.from=0;s.to=0;s.fade=1;s.fadeRate=0;s.turnBack=false;
+	s.step=0;s.from=0;s.to=0;s.fade=1;s.fadeRate=0;s.turnBack=true;
+	s.back=false;s.position=0;
 }
 void resetObject(int n){
 	resetObjectSetting(obj[n].set);
@@ -130,6 +132,8 @@ void resetObject(int n){
 	resetObjectFlipping(obj[n].flip);
 	resetObjectSliding(obj[n].slideX);
 	resetObjectSliding(obj[n].slideY);
+	resetObjectSliding(obj[n].slideIX);
+	resetObjectSliding(obj[n].slideIY);
 	resetObjectSliding(obj[n].slideMag);
 	resetObjectSliding(obj[n].slideAlpha);
 	obj[n].jumpG=0;obj[n].jumpY=0;
@@ -292,7 +296,7 @@ void readCartoon(char *json, int timer){
 		mode=JSON_DATA_START;
 	}
 
-	while(json[cartoonPointer]) {
+	while(cartoonPointer < cartoonJsonSize) {
 		char *c = &json[cartoonPointer];
 		if(*c==' ' || *c==10 || *c==13) {
 			cartoonPointer++;
@@ -467,6 +471,9 @@ void readSetObject(char *json, int timer){
 			else if(strcmp(str, "cache")==0) {
 				datamode=CARTOON_CACHE;
 			}
+			else if(strcmp(str, "lang")==0) {
+				datamode=CARTOON_LANG;
+			}
 			else if(strcmp(str, "note")==0) {
 				datamode=CARTOON_NOTE;
 			}
@@ -545,6 +552,11 @@ void readSetObject(char *json, int timer){
 				if(startsWith(c,"true")){
 					obj[this_id].set.type=CARTOON_CACHE;
 				}
+			}
+			else if(datamode==CARTOON_LANG) {
+				fetchString(c,str);
+				if(strcmp(str, "jp")==0)obj[this_id].set.lang=JAPANESE;
+				else if(strcmp(str, "en")==0)obj[this_id].set.lang=EUROPEAN;
 			}
 			else if(datamode==CARTOON_NOTE) {
 				fetchString(c,str);
@@ -961,7 +973,7 @@ void readFlipAnime(char *json, int timer){
 			else if(strcmp(str, "n")==0) {
 				datamode=CARTOON_NUM;
 			}
-			else if(strcmp(str, "turnback")==0) {
+			else if(strcmp(str, "turnBack")==0) {
 				datamode=CARTOON_TURNBACK;
 			}
 			mode=JSON_COLON;
@@ -1031,6 +1043,12 @@ void readSlideAnime(char *json, int timer){
 			else if(strcmp(str, "y")==0) {
 				datamode1=CARTOON_Y;
 			}
+			else if(strcmp(str, "ix")==0) {
+				datamode1=CARTOON_IX;
+			}
+			else if(strcmp(str, "iy")==0) {
+				datamode1=CARTOON_IY;
+			}
 			else if(strcmp(str, "mag")==0) {
 				datamode1=CARTOON_MAG;
 			}
@@ -1057,6 +1075,12 @@ void readSlideAnime(char *json, int timer){
 			else if(strcmp(str, "to")==0) {
 				datamode2=CARTOON_TO;
 			}
+			else if(strcmp(str, "pos")==0) {
+				datamode2=CARTOON_POS;
+			}
+			else if(strcmp(str, "turnBack")==0) {
+				datamode2=CARTOON_TURNBACK;
+			}
 			else if(strcmp(str, "fade")==0) {
 				datamode2=CARTOON_FADE;
 			}
@@ -1069,26 +1093,87 @@ void readSlideAnime(char *json, int timer){
 		}
 		else if(mode==JSON_GETVALUE2) {
 			if(datamode2==CARTOON_STEP) {
-				if(datamode1==CARTOON_X)obj[this_id].slideX.step=fetchDouble(c);
-				else if(datamode1==CARTOON_Y)obj[this_id].slideY.step=fetchDouble(c);
-				else if(datamode1==CARTOON_MAG)obj[this_id].slideMag.step=fetchDouble(c);
-				else if(datamode1==CARTOON_ALPHA)obj[this_id].slideAlpha.step=fetchDouble(c);
+				if(datamode1==CARTOON_X){
+					obj[this_id].slideX.step=fetchDouble(c);
+					if(obj[this_id].slideX.step<0){
+						obj[this_id].slideX.step*=-1;
+						obj[this_id].slideX.back=true;
+					}
+				}
+				else if(datamode1==CARTOON_Y){
+					obj[this_id].slideY.step=fetchDouble(c);
+					if(obj[this_id].slideY.step<0){
+						obj[this_id].slideY.step*=-1;
+						obj[this_id].slideY.back=true;
+					}
+				}
+				else if(datamode1==CARTOON_IX){
+					obj[this_id].slideIX.step=fetchDouble(c);
+					if(obj[this_id].slideIX.step<0){
+						obj[this_id].slideIX.step*=-1;
+						obj[this_id].slideIX.back=true;
+					}
+				}
+				else if(datamode1==CARTOON_IY){
+					obj[this_id].slideIY.step=fetchDouble(c);
+					if(obj[this_id].slideIY.step<0){
+						obj[this_id].slideIY.step*=-1;
+						obj[this_id].slideIY.back=true;
+					}
+				}
+				else if(datamode1==CARTOON_MAG){
+					obj[this_id].slideMag.step=fetchDouble(c);
+					if(obj[this_id].slideMag.step<0){
+						obj[this_id].slideMag.step*=-1;
+						obj[this_id].slideMag.back=true;
+					}
+				}
+				else if(datamode1==CARTOON_ALPHA){
+					obj[this_id].slideAlpha.step=fetchDouble(c);
+					if(obj[this_id].slideAlpha.step<0){
+						obj[this_id].slideAlpha.step*=-1;
+						obj[this_id].slideAlpha.back=true;
+					}
+				}
 			}
 			else if(datamode2==CARTOON_FROM) {
 				if(datamode1==CARTOON_X)obj[this_id].slideX.from=fetchDouble(c);
 				else if(datamode1==CARTOON_Y)obj[this_id].slideY.from=fetchDouble(c);
+				else if(datamode1==CARTOON_IX)obj[this_id].slideIX.from=fetchDouble(c);
+				else if(datamode1==CARTOON_IY)obj[this_id].slideIY.from=fetchDouble(c);
 				else if(datamode1==CARTOON_MAG)obj[this_id].slideMag.from=fetchDouble(c);
 				else if(datamode1==CARTOON_ALPHA)obj[this_id].slideAlpha.from=fetchDouble(c);
 			}
 			else if(datamode2==CARTOON_TO) {
 				if(datamode1==CARTOON_X)obj[this_id].slideX.to=fetchDouble(c);
 				else if(datamode1==CARTOON_Y)obj[this_id].slideY.to=fetchDouble(c);
+				else if(datamode1==CARTOON_IX)obj[this_id].slideIX.to=fetchDouble(c);
+				else if(datamode1==CARTOON_IY)obj[this_id].slideIY.to=fetchDouble(c);
 				else if(datamode1==CARTOON_MAG)obj[this_id].slideMag.to=fetchDouble(c);
 				else if(datamode1==CARTOON_ALPHA)obj[this_id].slideAlpha.to=fetchDouble(c);
 			}
+			else if(datamode2==CARTOON_POS) {
+				if(datamode1==CARTOON_X)obj[this_id].slideX.position=fetchDouble(c);
+				else if(datamode1==CARTOON_Y)obj[this_id].slideY.position=fetchDouble(c);
+				else if(datamode1==CARTOON_IX)obj[this_id].slideIX.position=fetchDouble(c);
+				else if(datamode1==CARTOON_IY)obj[this_id].slideIY.position=fetchDouble(c);
+				else if(datamode1==CARTOON_MAG)obj[this_id].slideMag.position=fetchDouble(c);
+				else if(datamode1==CARTOON_ALPHA)obj[this_id].slideAlpha.position=fetchDouble(c);
+			}
+			else if(datamode2==CARTOON_TURNBACK) {
+				bool b=false;
+				if(startsWith(c,"true"))b=true;
+				else if(startsWith(c,"false"))b=false;
+				if(datamode1==CARTOON_X)obj[this_id].slideX.turnBack=b;
+				else if(datamode1==CARTOON_Y)obj[this_id].slideY.turnBack=b;
+				else if(datamode1==CARTOON_IX)obj[this_id].slideIX.turnBack=b;
+				else if(datamode1==CARTOON_IY)obj[this_id].slideIY.turnBack=b;
+				else if(datamode1==CARTOON_MAG)obj[this_id].slideMag.turnBack=b;
+				else if(datamode1==CARTOON_ALPHA)obj[this_id].slideAlpha.turnBack=b;
+			}
 			else if(datamode2==CARTOON_FADE) {
 				if(datamode1==CARTOON_ALPHA){
-					obj[this_id].slideAlpha.fadeRate=fetchDouble(c)/obj[this_id].slideAlpha.to;
+					obj[this_id].slideAlpha.fadeRate=fetchDouble(c)/(obj[this_id].set.alpha+obj[this_id].slideAlpha.to);
 					obj[this_id].slideAlpha.fade=1;
 				}
 			}
@@ -1253,76 +1338,132 @@ void nextCut(){
 			}
 
 			if(obj[i].slideAlpha.step!=0){
-				if(obj[i].slideAlpha.turnBack){
-					obj[i].set.alpha-=obj[i].slideAlpha.step;
+				if(obj[i].slideAlpha.back){
+					obj[i].slideAlpha.position-=obj[i].slideAlpha.step;
 				}else{
-					obj[i].set.alpha+=obj[i].slideAlpha.step;
+					obj[i].slideAlpha.position+=obj[i].slideAlpha.step;
 				}
-				if(obj[i].set.alpha>=obj[i].slideAlpha.to){
-					obj[i].set.alpha=obj[i].slideAlpha.to;
-					if(obj[i].slideAlpha.step<0)obj[i].slideAlpha.turnBack=false;
-					else obj[i].slideAlpha.turnBack=true;
+				if(obj[i].slideAlpha.position>=obj[i].slideAlpha.to){
+					if(obj[i].slideAlpha.turnBack){
+						obj[i].slideAlpha.position=obj[i].slideAlpha.to;
+						obj[i].slideAlpha.back=true;
+					}else{
+						obj[i].slideAlpha.position=obj[i].slideAlpha.from;
+					}
 				}
-				else if(obj[i].set.alpha<=obj[i].slideAlpha.from){
-					obj[i].set.alpha=obj[i].slideAlpha.from;
-					if(obj[i].slideAlpha.step<0)obj[i].slideAlpha.turnBack=true;
-					else obj[i].slideAlpha.turnBack=false;
+				else if(obj[i].slideAlpha.position<=obj[i].slideAlpha.from){
+					obj[i].slideAlpha.position=obj[i].slideAlpha.from;
+					obj[i].slideAlpha.back=false;
 				}
 			}
 			if(obj[i].slideX.step!=0){
-				if(obj[i].slideX.turnBack){
-					obj[i].set.x-=obj[i].slideX.step;
+				if(obj[i].slideX.back){
+					obj[i].slideX.position-=obj[i].slideX.step;
 				}else{
-					obj[i].set.x+=obj[i].slideX.step;
+					obj[i].slideX.position+=obj[i].slideX.step;
 				}
-				if(obj[i].set.x>=obj[i].slideX.to){
-					obj[i].set.x=obj[i].slideX.to;
-					if(obj[i].slideX.step<0)obj[i].slideX.turnBack=false;
-					else obj[i].slideX.turnBack=true;
+				if(obj[i].slideX.position>=obj[i].slideX.to){
+					if(obj[i].slideX.turnBack){
+						obj[i].slideX.position=obj[i].slideX.to;
+						obj[i].slideX.back=true;
+					}else{
+						obj[i].slideX.position=obj[i].slideX.from;
+					}
 				}
-				else if(obj[i].set.x<=obj[i].slideX.from){
-					obj[i].set.x=obj[i].slideX.from;
-					if(obj[i].slideX.step<0)obj[i].slideX.turnBack=true;
-					else obj[i].slideX.turnBack=false;
+				else if(obj[i].slideX.position<=obj[i].slideX.from){
+					if(obj[i].slideX.turnBack){
+						obj[i].slideX.position=obj[i].slideX.from;
+						obj[i].slideX.back=false;
+					}else{
+						obj[i].slideX.position=obj[i].slideX.to;
+					}
 				}
 			}
 			if(obj[i].slideY.step!=0){
-				if(obj[i].slideY.turnBack){
-					obj[i].set.y-=obj[i].slideY.step;
+				if(obj[i].slideY.back){
+					obj[i].slideY.position-=obj[i].slideY.step;
 				}else{
-					obj[i].set.y+=obj[i].slideY.step;
+					obj[i].slideY.position+=obj[i].slideY.step;
 				}
-				if(obj[i].set.y>=obj[i].slideY.to){
-					obj[i].set.y=obj[i].slideY.to;
-					if(obj[i].slideY.step<0)obj[i].slideY.turnBack=false;
-					else obj[i].slideY.turnBack=true;
+				if(obj[i].slideY.position>=obj[i].slideY.to){
+					if(obj[i].slideY.turnBack){
+						obj[i].slideY.position=obj[i].slideY.to;
+						obj[i].slideY.back=true;
+					}else{
+						obj[i].slideY.position=obj[i].slideY.from;
+					}
+					obj[i].slideY.back=true;
 				}
-				else if(obj[i].set.y<=obj[i].slideY.from){
-					obj[i].set.y=obj[i].slideY.from;
-					if(obj[i].slideY.step<0)obj[i].slideY.turnBack=true;
-					else obj[i].slideY.turnBack=false;
+				else if(obj[i].slideY.position<=obj[i].slideY.from){
+					obj[i].slideY.position=obj[i].slideY.from;
+					obj[i].slideY.back=false;
+				}
+			}
+			if(obj[i].slideIX.step!=0){
+				if(obj[i].slideIX.back){
+					obj[i].slideIX.position-=obj[i].slideIX.step;
+				}else{
+					obj[i].slideIX.position+=obj[i].slideIX.step;
+				}
+				if(obj[i].slideIX.position>=obj[i].slideIX.to){
+					if(obj[i].slideIX.turnBack){
+						obj[i].slideIX.position=obj[i].slideIX.to;
+						obj[i].slideIX.back=true;
+					}else{
+						obj[i].slideIX.position=obj[i].slideIX.from;
+					}
+					obj[i].slideIX.back=true;
+				}
+				else if(obj[i].slideIX.position<=obj[i].slideIX.from){
+					obj[i].slideIX.position=obj[i].slideIX.from;
+					obj[i].slideIX.back=false;
+				}
+			}
+			if(obj[i].slideIY.step!=0){
+				if(obj[i].slideIY.back){
+					obj[i].slideIY.position-=obj[i].slideIY.step;
+				}else{
+					obj[i].slideIY.position+=obj[i].slideIY.step;
+				}
+				if(obj[i].slideIY.position>=obj[i].slideIY.to){
+					if(obj[i].slideIY.turnBack){
+						obj[i].slideIY.position=obj[i].slideIY.to;
+						obj[i].slideIY.back=true;
+					}else{
+						obj[i].slideIY.position=obj[i].slideIY.from;
+					}
+					obj[i].slideIY.back=true;
+				}
+				else if(obj[i].slideIY.position<=obj[i].slideIY.from){
+					obj[i].slideIY.position=obj[i].slideIY.from;
+					obj[i].slideIY.back=false;
 				}
 			}
 			if(obj[i].slideMag.step!=0){
-				if(obj[i].slideMag.turnBack){
-					obj[i].set.mag-=obj[i].slideMag.step;
+				if(obj[i].slideMag.back){
+					obj[i].slideMag.position-=obj[i].slideMag.step;
 				}else{
-					obj[i].set.mag+=obj[i].slideMag.step;
+					obj[i].slideMag.position+=obj[i].slideMag.step;
 				}
-				if(obj[i].set.mag>=obj[i].slideMag.to){
-					obj[i].set.mag=obj[i].slideMag.to;
-					if(obj[i].slideMag.step<0)obj[i].slideMag.turnBack=false;
-					else obj[i].slideMag.turnBack=true;
+				if(obj[i].slideMag.position>=obj[i].slideMag.to){
+					if(obj[i].slideMag.turnBack){
+						obj[i].slideMag.position=obj[i].slideMag.to;
+						obj[i].slideMag.back=true;
+					}else{
+						obj[i].slideMag.position=obj[i].slideMag.from;
+					}
 				}
-				else if(obj[i].set.mag<=obj[i].slideMag.from){
-					obj[i].set.mag=obj[i].slideMag.from;
-					if(obj[i].slideMag.step<0)obj[i].slideMag.turnBack=true;
-					else obj[i].slideMag.turnBack=false;
+				else if(obj[i].slideMag.position<=obj[i].slideMag.from){
+					obj[i].slideMag.position=obj[i].slideMag.from;
+					obj[i].slideMag.back=false;
 				}
 			}
 			if(obj[i].jumpG!=0){
 				obj[i].set.y-=obj[i].jumpY;
 				obj[i].jumpY-=obj[i].jumpG;
+			}
+			if(obj[i].slideAlpha.fadeRate!=0){
+				obj[i].slideAlpha.fade+=obj[i].slideAlpha.fadeRate;
 			}
 		}
 	}
@@ -1331,6 +1472,10 @@ void nextCut(){
 
 void drawAnimationCut(SDL_Surface* scr){
 	for(int i=0 ; i<=max_obj ; i++){
+		if(obj[i].set.lang!=-1 && obj[i].set.lang!=CHAR_CODE){
+			continue;
+		}
+
 		int dx=0,dy=0;
 		double fade=1;
 		if(obj[i].set.shake!=0){
@@ -1338,30 +1483,30 @@ void drawAnimationCut(SDL_Surface* scr){
 			dy=(int)(sin(count*0.3)*obj[i].set.shake);
 		}
 		if(obj[i].slideAlpha.fadeRate!=0){
-			obj[i].slideAlpha.fade+=obj[i].slideAlpha.fadeRate;
 			fade=obj[i].slideAlpha.fade;
 		}
 
-		int x=(int)(obj[i].set.x+dx);
-		int y=(int)(obj[i].set.y+dy);
-		int ix=(int)obj[i].set.ix;
-		int iy=(int)obj[i].set.iy;
+		int x=(int)(obj[i].set.x+obj[i].slideX.position+dx);
+		int y=(int)(obj[i].set.y+obj[i].slideY.position+dy);
+		int ix=(int)(obj[i].set.ix+obj[i].slideIX.position);
+		int iy=(int)(obj[i].set.iy+obj[i].slideIY.position);
 		int w=(int)obj[i].set.w;
 		int h=(int)obj[i].set.h;
-		int a=(int)(obj[i].set.alpha*fade);
+		int a=(int)((obj[i].set.alpha+obj[i].slideAlpha.position)*fade);
+		double mag=obj[i].set.mag+obj[i].slideMag.position;
 		if(obj[i].set.type==CARTOON_CACHE){
-			if(obj[i].set.mag==1){
+			if(mag==1){
 				drawImage(scr,img.cache,x,y,ix,iy,w,h,a);
 			}else{
-				drawImage_x(scr,img.cache,x,y,obj[i].set.mag,ix,iy,w,h,a);
+				drawImage_x(scr,img.cache,x,y,mag,ix,iy,w,h,a);
 			}
 		}else{
 			if(obj[i].set.cacheTo!=-1){
 				if(obj[i].set.type==CARTOON_DRAWIMAGE){
-					if(obj[i].set.mag==1){
+					if(mag==1){
 						drawImage(img.cache,img.back,x,y,ix,iy,w,h,a);
 					}else{
-						drawImage_x(img.cache,img.back,x,y,obj[i].set.mag,ix,iy,w,h,a);
+						drawImage_x(img.cache,img.back,x,y,mag,ix,iy,w,h,a);
 					}
 				}
 				else if(obj[i].set.type==CARTOON_FILLRECT){
@@ -1382,10 +1527,10 @@ void drawAnimationCut(SDL_Surface* scr){
 				}
 			}else{
 				if(obj[i].set.type==CARTOON_DRAWIMAGE){
-					if(obj[i].set.mag==1){
+					if(mag==1){
 						drawImage(scr,img.back,x,y,ix,iy,w,h,a);
 					}else{
-						drawImage_x(scr,img.back,x,y,obj[i].set.mag,ix,iy,w,h,a);
+						drawImage_x(scr,img.back,x,y,mag,ix,iy,w,h,a);
 					}
 				}
 				else if(obj[i].set.type==CARTOON_FILLRECT){
@@ -1409,204 +1554,6 @@ void drawAnimationCut(SDL_Surface* scr){
 	}
 }
 
-// scene0.png - scene6.png
-void drawWeeklyComic(SDL_Surface* scr){
-	fillRect(scr,0,0,640,480,0,0,0,255);
-	if(gd.week==0){
-		int a,b,c;
-		if(count<200)a=count*2-60;
-		else if(count<340)a=340;
-		else a=count*2-340;
-		if(count<200)b=((count/10)%2)*120;
-		else if(count<220)b=240;
-		else if(count<320)b=360;
-		else if(count<340)b=240;
-		else b=((count/5)%2)*120;
-		if(count<200)c=150;
-		else if(count<300)c=(int)(1.5*(300-count));
-		else c=0;
-		fillRect(scr,0,90,640,300,128,128,255,255);
-		drawImage(scr,img.back,400,100,600,340,30,30,255);
-		drawImage(scr,img.back,260-count/10,90,240,340,200,100,255);
-		drawImage(scr,img.back,0,90,0,40,640,300,255);
-		drawImage(scr,img.back,a,280,((count/10)%2)*120,340,120,120,255);
-		drawImage(scr,img.back,a,230,b,460,120,120,255);
-		if((count>200 && count%20<10) || count>300)drawImage(scr,img.back,240,130,480,420,160,160,255);
-		fillRect(scr,0,90,640,300,0,0,0,c);
-	}
-	else if(gd.week==1){
-		fillRect(scr,0,90,640,300,192,192,192,255);
-		drawImage(scr,img.back,0,90,((count/2)%160)*4,340+((count/2)%160)*2,640,300,64);
-		drawImage(scr,img.back,0,90,((count/3)%160)*4,340+((count/3)%160)*2,640,300,64);
-		drawImage(scr,img.back,0,90,0,40,640,300,255);
-		if(count>=140 && count<200)drawImage(scr,img.back,188,250,640,150,104,140,255);
-		if(count<100)drawImage(scr,img.back,60,220,880,230,50,80,255);
-		else if(count<130)drawImage(scr,img.back,60+(count-100)*2,220+(count-100)*4,880,230,50,80,255);
-		else if(count<200)drawImage(scr,img.back,120+(count-130)*2,340,880,230,50,80,255);
-		if(count>=150 && count<200)drawImage(scr,img.back,292,250,744,150,36,140,255);
-		drawImage(scr,img.back,0,240,640,0,640,150,255);
-		if(count>=260 && count<300)drawImage(scr,img.back,0,260,1000,230,240,120,255);
-		if(count>=300 && count<340)drawImage(scr,img.back,0,260,1000,350,240,120,255);
-		if(count>500)drawImage(scr,img.back,0,260,1000,230+((count/10)%2)*120,240,120,255);
-		if(count<340){
-			if(count%40<20)drawImage(scr,img.back,490,290,780,150,100,80,255);
-		}
-		else if(count<440){
-			if(count%40<20)drawImage(scr,img.back,490,290,880,150,100,80,255);
-			else drawImage(scr,img.back,490,290,980,150,100,80,255);
-			drawImage(scr,img.back,520,240,780,240,60,60,255);
-		}else{
-			if(count%40<20)drawImage(scr,img.back,490,290,1080,150,100,80,255);
-			else drawImage(scr,img.back,490,290,1180,150,100,80,255);
-			drawImage(scr,img.back,570,290,840,240,40,40,255);
-		}
-	}
-	else if(gd.week==2){
-		int a=0,b=240,sx,sy=130,cx,cy=190;
-		int fx1,fy1,fx2,fy2,fx3,fy3,fx4,fy4;
-
-		cx=520-count/5;
-		if(count>=100 && count<400)cy+=(count-100)/3;
-		else if(count>=400 && count<500)cy+=(500-count)-abs(4-count%10)*6;
-		if(count>=400 && count<450){a=240;cx-=(count-400)*2;}
-		else if(count>=450 && count<500){a=360;cx+=(count-450)*2;}
-		else a=((count/10)%2)*120;
-
-		if(count>=200)sy+=(count-200)/3;
-		if(count>=500)sy+=(count-500);
-		if(sy<310)sx=80+count/5;
-		else sx=160+count/5;
-
-		if(count<100){
-			fx1=640-count*4;
-			fy1=320-count*count/50;
-		}
-		else if(count<180){
-			fx1=240;
-			fy1=120+(count-100)/2;
-			b=400;
-		}else{
-			fx1=240-(count-180)*4;
-			fy1=200-(count-180)*(count-180)/50;
-		}
-		fx2=800-count*4;
-		fy2=300-count+abs(count%40-20)*2;
-		fx3=920-count*4;
-		fy3=540-count*2+abs((count+10)%40-20)*2;
-		fx4=1400-count*4;
-		fy4=800-count*2;
-		test=fx2*10000+fy2;
-		drawImage(scr,img.back,0,90,0,40,640,300,255);
-		if(sy<310)drawImage(scr,img.back,sx,sy,0,560,160,80,255);
-		else drawImage(scr,img.back,sx,sy,160,560,80,80,255);
-		drawImage(scr,img.back,count/5-200,180,0,340,640,100,255);
-		drawImage(scr,img.back,fx1,fy1,b+((count/10)%2)*80,560,80,80,255);
-		drawImage(scr,img.back,fx2,fy2,480,440,60,60,255);
-		drawImage(scr,img.back,fx3,fy3,480,440,60,60,255);
-		drawImage(scr,img.back,fx4,fy4,480+((count/10)%2)*60,500,60,60,255);
-		drawImage(scr,img.back,cx,cy,a,440,120,120,255);
-		drawImage(scr,img.back,440-count/5,280,0,340,640,100,255);
-	}
-	else if(gd.week==3){
-		int a=(count/10)%3;
-		drawImage(scr,img.back,0,90,0,40,640,300,255);
-		drawImage(scr,img.back,120,280,460,340+abs(2-(count/10)%4)*90,180,90,255);
-		if(count<270)drawImage(scr,img.back,440,count*2/3,0,520+a*40,120,40,255);
-		else if(count<350)drawImage(scr,img.back,440,180,0,520+a*40,120,40,255);
-		if(count>=300 && count<350)drawImage(scr,img.back,446,194,0,340,100,180,255);
-		else if(count>=350 && count<500){
-			if(count%50<25){
-				drawImage(scr,img.back,420,230,120+((count-325)/50)*80,520+a*80,80,80,255);
-				drawImage(scr,img.back,460,250,200,340,100,120,255);
-			}else{
-				drawImage(scr,img.back,460,220,120+((count-325)/50)*80,520+a*80,80,80,255);
-				drawImage(scr,img.back,460,250,100,340,100,120,255);
-				if(count%50<40)drawImage(scr,img.back,460,220,380,520+((count%50-25)/5)*80,80,80,255);
-			}
-		}else{
-			drawImage(scr,img.back,500,330,300,340+abs(2-(count/20)%4)*60,120,60,255);
-		}
-		if(count>=400){
-			if(count<600)fillRect(scr,0,90,640,300,255,0,0,(int)((count-400)*0.48));
-			else fillRect(scr,0,90,640,300,255,0,0,96);
-		}
-	}
-	else if(gd.week==4){
-		int a=0,b=0,c=0,d=0,e=0;
-		if(count<300){a=540-count/5;b=90+count/5;}
-		else if(count<380){a=480;b=150;}
-		else if(count<400){a=580;b=150-(10-abs(count-390))*4;}
-		else{
-			a=500+(count-400)*2;b=150-(count-400)*2;
-			c=50;
-			if(count%100<20){d=((count-400)/100)*40+(count%20)*2;e=((count/2)%2)*80;}
-			else d=((count-400)/100)*40+40;
-		}
-		drawImage(scr,img.back,0,90,0,40+((count/10)%2)*300,640,300,255);
-		drawImage(scr,img.back,a,b,c,640,50,50,255);
-		if(count>=300)drawImage(scr,img.back,120,150,((count/10)%3)*160,720,160,160,255);
-		if(count>=380)drawImage(scr,img.back,320,250,180,640,80,80,255);
-		else if(count>=340)drawImage(scr,img.back,320,250,100,640,80,80,255);
-		if(count>=420)drawImage(scr,img.back,380,90,340,640,80,80,255);
-		else if(count>=380)drawImage(scr,img.back,380,90,260,640,80,80,255);
-		if(count>=400)drawImage(scr,img.back,380+d,110+d,160+e,880,80,80,255);
-		if(count>=360)drawImage(scr,img.back,340+d,200-d,e,880,80,80,255);
-		drawImage(scr,img.back,520,230,520,640+((count/10)%2)*160,120,160,255);
-		if(count>=320 && count<360)drawImage(scr,img.back,440,120,420,640,40,40,255);
-		if(count>=380 && count<420)drawImage(scr,img.back,440,120,460,640,40,40,255);
-	}
-	else if(gd.week==5){
-		int a=144;
-		if(count>=350)a-=(count-350)/5;
-		for(int i=0 ; i<200 ; i++)fillRect(scr,0,i+90,640,1,i,0,64,255);
-		drawImage(scr,img.back,300,a,740,120,40,180,255);
-		if(count>=300){
-			drawImage_x(scr,img.back,280-(count-300)*2/7,240-(count-300)*2/9,2+(count-300)/1000.0,840,120,80,80,255);
-			drawImage_x(scr,img.back,280-(count-300)/2,240-(count-300)*2/5,2+(count-300)/500.0,840,120,80,80,255);
-			drawImage_x(scr,img.back,280-(count-300)*2/3,240-(count-300)*2/3,2+(count-300)/200.0,840,120,80,80,255);
-			drawImage_x(scr,img.back,280+(count-300)*2/7,240-(count-300)*2/9,2+(count-300)/1000.0,840,120,80,80,255);
-			drawImage_x(scr,img.back,280+(count-300)/2,240-(count-300)*2/5,2+(count-300)/500.0,840,120,80,80,255);
-			drawImage_x(scr,img.back,280+(count-300)*2/3,240-(count-300)*2/3,2+(count-300)/200.0,840,120,80,80,255);
-		}
-		drawImage(scr,img.back,0,90,0,40,640,300,255);
-		if(count>230 && count<260 && count%10<5)drawImage(scr,img.back,360,90,680,40,120,60,255);
-		if(count>280 && count<300 && count%10<5)drawImage(scr,img.back,320,90,640,40,40,80,255);
-		if(count%100>=50)drawImage(scr,img.back,180,290,640,120,100,100,255);
-		if(count>=450)drawImage(scr,img.back,180,230,780,120,60,60,255);
-		if(count<200 || count>700)drawImage(scr,img.back,480,90,abs(2-(count/10)%4)*160,340,160,300,255);
-		else if(count<230)drawImage(scr,img.back,480,90,320+((count-200)/10)*160,340,160,300,255);
-		else if(count<270)drawImage(scr,img.back,480,90,800+(((count-230)/10)%2)*160,340,160,300,255);
-		else drawImage(scr,img.back,480,90,800,340,160,300,255);
-	}
-	else if(gd.week==6){
-		if(count>=300 && count<400){
-			drawImage_x(scr,img.back,(int)((count-300)/1.25)-80,(count-300)/2+40,1.25-(count-300)/400.0,0,340,640,300,255);
-			drawImage(scr,img.back,320+(count-300),120+(count-300),((count/5)%2)*200,640,200,200,255);
-			if(CHAR_CODE==JAPANESE)drawImage(scr,img.back,320+(count-300),120+(count-300),((count/5)%2)*200,840,200,100,255);
-			else drawImage(scr,img.back,320+(count-300),120+(count-300),((count/5)%2)*200,940,200,100,255);
-		}else{
-			int a=0,b=0,c=320;
-			if(count<200)a=count;
-			else if(count>=200 && count<400)a=200;
-			else if(count>=400 && count<450)a=200+(count-400)*2;
-			else a=300+(count-450)*6;
-			if(count<300)b=count-16;
-			else if(count<425)b=284+(count-400);
-			else b=308+(count-425)*4;
-			if((count>=250 && count<260) || count>=450)c-=abs(count%10-4)*6;
-			drawImage(scr,img.back,0,90,0,40,640,300,255);
-			if(count>=250 && count<300)drawImage(scr,img.back,a,c,400,640,60,60,255);
-			else if(count>=450)drawImage(scr,img.back,a,c,460,640,60,60,255);
-			else drawImage(scr,img.chr,a,c,30,0,30,60,255);
-			drawImage(scr,img.chr,b,330,((count/5)%2)*60,110,60,60,255);
-			if(CHAR_CODE==JAPANESE)drawImage(scr,img.chr,b,330,((count/5)%2)*60,230,60,30,255);
-			else drawImage(scr,img.chr,b,165,((count/5)%2)*30,145,30,15,255);
-		}
-	}
-	fillRect(scr, 0,0,640,start*2+90, 0,0,0,255);
-	fillRect(scr, 0,390-start*2,640,start*2+90, 0,0,0,255);
-	drawImage(scr,img.back,340,410,0,0,300,38,255);
-}
 
 // ending2.png
 // このバージョンではまだ使わない
