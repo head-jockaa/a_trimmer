@@ -1236,9 +1236,10 @@ bool loadFile(const char* fn){
 	fsize=(size_t)a;
 	fseek(hFile,(long)b,SEEK_SET);
 
-	fstr=new char[fsize];
+	fstr=new char[fsize+1];
 	fread(fstr, sizeof(fstr[0]), fsize/sizeof(fstr[0]), hFile);
 	fclose(hFile);
+	fstr[fsize]=0;
 	return true;
 }
 
