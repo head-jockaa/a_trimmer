@@ -30,14 +30,8 @@ void initGameMenu(){
 }
 
 void initPrologue(){
-	freeMusic();
-	bgm=Mix_LoadMUS("file/bgm/15.ogg");
-	freeImage(img.back);
-	getImage(img.back,"file/img/prologue.png",0,0,255);
-	load_story(1);
-	TalkingAt(0);
+	loadCartoon("file/data/cartoon/story1.json");
 	phase=PROLOGUE;
-	start=100;
 	kick_count++;
 }
 
@@ -91,9 +85,9 @@ void gotoGame(){
 	else gd.game_mode=STORYMODE;
 	endGameMenu();
 	initGame();
+	load_story(dataNo);
 	if(c){
 		load_game(n);
-		load_story(dataNo);
 		phase=READY;
 	}
 	if((dataNo-1)%4==1){gd.sunrise_hour=5;gd.sunset_hour=19;}
@@ -154,7 +148,7 @@ void timerKomoro(){
 }
 
 void timerPrologue(){
-	if(face[gd.face_count]==EOF && start==1){
+	if(nextCut()){
 		if(movie_test){
 			endGameMenu();
 			initMiyazaki();
@@ -164,13 +158,10 @@ void timerPrologue(){
 			start=0;
 			for(int i=0 ; i<30 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
-			freeMusic();
-			bgm=Mix_LoadMUS("file/bgm/4.ogg");
+			phase=GOTO_GAME;
 			freeImage(img.back);
-			getImage(img.back,"file/img/shore.png",0,0,255);
-			TalkingAt(1);
-			phase=SEASIDE;
-			start=100;
+			getImage(img.back,"file/img/back.png",0,0,255);
+			freeMusic();
 			count=0;
 		}
 	}
@@ -180,9 +171,6 @@ void timerGameMenu(){
 	if(phase==GOTO_GAME && count==1)gotoGame();
 	else if(phase==GOTO_RECORD && count==1)gotoRecord();
 	if(phase==PROLOGUE || phase==SEASIDE || phase==KOMORO){
-		if(start==0)controlTextCount(true);
-		else controlTextCount(false);
-		if(count==1)Mix_PlayMusic(bgm,-1);
 	}else{
 		controlTextCount(false);
 	}
@@ -361,6 +349,10 @@ void keyGameRecord(){
 }
 
 void keyPrologue(){
+	if(key.z && !key_stop(key.z)){
+		nextTalk();
+	}
+/*
 	if(key.z && !key_stop(key.z) && start==0){
 		int a=controlTalking();
 		if(a==COMMA){
@@ -385,6 +377,7 @@ void keyPrologue(){
 			else start=100;
 		}
 	}
+*/
 	if(key.c && !key_stop(key.c)){
 		if(movie_test){
 			endGameMenu();
@@ -520,7 +513,7 @@ void drawGamemenuExplain(SDL_Surface* scr){
 
 void drawGameMenu(SDL_Surface* scr){
 	if(phase==RECORD)drawGameRecord(scr);
-	else if(phase==PROLOGUE)drawPrologue(scr);
+	else if(phase==PROLOGUE)drawAnimationCut(scr);
 	else if(phase==SEASIDE)drawSeaSide(scr);
 	else if(phase==KOMORO)drawKomoro(scr);
 	else{

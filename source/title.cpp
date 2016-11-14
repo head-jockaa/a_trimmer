@@ -70,20 +70,20 @@ void timerOpening(){
 	else if(phase==2){
 		int t=(int)((SDL_GetTicks()-loadtime)/16);
 		for(int i=0 ; i<t-playtime ; i++){
-			nextCut();
-		}
-		if(playtime>=3350){
-			if(movie_test){
-				endOpening();
-				initMiyazaki();
-				gd.x=1600;
-				gd.scrX=(int)gd.x-320;
-				phase=MIYAZAKI_MUSEUM;
-				start=0;
-				for(int i=0 ; i<29 ; i++)menu[BGM_TEST].cursorDown();
-			}else{
-				endOpening();
-				initTitle2();
+			if(nextCut()){
+				if(movie_test){
+					endOpening();
+					initMiyazaki();
+					gd.x=1600;
+					gd.scrX=(int)gd.x-320;
+					phase=MIYAZAKI_MUSEUM;
+					start=0;
+					for(int i=0 ; i<29 ; i++)menu[BGM_TEST].cursorDown();
+				}else{
+					endOpening();
+					initTitle2();
+				}
+				break;
 			}
 		}
 	}

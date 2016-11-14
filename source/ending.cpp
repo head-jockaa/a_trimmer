@@ -363,29 +363,29 @@ void timerEndingAnime(){
 	else if(phase==ENDING_ANIME){
 		int t=(int)((SDL_GetTicks()-loadtime)/16);
 		for(int i=0 ; i<t-playtime ; i++){
-			nextCut();
-		}
-		if(playtime>=4360){
-			if(movie_test){
-				endEnding();
-				initMiyazaki();
-				gd.x=1600;
-				gd.scrX=(int)gd.x-320;
-				phase=MIYAZAKI_MUSEUM;
-				start=0;
-				for(int i=0 ; i<31 ; i++)menu[BGM_TEST].cursorDown();
-			}else{
-				if(which_medal!=0 && dataNo!=index_num){//最終ボス面は保留
-					freeImage(img.back);
-					Mix_HaltMusic();
-					getImage(img.back,"file/img/warning.gif",0,0,255);
-					sf.alarm=Mix_LoadWAV("file/se/20.wav");
-					Mix_PlayChannel(1,sf.alarm,2);
-					phase=WARNING;
-				}else{
+			if(nextCut()){
+				if(movie_test){
 					endEnding();
-					initGameMenu();
+					initMiyazaki();
+					gd.x=1600;
+					gd.scrX=(int)gd.x-320;
+					phase=MIYAZAKI_MUSEUM;
+					start=0;
+					for(int i=0 ; i<31 ; i++)menu[BGM_TEST].cursorDown();
+				}else{
+					if(which_medal!=0 && dataNo!=index_num){//最終ボス面は保留
+						freeImage(img.back);
+						Mix_HaltMusic();
+						getImage(img.back,"file/img/warning.gif",0,0,255);
+						sf.alarm=Mix_LoadWAV("file/se/20.wav");
+						Mix_PlayChannel(1,sf.alarm,2);
+						phase=WARNING;
+					}else{
+						endEnding();
+						initGameMenu();
+					}
 				}
+				break;
 			}
 		}
 	}

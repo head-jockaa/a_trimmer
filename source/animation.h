@@ -6,7 +6,8 @@
 extern int playtime;
 extern int timestamp,loadtime,pausetime;
 void drawAnimationCut(SDL_Surface* scr);
-void nextCut();
+bool nextCut();
+void nextTalk();
 void freeCartoon();
 void loadCartoon(const char *filename);
 
