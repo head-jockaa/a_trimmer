@@ -36,19 +36,8 @@ void initPrologue(){
 }
 
 void initKomoro(){
-	freeMusic();
-	bgm=Mix_LoadMUS("file/bgm/4.ogg");
-	freeImage(img.back);
-	getImage(img.back,"file/img/komoro.png",0,0,255);
-	for(int i=0 ; i<14 ; i++){
-		sprintf_s(str,"file/img/komoro/%d.jpg",i+1);
-		getImage(img.photo[i],str,0,0,0);
-	}
-	load_story(13);
-	TalkingAt(0);
-	phase=KOMORO;
-	gd.scene_count=0;
-	start=100;
+	loadCartoon("file/data/cartoon/story13.json");
+	phase=PROLOGUE;
 	kick_count++;
 }
 

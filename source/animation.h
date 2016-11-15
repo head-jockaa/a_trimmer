@@ -13,7 +13,5 @@ void loadCartoon(const char *filename);
 
 void drawLastEndingAnim(SDL_Surface* scr, int cn);
 void drawSummerWars(SDL_Surface* scr);
-void drawPrologue(SDL_Surface* scr);
-void drawKomoro(SDL_Surface* scr);
 
 #endif

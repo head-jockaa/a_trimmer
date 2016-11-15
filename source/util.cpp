@@ -797,6 +797,13 @@ void freeMusic(){
 	}
 }
 
+void freeSound(Mix_Chunk *s){
+	if(s!=NULL){
+		Mix_FreeChunk(s);
+		s=NULL;
+	}
+}
+
 void getSymbolImage(){
 	Image *img2;
 	int a=0;

@@ -293,6 +293,7 @@ struct SoundFile{
 	Mix_Chunk *decide, *cursor_move, *decide2, *coin, *swish, *get, *lamp, *bubble;
 	Mix_Chunk *snore, *fw_sound, *noon, *sunset, *hold, *drag_s, *calling, *grumble;
 	Mix_Chunk *water, *thunder, *meow, *noize, *bupyo, *knob, *alarm, *tub, *gaze;
+	Mix_Chunk *sound[10];
 };
 extern SoundFile sf;
 
@@ -300,7 +301,7 @@ struct ImageFile{
 	SDL_Surface *iwa, *screen;
 	Image *back, *chr, *menuback, *facechip, *boss, *keyboard, *symbol, *pre_scr;
 	Image *rod, *circle, *fishup, *cache, *colorlight, *tv_asahi;
-	Image *buffer[4], *photo[14];
+	Image *buffer[4], *bg[10], *photo[14];
 	Image *searchImage;
 	Uint8 alphaR, alphaG, alphaB;
 };
@@ -322,6 +323,7 @@ void getImage(Image*& img, const char* st, int r, int g, int b);
 void getImage(Image*& im, char* st);
 void freeImage(Image*& im);
 void freeMusic();
+void freeSound(Mix_Chunk *s);
 void drawTalking(SDL_Surface* scr);
 void drawTalking(SDL_Surface* scr, int fc, String st);
 void drawRect(SDL_Surface* scr, int x, int y, int w, int h, int R, int G, int B, int a);

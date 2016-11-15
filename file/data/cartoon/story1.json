@@ -1,6 +1,11 @@
 [{0, {
-  "load-image": "file/img/prologue.png",
-  "load-bgm": "file/bgm/15.ogg",
+  "image":[
+    {"file":"file/img/prologue.png"}
+  ],
+  "load-sound":[
+    {"id":0, "file":"file/se/25.wav"}
+  ],
+  "bgm": {"file":"file/bgm/15.ogg"},
   "load-text": [
     {"lang":"jp", "file":"file/data/story/talk1_jp.dat"},
     {"lang":"en", "file":"file/data/story/talk1_en.dat"}
@@ -172,8 +177,10 @@
   ]
 }}, {100, {
   "reset":[0, 1, 2, 3, 20],
-  "load-image": "file/img/shore.png",
-  "load-bgm": "file/bgm/4.ogg",
+  "image":[
+    {"file":"file/img/shore.png"}
+  ],
+  "bgm": {"file":"file/bgm/4.ogg"},
   "set":[
     {"id":0, "x":0, "y":40, "w":640, "h":400, "col":"000000", "note":"night sky"},
     {"id":1, "x":-20, "y":40, "ix":0, "iy":340, "w":680, "h":400, "a":192, "note":"cloud"},
@@ -225,6 +232,7 @@
     {"id":6, "a":255},
     {"id":8, "a":0}
   ],
+  "sound":{"id":0, "ch":0},
   "move":[
     {"id":6, "y":-8}
   ]

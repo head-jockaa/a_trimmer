@@ -1,5 +1,7 @@
 [{0, {
-  "load-image": "file/img/weekly6.png",
+  "image":[
+    {"file":"file/img/weekly6.png"}
+  ],
   "set":[
     {"id":0, "x":0, "y":0, "w":640, "h":480, "col":"000000", "note":"background color"},
     {"id":1, "x":0, "y":90, "ix":0, "iy":40, "w":640, "h":300, "note":"background"},

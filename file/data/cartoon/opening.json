@@ -1,6 +1,8 @@
 [{0, {
-  "load-image": "file/img/opening.png",
-  "load-bgm": "file/bgm/1.ogg",
+  "image":[
+    {"file":"file/img/opening.png"}
+  ],
+  "bgm": {"file":"file/bgm/1.ogg"},
   "set":[
     {"id":0, "x":0, "y":40, "w":640, "h":400, "col_grad_y":{"from":"000000", "to":"000064"}, "note":"background color"},
     {"id":51, "x":0, "y":0, "w":640, "h":40, "col":"000000", "note":"letter box"},

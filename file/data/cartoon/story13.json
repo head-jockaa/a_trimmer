@@ -1,0 +1,284 @@
+[{0, {
+  "image":[
+    {"id":0, "file":"file/img/komoro.png"},
+    {"id":1, "file":"file/img/komoro/1.jpg"}
+  ],
+  "load-sound":[
+    {"id":0, "file":"file/se/3.wav"}
+  ],
+  "bgm": {"file":"file/bgm/4.ogg"},
+  "load-text": [
+    {"lang":"jp", "file":"file/data/story/talk13_jp.dat"},
+    {"lang":"en", "file":"file/data/story/talk13_en.dat"}
+  ],
+  "set":[
+    {"id":0, "img_id":1, "x":0, "y":0, "ix":0, "iy":0, "w":640, "h":480, "note":"photo"},
+    {"id":1, "x":640, "y":200, "ix":640, "iy":0, "w":160, "h":280, "note":"rotation cat"}
+  ],
+  "move":[
+    {"id":1, "x":-2, "flip":{"in":5, "ix":160, "n":2}}
+  ]
+}}, {100, {
+  "move":[
+    {"id":1, "x":0}
+  ],
+  "talk":[
+    {"face":6, "text":0},
+    {"face":8, "text":1}
+  ]
+}}, {0, {
+  "image":[
+    {"id":1, "file":"file/img/komoro/2.jpg"}
+  ],
+  "set":[
+    {"id":1, "x":0},
+    {"id":2, "x":360, "y":240, "ix":160, "iy":0, "w":160, "h":240, "note":"funny cat"}
+  ],
+  "move":[
+    {"id":1, "slide":{"x":{"step":2, "from":0, "to":40, "pos":40}}},
+    {"id":2, "slide":{"x":{"step":2, "from":0, "to":80}, "y":{"step":1, "from":0, "to":20}}}
+  ],
+  "talk":[
+    {"face":8, "text":2},
+    {"face":6, "text":3},
+    {"face":6, "text":4}
+  ]
+}}, {0, {
+  "reset":[1, 2],
+  "image":[
+    {"id":1, "file":"file/img/komoro/3.jpg"}
+  ],
+  "set":[
+    {"id":0, "iy":380}
+  ],
+  "talk":[
+    {"face":7, "text":5}
+  ]
+}}, {0, {
+  "move":[
+    {"id":0, "iy":-2}
+  ]
+}}, {190, {
+  "move":[
+    {"id":0, "iy":0}
+  ],
+  "talk":[
+    {"face":8, "text":6},
+    {"face":8, "text":7}
+  ]
+}}, {0, {
+  "image":[
+    {"id":1, "file":"file/img/komoro/4.jpg"}
+  ],
+  "talk":[
+    {"face":6, "text":8}
+  ]
+}}, {0, {
+  "image":[
+    {"id":1, "file":"file/img/komoro/5.jpg"}
+  ],
+  "set":[
+    {"id":1, "x":-160, "y":240, "ix":320, "iy":0, "w":160, "h":240, "note":"funny cat"}
+  ],
+  "move":[
+    {"id":1, "x":8}
+  ]
+}}, {20, {
+  "move":[
+    {"id":1, "x":0}
+  ],
+  "talk":[
+    {"face":6, "text":9},
+    {"face":8, "text":10}
+  ]
+}}, {0, {
+  "reset":[1],
+  "image":[
+    {"id":1, "file":"file/img/komoro/7.jpg"}
+  ],
+  "set":[
+    {"id":1, "x":80, "y":240, "ix":0, "iy":0, "w":160, "h":240, "note":"funny cat"},
+    {"id":2, "x":320, "y":240, "ix":160, "iy":0, "w":160, "h":240, "note":"funny cat"}
+  ],
+  "move":[
+    {"id":1, "slide":{"x":{"step":2, "from":0, "to":160}, "y":{"step":1, "from":0, "to":20}}},
+    {"id":2, "slide":{"x":{"step":2, "from":0, "to":80, "pos":80}, "y":{"step":1, "from":0, "to":20, "pos":10}}}
+  ],
+  "talk":[
+    {"face":7, "text":11}
+  ]
+}}, {0, {
+  "reset":[1, 2],
+  "image":[
+    {"id":1, "file":"file/img/komoro/8.jpg"}
+  ],
+  "set":[
+    {"id":0, "iy":380}
+  ],
+  "talk":[
+    {"face":6, "text":12}
+  ]
+}}, {0, {
+  "move":[
+    {"id":0, "iy":-2}
+  ]
+}}, {190, {
+  "move":[
+    {"id":0, "iy":0}
+  ],
+  "talk":[
+    {"face":7, "text":13},
+    {"face":8, "text":14}
+  ]
+}}, {0, {
+  "set":[
+    {"id":1, "x":660, "y":160, "ix":320, "iy":240, "w":40, "h":40, "note":"stone"}
+  ],
+  "move":[
+    {"id":1, "x":-28, "y":4}
+  ]
+}}, {20, {
+  "sound":{"id":0, "ch":0},
+  "move":[
+    {"id":1, "x":28, "y":16}
+  ]
+}}, {40, {
+  "reset":[1],
+  "image":[
+    {"id":1, "file":"file/img/komoro/6.jpg"}
+  ],
+  "talk":[
+    {"face":6, "text":15},
+    {"face":7, "text":16}
+  ]
+}}, {0, {
+  "image":[
+    {"id":1, "file":"file/img/komoro/9.jpg"}
+  ],
+   "set":[
+   {"id":0, "img_id":1, "x":0, "y":0, "ix":0, "iy":240, "w":1280, "h":960, "note":"photo"}
+  ],
+  "move":[
+    {"id":0, "ix":4}
+  ]
+}}, {160, {
+  "move":[
+    {"id":0, "ix":0}
+  ],
+  "talk":[
+    {"face":8, "text":17}
+  ]
+}}, {0, {
+  "move":[
+    {"id":0, "ix":-16, "iy":-6, "mag":-0.0125}
+  ]
+}}, {40, {
+  "set":[
+    {"id":0, "ix":0, "iy":0, "mag":0.5},
+    {"id":1, "x":480, "y":240, "ix":480, "iy":0, "w":160, "h":240, "note":"funny cat"}
+  ],
+  "move":[
+    {"id":0, "ix":0, "iy":0, "mag":0},
+    {"id":1, "slide":{"y":{"step":2, "from":0, "to":40}}}
+  ],
+  "talk":[
+    {"face":7, "text":18}
+  ]
+}}, {0, {
+  "reset":[1],
+  "image":[
+    {"id":1, "file":"file/img/komoro/10.jpg"}
+  ],
+  "set":[
+    {"id":0, "iy":380, "w":640, "h":480, "mag":1}
+  ],
+  "move":[
+    {"id":0, "iy":-2}
+  ]
+}}, {190, {
+  "move":[
+    {"id":0, "iy":0}
+  ],
+  "talk":[
+    {"face":6, "text":19},
+    {"face":6, "text":20}
+  ]
+}}, {0, {
+  "image":[
+    {"id":1, "file":"file/img/komoro/11.jpg"}
+  ],
+  "talk":[
+    {"face":6, "text":21},
+    {"face":7, "text":22}
+  ]
+}}, {0, {
+  "image":[
+    {"id":1, "file":"file/img/komoro/12.jpg"}
+  ],
+  "set":[
+    {"id":1, "x":-160, "y":200, "ix":640, "iy":0, "w":160, "h":280, "note":"rotation cat"}
+  ],
+  "move":[
+    {"id":1, "x":8, "flip":{"in":5, "ix":160, "n":2}}
+  ],
+  "talk":[
+    {"face":6, "text":23},
+    {"face":8, "text":24}
+  ]
+}}, {0, {
+  "reset":[1],
+  "image":[
+    {"id":1, "file":"file/img/komoro/13.jpg"}
+  ],
+  "set":[
+    {"id":0, "iy":400}
+  ],
+  "move":[
+    {"id":0, "iy":-4}
+  ]
+}}, {100, {
+  "move":[
+    {"id":0, "iy":0}
+  ],
+  "talk":[
+    {"face":8, "text":25},
+    {"face":6, "text":26}
+  ]
+}}, {0, {
+  "image":[
+    {"id":1, "file":"file/img/komoro/14.jpg"}
+  ],
+  "set":[
+    {"id":0, "w":1280, "h":960, "mag":0.5},
+    {"id":1, "x":40, "y":160, "ix":0, "iy":0, "w":160, "h":280, "note":"funny cat"},
+    {"id":2, "x":80, "y":180, "ix":160, "iy":0, "w":160, "h":280, "note":"funny cat"},
+    {"id":3, "x":0, "y":200, "ix":640, "iy":0, "w":160, "h":280, "note":"rotation cat"}
+  ],
+  "move":[
+    {"id":3, "flip":{"in":5, "ix":160, "n":2}}
+  ],
+  "talk":[
+    {"face":8, "text":27},
+    {"face":7, "text":28},
+    {"face":6, "text":29}
+  ]
+}}, {0, {
+  "move":[
+    {"id":1, "x":10, "y":0.66666, "slide":{"y":{"step":1, "from":0, "to":20}}},
+    {"id":2, "x":8, "y":1, "slide":{"y":{"step":1, "from":0, "to":20}}},
+    {"id":3, "x":6, "y":2, "slide":{"y":{"step":1, "from":0, "to":20}}}
+  ]
+}}, {100, {
+  "move":[
+    {"id":0, "iy":4, "mag":0.005}
+  ]
+}}, {170, {
+  "set":[
+    {"id":4, "x":0, "y":0, "w":640, "h":480, "col":"000000", "a":0, "note":"fade out"}
+  ],
+  "move":[
+    {"id":4, "a":8}
+  ]
+}}, {200, {
+  "end":true
+}}]
