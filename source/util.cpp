@@ -797,7 +797,7 @@ void freeMusic(){
 	}
 }
 
-void freeSound(Mix_Chunk *s){
+void freeSound(Mix_Chunk*& s){
 	if(s!=NULL){
 		Mix_FreeChunk(s);
 		s=NULL;

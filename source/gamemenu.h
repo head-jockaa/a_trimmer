@@ -17,8 +17,6 @@
 #define NODATA 11
 
 void initGameMenu();
-void initPrologue();
-void initKomoro();
 void endGameMenu();
 void timerGameMenu();
 void keyGameMenu();

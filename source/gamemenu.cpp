@@ -29,18 +29,6 @@ void initGameMenu(){
 	Mix_PlayMusic(bgm,-1);
 }
 
-void initPrologue(){
-	loadCartoon("file/data/cartoon/story1.json");
-	phase=PROLOGUE;
-	kick_count++;
-}
-
-void initKomoro(){
-	loadCartoon("file/data/cartoon/story13.json");
-	phase=PROLOGUE;
-	kick_count++;
-}
-
 void endGameMenu(){
 	if(phase==RECORD)fishbox.endFishBox();
 	if(phase==KOMORO){
@@ -235,24 +223,10 @@ void keyGameSeason(){
 	if(key.z && !key_stop(key.z)){
 		count=0;
 		dataNo=gd.scrX*4+gd.scrY+1;
-		if(dataNo==1){
-			initPrologue();
-		}
-		else if(dataNo==13){
-			initKomoro();
-		}else{
-			freeMusic();
-			bgm=Mix_LoadMUS("file/bgm/4.ogg");
-			freeImage(img.back);
-			getImage(img.back,"file/img/shore.png",0,0,255);
-			if(dataNo==index_num+1)load_story(25);
-			else load_story(dataNo);
-			if(dataNo==1)TalkingAt(1);
-			else TalkingAt(0);
-			phase=SEASIDE;
-			start=100;
-			kick_count++;
-		}
+		sprintf_s(str,"file/data/cartoon/story%d.json",dataNo);
+		loadCartoon(str);
+		phase=PROLOGUE;
+		kick_count++;
 	}
 	if(key.x && !key_stop(key.x)){
 		phase=MAIN;
@@ -503,8 +477,6 @@ void drawGamemenuExplain(SDL_Surface* scr){
 void drawGameMenu(SDL_Surface* scr){
 	if(phase==RECORD)drawGameRecord(scr);
 	else if(phase==PROLOGUE)drawAnimationCut(scr);
-	else if(phase==SEASIDE)drawSeaSide(scr);
-	else if(phase==KOMORO)drawKomoro(scr);
 	else{
 		fillRect(scr,0,0,640,480,0,0,0,255);
 		drawImage(scr,img.back,0,0,640+(count/2)%600,(count/2)%600,640,480,255);

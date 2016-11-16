@@ -160,14 +160,16 @@ void gotoMovieTest(){
 	}
 	else if(n==12){
 		initGameMenu();
-		initPrologue();
+		loadCartoon("file/data/cartoon/story1.json");
+		phase=PROLOGUE;
 	}
 	else if(n==13){
 		initEndingAnime();
 	}
 	else if(n==14){
 		initGameMenu();
-		initKomoro();
+		loadCartoon("file/data/cartoon/story13.json");
+		phase=PROLOGUE;
 	}
 	else if(n==15){
 		freeImage(img.back);
