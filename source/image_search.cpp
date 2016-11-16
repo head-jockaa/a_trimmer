@@ -465,7 +465,7 @@ void getTargetImage_http(int id, char *url){
 
 	SDLNet_TCP_Send(tm.tcpsock, msg, (int)strlen(msg)+1);
 	networkLog(id, SDLNet_GetError());
-	delete msg;
+	delete[] msg;
 
 	receivingImageFile(id, url, NULL);
 
@@ -586,7 +586,7 @@ void getTargetImage_https(int id, char *url){
 		ERR_print_errors_fp(stderr);
 		return;
 	}
-	delete msg;
+	delete[] msg;
 
 	receivingImageFile(id, url, ssl);
 
@@ -689,7 +689,7 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 				tm.timeout = 0;
 				tm.halt = RESTART_GETIMAGE;
 				strcpy_s(url, 1000, url2);
-				delete url2;
+				delete[] url2;
 				break;
 			}
 
@@ -803,7 +803,7 @@ void getGoogleImageSearch(int id, char *query){
     sprintf_s(request, request_size, "GET /search?q=%s&source=lnms&tbm=isch HTTP/1.1\r\nHost: www.google.co.jp\r\nUser-Agent: %s\r\n\r\n", query, USER_AGENT);
 	networkLog_noparam(id, request);
     imageSearch_https(id, "www.google.co.jp", 443, request);
-    delete request;
+    delete[] request;
 }
 
 void ImageFormatReader::reset(){

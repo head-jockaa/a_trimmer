@@ -1320,12 +1320,12 @@ void make3dview(double X, double Y, int D){
 		if(i<0 || i>=map.mapW || j<0 || j>=map.mapH)continue;
 		dis=sqrt(1.0*(i-X)*(i-X)+1.0*(Y-j)*(Y-j));
 		if(dis<2 || dis>=mg)continue;
-		double mound=(mg/8.0)*(mg/8.0)*sqrt( 1-(abs(dis-span)/span) );
+		double mound=(mg/8.0)*(mg/8.0)*sqrt( 1-(std::abs(dis-span)/span) );
 		xd=asin_q(dis,i-X,Y-j);
 		if(xd>180 && D<90)xd-=360;
 		if(xd<180 && D>270)xd+=360;
 		xd=D-xd;// xd‚Í•ûŠp
-		if(abs(xd)>gd.zoom*3)continue; //Ž‹ŠE‚ÌŠO
+		if(std::abs(xd)>gd.zoom*3)continue; //Ž‹ŠE‚ÌŠO
 		zd=asin_q(dis*MAP_SCALE*1000,0,map.h[i][j]-Z+mound);
 		if(zd>180)zd-=360; //zd‚Í‹ÂŠp
 
@@ -1403,7 +1403,7 @@ void make3dview_tower(double X, double Y, int D){
 		tw->x_3d=400;
 		dis=sqrt(1.0*(tw->x-X)*(tw->x-X)+1.0*(tw->y-Y)*(tw->y-Y));
 		if(dis>=mg){tw++;continue;}
-		double mound=(mg/8.0)*(mg/8.0)*sqrt( 1-(abs(dis-span)/span) );
+		double mound=(mg/8.0)*(mg/8.0)*sqrt( 1-(std::abs(dis-span)/span) );
 		xd=atan_q(tw->x-X,Y-tw->y);
 		zd=atan_q(dis*MAP_SCALE*1000,tw->h+map.h[tw->x][tw->y]-Z+mound);
 		zd2=atan_q(dis*MAP_SCALE*1000,map.h[tw->x][tw->y]-Z+mound);
@@ -1422,7 +1422,7 @@ void make3dview_tower(double X, double Y, int D){
 
 		if(A<0 || A>=320 || B<0 || B>=240){tw++;continue;}
 
-		for(int a=0 ; a<=(int)abs(zd-zd2)*10 ; a++){
+		for(int a=0 ; a<=(int)std::abs(zd-zd2)*10 ; a++){
 			if(B+a<0 || B+a>=240)continue;
 			if(m>=2 && A-1>=0){
 				if(map.z[(B+a)*320+(A-1)]>(Uint16)dis){

@@ -319,7 +319,7 @@ void keyMiyazakiMuseum(){
 	gd.scrX=(int)gd.x-320;
 	if(gd.scrX<0)gd.scrX=0;
 	if(gd.scrX>2160)gd.scrX=2160;
-	if(talk_seoiha && abs(gd.x-1440)>200){
+	if(talk_seoiha && std::abs(gd.x-1440)>200){
 		TalkingAt(23);
 		phase=MIYAZAKI_TALK;
 		gd.talk_open_count=1;

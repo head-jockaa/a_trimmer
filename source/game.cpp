@@ -697,8 +697,8 @@ void walking(){
 		double a=3;
 		int loc=EOF;
 		for(int i=0 ; i<towns ; i++){
-			if(abs(town[i].x-gd.x)>3)continue;
-			if(abs(town[i].y-gd.y)>3)continue;
+			if(std::abs(town[i].x-gd.x)>3)continue;
+			if(std::abs(town[i].y-gd.y)>3)continue;
 			double X=town[i].x-gd.x, Y=town[i].y-gd.y;
 			if(sqrt(X*X+Y*Y)<a){
 				a=sqrt(X*X+Y*Y);
@@ -1359,7 +1359,7 @@ void getH(){
 			if(rd.seeH[0]<a)rd.seeH[0]=a;
 		}
 
-		if(mt->volcano && abs(mX-gd.dotX)<3 && abs(mY-gd.dotY)<3){
+		if(mt->volcano && std::abs(mX-gd.dotX)<3 && std::abs(mY-gd.dotY)<3){
 			for(int i=0 ; i<map.volcanoNum ; i++){
 				if(map.volcano_id[i]==k)break;
 				if(map.volcano[i]!=0)continue;

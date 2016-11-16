@@ -118,7 +118,7 @@ void shield_each_tower(double X, double Y, Tower* T){
 	double half_point=1.0*rd.seeDIS[rd.see_mounts-1]/2;
 	for(int m=1 ; m<rd.see_mounts-1 ; m++){
 		if(rd.seeDIS[m]==EOF)continue;
-		rd.seeM[m]=(int)(mound*sqrt( 1.0-(abs(rd.seeDIS[m]-half_point)/half_point) ));
+		rd.seeM[m]=(int)(mound*sqrt( 1.0-(std::abs(rd.seeDIS[m]-half_point)/half_point) ));
 	}
 
 /*ŽRp‚ÆŽRm‚É‹²‚Ü‚ê‚é’á‚¢ŽRn‚ðœ‚­*/
@@ -240,10 +240,10 @@ void receive_each_tower(double X, double Y, Tower* T){
 			int dir=(45*k+180)%360;
 			if(T->dir<30 && dir>330)dir=dir-360;
 			if(T->dir>330 && dir<30)dir=dir+360;
-			if(abs(T->dir-dir)<=13){
+			if(std::abs(T->dir-dir)<=13){
 				rd.bias_dir=0;break;
 			}else{
-				int a=(int)abs(T->dir-dir);
+				int a=(int)std::abs(T->dir-dir);
 				if( rd.bias_dir>a )rd.bias_dir=a;
 			}
 		}
@@ -385,9 +385,9 @@ void create_atan_table(){
 
 double asin_q(double D, double X, double Y){
 	if(D==0)return 0.0;
-	int b=(int)(10000.0*abs(Y)/abs(D));
+	int b=(int)(10000.0*std::abs(Y)/std::abs(D));
 	int a=asin_table[b];
-	if(b>=9988)a=(int)abs(asin(1.0*Y/D)*180/PI*10.0);
+	if(b>=9988)a=(int)std::abs(asin(1.0*Y/D)*180/PI*10.0);
 	if(X<0 && Y>=0)a=1800-a;
 	else if(X<0 && Y<0)a+=1800;
 	else if(X>=0 && Y<0)a=3600-a;
@@ -396,9 +396,9 @@ double asin_q(double D, double X, double Y){
 
 double acos_q(double D, double X, double Y){
 	if(D==0)return 0.0;
-	int b=(int)(10000.0*abs(X)/abs(D));
+	int b=(int)(10000.0*std::abs(X)/std::abs(D));
 	int a=acos_table[b];
-	if(b<=12)a=(int)abs(acos(1.0*X/D)*180/PI*10.0);
+	if(b<=12)a=(int)std::abs(acos(1.0*X/D)*180/PI*10.0);
 	if(X<0 && Y>=0)a=1800-a;
 	else if(X<0 && Y<0)a+=1800;
 	else if(X>=0 && Y<0)a=3600-a;
@@ -410,9 +410,9 @@ double atan_q(double X, double Y){
 		if(Y>=0)return 90.0;
 		else return 270.0;
 	}
-	int a=(int)(1000.0*abs(Y)/abs(X)), b=0;
+	int a=(int)(1000.0*std::abs(Y)/std::abs(X)), b=0;
 	if(a<0)return 0;
-	else if(a>=60000)b=(int)abs(atan(1.0*Y/X)*180/PI*10.0);
+	else if(a>=60000)b=(int)std::abs(atan(1.0*Y/X)*180/PI*10.0);
 	else b=atan_table[a];
 	if(X<0 && Y>=0)b=1800-b;
 	else if(X<0 && Y<0)b+=1800;

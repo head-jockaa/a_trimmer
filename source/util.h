@@ -12,6 +12,7 @@
 #include <math.h>
 #include <string>
 #include <iostream>
+#include <cmath>
 
 #pragma comment(lib, "SDL2.lib")
 #pragma comment(lib, "SDL2main.lib")
