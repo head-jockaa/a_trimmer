@@ -409,8 +409,6 @@ void keyResult(){
 					freeMusic();
 					freeImage(img.back);
 					gd.week++;gd.hour=4;
-					sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
-					bgm=Mix_LoadMUS(str);
 					freeImage(img.tv_asahi);
 					sprintf_s(str,"file/img/ready%d.png",gd.week%6);
 					getImage(img.tv_asahi,str,0,0,0);
@@ -418,6 +416,8 @@ void keyResult(){
 					phase=GAMESTART;
 					sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
 					loadCartoon(str);
+					sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
+					bgm=Mix_LoadMUS(str);
 					for(int i=0 ; i<works ; i++)fishbox.today[i]=EOF;
 					gd.ta_count=0;start=75;count=-1;
 					Mix_PlayChannel(1, sf.decide, 0);

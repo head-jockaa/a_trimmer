@@ -1,4 +1,4 @@
-[{0, {
+[{"time":0, "act":{
   "image":[
     {"file":"file/img/prologue.png"}
   ],
@@ -15,7 +15,7 @@
     {"id":0, "x":0, "y":0, "w":640, "h":480, "col":"000000", "note":"background color"},
     {"id":1, "x":0, "y":0, "ix":0, "iy":0, "w":640, "h":360, "note":"youtube office"}
   ]
-}}, {100, {
+}}, {"time":100, "act":{
   "set":[
     {"id":1, "x":0, "y":0, "ix":0, "iy":360, "w":640, "h":360, "note":"rouka"},
     {"id":2, "x":160, "y":120, "ix":1280, "iy":0, "w":160, "h":240, "note":"cat 1"},
@@ -29,7 +29,7 @@
     {"face":7, "text":0},
     {"face":8, "text":1}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2, 3],
   "set":[
     {"id":1, "x":0, "y":0, "ix":0, "iy":720, "w":640, "h":360, "note":"front of the door"},
@@ -38,7 +38,7 @@
     {"id":5, "x":200, "y":0, "ix":1280, "iy":240, "w":200, "h":360, "note":"closed door"},
     {"id":6, "x":160, "y":200, "ix":1600, "iy":0, "w":160, "h":240, "note":"cat"}
   ]
-}}, {25, {
+}}, {"time":25, "act":{
   "set":[
     {"id":5, "ix":1480}
   ],
@@ -46,12 +46,12 @@
     {"id":3, "slide":{"x":{"step":0.66666, "from":0, "to":10}}},
     {"id":4, "slide":{"x":{"step":0.66666, "from":0, "to":10, "pos":5}}}
   ]
-}}, {50, {
+}}, {"time":50, "act":{
   "reset":[5],
   "set":[
     {"id":2, "x":40, "y":0, "ix":1760, "iy":240, "w":160, "h":360, "note":"opened door"}
   ]
-}}, {75, {
+}}, {"time":75, "act":{
   "reset":[4],
   "set":[
     {"id":3, "x":350, "y":-10},
@@ -61,15 +61,15 @@
     {"id":10, "x":400, "y":0, "ix":400, "iy":720, "w":240, "h":360, "note":"overdraw background"}
   ],
   "move":[
-    {"id":3, "slide":{"x":{"step":-16, "from":-320, "to":0, "turnBack":false, "pos":-80}, "y":{"step":16, "from":0, "to":320, "turnBack":false, "pos":80}}},
-    {"id":7, "slide":{"x":{"step":-16, "from":-320, "to":0, "turnBack":false}, "y":{"step":16, "from":0, "to":320, "turnBack":false}}},
-    {"id":8, "slide":{"x":{"step":-16, "from":-320, "to":0, "turnBack":false, "pos":-160}, "y":{"step":16, "from":0, "to":320, "turnBack":false, "pos":160}}}
+    {"id":3, "slide":{"x":{"step":-16, "from":-320, "to":0, "turnback":false, "pos":-80}, "y":{"step":16, "from":0, "to":320, "turnback":false, "pos":80}}},
+    {"id":7, "slide":{"x":{"step":-16, "from":-320, "to":0, "turnback":false}, "y":{"step":16, "from":0, "to":320, "turnback":false}}},
+    {"id":8, "slide":{"x":{"step":-16, "from":-320, "to":0, "turnback":false, "pos":-160}, "y":{"step":16, "from":0, "to":320, "turnback":false, "pos":160}}}
   ]
-}}, {100, {
+}}, {"time":100, "act":{
   "talk":[
     {"face":7, "text":2, "shake":true}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   "set":[
     {"id":1, "x":0, "y":0, "ix":0, "iy":1080, "w":640, "h":360, "note":"floor"},
@@ -83,7 +83,7 @@
     {"face":7, "text":3},
     {"face":7, "text":4}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2, 3],
   "set":[
     {"id":1, "x":0, "y":0, "ix":640, "iy":0, "w":640, "h":360, "note":"wall"},
@@ -95,7 +95,7 @@
   "talk":[
     {"face":8, "text":5}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2],
   "set":[
     {"id":1, "x":0, "y":0, "ix":0, "iy":720, "w":640, "h":360, "note":"front of the door"},
@@ -108,7 +108,7 @@
   "talk":[
     {"face":7, "text":6, "shake":true}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2, 3],
   "set":[
     {"id":1, "x":0, "y":0, "ix":640, "iy":0, "w":640, "h":360, "note":"wall"},
@@ -121,7 +121,7 @@
     {"face":8, "text":7},
     {"face":8, "text":8}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2],
   "set":[
     {"id":1, "x":0, "y":0, "ix":640, "iy":360, "w":640, "h":360, "note":"server room"},
@@ -139,7 +139,7 @@
     {"face":7, "text":9},
     {"face":7, "text":10}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2, 3, 4, 5],
   "set":[
     {"id":1, "x":0, "y":0, "ix":640, "iy":720, "w":640, "h":360, "note":"server room"},
@@ -152,30 +152,30 @@
     {"face":8, "text":11},
     {"face":8, "text":12}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2],
   "set":[
     {"id":1, "x":0, "y":0, "ix":640, "iy":1080, "w":640, "h":360, "note":"server room"},
     {"id":2, "x":0, "y":0, "w":6, "h":30, "col":"000000", "note":"blink of lamps"}
    ],
   "move":[
-    {"id":2, "slide":{"x":{"step":2, "from":0, "to":100, "turnBack":false}}}
+    {"id":2, "slide":{"x":{"step":2, "from":0, "to":100, "turnback":false}}}
   ],
   "talk":[
     {"face":7, "text":13}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "set":[
     {"id":3, "x":80, "y":-360, "ix":1280, "iy":600, "w":160, "h":160, "note":"dvd"}
    ],
   "move":[
     {"id":3, "x":4, "jump":{"g":0.32, "y":0}}
   ]
-}}, {50, {
+}}, {"time":50, "act":{
   "move":[
     {"id":3, "x":0, "jump":{"g":0}}
   ]
-}}, {100, {
+}}, {"time":100, "act":{
   "reset":[0, 1, 2, 3, 20],
   "image":[
     {"file":"file/img/shore.png"}
@@ -202,7 +202,7 @@
     {"id":7, "x":4, "slide":{"y":{"step":0.4, "from":-10, "to":10}}},
     {"id":8, "x":4, "slide":{"y":{"step":0.4, "from":-10, "to":10}}}
   ]
-}}, {200, {
+}}, {"time":200, "act":{
   "move":[
     {"id":3, "x":0},
     {"id":4, "x":0},
@@ -216,7 +216,7 @@
     {"face":3, "text":15},
     {"face":1, "text":16}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "set":[
     {"id":8, "a":255}
   ],
@@ -226,16 +226,15 @@
     {"face":3, "text":19},
     {"face":1, "text":20}
   ]
-}}, {0, {
-  "reset":[5],
+}}, {"time":0, "act":{
+  "reset":[5, 8],
   "set":[
-    {"id":6, "a":255},
-    {"id":8, "a":0}
+    {"id":6, "a":255}
   ],
   "sound":{"id":0, "ch":0},
   "move":[
     {"id":6, "y":-8}
   ]
-}}, {100, {
+}}, {"time":100, "act":{
   "end":true
 }}]

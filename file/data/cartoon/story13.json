@@ -1,4 +1,4 @@
-[{0, {
+[{"time":0, "act":{
   "image":[
     {"id":0, "file":"file/img/komoro.png"},
     {"id":1, "file":"file/img/komoro/1.jpg"}
@@ -18,7 +18,7 @@
   "move":[
     {"id":1, "x":-2, "flip":{"in":5, "ix":160, "n":2}}
   ]
-}}, {100, {
+}}, {"time":100, "act":{
   "move":[
     {"id":1, "x":0}
   ],
@@ -26,7 +26,7 @@
     {"face":6, "text":0},
     {"face":8, "text":1}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "image":[
     {"id":1, "file":"file/img/komoro/2.jpg"}
   ],
@@ -43,7 +43,7 @@
     {"face":6, "text":3},
     {"face":6, "text":4}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2],
   "image":[
     {"id":1, "file":"file/img/komoro/3.jpg"}
@@ -54,11 +54,11 @@
   "talk":[
     {"face":7, "text":5}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "move":[
     {"id":0, "iy":-2}
   ]
-}}, {190, {
+}}, {"time":190, "act":{
   "move":[
     {"id":0, "iy":0}
   ],
@@ -66,14 +66,14 @@
     {"face":8, "text":6},
     {"face":8, "text":7}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "image":[
     {"id":1, "file":"file/img/komoro/4.jpg"}
   ],
   "talk":[
     {"face":6, "text":8}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "image":[
     {"id":1, "file":"file/img/komoro/5.jpg"}
   ],
@@ -83,7 +83,7 @@
   "move":[
     {"id":1, "x":8}
   ]
-}}, {20, {
+}}, {"time":20, "act":{
   "move":[
     {"id":1, "x":0}
   ],
@@ -91,7 +91,7 @@
     {"face":6, "text":9},
     {"face":8, "text":10}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1],
   "image":[
     {"id":1, "file":"file/img/komoro/7.jpg"}
@@ -107,7 +107,7 @@
   "talk":[
     {"face":7, "text":11}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1, 2],
   "image":[
     {"id":1, "file":"file/img/komoro/8.jpg"}
@@ -118,11 +118,11 @@
   "talk":[
     {"face":6, "text":12}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "move":[
     {"id":0, "iy":-2}
   ]
-}}, {190, {
+}}, {"time":190, "act":{
   "move":[
     {"id":0, "iy":0}
   ],
@@ -130,19 +130,19 @@
     {"face":7, "text":13},
     {"face":8, "text":14}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "set":[
     {"id":1, "x":660, "y":160, "ix":320, "iy":240, "w":40, "h":40, "note":"stone"}
   ],
   "move":[
     {"id":1, "x":-28, "y":4}
   ]
-}}, {20, {
+}}, {"time":20, "act":{
   "sound":{"id":0, "ch":0},
   "move":[
     {"id":1, "x":28, "y":16}
   ]
-}}, {40, {
+}}, {"time":40, "act":{
   "reset":[1],
   "image":[
     {"id":1, "file":"file/img/komoro/6.jpg"}
@@ -151,7 +151,7 @@
     {"face":6, "text":15},
     {"face":7, "text":16}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "image":[
     {"id":1, "file":"file/img/komoro/9.jpg"}
   ],
@@ -161,18 +161,18 @@
   "move":[
     {"id":0, "ix":4}
   ]
-}}, {160, {
+}}, {"time":160, "act":{
   "move":[
     {"id":0, "ix":0}
   ],
   "talk":[
     {"face":8, "text":17}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "move":[
     {"id":0, "ix":-16, "iy":-6, "mag":-0.0125}
   ]
-}}, {40, {
+}}, {"time":40, "act":{
   "set":[
     {"id":0, "ix":0, "iy":0, "mag":0.5},
     {"id":1, "x":480, "y":240, "ix":480, "iy":0, "w":160, "h":240, "note":"funny cat"}
@@ -184,7 +184,7 @@
   "talk":[
     {"face":7, "text":18}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1],
   "image":[
     {"id":1, "file":"file/img/komoro/10.jpg"}
@@ -195,7 +195,7 @@
   "move":[
     {"id":0, "iy":-2}
   ]
-}}, {190, {
+}}, {"time":190, "act":{
   "move":[
     {"id":0, "iy":0}
   ],
@@ -203,7 +203,7 @@
     {"face":6, "text":19},
     {"face":6, "text":20}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "image":[
     {"id":1, "file":"file/img/komoro/11.jpg"}
   ],
@@ -211,7 +211,7 @@
     {"face":6, "text":21},
     {"face":7, "text":22}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "image":[
     {"id":1, "file":"file/img/komoro/12.jpg"}
   ],
@@ -225,7 +225,7 @@
     {"face":6, "text":23},
     {"face":8, "text":24}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "reset":[1],
   "image":[
     {"id":1, "file":"file/img/komoro/13.jpg"}
@@ -236,7 +236,7 @@
   "move":[
     {"id":0, "iy":-4}
   ]
-}}, {100, {
+}}, {"time":100, "act":{
   "move":[
     {"id":0, "iy":0}
   ],
@@ -244,7 +244,7 @@
     {"face":8, "text":25},
     {"face":6, "text":26}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "image":[
     {"id":1, "file":"file/img/komoro/14.jpg"}
   ],
@@ -262,23 +262,23 @@
     {"face":7, "text":28},
     {"face":6, "text":29}
   ]
-}}, {0, {
+}}, {"time":0, "act":{
   "move":[
     {"id":1, "x":10, "y":0.66666, "slide":{"y":{"step":1, "from":0, "to":20}}},
     {"id":2, "x":8, "y":1, "slide":{"y":{"step":1, "from":0, "to":20}}},
     {"id":3, "x":6, "y":2, "slide":{"y":{"step":1, "from":0, "to":20}}}
   ]
-}}, {100, {
+}}, {"time":100, "act":{
   "move":[
     {"id":0, "iy":4, "mag":0.005}
   ]
-}}, {170, {
+}}, {"time":170, "act":{
   "set":[
     {"id":4, "x":0, "y":0, "w":640, "h":480, "col":"000000", "a":0, "note":"fade out"}
   ],
   "move":[
     {"id":4, "a":8}
   ]
-}}, {200, {
+}}, {"time":200, "act":{
   "end":true
 }}]

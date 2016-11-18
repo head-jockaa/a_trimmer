@@ -1,4 +1,4 @@
-[{0, {
+[{"time":0, "act":{
   "image":[
     {"file":"file/img/weekly1.png"}
   ],
@@ -16,40 +16,40 @@
     {"id":13, "x":340, "y":410, "ix":0, "iy":0, "w":300, "h":38, "note":"tuesday"}
   ],
   "move":[
-    {"id":2, "slide":{"ix":{"step":2, "from":0, "to":640, "turnBack":false}, "iy":{"step":1, "from":0, "to":320, "turnBack":false}}},
-    {"id":3, "slide":{"ix":{"step":1.33333, "from":0, "to":640, "turnBack":false}, "iy":{"step":0.66666, "from":0, "to":320, "turnBack":false}}},
+    {"id":2, "slide":{"ix":{"step":2, "from":0, "to":640, "turnback":false}, "iy":{"step":1, "from":0, "to":320, "turnback":false}}},
+    {"id":3, "slide":{"ix":{"step":1.33333, "from":0, "to":640, "turnback":false}, "iy":{"step":0.66666, "from":0, "to":320, "turnback":false}}},
     {"id":9, "flip":{"in":20, "iy":-300, "n":2}},
     {"id":11, "h":-2},
     {"id":12, "y":2, "h":-2}
   ]
-}}, {76, {
+}}, {"time":76, "act":{
   "move":[
     {"id":11, "h":0},
     {"id":12, "y":0, "h":0}
   ]
-}}, {100, {
+}}, {"time":100, "act":{
   "move":[
     {"id":6, "x":2, "jump":{"g":0.26666, "y":0}}
   ]
-}}, {130, {
+}}, {"time":130, "act":{
   "move":[
     {"id":6, "jump":{"g":0}}
   ]
-}}, {140, {
+}}, {"time":140, "act":{
   "set":[
     {"id":5, "x":188, "y":250, "ix":640, "iy":150, "w":104, "h":140, "note":"open the door"}
   ]
-}}, {200, {
+}}, {"time":200, "act":{
   "reset":[5, 6]
-}}, {260, {
+}}, {"time":260, "act":{
   "set":[
     {"id":8, "x":0, "y":260, "ix":1000, "iy":230, "w":240, "h":120, "note":"voice"}
   ]
-}}, {300, {
+}}, {"time":300, "act":{
   "set":[
     {"id":8, "x":0, "y":260, "ix":1000, "iy":350, "w":240, "h":120, "note":"voice"}
   ]
-}}, {340, {
+}}, {"time":340, "act":{
   "reset":[8],
   "set":[
     {"id":9, "x":490, "y":290, "ix":880, "iy":150, "w":100, "h":80, "note":"tv screen"},
@@ -58,7 +58,7 @@
   "move":[
     {"id":9, "flip":{"in":20, "ix":100, "iy":0, "n":2}}
   ]
-}}, {440, {
+}}, {"time":440, "act":{
   "set":[
     {"id":9, "x":490, "y":290, "ix":1080, "iy":150, "w":100, "h":80, "note":"tv screen"},
     {"id":10, "x":570, "y":290, "ix":840, "iy":240, "w":40, "h":40, "note":"popped eye"}
@@ -66,7 +66,7 @@
   "move":[
     {"id":9, "flip":{"in":20, "ix":100, "n":2}}
   ]
-}}, {500, {
+}}, {"time":500, "act":{
   "set":[
     {"id":8, "x":0, "y":260, "ix":1000, "iy":230, "w":240, "h":120, "note":"voice"}
   ],

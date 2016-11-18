@@ -54,6 +54,8 @@
 #define CARTOON_LOAD_SOUND 52
 #define CARTOON_SOUND 53
 #define CARTOON_CHANNEL 54
+#define CARTOON_TIME 55
+#define CARTOON_ACT 56
 
 #define JSON_ARRAY_START 1
 #define JSON_STARTTIME 2
@@ -71,6 +73,7 @@
 #define JSON_GETVALUE2 14
 
 void readSetObject(char *json, int timer);
+bool readCartoonAct(char *json, int timer);
 void readMoveObject(char *json, int timer);
 void readSlideAnime(char *json, int timer);
 void readFlipAnime(char *json, int timer);
@@ -313,13 +316,14 @@ void loadCartoon(const char *filename){
 bool readCartoon(char *json, int timer){
 	int mode=JSON_ARRAY_START;
 	int datamode=0;
-	bool endThisTime=false;
+	bool waitForNextTime=false;
 
 	if(talkmode) {
 		mode=JSON_GETVALUE;
+		datamode=CARTOON_ACT;
 	}
 	else if(cartoonPointer!=0) {
-		mode=JSON_DATA_START;
+		mode=JSON_NEXTDATA;
 	}
 
 	while(cartoonPointer < cartoonJsonSize) {
@@ -335,21 +339,76 @@ bool readCartoon(char *json, int timer){
 		}
 		else if(mode==JSON_STARTTIME) {
 			if(*c=='{') {
-				mode=JSON_GETTIME;
+				mode=JSON_GETNAME;
 			}
 		}
-		else if(mode==JSON_GETTIME) {
-			if(*c==',') {
-				mode=JSON_DATA_START;
-			}else{
+		else if(mode==JSON_GETNAME) {
+			fetchString(c,str);
+			if(strcmp(str, "time")==0) {
+				datamode=CARTOON_TIME;
+			}
+			else if(strcmp(str, "act")==0) {
+				datamode=CARTOON_ACT;
+			}
+			mode=JSON_COLON;
+		}
+		else if(mode==JSON_COLON) {
+			if(*c==':') {
+				mode=JSON_GETVALUE;
+			}
+		}
+		else if(mode==JSON_GETVALUE) {
+			if(datamode==CARTOON_TIME) {
 				cartoonNextTime=fetchInt(c);
 			}
-		}
-		else if(mode==JSON_DATA_START) {
-			if(endThisTime){
-				return false;
+			else if(datamode==CARTOON_ACT) {
+				bool end = readCartoonAct(json,timer);
+				if(end)return true;
+				if(talkmode){
+					break;
+				}
 			}
-			else if(*c=='{') {
+			mode=JSON_NEXTDATA;
+		}
+		else if(mode==JSON_NEXTDATA) {
+			if(*c==',') {
+				if(waitForNextTime){
+					return false;
+				} else {
+					mode=JSON_GETNAME;
+				}
+			}
+			else if(*c=='}') {
+				mode=JSON_ENDDATA;
+			}
+		}
+		else if(mode==JSON_ENDDATA) {
+			if(*c==',') {
+				waitForNextTime=true;
+				mode=JSON_STARTTIME;
+			}
+		}
+		cartoonPointer++;
+	}
+	return false;
+}
+
+bool readCartoonAct(char *json, int timer){
+	int mode=JSON_DATA_START;
+	int datamode=0;
+
+	if(talkmode) {
+		mode=JSON_GETVALUE;
+	}
+
+	while(cartoonPointer < cartoonJsonSize) {
+		char *c = &json[cartoonPointer];
+		if(*c==' ' || *c==10 || *c==13) {
+			cartoonPointer++;
+			continue;
+		}
+		if(mode==JSON_DATA_START) {
+			if(*c=='{') {
 				mode=JSON_GETNAME;
 			}
 		}
@@ -447,18 +506,7 @@ bool readCartoon(char *json, int timer){
 				mode=JSON_GETNAME;
 			}
 			else if(*c=='}') {
-				mode=JSON_ENDDATA;
-			}
-		}
-		else if(mode==JSON_ENDDATA) {
-			if(*c=='}') {
-				mode=JSON_ENDTIME;
-			}
-		}
-		else if(mode==JSON_ENDTIME) {
-			if(*c==',') {
-				endThisTime=true;
-				mode=JSON_STARTTIME;
+				return false;
 			}
 		}
 		cartoonPointer++;
@@ -1044,7 +1092,7 @@ void readFlipAnime(char *json, int timer){
 			else if(strcmp(str, "n")==0) {
 				datamode=CARTOON_NUM;
 			}
-			else if(strcmp(str, "turnBack")==0) {
+			else if(strcmp(str, "turnback")==0) {
 				datamode=CARTOON_TURNBACK;
 			}
 			mode=JSON_COLON;
@@ -1149,7 +1197,7 @@ void readSlideAnime(char *json, int timer){
 			else if(strcmp(str, "pos")==0) {
 				datamode2=CARTOON_POS;
 			}
-			else if(strcmp(str, "turnBack")==0) {
+			else if(strcmp(str, "turnback")==0) {
 				datamode2=CARTOON_TURNBACK;
 			}
 			else if(strcmp(str, "fade")==0) {
@@ -1528,7 +1576,6 @@ void readCartoonImage(char *json, int timer){
 				fetchString(c,str);
 				freeImage(img.bg[img_id]);
 				getImage(img.bg[img_id],str,0,0,255);
-				gd.talk_count=fetchInt(c);
 			}
 			mode=JSON_NEXTDATA;
 		}
@@ -1595,7 +1642,6 @@ void readCartoonLoadSound(char *json, int timer){
 				fetchString(c,str);
 				freeSound(sf.sound[sound_id]);
 				sf.sound[sound_id]=Mix_LoadWAV(str);
-				gd.talk_count=fetchInt(c);
 			}
 			mode=JSON_NEXTDATA;
 		}

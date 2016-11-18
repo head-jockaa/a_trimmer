@@ -141,14 +141,14 @@ void gotoMovieTest(){
 	}
 	if(n<=6){
 		gd.week=n;
+		sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
+		loadCartoon(str);
 		freeMusic();
 		sprintf_s(str,"file/bgm/%d.ogg",n+5);
 		bgm=Mix_LoadMUS(str);
 		Mix_PlayMusic(bgm,-1);
 		phase=GAMESTART;
 		count=0;start=75;
-		sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
-		loadCartoon(str);
 	}
 	else if(n>=7 && n<=10){
 		initEnding();
