@@ -62,17 +62,17 @@ void gotoGame(){
 	else gd.game_mode=STORYMODE;
 	endGameMenu();
 	initGame();
-	load_story(dataNo);
 	if(c){
 		load_game(n);
 		phase=READY;
+		sprintf_s(str,"file/data/cartoon/talk%d.json",dataNo);
+		loadCartoon(str);
 	}
 	if((dataNo-1)%4==1){gd.sunrise_hour=5;gd.sunset_hour=19;}
 	else if((dataNo-1)%4==3){gd.sunrise_hour=7;gd.sunset_hour=17;}
 	else {gd.sunrise_hour=6;gd.sunset_hour=18;}
 	if(dataNo==index_num+1)gd.hour=12;//last stage
 	initGame2();
-	head_of_talking();
 	head_of_timeslot();
 	gd.talk_count=EOF;
 	kick_count=1;
@@ -315,32 +315,6 @@ void keyPrologue(){
 	if(key.z && !key_stop(key.z)){
 		nextTalk();
 	}
-/*
-	if(key.z && !key_stop(key.z) && start==0){
-		int a=controlTalking();
-		if(a==COMMA){
-			count=2;
-			if(phase==PROLOGUE && gd.scene_count==1)start=100;
-			if(phase==KOMORO && gd.scene_count==4)start=20;
-			if(dataNo==index_num+1){//ç≈èIÉ{ÉX
-				if(gd.scene_count==1){
-					freeMusic();
-					bgm=Mix_LoadMUS("file/bgm/14.ogg");
-					Mix_PlayChannel(0,sf.thunder,0);
-					start=100;
-				}
-				else if(gd.scene_count==2){
-					getImage(img.boss,"file/img/warning.gif",0,0,255);
-					start=200;
-				}
-			}
-		}
-		else if(a==EOF){
-			if(phase==KOMORO)start=200;
-			else start=100;
-		}
-	}
-*/
 	if(key.c && !key_stop(key.c)){
 		if(movie_test){
 			endGameMenu();
@@ -351,27 +325,7 @@ void keyPrologue(){
 			start=0;
 			for(int i=0 ; i<30 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
-			if(phase==PROLOGUE){
-				freeMusic();
-				bgm=Mix_LoadMUS("file/bgm/4.ogg");
-				freeImage(img.back);
-				getImage(img.back,"file/img/shore.png",0,0,255);
-				TalkingAt(1);
-				phase=SEASIDE;
-				start=100;
-			}else{
-				freeImage(img.back);
-				getImage(img.back,"file/img/back.png",0,0,255);
-				if(phase==KOMORO){
-					for(int i=0 ; i<14 ; i++)freeImage(img.photo[i]);
-				}
-				if(dataNo==index_num+1){
-					freeMusic();
-					bgm=Mix_LoadMUS("file/bgm/14.ogg");
-					Mix_PlayMusic(bgm,-1);
-				}
-				phase=GOTO_GAME;
-			}
+			phase=GOTO_GAME;
 			count=0;
 		}
 	}

@@ -5,9 +5,10 @@
 
 extern int playtime;
 extern int timestamp,loadtime,pausetime;
+extern int call_week,call_hour,call_minute;
 void drawAnimationCut(SDL_Surface* scr);
 bool nextCut();
-void nextTalk();
+bool nextTalk();
 void freeCartoon();
 void loadCartoon(const char *filename);
 

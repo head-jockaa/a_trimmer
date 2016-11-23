@@ -1,0 +1,13 @@
+[{"date":"Mon, 06:30", "act":{
+  "load-text": [
+    {"lang":"jp", "file":"file/data/story/talk1_jp.dat"},
+    {"lang":"en", "file":"file/data/story/talk1_en.dat"}
+  ],
+  "talk":[
+    {"face":1, "text":21},
+    {"face":2, "text":22},
+    {"face":2, "text":23},
+    {"face":1, "text":24},
+    {"face":2, "text":25}
+  ]
+}}]

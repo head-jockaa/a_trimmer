@@ -270,6 +270,8 @@ void keyGameStart(){
 			if(gd.week==0)phase=READY;
 			else phase=PLAYING;
 			count=2;
+			sprintf_s(str,"file/data/cartoon/talk%d.json",dataNo);
+			loadCartoon(str);
 		}
 	}
 }
@@ -1177,31 +1179,9 @@ void keyManekiTalking(){
 void keyGameTalking(){
 	if(phase==SUMMERWARS && count<660)return;
 	if(key.z && !key_stop(key.z) && start==0){
-		int a=controlTalking();
-		if(a==COMMA){
-			if(gd.game_mode==BOSS && bd.talking==7){
-				if(gd.scene_count==0){
-					phase=CALLING;
-					Mix_HaltMusic();
-					Mix_PlayChannel(0,sf.calling,0);
-					count=0;
-				}
-				if(gd.scene_count==1){
-					freeMusic();
-					bgm=Mix_LoadMUS("file/bgm/1.ogg");
-					Mix_PlayMusic(bgm,-1);
-				}
-			}
-		}
-		else if(a==EOF || a==HANGUP){
-			if(phase==SUMMERWARS){
-				endGame();
-				initLastStory();
-			}else{
-				if(a==EOF)gd.face_count++;
-				Mix_PlayChannel(0, sf.noize, 0);
-				phase=PLAYING;
-			}
+		if(nextTalk()){
+			Mix_PlayChannel(0, sf.noize, 0);
+			phase=PLAYING;
 		}
 	}
 }
@@ -2110,7 +2090,7 @@ void drawGame(SDL_Surface* scr){
 		if(phase==SAVING_RECORD && count>=150)drawText2(scr,160,60,text[EPILOGUE+5]);
 		if(phase==MANEKI)drawTalking(scr,1,text[ANTENNATEXT+17+gd.scene_count]);
 		else if(phase==MANEKI_CONFIRM)drawTalking(scr,1,text[ANTENNATEXT+24+gd.scene_count]);
-		else if(phase!=CALLING)drawTalking(scr);
+		else if(phase!=CALLING)drawAnimationCut(scr);
 
 		if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)drawThrowPhoto(scr);
 	}
@@ -2519,14 +2499,11 @@ void timerGazing(){
 }
 
 void timerCatchPhone(){
-	if(face[gd.face_count]==HANGUP){
-		if(gd.week==face[gd.face_count+1] && gd.hour==face[gd.face_count+2] && gd.minute==face[gd.face_count+3]){
-			Mix_PlayChannel(0, sf.calling, 0);
-			head_of_talking();
-			gd.face_count+=4;
-			phase=CALLING;
-			count=2;
-		}
+	if(gd.week==call_week && gd.hour==call_hour && gd.minute==call_minute){
+		Mix_PlayChannel(0, sf.calling, 0);
+		nextCut();
+		phase=CALLING;
+		count=2;
 	}
 }
 
