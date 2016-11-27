@@ -870,3 +870,39 @@ void illuminateImage_x(Image* scr, Image* ima, int x, int y, double mag, int x2,
 		__illuminateImage_x((Uint8*)scr->RGB, scr->w, scr->h, ima, x, y, mag, x2, y2, w2, h2, a);
 	}
 }
+
+void __drawLightBall(Uint8* px, int pxwidth, int x, int y, int cx, int r, int cy, int w, int h, Uint8 R, Uint8 G, Uint8 B){
+	Uint16 px_skip;
+	px=px+(pxwidth*y+x)*4;
+	px_skip=(pxwidth-w)*4;
+	cx-=x;
+	cy-=y;
+
+	double a;
+	for(int j=0 ; j<h ; j++){
+		for(int i=0 ; i<w ; i++){
+			a=1.0-sqrt((cx-i)*(cx-i)+(cy-j)*(cy-j))/r;
+			if(a>0){
+				*(Uint32 *)px=setRGB((int)(R*a),(int)(G*a),(int)(B*a));
+			}
+			px+=4;
+		}
+		px+=px_skip;
+	}
+}
+
+void drawLightBall(SDL_Surface* scr, int x, int y, int w, int R, int G, int B) {
+	if(scr==NULL)return;
+	int x2=0,y2=0,h=w,cx=x+w/2,cy=y+h/2,r=w/2,a=0;
+	clipping(&x,&y,&scr->w,&scr->h,&x2,&y2,&w,&h,&w,&h,&a);
+	SDL_LockSurface(scr);
+	__drawLightBall((Uint8*)scr->pixels, scr->w, x, y, cx, cy, r, w, h, R, G, B);
+	SDL_UnlockSurface(scr);
+}
+
+void drawLightBall(Image* scr, int x, int y, int w, int R, int G, int B) {
+	if(scr==NULL)return;
+	int x2=0,y2=0,h=w,cx=x+w/2,cy=y+h/2,r=w/2,a=0;
+	clipping(&x,&y,&scr->w,&scr->h,&x2,&y2,&w,&h,&w,&h,&a);
+	__drawLightBall((Uint8*)scr->RGB, scr->w, x, y, cx, cy, r, w, h, R, G, B);
+}

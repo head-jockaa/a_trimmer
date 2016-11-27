@@ -13,15 +13,9 @@ void makeMirrorImage(SDL_Surface* scr);
 void initEnding(){
 	mode=ENDING;
 	count=0;
-	start=100;
-	load_story(dataNo);
-	if(dataNo==1)TalkingAt(4);
-	else TalkingAt(3);
+	playtime=0;
 	phase=LEAVE_SHORE;
 	getImage(img.back,"file/img/shore.png",0,0,255);
-	bgm=Mix_LoadMUS("file/bgm/4.ogg");
-	Mix_PlayMusic(bgm,-1);
-	sf.swish=Mix_LoadWAV("file/se/25.wav");
 	mirror=NULL;
 	sf.thunder=NULL;sf.tub=NULL;sf.alarm=NULL;sf.noize=NULL;sf.sunset=NULL;
 }
@@ -145,7 +139,13 @@ void keyWarning(){
 }
 
 void keyEnding(){
-	if(phase==LEAVE_SHORE || phase==GET_MEDAL || phase==ANIME_GOD || phase==LAST_STORY){
+	if(phase==LEAVE_SHORE){
+		if(key.z && !key_stop(key.z)){
+			if(nextTalk()){
+			}
+		}
+	}
+	else if(phase==GET_MEDAL || phase==ANIME_GOD || phase==LAST_STORY){
 		bool ok=true;
 		if(phase==ANIME_GOD && gd.scene_count==1)ok=false;
 		if(phase==LAST_STORY && start!=0)ok=false;
@@ -200,17 +200,12 @@ void keyEnding(){
 }
 
 void timerLeaveShore(){
-	if(face[gd.face_count]==EOF){
-		if(start==1){
-			Mix_FreeChunk(sf.swish);
-			int a=100*gd.crops/works;
-			if(a>=100)initMedalAward(3);
-			else if(a>=80)initMedalAward(2);
-			else if(a>=60)initMedalAward(1);
-			else initMedalAward(0);
-		}
-	}else{
-		if(start==50)Mix_PlayChannel(0,sf.swish,0);
+	if(nextCut()){
+		int a=100*gd.crops/works;
+		if(a>=100)initMedalAward(3);
+		else if(a>=80)initMedalAward(2);
+		else if(a>=60)initMedalAward(1);
+		else initMedalAward(0);
 	}
 }
 
@@ -567,7 +562,7 @@ void drawEnding(SDL_Surface* scr){
 		drawLastStory(scr);
 	}
 	else if(phase==LEAVE_SHORE){
-		drawSeaSide(scr);
+		drawAnimationCut(scr);
 	}
 	else drawTorishima(scr);
 }

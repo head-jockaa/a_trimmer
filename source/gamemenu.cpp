@@ -345,38 +345,6 @@ void drawGameMainMenuBox(SDL_Surface* scr){
 	drawText2(scr,120,320,text[MENUTEXT+gd.mainmenu_selected]);
 }
 
-void drawSeaSide(SDL_Surface* scr){
-	int a=0,b=0,c=0,d=0;
-	if(dataNo==index_num+1){//ÅIƒ{ƒX
-		if(start>0 && gd.scene_count==1)a=10-2*abs(10-start%20);
-		if(gd.scene_count==2){
-			c=(int)((200-start)*1.7);
-			d=start;
-		}
-	}
-	if(mode==GAMEMENU && start>0 && gd.scene_count==0 && face[gd.face_count]!=EOF)b=start*4;
-	if(mode==ENDING && face[gd.face_count]==EOF)b=400-start*4;
-	if(dataNo==index_num+1)fillRect(scr,0,0,640,480,192,272,432,255);
-	else fillRect(scr,0,0,640,480,0,0,0,255);
-	if(img.boss!=NULL){
-		drawImage(scr,img.boss,400,40+d,((bg_count/5)%8)*220,(((bg_count/5)/8)%2)*410,220,410,255);
-	}
-	drawImage(scr,img.back,a-20,40,0,340-c,680,400,192);
-	drawImage(scr,img.back,a-20,180+c,0,540,680,260,255);
-	drawImage(scr,img.back,a-b-20,220+c-2*abs(20-(bg_count/5)%40),760,300,490,180,255);
-	drawImage(scr,img.back,a-b-20,220+c-2*abs(20-(bg_count/5)%40),760,480,490,180,255);
-	if(mode==GAMEMENU && face[gd.face_count]==EOF)drawImage(scr,img.back,a+200-b,-560+start*8+c,880,660,20,140,255);
-	else if(mode==ENDING && start>0 && gd.scene_count==0 && face[gd.face_count]!=EOF)drawImage(scr,img.back,a+200-b,240-start*8+c,880,660,20,140,255);
-	else drawImage(scr,img.back,a+160-b,240+c-2*abs(20-(bg_count/5)%40),760,660,120,140,255);
-	drawImage(scr,img.back,a-b-20,220+c-2*abs(20-(bg_count/5)%40),760,0,490,300,255);
-	if(gd.scene_count==1){
-		if(dataNo==1 && face[gd.face_count]!=EOF)drawImage(scr,img.back,-b+60,160-2*abs(20-(bg_count/5)%40),0,1040,320,160,255);
-	}
-	fillRect(scr,0,0,640,40,0,0,0,255);
-	fillRect(scr,0,440,640,40,0,0,0,255);
-	if(start==0)drawTalking(scr);
-}
-
 void drawGameRecord(SDL_Surface* scr){
 	SDL_Color col=getSkyColor(fishbox.getH(),fishbox.getM());
 	fillRect(scr,0,0,640,480,col.r,col.g,col.b,255);

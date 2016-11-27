@@ -188,7 +188,8 @@ void initGame2(){
 
 	if(gd.game_mode==BOSS){
 		getImage(img.back,"file/img/epilogue.png",0,0,255);
-	}else{
+	}
+	else if(phase!=READY){
 		sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
 		loadCartoon(str);
 	}
@@ -350,46 +351,25 @@ void keyFinish(){
 
 void keyGetHazia(){
 	if(key.z && !key_stop(key.z)){
-		if(gd.scene_count==0 || gd.scene_count==2){
-			if(gd.text_count<(int)strlen(talk[gd.talk_count].str[CHAR_CODE])){
-				gd.text_count=90;
-			}
-			else if(gd.talk_open_count==0){
-				gd.text_count=0;
-				gd.talk_count++;
-				gd.face_count++;
-				if(face[gd.face_count]==COMMA){
-					if(gd.scene_count==0){
-						start=300;count=2;
-						gd.scene_count++;
-						gd.face_count++;
-						gd.hazia2=gd.score-indexName[dataNo-1].hiscore;
-						if(gd.hazia2<0)gd.hazia2=0;
-						freeMusic();
-						bgm=Mix_LoadMUS("file/bgm/13.ogg");
-						Mix_PlayMusic(bgm,-1);
-					}
-				}
-				if(face[gd.face_count]==SHAKE){
-					Mix_PlayChannel(0,sf.decide,0);
-					gd.shake_count=50;
-					gd.face_count++;
-				}
-				if(face[gd.face_count]==EOF){
-					gd.talk_count=EOF;
-					gd.talk_open_count=1;
-					gd.scene_count++;
-					count=2;
-				}
+		if(nextTalk()){
+			if(gd.scene_count==0){
+				start=300;count=2;
+				gd.hazia2=gd.score-indexName[dataNo-1].hiscore;
+				if(gd.hazia2<0)gd.hazia2=0;
+				freeMusic();
+				bgm=Mix_LoadMUS("file/bgm/13.ogg");
+				Mix_PlayMusic(bgm,-1);
+				gd.scene_count++;
 			}
 		}
-		else if(gd.scene_count==1){
+		if(gd.scene_count==1){
 			if(start==0 && gd.hazia2==0){
-				gd.scene_count++;
 				gd.text_count=0;
 				freeMusic();
 				bgm=Mix_LoadMUS("file/bgm/12.ogg");
 				Mix_PlayMusic(bgm,-1);
+				gd.scene_count++;
+				playtime=0;
 			}
 		}
 	}
@@ -405,7 +385,8 @@ void keyResult(){
 			else if(gd.game_mode==STORYMODE){
 				if(gd.week==6){
 					phase=GET_HAZIA;
-					start=200;
+					sprintf_s(str,"file/data/cartoon/end%d.json",dataNo);
+					loadCartoon(str);
 					gd.scene_count=0;
 				}else{
 					freeMusic();
@@ -1574,84 +1555,10 @@ void drawResult(SDL_Surface* scr){
 }
 
 void drawGetHazia(SDL_Surface *scr){
-	if(gd.scene_count==0 && start>0){
-		drawImage(scr,img.back,300-start/5,40,280,0,320,400,255);
-		drawImage(scr,img.back,260-(int)(start/2.5),160,600+((count/5)%2)*160,0,160,280,255);
-		drawImage(scr,img.back,20+start/5,40,0,0,280,400,255);
-		drawImage(scr,img.back,40+start/10,160,520,400,240,280,255);
-		fillRect(scr,0,0,640,40,0,0,0,255);
-		fillRect(scr,0,440,640,40,0,0,0,255);
-		fillRect(scr,0,0,60,480,0,0,0,255);
-		fillRect(scr,580,0,60,480,0,0,0,255);
-
-		if(start==1){
-			int a;
-			for(int i=0 ; i<200 ; i++)for(int j=0 ; j<200 ; j++){
-				a=255-(int)(255.0*(sqrt((100.0-i)*(100-i)+(100-j)*(100-j))/100));
-				if(a>0)fillRect(img.back,1240+i,j,1,1,a,a,0,255);
-			}
-		}
-	}
-	else if(gd.scene_count==0 || gd.scene_count>=2){
-		int a=0;
-		if(gd.scene_count==3)a=count;
-		drawImage(scr,img.back,180,40,120,400,280,320,255);
-		drawImage(scr,img.back,640-((count+70)%120)*12,240,600,280,320,120,255);
-		drawImage(scr,img.back,((count+20)%120)*12-320,280,920,320,320,80,255);
-
-		int X=0,Y=0,X2,Y2,W,H;
-
-		for(int k=0 ; k<2 ; k++){
-			if(k==0){X=((count+20)%120)*12-100;Y=240;}
-			if(k==1){X=540-((count+70)%120)*12;Y=280;}
-			X2=0;Y2=0;W=200;H=200;
-
-			illuminateImage(scr,img.back,X,Y,1240+X2,Y2,W,H,255);
-		}
-
-		drawImage(scr,img.back,240-a,120,600+((count/5)%2)*160,0,160,280,255);
-
-		Y=120;W=80;H=280;
-		X2=0;Y2=0;
-		int b=0;
-		if(count%120<40){
-			X=240-a;
-			b=(20-abs(20-count%120))*26;
-		}
-		if((count+50)%120<40){
-			X=320-a;X2=80;
-			b=(20-abs(20-(count+50)%120))*26;
-		}
-		if(b!=0){
-			illuminateImage(scr,img.back,X,Y,1280+X2,200+Y2,W,H,b);
-		}
-
-		drawImage(scr,img.back,60,40,0,400,120,320,255);
-		drawImage(scr,img.back,460,40,400,400,120,320,255);
-		if((count+70)%120<40)fillRect(scr,60,40,120,320,255,255,255,(20-abs(20-(count+70)%120))*13);
-		if((count+20)%120<40)fillRect(scr,460,40,120,320,255,255,255,(20-abs(20-(count+20)%120))*13);
-		fillRect(scr,0,0,640,40,0,0,0,255);
-		fillRect(scr,0,360,640,230,0,0,0,255);
-		fillRect(scr,0,0,60,480,0,0,0,255);
-		fillRect(scr,580,0,60,480,0,0,0,255);
-		drawTalking(scr);
-	}
-	else if(gd.scene_count==1){
+	drawAnimationCut(scr);
+	if(gd.scene_count==1){
 		int inc=gd.score-indexName[dataNo-1].hiscore;
 		if(inc<0)inc=0;
-		drawImage(scr,img.back,0,40,0,720,640,400,255);
-
-		int x1=0,y1=120,x2=280,y2=-40,x3=240,y3=200,x4=640,y4=0;
-		if(start<260){x1=-(260-start)*4;y1=120+(260-start)*4;}
-		if(start<280 && start>=180){x2=280+(280-start)*4;y2=-40-(280-start)*4;}
-		if(start<180 && start>=100){x2=600-(180-start)*4;y2=-360+(180-start)*4;}
-		if(start<280){x3=240+(280-start)*4;y3=200-(280-start)*4;}
-		if(start<180 && start>=100){x4=600-(180-start)*4;y4=-120+(180-start)*4;}
-		if(start<100){x4=280;y4=200;}
-		drawImage(scr,img.back,x1,y1,640,720,320,320,255);
-		drawImage(scr,img.back,x2,y2,960,720,320,320,255);
-		drawImage(scr,img.back,x3,y3,920,120,120,120,255);
-		drawImage(scr,img.back,x4,y4,1040,120,200,200,255);
 
 		fillRect(scr,0,0,640,40,0,0,0,255);
 		fillRect(scr,0,440,640,40,0,0,0,255);
@@ -1691,7 +1598,6 @@ void drawGetHazia(SDL_Surface *scr){
 		}
 		if(start<100 && start>=50){
 			int a=100-abs((start-50)-25)*4;
-			drawImage(scr,img.back,0,40,((count/2)%2)*640,1120,640,400,255);
 			drawImage_x(scr,img.back,220-a,180-a,(100.0+a)/100.0,920,0,200,120,255);
 		}
 		if(start<50 && start>0){
@@ -1701,8 +1607,6 @@ void drawGetHazia(SDL_Surface *scr){
 			sprintf_s(str,"(+%d)",gd.hazia2);
 			drawText(scr,460,360,str);
 		}
-	}else{
-		if(gd.scene_count==2)drawTalking(scr);
 	}
 }
 
@@ -2090,7 +1994,7 @@ void drawGame(SDL_Surface* scr){
 		if(phase==SAVING_RECORD && count>=150)drawText2(scr,160,60,text[EPILOGUE+5]);
 		if(phase==MANEKI)drawTalking(scr,1,text[ANTENNATEXT+17+gd.scene_count]);
 		else if(phase==MANEKI_CONFIRM)drawTalking(scr,1,text[ANTENNATEXT+24+gd.scene_count]);
-		else if(phase!=CALLING)drawAnimationCut(scr);
+		else if(phase==TALKING)drawAnimationCut(scr);
 
 		if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)drawThrowPhoto(scr);
 	}
@@ -2370,35 +2274,15 @@ void timerTodaysCrop(){
 }
 
 void timerGetHazia(){
-	if(gd.scene_count==0){
-		if(start==1){
-			if(dataNo==1)TalkingAt(3);
-			else TalkingAt(2);
-			gd.talk_open_count=1;
-		}
-	}
-	else if(gd.scene_count==1){
-		if(start==100)Mix_PlayChannel(0,sf.thunder,0);
-		if(start==0 && count%5==0 && gd.hazia2>0){
-			int a=1;
-			for(int i=0 ; i<10 ; i++){
-				if(gd.hazia2/a>=10)a*=10;
-			}
-			gd.hazia2-=a;
-			gd.hazia+=a;
-			if(gd.hazia2==0)Mix_PlayChannel(0,sf.coin,0);
-			else Mix_PlayChannel(0,sf.cursor_move,0);
-		}
-	}
-	else if(gd.scene_count==3){
-		if(count==100){
+	if(nextCut()){
+		if(gd.scene_count==2){
 			gd.text_count=0;
 			phase=END_YN;
 			if(indexName[dataNo-1].rate<100*gd.crops/works)indexName[dataNo-1].rate=100*gd.crops/works;
 			if(indexName[dataNo-1].rate>100)indexName[dataNo-1].rate=100;
 			if(indexName[dataNo-1].hiscore<gd.score)indexName[dataNo-1].hiscore=gd.score;
 			clear_num=1;
-			for(int i=0 ; i<index_num-1 ; i++){//ÅIƒ{ƒX–Ê‚Í•Û—¯
+			for(int i=0 ; i<index_num-1 ; i++){
 				if(indexName[i].rate<60)break;
 				clear_num++;
 			}

@@ -36,7 +36,7 @@
 #define CARTOON_FILLRECT_GRAD 34
 #define CARTOON_DRAWIMAGE_WAVE 35
 #define CARTOON_CACHE 36
-#define CARTOON_CACHE_TO 37
+#define CARTOON_DRAW_TO 37
 #define CARTOON_TURNBACK 38
 #define CARTOON_COL_R 39
 #define CARTOON_COL_G 40
@@ -57,6 +57,9 @@
 #define CARTOON_TIME 55
 #define CARTOON_ACT 56
 #define CARTOON_DATE 57
+#define CARTOON_TYPE 58
+#define CARTOON_CARLIGHT 59
+#define CARTOON_ILLUMINATE 60
 
 #define JSON_ARRAY_START 1
 #define JSON_STARTTIME 2
@@ -101,7 +104,7 @@ char *cartoonJson, cartoonBgmName[200];
 
 struct ObjectSetting{
 	double x,y,ix,iy,w,h,mag,alpha,shake;
-	int type,cacheTo,lang,img_id;
+	int type,drawTo,lang,img_id;
 	double R,G,B;
 	double gradRfrom,gradGfrom,gradBfrom;
 	double gradRto,gradGto,gradBto;
@@ -132,7 +135,7 @@ CartoonObject obj[1000];
 
 void resetObjectSetting(ObjectSetting &s){
 	s.x=0;s.y=0;s.ix=0;s.iy=0;s.w=0;s.h=0;
-	s.mag=1;s.alpha=255;s.shake=0;s.type=0;s.cacheTo=-1;s.lang=-1;
+	s.mag=1;s.alpha=255;s.shake=0;s.type=0;s.drawTo=-1;s.lang=-1;
 	s.R=0;s.G=0;s.B=0;s.img_id=0;
 	s.gradRfrom=0;s.gradGfrom=0;s.gradBfrom=0;
 	s.gradRto=0;s.gradGto=0;s.gradBto=0;
@@ -348,7 +351,7 @@ void loadCartoon(const char *filename){
 bool readCartoon(char *json, int timer){
 	int mode=JSON_ARRAY_START;
 	int datamode=0;
-	bool waitForNextTime=false;
+	bool waitForNextTime=false, end=false;
 
 	if(talkmode) {
 		mode=JSON_GETVALUE;
@@ -395,7 +398,7 @@ bool readCartoon(char *json, int timer){
 		else if(mode==JSON_GETVALUE) {
 			if(datamode==CARTOON_TIME) {
 				cartoonNextTime=fetchInt(c);
-				if(cartoonNextTime!=playtime) {
+				if(cartoonNextTime!=playtime || end) {
 					waitForNextTime=true;
 				}
 			}
@@ -415,8 +418,7 @@ bool readCartoon(char *json, int timer){
 				}
 			}
 			else if(datamode==CARTOON_ACT) {
-				bool end = readCartoonAct(json,timer);
-				if(end)return true;
+				end = readCartoonAct(json,timer);
 				if(talkmode){
 					break;
 				}
@@ -426,7 +428,7 @@ bool readCartoon(char *json, int timer){
 		else if(mode==JSON_NEXTDATA) {
 			if(*c==',') {
 				if(waitForNextTime){
-					return false;
+					break;
 				} else {
 					mode=JSON_GETNAME;
 				}
@@ -440,17 +442,17 @@ bool readCartoon(char *json, int timer){
 				mode=JSON_STARTTIME;
 			}
 			else if(*c==']') {
-				return true;
 			}
 		}
 		cartoonPointer++;
 	}
-	return false;
+	return end;
 }
 
 bool readCartoonAct(char *json, int timer){
 	int mode=JSON_DATA_START;
 	int datamode=0;
+	bool end=false;
 
 	if(talkmode) {
 		mode=JSON_GETVALUE;
@@ -549,7 +551,9 @@ bool readCartoonAct(char *json, int timer){
 				resetObject(json,timer);
 			}
 			else if(datamode==CARTOON_END) {
-				return true;
+				if(startsWith(c,"true")){
+					end=true;
+				}
 			}
 			else if(datamode==CARTOON_NOTE) {
 				fetchString(c, str);
@@ -561,7 +565,7 @@ bool readCartoonAct(char *json, int timer){
 				mode=JSON_GETNAME;
 			}
 			else if(*c=='}') {
-				return false;
+				return end;
 			}
 		}
 		cartoonPointer++;
@@ -636,11 +640,11 @@ void readSetObject(char *json, int timer){
 			else if(strcmp(str, "shake")==0) {
 				datamode=CARTOON_SHAKE;
 			}
-			else if(strcmp(str, "cache_to")==0) {
-				datamode=CARTOON_CACHE_TO;
+			else if(strcmp(str, "draw_to")==0) {
+				datamode=CARTOON_DRAW_TO;
 			}
-			else if(strcmp(str, "cache")==0) {
-				datamode=CARTOON_CACHE;
+			else if(strcmp(str, "type")==0) {
+				datamode=CARTOON_TYPE;
 			}
 			else if(strcmp(str, "lang")==0) {
 				datamode=CARTOON_LANG;
@@ -719,13 +723,14 @@ void readSetObject(char *json, int timer){
 				readWaveAnime(json,timer);
 				obj[this_id].set.type=CARTOON_DRAWIMAGE_WAVE;
 			}
-			else if(datamode==CARTOON_CACHE_TO) {
-				obj[this_id].set.cacheTo=fetchInt(c);
+			else if(datamode==CARTOON_DRAW_TO) {
+				obj[this_id].set.drawTo=fetchInt(c);
 			}
-			else if(datamode==CARTOON_CACHE) {
-				if(startsWith(c,"true")){
-					obj[this_id].set.type=CARTOON_CACHE;
-				}
+			else if(datamode==CARTOON_TYPE) {
+				fetchString(c,str);
+				if(strcmp(str, "carlight")==0)obj[this_id].set.type=CARTOON_CARLIGHT;
+				else if(strcmp(str, "cache")==0)obj[this_id].set.type=CARTOON_CACHE;
+				else if(strcmp(str, "illuminate")==0)obj[this_id].set.type=CARTOON_ILLUMINATE;
 			}
 			else if(datamode==CARTOON_LANG) {
 				fetchString(c,str);
@@ -1477,6 +1482,9 @@ void readStoryFile(char *json, int timer){
 				for(int i=0 ; i<1000 ; i++){
 					if(fc>=fsize)break;
 					for(int j=0 ; j<200 ; j++){
+						talk[i].str[lang][j]=0;
+					}
+					for(int j=0 ; j<200 ; j++){
 						talk[i].str[lang][j]=fstr[fc];fc++;
 						if(talk[i].str[lang][j]==0)break;
 					}
@@ -1510,7 +1518,6 @@ void readStoryFile(char *json, int timer){
 void readCartoonTalk(char *json, int timer){
 	int mode=JSON_ARRAY_START;
 	int datamode=0;
-
 	if(talkmode) {
 		mode=JSON_ENDDATA;
 	}
@@ -1590,7 +1597,7 @@ void readCartoonTalk(char *json, int timer){
 
 void readCartoonImage(char *json, int timer){
 	int mode=JSON_ARRAY_START;
-	int datamode=0, img_id=0;
+	int datamode=0, img_id=0, w=0, h=0;
 
 	while(json[cartoonPointer]) {
 		char *c = &json[cartoonPointer];
@@ -1616,6 +1623,12 @@ void readCartoonImage(char *json, int timer){
 			else if(strcmp(str, "file")==0) {
 				datamode=CARTOON_FILE;
 			}
+			else if(strcmp(str, "w")==0) {
+				datamode=CARTOON_W;
+			}
+			else if(strcmp(str, "h")==0) {
+				datamode=CARTOON_H;
+			}
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_COLON) {
@@ -1632,6 +1645,12 @@ void readCartoonImage(char *json, int timer){
 				freeImage(img.bg[img_id]);
 				getImage(img.bg[img_id],str,0,0,255);
 			}
+			else if(datamode==CARTOON_W) {
+				w=fetchInt(c);
+			}
+			else if(datamode==CARTOON_H) {
+				h=fetchInt(c);
+			}
 			mode=JSON_NEXTDATA;
 		}
 		else if(mode==JSON_NEXTDATA) {
@@ -1639,6 +1658,9 @@ void readCartoonImage(char *json, int timer){
 				mode=JSON_GETNAME;
 			}
 			else if(*c=='}') {
+				if(w!=0 && h!=0 && img.bg[img_id]==NULL){
+					img.bg[img_id]=new Image(w,h);
+				}
 				mode=JSON_ENDDATA;
 			}
 		}
@@ -2114,28 +2136,38 @@ void drawAnimationCut(SDL_Surface* scr){
 				drawImage_x(scr,img.cache,x,y,mag,ix,iy,w,h,a);
 			}
 		}else{
-			if(obj[i].set.cacheTo!=-1){
+			if(obj[i].set.drawTo!=-1){
 				if(obj[i].set.type==CARTOON_DRAWIMAGE){
 					if(mag==1){
-						drawImage(img.cache,img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+						drawImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
 					}else{
-						drawImage_x(img.cache,img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+						drawImage_x(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					}
+				}
+				if(obj[i].set.type==CARTOON_ILLUMINATE){
+					if(mag==1){
+						illuminateImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					}else{
+						illuminateImage_x(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
 					}
 				}
 				else if(obj[i].set.type==CARTOON_FILLRECT){
-					fillRect(img.cache,x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+					fillRect(img.bg[obj[i].set.drawTo],x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+				}
+				else if(obj[i].set.type==CARTOON_CARLIGHT){
+					drawLightBall(img.bg[obj[i].set.drawTo],x,y,w,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B);
 				}
 				else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
 					for(int j=0 ; j<h ; j++){
 						int R=(int)(obj[i].set.gradRfrom+(obj[i].set.gradRto-obj[i].set.gradRfrom)*j/h);
 						int G=(int)(obj[i].set.gradGfrom+(obj[i].set.gradGto-obj[i].set.gradGfrom)*j/h);
 						int B=(int)(obj[i].set.gradBfrom+(obj[i].set.gradBto-obj[i].set.gradBfrom)*j/h);
-						fillRect(img.cache,x,y+j,w,1,R,G,B,a);
+						fillRect(img.bg[obj[i].set.drawTo],x,y+j,w,1,R,G,B,a);
 					}
 				}
 				else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
 					for(int j=0 ; j<h ; j++){
-						drawImage(img.cache,img.bg[obj[i].set.img_id],x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
+						drawImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
 					}
 				}
 			}else{
@@ -2146,8 +2178,18 @@ void drawAnimationCut(SDL_Surface* scr){
 						drawImage_x(scr,img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
 					}
 				}
+				if(obj[i].set.type==CARTOON_ILLUMINATE){
+					if(mag==1){
+						illuminateImage(scr,img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					}else{
+						illuminateImage_x(scr,img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					}
+				}
 				else if(obj[i].set.type==CARTOON_FILLRECT){
 					fillRect(scr,x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+				}
+				else if(obj[i].set.type==CARTOON_CARLIGHT){
+					drawLightBall(scr,x,y,w,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B);
 				}
 				else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
 					for(int j=0 ; j<h ; j++){

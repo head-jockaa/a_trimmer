@@ -25,5 +25,7 @@ void illuminateImage_x(SDL_Surface* scr, Image* ima, int x, int y, double mag, i
 void illuminateImage_x(Image* scr, Image* ima, int x, int y, double mag, int x2, int y2, int w2, int h2, int a);
 void fillRect(SDL_Surface* scr, int x, int y, int w, int h, Uint8 R, Uint8 G, Uint8 B, int a);
 void fillRect(Image* scr, int x, int y, int w, int h, Uint8 R, Uint8 G, Uint8 B, int a);
+void drawLightBall(SDL_Surface* scr, int x, int y, int w, int R, int G, int B);
+void drawLightBall(Image* scr, int x, int y, int w, int R, int G, int B);
 
 #endif

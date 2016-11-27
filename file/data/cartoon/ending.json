@@ -584,17 +584,20 @@
   ]
 }}, {"time":3150, "act":{
   "reset":[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  "image":[
+    {"id":1, "w":640, "h":480}
+  ],
   "set":[
-    {"id":0, "x":0, "y":40, "w":640, "h":400, "col_grad_y":{"from":"0000c0", "to":"c8c8c0"}, "cache_to":9, "note":"sky"},
-    {"id":1, "x":0, "y":0, "ix":960, "iy":800, "w":640, "h":400, "cache_to":9, "note":"cloud"},
-    {"id":2, "x":0, "y":0, "ix":960, "iy":400, "w":640, "h":400, "cache_to":9, "note":"cloud"},
-    {"id":3, "x":0, "y":0, "ix":960, "iy":0, "w":640, "h":400, "cache_to":9, "note":"cloud"},
-    {"id":4, "x":280, "y":80, "ix":1000, "iy":1400, "w":160, "h":320, "a":0, "cache_to":9, "note":"sunbeam"},
-    {"id":5, "x":120, "y":160, "ix":1200, "iy":1200, "w":200, "h":300, "cache_to":9, "note":"rotation cat"},
-    {"id":6, "x":268, "y":90, "ix":640, "iy":1400, "w":104, "h":350, "cache_to":9, "note":"tv tower"},
-    {"id":7, "x":-190, "y":270, "ix":760, "iy":1700, "w":240, "h":240, "cache_to":9, "note":"cat"},
-    {"id":8, "x":580, "y":270, "ix":760, "iy":1460, "w":240, "h":240, "cache_to":9, "note":"dog"},
-    {"id":9, "x":-320, "y":-160, "ix":0, "iy":0, "w":640, "h":480, "mag":2, "cache":true},
+    {"id":0, "x":0, "y":40, "w":640, "h":400, "col_grad_y":{"from":"0000c0", "to":"c8c8c0"}, "draw_to":1, "note":"sky"},
+    {"id":1, "x":0, "y":0, "ix":960, "iy":800, "w":640, "h":400, "draw_to":1, "note":"cloud"},
+    {"id":2, "x":0, "y":0, "ix":960, "iy":400, "w":640, "h":400, "draw_to":1, "note":"cloud"},
+    {"id":3, "x":0, "y":0, "ix":960, "iy":0, "w":640, "h":400, "draw_to":1, "note":"cloud"},
+    {"id":4, "x":280, "y":80, "ix":1000, "iy":1400, "w":160, "h":320, "a":0, "draw_to":1, "note":"sunbeam"},
+    {"id":5, "x":120, "y":160, "ix":1200, "iy":1200, "w":200, "h":300, "draw_to":1, "note":"rotation cat"},
+    {"id":6, "x":268, "y":90, "ix":640, "iy":1400, "w":104, "h":350, "draw_to":1, "note":"tv tower"},
+    {"id":7, "x":-190, "y":270, "ix":760, "iy":1700, "w":240, "h":240, "draw_to":1, "note":"cat"},
+    {"id":8, "x":580, "y":270, "ix":760, "iy":1460, "w":240, "h":240, "draw_to":1, "note":"dog"},
+    {"id":9, "x":-320, "y":-160, "ix":0, "iy":0, "w":640, "h":480, "mag":2, "img_id":1, "note":"image buffer"},
     {"id":10, "x":0, "y":40, "w":640, "h":400, "col":"ffffff", "note":"fade in"}
   ],
   "move":[
