@@ -1,0 +1,194 @@
+[{"time":0, "act":{
+  "image":[
+    {"file":"file/img/result.png"}
+  ],
+  "load-sound":[
+    {"id":0, "file":"file/se/14.wav"},
+    {"id":1, "file":"file/se/25.wav"}
+  ],
+  "load-text": [
+    {"lang":"jp", "file":"file/data/story/talk2_jp.dat"},
+    {"lang":"en", "file":"file/data/story/talk2_en.dat"}
+  ],
+  "set":[
+    {"id":0, "x":260, "y":40, "ix":280, "iy":0, "w":320, "h":400, "note":"background"},
+    {"id":1, "x":180, "y":160, "ix":600, "iy":0, "w":160, "h":280, "note":"rotation cat"},
+    {"id":2, "x":60, "y":40, "ix":0, "iy":0, "w":280, "h":400, "note":"wall"},
+    {"id":3, "x":60, "y":160, "ix":520, "iy":400, "w":240, "h":280, "note":"cat"},
+    {"id":4, "x":0, "y":0, "w":640, "h":40, "col":"000000", "note":"frame"},
+    {"id":5, "x":0, "y":440, "w":640, "h":40, "col":"000000", "note":"frame"},
+    {"id":6, "x":0, "y":0, "w":60, "h":480, "col":"000000", "note":"frame"},
+    {"id":7, "x":580, "y":0, "w":60, "h":480, "col":"000000", "note":"frame"}
+  ],
+  "move":[
+    {"id":0, "x":0.2},
+    {"id":1, "x":0.4, "flip":{"in":5, "ix":160, "n":2}},
+    {"id":2, "x":-0.2},
+    {"id":3, "x":-0.1}
+  ]
+}}, {"time":200, "act":{
+  "reset":[0, 1, 2, 3, 4, 5, 6, 7],
+  "image":[
+    {"id":1, "w":200, "h":200}
+  ],
+  "set":[
+    {"id":0, "x":180, "y":40, "ix":120, "iy":400, "w":280, "h":320, "note":"background"},
+    {"id":1, "x":-800, "y":240, "ix":600, "iy":280, "w":320, "h":120, "note":"car"},
+    {"id":2, "x":-320, "y":280, "ix":920, "iy":320, "w":320, "h":80, "note":"car"},
+    {"id":3, "x":-900, "y":240, "ix":0, "iy":0, "w":200, "h":200, "img_id":1, "type":"illuminate", "note":"car"},
+    {"id":4, "x":-220, "y":280, "ix":0, "iy":0, "w":200, "h":200, "img_id":1, "type":"illuminate", "note":"car"},
+    {"id":5, "x":240, "y":120, "ix":600, "iy":0, "w":160, "h":280, "note":"rotation cat"},
+    {"id":6, "x":60, "y":40, "ix":0, "iy":400, "w":120, "h":320, "note":"wall"},
+    {"id":7, "x":240, "y":120, "ix":1280, "iy":200, "w":80, "h":280, "a":0, "type":"illuminate", "note":"reflect on cat"},
+    {"id":8, "x":320, "y":120, "ix":1360, "iy":200, "w":80, "h":280, "a":0, "type":"illuminate", "note":"reflect on cat"},
+    {"id":9, "x":460, "y":40, "ix":400, "iy":400, "w":120, "h":320, "note":"wall"},
+    {"id":10, "x":60, "y":40, "w":120, "h":320, "col":"ffffff", "a":0, "note":"reflect on wall"},
+    {"id":11, "x":460, "y":40, "w":120, "h":320, "col":"ffffff", "a":0, "note":"reflect on wall"},
+    {"id":12, "x":0, "y":0, "w":640, "h":40, "col":"000000", "note":"frame"},
+    {"id":13, "x":0, "y":360, "w":640, "h":230, "col":"000000", "note":"frame"},
+    {"id":14, "x":0, "y":0, "w":60, "h":480, "col":"000000", "note":"frame"},
+    {"id":15, "x":580, "y":0, "w":60, "h":480, "col":"000000", "note":"frame"},
+    {"id":16, "x":0, "y":0, "w":200, "col":"ffff00", "draw_to":1, "type":"carlight", "note":"car light"}
+  ],
+  "move":[
+    {"id":1, "slide":{"x":{"step":-12, "from":0, "to":1440, "pos":840, "turnback":false}}},
+    {"id":2, "slide":{"x":{"step":12, "from":0, "to":1440, "pos":240, "turnback":false}}},
+    {"id":3, "slide":{"x":{"step":-12, "from":0, "to":1440, "pos":840, "turnback":false}}},
+    {"id":4, "slide":{"x":{"step":12, "from":0, "to":1440, "pos":240, "turnback":false}}},
+    {"id":5, "flip":{"in":5, "ix":160, "n":2}},
+    {"id":7, "slide":{"a":{"step":26, "from":-1040, "to":520, "pos":0}}},
+    {"id":8, "slide":{"a":{"step":-26, "from":-1040, "to":520, "pos":-260}}},
+    {"id":10, "slide":{"a":{"step":-13, "from":-520, "to":260, "pos":260}}},
+    {"id":11, "slide":{"a":{"step":13, "from":-520, "to":260, "pos":-390}}}
+  ],
+  "talk":[
+    {"face":6, "text":1}
+  ],
+  "end":true
+}}, {"time":0, "act":{
+  "reset":[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+  "set":[
+    {"id":0, "x":0, "y":40, "ix":0, "iy":720, "w":640, "h":400, "note":"background"},
+    {"id":1, "x":0, "y":120, "ix":640, "iy":720, "w":320, "h":320, "note":"cat paw"},
+    {"id":2, "x":280, "y":-40, "ix":960, "iy":720, "w":320, "h":320, "note":"cat paw"},
+    {"id":3, "x":240, "y":200, "ix":920, "iy":120, "w":120, "h":120, "note":"usb memory"},
+    {"id":4, "x":640, "y":-180, "ix":1040, "iy":120, "w":200, "h":200, "note":"bag"},
+    {"id":6, "x":0, "y":0, "w":640, "h":40, "col":"000000", "note":"frame"},
+    {"id":7, "x":0, "y":440, "w":640, "h":40, "col":"000000", "note":"frame"}
+  ]
+}}, {"time":20, "act":{
+  "move":[
+    {"id":2, "x":4, "y":-4},
+    {"id":3, "x":4, "y":-4}
+  ]
+}}, {"time":40, "act":{
+  "move":[
+    {"id":1, "x":-4, "y":4}
+  ]
+}}, {"time":120, "act":{
+  "move":[
+    {"id":2, "x":-4, "y":4},
+    {"id":4, "x":-4, "y":4}
+  ]
+}}, {"time":200, "act":{
+  "set":[
+    {"id":5, "x":0, "y":40, "ix":0, "iy":1120, "w":640, "h":400, "note":"boom"}
+  ],
+  "sound":{"id":0, "ch":1},
+  "move":[
+    {"id":2, "x":0, "y":0},
+    {"id":4, "x":0, "y":0},
+    {"id":5, "x":0, "y":0, "flip":{"in":2, "ix":640, "n":2}}
+  ]
+}}, {"time":250, "act":{
+  "reset":[5]
+}}, {"time":0, "act":{
+  "reset":[0, 1, 2, 3, 4, 6, 7],
+  "set":[
+    {"id":0, "x":180, "y":40, "ix":120, "iy":400, "w":280, "h":320, "note":"background"},
+    {"id":1, "x":-800, "y":240, "ix":600, "iy":280, "w":320, "h":120, "note":"car"},
+    {"id":2, "x":-320, "y":280, "ix":920, "iy":320, "w":320, "h":80, "note":"car"},
+    {"id":3, "x":-900, "y":240, "ix":0, "iy":0, "w":200, "h":200, "img_id":1, "type":"illuminate", "note":"car"},
+    {"id":4, "x":-220, "y":280, "ix":0, "iy":0, "w":200, "h":200, "img_id":1, "type":"illuminate", "note":"car"},
+    {"id":5, "x":240, "y":120, "ix":600, "iy":0, "w":160, "h":280, "note":"rotation cat"},
+    {"id":6, "x":60, "y":40, "ix":0, "iy":400, "w":120, "h":320, "note":"wall"},
+    {"id":7, "x":240, "y":120, "ix":1280, "iy":200, "w":80, "h":280, "a":0, "type":"illuminate", "note":"reflect on cat"},
+    {"id":8, "x":320, "y":120, "ix":1360, "iy":200, "w":80, "h":280, "a":0, "type":"illuminate", "note":"reflect on cat"},
+    {"id":9, "x":460, "y":40, "ix":400, "iy":400, "w":120, "h":320, "note":"wall"},
+    {"id":10, "x":60, "y":40, "w":120, "h":320, "col":"ffffff", "a":0, "note":"reflect on wall"},
+    {"id":11, "x":460, "y":40, "w":120, "h":320, "col":"ffffff", "a":0, "note":"reflect on wall"},
+    {"id":12, "x":0, "y":0, "w":640, "h":40, "col":"000000", "note":"frame"},
+    {"id":13, "x":0, "y":360, "w":640, "h":230, "col":"000000", "note":"frame"},
+    {"id":14, "x":0, "y":0, "w":60, "h":480, "col":"000000", "note":"frame"},
+    {"id":15, "x":580, "y":0, "w":60, "h":480, "col":"000000", "note":"frame"},
+    {"id":16, "x":0, "y":0, "w":200, "col":"ffff00", "draw_to":1, "type":"carlight", "note":"car light"}
+  ],
+  "move":[
+    {"id":1, "slide":{"x":{"step":-12, "from":0, "to":1440, "pos":840, "turnback":false}}},
+    {"id":2, "slide":{"x":{"step":12, "from":0, "to":1440, "pos":240, "turnback":false}}},
+    {"id":3, "slide":{"x":{"step":-12, "from":0, "to":1440, "pos":840, "turnback":false}}},
+    {"id":4, "slide":{"x":{"step":12, "from":0, "to":1440, "pos":240, "turnback":false}}},
+    {"id":5, "flip":{"in":5, "ix":160, "n":2}},
+    {"id":7, "slide":{"a":{"step":26, "from":-1040, "to":520, "pos":0}}},
+    {"id":8, "slide":{"a":{"step":-26, "from":-1040, "to":520, "pos":-260}}},
+    {"id":10, "slide":{"a":{"step":13, "from":-520, "to":260, "pos":-390}}},
+    {"id":11, "slide":{"a":{"step":-13, "from":-520, "to":260, "pos":260}}}
+  ],
+  "talk":[
+    {"face":6, "text":2}
+  ]
+}}, {"time":0, "act":{
+  "move":[
+    {"id":5, "x":-1},
+    {"id":7, "x":-1},
+    {"id":8, "x":-1}
+  ]
+}}, {"time":100, "act":{
+  "reset":[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+  "set":[
+    {"id":0, "x":0, "y":0, "w":640, "h":480, "col":"000000", "note":"clear screen"}
+  ],
+  "end":true
+}}, {"time":0, "act":{
+  "image":[
+    {"file":"file/img/shore.png"}
+  ],
+  "bgm": {"file":"file/bgm/4.ogg"},
+  "set":[
+    {"id":0, "x":0, "y":40, "w":640, "h":400, "col":"000000", "note":"night sky"},
+    {"id":1, "x":-20, "y":40, "ix":0, "iy":340, "w":680, "h":400, "a":192, "note":"cloud"},
+    {"id":2, "x":-20, "y":180, "ix":0, "iy":540, "w":680, "h":260, "note":"shore"},
+    {"id":3, "x":-20, "y":210, "ix":760, "iy":300, "w":490, "h":180, "note":"cat"},
+    {"id":4, "x":-20, "y":210, "ix":760, "iy":480, "w":490, "h":180, "note":"dog"},
+    {"id":5, "x":160, "y":230, "ix":760, "iy":660, "w":120, "h":140, "a":0, "note":"cat"},
+    {"id":6, "x":200, "y":-560, "ix":880, "iy":660, "w":20, "h":140, "note":"megaman-like"},
+    {"id":7, "x":-20, "y":210, "ix":760, "iy":0, "w":490, "h":300, "note":"boat"},
+    {"id":8, "x":0, "y":0, "w":640, "h":40, "col":"000000", "note":"letter box"},
+    {"id":9, "x":0, "y":440, "w":640, "h":40, "col":"000000", "note":"letter box"}
+   ],
+  "sound":{"id":1, "ch":0},
+  "move":[
+    {"id":3, "slide":{"y":{"step":0.4, "from":-10, "to":10}}},
+    {"id":4, "slide":{"y":{"step":0.4, "from":-10, "to":10}}},
+    {"id":5, "slide":{"y":{"step":0.4, "from":-10, "to":10}}},
+    {"id":6, "y":8, "slide":{"y":{"step":0.4, "from":-10, "to":10}}},
+    {"id":7, "slide":{"y":{"step":0.4, "from":-10, "to":10}}}
+  ]
+}}, {"time":100, "act":{
+  "reset":[6],
+  "set":[
+    {"id":5, "a":255}
+   ],
+  "talk":[
+    {"face":1, "text":3}
+  ]
+}}, {"time":0, "act":{
+  "move":[
+    {"id":3, "x":-4},
+    {"id":4, "x":-4},
+    {"id":5, "x":-4},
+    {"id":7, "x":-4}
+  ]
+}}, {"time":100, "act":{
+  "end":true
+}}]
