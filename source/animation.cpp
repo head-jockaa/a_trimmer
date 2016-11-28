@@ -1277,6 +1277,8 @@ void readSlideAnime(char *json, int timer){
 					if(obj[this_id].slideX.step<0){
 						obj[this_id].slideX.step*=-1;
 						obj[this_id].slideX.back=true;
+					}else{
+						obj[this_id].slideX.back=false;
 					}
 				}
 				else if(datamode1==CARTOON_Y){
@@ -1284,6 +1286,8 @@ void readSlideAnime(char *json, int timer){
 					if(obj[this_id].slideY.step<0){
 						obj[this_id].slideY.step*=-1;
 						obj[this_id].slideY.back=true;
+					}else{
+						obj[this_id].slideY.back=false;
 					}
 				}
 				else if(datamode1==CARTOON_IX){
@@ -1291,6 +1295,8 @@ void readSlideAnime(char *json, int timer){
 					if(obj[this_id].slideIX.step<0){
 						obj[this_id].slideIX.step*=-1;
 						obj[this_id].slideIX.back=true;
+					}else{
+						obj[this_id].slideIX.back=false;
 					}
 				}
 				else if(datamode1==CARTOON_IY){
@@ -1298,6 +1304,8 @@ void readSlideAnime(char *json, int timer){
 					if(obj[this_id].slideIY.step<0){
 						obj[this_id].slideIY.step*=-1;
 						obj[this_id].slideIY.back=true;
+					}else{
+						obj[this_id].slideIY.back=false;
 					}
 				}
 				else if(datamode1==CARTOON_MAG){
@@ -1305,6 +1313,8 @@ void readSlideAnime(char *json, int timer){
 					if(obj[this_id].slideMag.step<0){
 						obj[this_id].slideMag.step*=-1;
 						obj[this_id].slideMag.back=true;
+					}else{
+						obj[this_id].slideMag.back=false;
 					}
 				}
 				else if(datamode1==CARTOON_ALPHA){
@@ -1312,6 +1322,8 @@ void readSlideAnime(char *json, int timer){
 					if(obj[this_id].slideAlpha.step<0){
 						obj[this_id].slideAlpha.step*=-1;
 						obj[this_id].slideAlpha.back=true;
+					}else{
+						obj[this_id].slideAlpha.back=false;
 					}
 				}
 			}

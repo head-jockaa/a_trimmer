@@ -23,12 +23,9 @@ void initEnding(){
 void initMedalAward(int n){
 	count=0;
 	which_medal=n;
-	phase=COME_TORISHIMA;
-	load_story(0);
-	TalkingAt(25+n);
-	sf.thunder=Mix_LoadWAV("file/se/14.wav");
-	sf.tub=Mix_LoadWAV("file/se/13.wav");
-	sf.sunset=Mix_LoadWAV("file/se/15.ogg");
+	phase=GET_MEDAL;
+	sprintf_s(str,"file/data/cartoon/medal%d.json",which_medal+1);
+	loadCartoon(str);
 	sf.alarm=NULL;sf.noize=NULL;sf.swish=NULL;
 }
 
@@ -139,29 +136,20 @@ void keyWarning(){
 }
 
 void keyEnding(){
-	if(phase==LEAVE_SHORE){
+	if(phase==LEAVE_SHORE || phase==GET_MEDAL){
 		if(key.z && !key_stop(key.z)){
 			if(nextTalk()){
 			}
 		}
 	}
-	else if(phase==GET_MEDAL || phase==ANIME_GOD || phase==LAST_STORY){
+	else if(phase==ANIME_GOD || phase==LAST_STORY){
 		bool ok=true;
 		if(phase==ANIME_GOD && gd.scene_count==1)ok=false;
 		if(phase==LAST_STORY && start!=0)ok=false;
 		if(key.z && !key_stop(key.z) && ok){
 			int a=controlTalking();
 			if(a==COMMA){
-				if(phase==GET_MEDAL){
-					if(gd.scene_count==1){
-						gd.shake_count=50;count=0;
-					}
-					if(gd.scene_count==2){
-						gd.shake_count=50;
-						Mix_PlayChannel(1,sf.thunder,0);
-					}
-				}
-				else if(phase==ANIME_GOD)start=150;
+				if(phase==ANIME_GOD)start=150;
 				else if(phase==LAST_STORY){
 					if(gd.scene_count==4)start=800;
 					else start=100;
@@ -169,15 +157,7 @@ void keyEnding(){
 				else count=0;
 			}
 			else if(a==EOF){
-				if(phase==LEAVE_SHORE){
-					start=100;
-				}
-				else if(phase==GET_MEDAL){
-					if(which_medal!=0 && count<20)Mix_PlayChannel(1,sf.decide,0);
-					phase=LEAVE_TORISHIMA;
-					count=0;
-				}
-				else if(phase==LAST_STORY){
+				if(phase==LAST_STORY){
 					if(movie_test){
 						endTitle();
 						initMiyazaki();
@@ -209,22 +189,8 @@ void timerLeaveShore(){
 	}
 }
 
-void timerComeTorishima(){
-	if(count==125)phase=GET_MEDAL;
-}
-
 void timerGetMedal(){
-	if(which_medal!=0){
-		if(gd.scene_count==1 && count==20)Mix_PlayChannel(1,sf.tub,0);
-	}
-}
-
-void timerLeaveTorishima(){
-	if(which_medal==0){
-		if(count==1)Mix_PlayChannel(1,sf.tub,0);
-		if(count==150)Mix_PlayChannel(1,sf.sunset,0);
-	}
-	if((which_medal!=0 && count==100) || count==500){
+	if(nextCut()){
 		if(movie_test){
 			endEnding();
 			initMiyazaki();
@@ -237,9 +203,7 @@ void timerLeaveTorishima(){
 			endEnding();
 			if(which_medal==0){
 				initGame();
-				load_story(dataNo);
 				initGame2();
-				head_of_talking();
 				head_of_timeslot();
 				gd.talk_count=EOF;
 				kick_count=0;
@@ -410,101 +374,11 @@ void timerLastEnding(){
 
 void timerEnding(){
 	if(phase==LEAVE_SHORE)timerLeaveShore();
-	else if(phase==COME_TORISHIMA)timerComeTorishima();
 	else if(phase==GET_MEDAL)timerGetMedal();
-	else if(phase==LEAVE_TORISHIMA)timerLeaveTorishima();
 	else if(phase==ANIME_GOD)timerAnimeGod();
 	else if(phase==LAST_STORY)timerLastStory();
 	else if(phase==PRE_ENDING_ANIME || phase==ENDING_ANIME)timerEndingAnime();
 	else if(phase==LAST_ENDING)timerLastEnding();
-	if(phase==LEAVE_SHORE || phase==GET_MEDAL || phase==ANIME_GOD || phase==LAST_STORY){
-	  if(start==0 || (phase==ANIME_GOD && start<50))controlTextCount(true);
-	  else controlTextCount(false);
-	}else{
-		controlTextCount(false);
-	}
-}
-
-void drawTryAgain(SDL_Surface* scr){
-	int a=512;
-	if(count<200)a=0;
-	else if(count<250)a=(count-200)*10;
-	fillRect(scr,0,0,640,480,0,0,0,255);
-	drawImage(scr,img.back,420,360,1040,1120,220,60,255);
-	for(int i=0 ; i<220 ; i++){
-		drawImage(scr,img.back,420+i,360,1040+i,1180,2,60,-10*abs(25-i%50)+a);
-	}
-	if(count>250){
-		if(count<300){
-			for(int i=-2 ; i<=2 ; i++)drawImage(scr,img.back,420+i*(300-count)/5,360,1040,1240,30,60,50);
-		}
-		else drawImage(scr,img.back,420,360,1040,1240,30,60,255);
-	}
-	if(count>270){
-		if(count<320){
-			for(int i=-2 ; i<=2 ; i++)drawImage(scr,img.back,540+i*(320-count)/5,360,1160,1240,20,60,50);
-		}
-		else drawImage(scr,img.back,540,360,1160,1240,20,60,255);
-	}
-	if(count>260){
-		if(count<310){
-			for(int i=-2 ; i<=2 ; i++)drawImage(scr,img.back,600+i*(310-count)/5,360,1220,1240,30,60,50);
-		}
-		else drawImage(scr,img.back,600,360,1220,1240,30,60,255);
-	}
-	if(count>300)drawImage(scr,img.back,420,360,1040,1240,220,60,(count-300)*15);
-}
-
-void drawTorishima(SDL_Surface *scr){
-	fillRect(scr,0,60,640,1360,96,136,216,255);
-	drawImage(scr,img.back,0,240,0,800,640,240,255);
-	if(face[gd.face_count]==12)drawImage(scr,img.back,580,300,640,1240+abs((count/5)%2)*60,60,60,255);
-	else drawImage(scr,img.back,580,300,640,1060+abs(2-(count/10)%4)*60,60,60,255);
-	if(which_medal==0){
-		if(gd.scene_count>=1)drawImage(scr,img.back,560,140,640,980,80,80,255);
-		if(gd.scene_count==2 && phase==GET_MEDAL)drawImage(scr,img.back,240,180,720,800+((count/5)%2)*240,320,240,255);
-	}
-	if(phase==COME_TORISHIMA){
-		drawImage(scr,img.back,-500+count*4,220-abs(20-(count/5)%40)*2,760,300,490,180,255);
-		drawImage(scr,img.back,-500+count*4,220-abs(20-(count/5)%40)*2,760,480,490,180,255);
-		drawImage(scr,img.back,-320+count*4,240-abs(20-(count/5)%40)*2,760,660,120,140,255);
-		drawImage(scr,img.back,-500+count*4,220-abs(20-(count/5)%40)*2,760,0,490,300,255);
-	}
-	else if(phase==LEAVE_TORISHIMA){
-		if(which_medal==0){
-			if(count<150){
-				drawImage(scr,img.back,160,240,1040,800+((count/5)%2)*160,200,160,255);
-				if(count>100)fillRect(scr,0,0,640,480,0,0,0,(count-100)*5);
-			}
-			else drawTryAgain(scr);
-		}else{
-			drawImage(scr,img.back,-count*4,220-abs(20-(count/5)%40)*2,760,300,490,180,255);
-			drawImage(scr,img.back,-count*4,220-abs(20-(count/5)%40)*2,760,480,490,180,255);
-			drawImage(scr,img.back,180-count*4,240-abs(20-(count/5)%40)*2,760,660,120,140,255);
-			drawImage(scr,img.back,-count*4,220-abs(20-(count/5)%40)*2,760,0,490,300,255);
-		}
-	}else{
-		drawImage(scr,img.back,0,220-abs(20-(count/5)%40)*2,760,300,490,180,255);
-		drawImage(scr,img.back,0,220-abs(20-(count/5)%40)*2,760,480,490,180,255);
-		drawImage(scr,img.back,180,240-abs(20-(count/5)%40)*2,760,660,120,140,255);
-		drawImage(scr,img.back,0,220-abs(20-(count/5)%40)*2,760,0,490,300,255);
-	}
-	if(which_medal!=0){
-		int a=(which_medal-1);
-		if(phase==LEAVE_TORISHIMA){
-			drawImage_x(scr,img.back,240-count*4,200-abs(20-(count/5)%40)*2,4,640,800+a*60,60,60,255);
-		}else{
-			if(gd.scene_count==0)drawImage(scr,img.back,500,280-abs(10-(count/3)%20)*2,640,800+a*60,60,60,255);
-			if(gd.scene_count==1){
-				if(count<20)drawImage_x(scr,img.back,480-count*12,280-count*4-abs(20-(count/5)%40)*2,2.0+count/10.0,640,800+a*60,60,60,255);
-				else drawImage_x(scr,img.back,240,200-abs(20-(count/5)%40)*2,4,640,800+a*60,60,60,255);
-			}
-		}
-	}
-	fillRect(scr,0,0,640,60,0,0,0,255);
-	fillRect(scr,0,420,640,60,0,0,0,255);
-	if(which_medal!=0)drawText(scr,200,0,text[EPILOGUE+3]);
-	if(phase==GET_MEDAL)drawTalking(scr);
 }
 
 void drawEndingExplain(SDL_Surface* scr){
@@ -561,10 +435,11 @@ void drawEnding(SDL_Surface* scr){
 	else if(phase==LAST_STORY){
 		drawLastStory(scr);
 	}
-	else if(phase==LEAVE_SHORE){
-		drawAnimationCut(scr);
+	else drawAnimationCut(scr);
+
+	if(phase==GET_MEDAL){
+		if(which_medal!=0)drawText(scr,200,0,text[EPILOGUE+3]);
 	}
-	else drawTorishima(scr);
 }
 
 void drawAnimeGod(SDL_Surface* scr){

@@ -4,9 +4,7 @@
 #include "util.h"
 
 #define LEAVE_SHORE 0
-#define COME_TORISHIMA 1
 #define GET_MEDAL 2
-#define LEAVE_TORISHIMA 3
 #define PRE_ENDING_ANIME 4
 #define ENDING_ANIME 5
 #define WARNING 6

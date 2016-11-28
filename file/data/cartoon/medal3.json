@@ -1,0 +1,92 @@
+[{"time":0, "act":{
+  "image":[
+    {"file":"file/img/shore.png"}
+  ],
+  "load-sound":[
+    {"id":0, "file":"file/se/13.wav"}
+  ],
+  "bgm": {"file":"file/bgm/4.ogg"},
+  "load-text": [
+    {"lang":"jp", "file":"file/data/story/talk0_jp.dat"},
+    {"lang":"en", "file":"file/data/story/talk0_en.dat"}
+  ],
+  "set":[
+    {"id":0, "x":0, "y":60, "w":640, "h":400, "col":"6088d8", "note":"night sky"},
+    {"id":1, "x":0, "y":240, "ix":0, "iy":800, "w":640, "h":240, "note":"background"},
+    {"id":2, "x":580, "y":300, "ix":640, "iy":1060, "w":60, "h":60, "note":"monkey"},
+    {"id":3, "x":-500, "y":210, "ix":760, "iy":300, "w":490, "h":180, "note":"cat"},
+    {"id":4, "x":-500, "y":210, "ix":760, "iy":480, "w":490, "h":180, "note":"dog"},
+    {"id":5, "x":-320, "y":230, "ix":760, "iy":660, "w":120, "h":140, "note":"cat"},
+    {"id":6, "x":-500, "y":210, "ix":760, "iy":0, "w":490, "h":300, "note":"boat"},
+    {"id":7, "x":500, "y":200, "ix":640, "iy":860, "w":60, "h":60, "note":"silver medal"},
+    {"id":8, "x":0, "y":0, "w":640, "h":60, "col":"000000", "note":"letter box"},
+    {"id":9, "x":0, "y":420, "w":640, "h":60, "col":"000000", "note":"letter box"}
+   ],
+  "move":[
+    {"id":2, "flip":{"in":10, "iy":60, "n":3}},
+    {"id":3, "x":4, "slide":{"y":{"step":0.4, "from":-10, "to":10}}},
+    {"id":4, "x":4, "slide":{"y":{"step":0.4, "from":-10, "to":10}}},
+    {"id":5, "x":4, "slide":{"y":{"step":0.4, "from":-10, "to":10}}},
+    {"id":6, "x":4, "slide":{"y":{"step":0.4, "from":-10, "to":10}}},
+    {"id":7, "slide":{"y":{"step":1.5, "from":-21, "to":21}}}
+  ]
+}}, {"time":125, "act":{
+  "move":[
+    {"id":3, "x":0},
+    {"id":4, "x":0},
+    {"id":5, "x":0},
+    {"id":6, "x":0}
+  ],
+  "talk":[
+    {"face":1, "text":70},
+    {"face":13, "text":71},
+    {"face":1, "text":72}
+  ]
+}}, {"time":0, "act":{
+  "set":[
+    {"id":2, "iy":1240}
+   ],
+  "move":[
+    {"id":2, "flip":{"in":5, "iy":60, "n":2}}
+   ],
+  "talk":[
+    {"face":12, "text":73, "shake":true}
+  ]
+}}, {"time":0, "act":{
+  "move":[
+    {"id":7, "x":-12, "y":-4, "mag":0.1, "flip":{"n":0}}
+  ]
+}}, {"time":20, "act":{
+  "set":[
+    {"id":2, "iy":1060}
+  ],
+  "move":[
+    {"id":2, "flip":{"in":10, "iy":60, "n":3}},
+    {"id":3, "slide":{"y":{"step":0.4, "pos":0}}},
+    {"id":4, "slide":{"y":{"step":0.4, "pos":0}}},
+    {"id":5, "slide":{"y":{"step":0.4, "pos":0}}},
+    {"id":6, "slide":{"y":{"step":0.4, "pos":0}}},
+    {"id":7, "x":0, "y":0, "mag":0, "slide":{"y":{"step":0.4, "from":-10, "to":10, "pos":0}}}
+  ],
+  "sound":{"id":0, "ch":0},
+  "talk":[
+    {"face":13, "text":74}
+  ]
+}}, {"time":0, "act":{
+  "move":[
+    {"id":3, "x":-4},
+    {"id":4, "x":-4},
+    {"id":5, "x":-4},
+    {"id":6, "x":-4},
+    {"id":7, "x":-4}
+  ]
+}}, {"time":100, "act":{
+  "set":[
+    {"id":10, "x":0, "y":60, "w":640, "h":400, "col":"000000", "a":0, "note":"fade out"}
+  ],
+  "move":[
+    {"id":10, "a":13}
+  ]
+}}, {"time":120, "act":{
+  "end":true
+}}]
