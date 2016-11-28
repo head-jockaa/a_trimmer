@@ -60,6 +60,8 @@
 #define CARTOON_TYPE 58
 #define CARTOON_CARLIGHT 59
 #define CARTOON_ILLUMINATE 60
+#define CARTOON_RESET_TIMER 61
+#define CARTOON_SYNC 62
 
 #define JSON_ARRAY_START 1
 #define JSON_STARTTIME 2
@@ -98,7 +100,7 @@ int playtime,cartoonNextTime;
 int timestamp,loadtime,pausetime;
 int max_obj,this_id;
 int call_week,call_hour,call_minute;
-bool talkmode=false,skipThisTime=false;
+bool talkmode=false,skipThisTime=false,cartoonSync=false;
 size_t cartoonJsonSize,cartoonPointer;
 char *cartoonJson, cartoonBgmName[200];
 
@@ -323,18 +325,18 @@ void freeCartoon(){
 	cartoonNextTime=0;
 	skipThisTime=false;
 	talkmode=false;
+	cartoonSync=false;
 	call_week=-1;call_hour=-1;call_minute=-1;
-	if(cartoonJsonSize)delete [] cartoonJson;
+	if(cartoonJsonSize){
+		delete [] cartoonJson;
+		cartoonJsonSize=0;
+	}
 	for(int i=0 ; i<1000 ; i++){
 		resetObject(i);
 	}
 	for(int i=0 ; i<10 ; i++){
 		freeImage(img.bg[i]);
 		freeSound(sf.sound[i]);
-	}
-	if(cartoonBgmName[0]!=0){
-		freeMusic();
-		cartoonBgmName[0]=0;
 	}
 }
 
@@ -345,7 +347,6 @@ void loadCartoon(const char *filename){
 	cartoonJson=new char[cartoonJsonSize];
 	strcpy_s(cartoonJson,fstr);
 	nextCut();
-	loadtime=SDL_GetTicks();
 }
 
 bool readCartoon(char *json, int timer){
@@ -495,8 +496,14 @@ bool readCartoonAct(char *json, int timer){
 			else if(strcmp(str, "talk")==0) {
 				datamode=CARTOON_TALK;
 			}
+			else if(strcmp(str, "reset-timer")==0) {
+				datamode=CARTOON_RESET_TIMER;
+			}
 			else if(strcmp(str, "reset")==0) {
 				datamode=CARTOON_RESET;
+			}
+			else if(strcmp(str, "sync")==0) {
+				datamode=CARTOON_SYNC;
 			}
 			else if(strcmp(str, "end")==0) {
 				datamode=CARTOON_END;
@@ -547,8 +554,20 @@ bool readCartoonAct(char *json, int timer){
 					break;
 				}
 			}
+			else if(datamode==CARTOON_RESET_TIMER) {
+				playtime=fetchInt(c);
+			}
 			else if(datamode==CARTOON_RESET) {
 				resetObject(json,timer);
+			}
+			else if(datamode==CARTOON_SYNC) {
+				if(startsWith(c,"true")){
+					loadtime=SDL_GetTicks();
+					cartoonSync=true;
+				}
+				else if(startsWith(c,"false")){
+					cartoonSync=false;
+				}
 			}
 			else if(datamode==CARTOON_END) {
 				if(startsWith(c,"true")){
@@ -1792,10 +1811,12 @@ void readCartoonBgm(char *json, int timer){
 			}
 			else if(datamode==CARTOON_FILE) {
 				fetchString(c, str);
-				freeMusic();
-				strcpy_s(cartoonBgmName,str);
-				bgm=Mix_LoadMUS(str);
-				Mix_PlayMusic(bgm, repeat);
+				if(strcmp(cartoonBgmName,str)!=0){
+					freeMusic();
+					strcpy_s(cartoonBgmName,str);
+					bgm=Mix_LoadMUS(str);
+					Mix_PlayMusic(bgm, repeat);
+				}
 			}
 			mode=JSON_NEXTDATA;
 		}
@@ -2083,7 +2104,7 @@ void _moveObject(){
 	}
 }
 
-bool nextCut(){
+bool _nextCut(){
 	_moveObject();
 	if(!talkmode){
 		bool end=false;
@@ -2102,6 +2123,19 @@ bool nextCut(){
 		}
 	}
 	return false;
+}
+
+bool nextCut(){
+	bool end=false;
+	int t=1;
+	if(cartoonSync){
+		t=(int)((SDL_GetTicks()-loadtime)/16)-playtime;
+	}
+	for(int i=0 ; i<t ; i++){
+		end=_nextCut();
+		if(end)break;
+	}
+	return end;
 }
 
 bool nextTalk(){

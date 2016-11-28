@@ -5,7 +5,6 @@
 
 #define LEAVE_SHORE 0
 #define GET_MEDAL 2
-#define PRE_ENDING_ANIME 4
 #define ENDING_ANIME 5
 #define WARNING 6
 #define ANIME_GOD 7

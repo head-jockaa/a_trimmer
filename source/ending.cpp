@@ -30,16 +30,7 @@ void initMedalAward(int n){
 }
 
 void initEndingAnime(){
-	mode=ENDING;
-	phase=PRE_ENDING_ANIME;
-	count=0;
 	bgm=NULL;
-	mirror=NULL;
-	sf.thunder=NULL;sf.tub=NULL;sf.alarm=NULL;sf.noize=NULL;sf.sunset=NULL;sf.swish=NULL;
-	getImage(img.back,"file/img/testcard.png",0,0,255);
-}
-
-void initEndingMainAnime(){
 	mode=ENDING;
 	phase=ENDING_ANIME;
 	mirror=NULL;
@@ -175,7 +166,7 @@ void keyEnding(){
 			}
 		}
 	}
-	else if(phase==PRE_ENDING_ANIME || phase==ENDING_ANIME)keyEndingAnime();
+	else if(phase==ENDING_ANIME)keyEndingAnime();
 	else if(phase==WARNING)keyWarning();
 }
 
@@ -185,12 +176,13 @@ void timerLeaveShore(){
 		if(a>=100)initMedalAward(3);
 		else if(a>=80)initMedalAward(2);
 		else if(a>=60)initMedalAward(1);
-		else initMedalAward(0);
+		else initMedalAward(3);
 	}
 }
 
 void timerGetMedal(){
 	if(nextCut()){
+		freeCartoon();
 		if(movie_test){
 			endEnding();
 			initMiyazaki();
@@ -313,39 +305,30 @@ void timerLastStory(){
 }
 
 void timerEndingAnime(){
-	if(phase==PRE_ENDING_ANIME){
-		if(count==150){
-			freeImage(img.back);
-			initEndingMainAnime();
-		}
-	}
-	else if(phase==ENDING_ANIME){
-		int t=(int)((SDL_GetTicks()-loadtime)/16);
-		for(int i=0 ; i<t-playtime ; i++){
-			if(nextCut()){
-				if(movie_test){
-					endEnding();
-					initMiyazaki();
-					gd.x=1600;
-					gd.scrX=(int)gd.x-320;
-					phase=MIYAZAKI_MUSEUM;
-					start=0;
-					for(int i=0 ; i<31 ; i++)menu[BGM_TEST].cursorDown();
+	if(phase==ENDING_ANIME){
+		if(nextCut()){
+			if(movie_test){
+				endEnding();
+				initMiyazaki();
+				gd.x=1600;
+				gd.scrX=(int)gd.x-320;
+				phase=MIYAZAKI_MUSEUM;
+				start=0;
+				for(int i=0 ; i<31 ; i++)menu[BGM_TEST].cursorDown();
+			}else{
+				if(which_medal!=0 && dataNo!=index_num){//最終ボス面は保留
+					freeImage(img.back);
+					Mix_HaltMusic();
+					getImage(img.back,"file/img/warning.gif",0,0,255);
+					sf.alarm=Mix_LoadWAV("file/se/20.wav");
+					Mix_PlayChannel(1,sf.alarm,2);
+					phase=WARNING;
 				}else{
-					if(which_medal!=0 && dataNo!=index_num){//最終ボス面は保留
-						freeImage(img.back);
-						Mix_HaltMusic();
-						getImage(img.back,"file/img/warning.gif",0,0,255);
-						sf.alarm=Mix_LoadWAV("file/se/20.wav");
-						Mix_PlayChannel(1,sf.alarm,2);
-						phase=WARNING;
-					}else{
-						endEnding();
-						initGameMenu();
-					}
+					endEnding();
+					initGameMenu();
 				}
-				break;
 			}
+			freeCartoon();
 		}
 	}
 }
@@ -377,7 +360,7 @@ void timerEnding(){
 	else if(phase==GET_MEDAL)timerGetMedal();
 	else if(phase==ANIME_GOD)timerAnimeGod();
 	else if(phase==LAST_STORY)timerLastStory();
-	else if(phase==PRE_ENDING_ANIME || phase==ENDING_ANIME)timerEndingAnime();
+	else if(phase==ENDING_ANIME)timerEndingAnime();
 	else if(phase==LAST_ENDING)timerLastEnding();
 }
 
@@ -399,16 +382,7 @@ void drawEndingExplain(SDL_Surface* scr){
 }
 
 void drawEnding(SDL_Surface* scr){
-	if(phase==PRE_ENDING_ANIME){
-		int a=255;
-		if(count<20)a=count*13;
-		if(count>130)a=(150-count)*13;
-		fillRect(scr,0,0,640,480,0,0,0,255);
-		drawImage(scr,img.back,120,40,0,880,400,300,a);
-		if(CHAR_CODE==JAPANESE)drawImage(scr,img.back,200,380,400,880,240,80,a);
-		else drawImage(scr,img.back,200,380,400,960,240,80,a);
-	}
-	else if(phase==ENDING_ANIME){
+	if(phase==ENDING_ANIME){
 		drawAnimationCut(scr);
 	}
 	else if(phase==LAST_ENDING){

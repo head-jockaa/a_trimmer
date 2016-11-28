@@ -126,6 +126,7 @@ void timerKomoro(){
 
 void timerPrologue(){
 	if(nextCut()){
+		freeCartoon();
 		if(movie_test){
 			endGameMenu();
 			initMiyazaki();
@@ -316,6 +317,7 @@ void keyPrologue(){
 		nextTalk();
 	}
 	if(key.c && !key_stop(key.c)){
+		freeCartoon();
 		if(movie_test){
 			endGameMenu();
 			initMiyazaki();

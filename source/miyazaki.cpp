@@ -48,13 +48,11 @@ void initMiyazaki(){
 	}
 	load_story(0);
 	getImage(img.back,"file/img/miyazaki.png",0,0,255);
-	bgm=Mix_LoadMUS("file/bgm/17.ogg");
 	sf.thunder=Mix_LoadWAV("file/se/14.wav");
 	sf.swish=Mix_LoadWAV("file/se/25.wav");
 	sf.meow=Mix_LoadWAV("file/se/16.wav");
-	sf.drag_s=Mix_LoadWAV("file/se/4.wav");
-	sf.tub=Mix_LoadWAV("file/se/13.wav");
-	sf.noize=Mix_LoadWAV("file/se/23.wav");
+	loadCartoon("file/data/cartoon/miyazaki_in.json");
+	bgm=Mix_LoadMUS("file/bgm/17.ogg");
 	Mix_PlayMusic(bgm,-1);
 }
 
@@ -64,9 +62,6 @@ void endMiyazaki(){
 	Mix_FreeChunk(sf.thunder);
 	Mix_FreeChunk(sf.swish);
 	Mix_FreeChunk(sf.meow);
-	Mix_FreeChunk(sf.drag_s);
-	Mix_FreeChunk(sf.tub);
-	Mix_FreeChunk(sf.noize);
 	freeImage(img.back);
 	if(prgs2)delete [] prgs2;
 	for(int i=0 ; i<20 ; i++)menu[i].reset();
@@ -155,8 +150,7 @@ void gotoMovieTest(){
 		initMedalAward(n-7);
 	}
 	else if(n==11){
-		initOpening();
-		phase=1;count=0;
+		initOpeningAnime();
 	}
 	else if(n==12){
 		initGameMenu();
@@ -194,18 +188,13 @@ void timerMiyazaki(){
 	else if(phase==GOTO_TOWERLIST && count==1)gotoTowerList();
 	else if(phase==GOTO_MOVIE && count==100)gotoMovieTest();
 	else if(phase==COME_MIYAZAKI){
-		if(count==100)Mix_PlayChannel(0,sf.drag_s,0);
-		if(count==120)Mix_PlayChannel(1,sf.tub,0);
-		if(count==150){
+		if(nextCut()){
 			phase=MIYAZAKI_MUSEUM;
 			start=200;
 		}
 	}
 	else if(phase==LEAVE_MIYAZAKI){
-		if(count==0)Mix_PlayChannel(0,sf.decide,0);
-		if(count==30)Mix_PlayChannel(0,sf.noize,0);
-		if(count==60)Mix_PlayChannel(0,sf.tub,0);
-		if(count==150){
+		if(nextCut()){
 			endMiyazaki();
 			initGameMenu();
 		}
@@ -329,6 +318,7 @@ void keyMiyazakiMuseum(){
 	}
 	if(gd.x<0){
 		phase=LEAVE_MIYAZAKI;
+		loadCartoon("file/data/cartoon/miyazaki_out.json");
 		count=0;
 	}
 }
@@ -1209,6 +1199,7 @@ void keyMiyazaki(){
 		default:break;
 	}
 	if(phase==GAMESTART && key.z && !key_stop(key.z)){
+		freeCartoon();
 		phase=MIYAZAKI_MUSEUM;
 		freeImage(img.back);
 		getImage(img.back,"file/img/miyazaki.png",0,0,255);
@@ -1301,54 +1292,6 @@ void drawMiyazakiMuseum(SDL_Surface* scr){
 	}
 }
 
-void drawComeMiyazaki(SDL_Surface* scr){
-	int x,y,x2,y2;
-	double mag;
-	if(count<100)x=660-count*4;
-	else if(count<130)x=260;
-	else x=260-(count-130);
-	if(count<80)y=250+count/8;
-	else if(count<100)y=260+(count-80)*2;
-	else if(count<130)y=300;
-	else y=300-(count-130);
-	if(count<100){x2=258;y2=208;mag=0.85;}
-	else if(count<120){x2=258-(count-100);y2=208-(count-100)/2;mag=0.85+(count-100)*0.0075;}
-	else{x2=238;y2=198;mag=1;}
-	drawImage(scr,img.back,0,0,640,0,640,480,255);
-	drawImage(scr,img.back,238,198,1280,0,18,216,255);
-	drawImage(scr,img.back,x,y,240,660,60,120,255);
-	drawImage(scr,img.back,460,240,1280,330,180,140,255);
-	drawImage_x(scr,img.back,x2,y2,mag,1280,0,18,216,255);
-	if(count<110)drawImage(scr,img.back,180,360,1320,560,80,80,255);
-	else if(count<120)drawImage(scr,img.back,200,370,1320,640,80,80,255);
-	else drawImage(scr,img.back,220,380,1320,720,80,80,255);
-}
-
-void drawLeaveMiyazaki(SDL_Surface* scr){
-	int x,y,a,x2,y2,x3=0,y3=0;
-	if(count<30)x=240+count*4;
-	else if(count<60)x=360;
-	else x=360-(count-60)*4;
-	if(count<60)y=280;
-	else y=280+(count-60)*2;
-	if(count<50)a=300;
-	else a=240;
-	if(count<30){x2=238+count*8;y2=198-count*2;}
-	else if(count<60){x2=438-(count-30)*12;y2=88+(count-40)*(count-40)/2;}
-	else{x2=78;y2=288;}
-	if(count>60){x3=120;y3=420;}
-	else if(count>30){x3=(count-30)*4;y3=240+(count-30)*(count-30)/5;}
-	drawImage(scr,img.back,0,0,640,0,640,480,255);
-	if(count<30)drawImage(scr,img.back,x2,y2,1280,0,18,216,255);
-	else drawImage(scr,img.back,x2,y2,1300,0,100,160,255);
-	drawImage(scr,img.back,80,370,1280,220,80,110,255);
-	drawImage(scr,img.back,x,y,a,660,60,120,255);
-	if(count>30){
-		drawImage(scr,img.back,440-x3,y3,1400,0,60,60,255);
-		drawImage(scr,img.back,440+x3,y3,1400,0,60,60,255);
-	}
-}
-
 void drawDeploma(SDL_Surface* scr){
 	fillRect(scr,0,0,640,480,255,255,255,255);
 	for(int i=0 ; i<16 ; i++){
@@ -1366,8 +1309,7 @@ void drawDeploma(SDL_Surface* scr){
 
 void drawMiyazaki(SDL_Surface* scr){
 	if(phase==TOWERLIST || phase==SHOW_TOWERDATA || phase==WHICH_TOWER)drawTowerList(scr);
-	else if(phase==COME_MIYAZAKI)drawComeMiyazaki(scr);
-	else if(phase==LEAVE_MIYAZAKI)drawLeaveMiyazaki(scr);
+	else if(phase==COME_MIYAZAKI || phase==LEAVE_MIYAZAKI)drawAnimationCut(scr);
 	else if(phase==DEPLOMA)drawDeploma(scr);
 	else if(phase==GOTO_MOVIE){
 		fillRect(scr,0,0,640,480,0,0,0,255);

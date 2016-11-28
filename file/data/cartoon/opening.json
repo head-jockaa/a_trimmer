@@ -1,12 +1,40 @@
 [{"time":0, "act":{
   "image":[
+    {"file":"file/img/testcard.png"}
+  ],
+  "set":[
+    {"id":51, "x":0, "y":0, "w":640, "h":40, "col":"000000", "note":"letter box"},
+    {"id":52, "x":0, "y":440, "w":640, "h":40, "col":"000000", "note":"letter box"},
+    {"id":0, "x":0, "y":40, "w":640, "h":400, "col":"ffffff", "note":"background color"},
+    {"id":1, "x":320, "y":240, "ix":0, "iy":480, "w":640, "h":400, "mag":0, "note":"caligraph"}
+  ],
+  "move":[
+    {"id":1, "x":-4, "y":-2.5, "mag":0.0125}
+  ]
+}}, {"time":80, "act":{
+  "move":[
+    {"id":1, "x":0, "y":0, "mag":0}
+  ]
+}}, {"time":170, "act":{
+  "set":[
+    {"id":2, "x":-160, "y":-160, "ix":640, "iy":480, "w":160, "h":400, "mag":2, "note":"head jockaa"}
+  ],
+  "move":[
+    {"id":2, "x":5.333333, "y":6.66666, "mag":-0.033333}
+  ]
+}}, {"time":200, "act":{
+  "move":[
+    {"id":2, "x":0, "y":0, "mag":0}
+  ]
+}}, {"time":300, "act":{
+  "reset":[0, 1, 2],
+  "reset-timer":0,
+  "image":[
     {"file":"file/img/opening.png"}
   ],
   "bgm": {"file":"file/bgm/1.ogg"},
   "set":[
     {"id":0, "x":0, "y":40, "w":640, "h":400, "col_grad_y":{"from":"000000", "to":"000064"}, "note":"background color"},
-    {"id":51, "x":0, "y":0, "w":640, "h":40, "col":"000000", "note":"letter box"},
-    {"id":52, "x":0, "y":440, "w":640, "h":40, "col":"000000", "note":"letter box"},
     {"id":53, "x":540, "y":60, "ix":2240, "iy":600, "w":80, "h":40, "note":"icon subtitles"},
     {"id":1, "x":140, "y":286, "ix":2120, "iy":400, "w":320, "h":200, "note":"heliport"},
     {"id":2, "x":80, "y":120, "ix":2120, "iy":0, "w":100, "h":400, "note":"back left building"},
@@ -24,7 +52,8 @@
     {"id":5, "x":2, "y":-2, "mag":0.01},
     {"id":6, "x":-1, "y":-1, "mag":-0.0020833, "flip":{"in":2, "iy":100, "n":2}},
     {"id":7, "x":-1, "y":-1, "mag":-0.0020833}
-  ]
+  ],
+  "sync":true
 }}, {"time":50, "act":{
   "set":[
     {"id":54, "x":320, "y":100, "ix":3880, "iy":2800, "w":240, "h":50, "note":"credits"}

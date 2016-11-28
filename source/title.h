@@ -9,7 +9,7 @@ void endOpening();
 void drawOpening(SDL_Surface* scr);
 void keyOpening();
 void timerOpening();
-void initOpeningMainAnime();
+void initOpeningAnime();
 void initTitle2();
 void keyTitle();
 void timerTitle();
