@@ -1,23 +1,22 @@
-CREATE TABLE `areacode` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `name_en` varchar(100) NOT NULL,
-  `button1` int(11) NOT NULL,
-  `button2` int(11) NOT NULL,
-  `button3` int(11) NOT NULL,
-  `button4` int(11) NOT NULL,
-  `button5` int(11) NOT NULL,
-  `button6` int(11) NOT NULL,
-  `button7` int(11) NOT NULL,
-  `button8` int(11) NOT NULL,
-  `button9` int(11) NOT NULL,
-  `button10` int(11) NOT NULL,
-  `button11` int(11) NOT NULL,
-  `button12` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+INSERT INTO `areacode` (
+  `id`,
+  `name_jp`,
+  `name_en`,
+  `button1`,
+  `button2`,
+  `button3`,
+  `button4`,
+  `button5`,
+  `button6`,
+  `button7`,
+  `button8`,
+  `button9`,
+  `button10`,
+  `button11`,
+  `button12`
+)
 
-INSERT INTO `areacode` VALUES
+VALUES
 (1,'','',0,0,0,0,0,0,0,0,0,0,0,0),
 (2,'ŽD–y','Sapporo',1,0,3,17,5,0,27,0,0,35,0,12),
 (3,'”ŸŠÙ','Hakodate',27,0,35,4,21,6,0,0,0,10,0,12),

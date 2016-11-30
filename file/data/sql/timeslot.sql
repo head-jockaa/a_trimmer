@@ -1,13 +1,12 @@
-CREATE TABLE `timeslot` (
-  `id` int(11) NOT NULL,
-  `season_id` int(11) NOT NULL,
-  `week` tinyint(3) unsigned NOT NULL,
-  `hour` tinyint(3) unsigned NOT NULL,
-  `minute` tinyint(3) unsigned NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+INSERT INTO `timeslot` (
+  `id`,
+  `season_id`,
+  `week`,
+  `hour`,
+  `minute`
+)
 
-INSERT INTO `timeslot` VALUES
+VALUES
 (1,0,6,45,6),
 (2,0,15,0,1),
 (3,0,17,0,2),

@@ -1,14 +1,13 @@
-CREATE TABLE `town` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `name_en` varchar(100) NOT NULL,
-  `area_id` int(11) NOT NULL,
-  `x` int(11) NOT NULL,
-  `y` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+INSERT INTO `town` (
+  `id`,
+  `name_jp`,
+  `name_en`,
+  `area_id`,
+  `x`,
+  `y`
+)
 
-INSERT INTO `town` VALUES
+VALUES
 (1,'ç]åÀêÏ','Edogawa',1,1442,1028),
 (2,'äãè¸','Katsushika',1,1440,1024),
 (3,'ë´óß','Adachi',1,1437,1020),

@@ -1,15 +1,14 @@
-CREATE TABLE `cartoon` (
-  `id` int(11) NOT NULL,
-  `name` varchar(200) NOT NULL,
-  `name_en` varchar(200) NOT NULL,
-  `icon` int(11) NOT NULL,
-  `red` tinyint(3) unsigned NOT NULL,
-  `green` tinyint(3) unsigned NOT NULL,
-  `blue` tinyint(3) unsigned NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+INSERT INTO `cartoon` (
+  `id`,
+  `name_jp`,
+  `name_en`,
+  `icon`,
+  `red`,
+  `green`,
+  `blue`
+)
 
-INSERT INTO `cartoon` VALUES
+VALUES
 (1,'ÉhÉâÇ¶Ç‡ÇÒ','',170,55,140,190),
 (2,'Ç¢Ç»Ç©Ç¡ÇÿëÂè´','',85,140,150,110),
 (3,'ÉÇÉWÉÉåˆ','',279,255,120,35),

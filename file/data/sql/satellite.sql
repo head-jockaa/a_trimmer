@@ -1,11 +1,10 @@
-CREATE TABLE `satellite` (
-  `channel` int(11) NOT NULL,
-  `physical` int(11) NOT NULL,
-  `station_id` int(11) NOT NULL,
-  PRIMARY KEY (`channel`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+INSERT INTO `satellite` (
+  `channel`,
+  `physical`,
+  `station_id`
+)
 
-INSERT INTO `satellite` VALUES
+VALUES
 (1,15,50),
 (2,15,51),
 (3,15,180),

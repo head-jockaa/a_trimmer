@@ -1,17 +1,16 @@
-CREATE TABLE `mountain` (
-  `id` int(11) NOT NULL,
-  `x` int(11) NOT NULL,
-  `y` int(11) NOT NULL,
-  `height` int(11) NOT NULL,
-  `slope` int(11) NOT NULL,
-  `range` int(11) NOT NULL,
-  `volcano` tinyint(1) NOT NULL,
-  `building` tinyint(4) NOT NULL,
-  `note` text,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+INSERT INTO `mountain` (
+  `id`,
+  `x`,
+  `y`,
+  `height`,
+  `slope`,
+  `range`,
+  `volcano`,
+  `building`,
+  `note`
+)
 
-INSERT INTO `mountain` VALUES
+VALUES
 (1,1539,40,490,0,3,0,0,''),
 (2,1559,63,1721,0,6,1,0,''),
 (3,1660,206,295,0,5,0,0,''),

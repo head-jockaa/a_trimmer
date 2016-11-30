@@ -1,15 +1,14 @@
-CREATE TABLE `station` (
-  `id` int(11) NOT NULL,
-  `icon` int(11) NOT NULL,
-  `abbr` varchar(100) DEFAULT NULL,
-  `name` varchar(100) NOT NULL,
-  `name_en` varchar(100) NOT NULL,
-  `message` text,
-  `message_en` text,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+INSERT INTO `station` (
+  `id`,
+  `icon`,
+  `abbr`,
+  `name_jp`,
+  `name_en`,
+  `message`,
+  `message_en`
+)
 
-INSERT INTO `station` VALUES
+VALUES
 (1,5,'','NHK東京','NHK Tokyo','こんにちはいっと６けん。スタジオパークでは、様々なゲストを招いてのトークをお送り！ ','Hello, 1metro6pref. At Studio Park, sending talks with inviting various guests! '),
 (2,5,'','NHK札幌','NHK Sapporo','ほっからんど北海道。スタジオパークでは、様々なゲストを招いてのトークをお送り！ ','HokkaLand Hokkaido. At Studio Park, sending talks with inviting various guests! '),
 (3,5,'','NHK函館','NHK Hakodate','ほっからんど函館。スタジオパークでは、様々なゲストを招いてのトークをお送り！ ','HokkaLand Hakodate. At Studio Park, sending talks with inviting various guests! '),

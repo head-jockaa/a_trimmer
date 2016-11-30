@@ -1,29 +1,28 @@
-CREATE TABLE `tower` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `name_en` varchar(100) NOT NULL,
-  `area_id` int(11) NOT NULL,
-  `x` int(11) NOT NULL,
-  `y` int(11) NOT NULL,
-  `height` int(11) NOT NULL,
-  `kw` float NOT NULL,
-  `erp` float NOT NULL,
-  `vertical` tinyint(1) NOT NULL,
-  `bias` tinyint(3) unsigned NOT NULL,
-  `ch1` int(11) DEFAULT NULL,
-  `ch2` int(11) DEFAULT NULL,
-  `ch3` int(11) DEFAULT NULL,
-  `ch4` int(11) DEFAULT NULL,
-  `ch5` int(11) DEFAULT NULL,
-  `ch6` int(11) DEFAULT NULL,
-  `ch7` int(11) DEFAULT NULL,
-  `ch8` int(11) DEFAULT NULL,
-  `ch9` int(11) DEFAULT NULL,
-  `ch10` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+INSERT INTO `tower` (
+  `id`,
+  `name_jp`,
+  `name_en`,
+  `area_id`,
+  `x`,
+  `y`,
+  `height`,
+  `kw`,
+  `erp`,
+  `vertical`,
+  `bias`,
+  `ch1`,
+  `ch2`,
+  `ch3`,
+  `ch4`,
+  `ch5`,
+  `ch6`,
+  `ch7`,
+  `ch8`,
+  `ch9`,
+  `ch10`
+)
 
-INSERT INTO `tower` VALUES
+VALUES
 (1,'“Œ‹ž','Tokyo',1,1432,1033,255,50,10,0,255,1,3,4,6,8,10,12,63,16,0),
 (2,'“Œ‹ž','Tokyo',1,1432,1033,225,10,10,0,255,63,63,63,63,63,63,63,14,63,0),
 (3,'‘½–€','Tama',1,1408,1038,30,0.2,10,0,255,49,47,51,53,55,57,59,63,0,0),

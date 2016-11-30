@@ -1,11 +1,10 @@
-CREATE TABLE `season` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `name_en` varchar(100) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+INSERT INTO `season` (
+  `id`,
+  `name_jp`,
+  `name_en`
+)
 
-INSERT INTO `season` VALUES
+VALUES
 (1,'2005èt','2005Spring'),
 (2,'2005âƒ','2005Summer'),
 (3,'2005èH','2005Automn'),
