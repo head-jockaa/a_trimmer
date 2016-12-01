@@ -15,4 +15,8 @@ void loadCartoon(const char *filename);
 void drawLastEndingAnim(SDL_Surface* scr, int cn);
 void drawSummerWars(SDL_Surface* scr);
 
+bool startsWith(char *s, const char *target);
+int fetchInt(char *&s);
+double fetchDouble(char *&s);
+
 #endif

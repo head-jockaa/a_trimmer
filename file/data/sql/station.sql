@@ -4,7 +4,7 @@ INSERT INTO `station` (
   `abbr`,
   `name_jp`,
   `name_en`,
-  `message`,
+  `message_jp`,
   `message_en`
 )
 

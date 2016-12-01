@@ -34,6 +34,11 @@ double DIS1CH,DIS62CH,RCV_LEVEL,MAP_SCALE,CURVE_RISE;
 int BSchannel[12],BSstation[12];
 Mhz *mhz;
 
+Areacode *areacode;
+Timeslot *timeslot;
+size_t areacode_num, allofworks_num, timeslot_num;
+Work *allofworks;
+
 void Menu::setMenu(int X, int Y, int w, int r, int n){
 	reset();
 	if(n==0)return;

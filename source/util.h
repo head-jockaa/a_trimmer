@@ -139,7 +139,7 @@ String jummingText(String s, int strl, int rcv, int mg_rcv);
 struct Index{
 	String name;
 	Uint8 rate;
-	int hiscore;
+	int id,hiscore;
 };
 extern Index *indexName;
 
@@ -192,18 +192,18 @@ public:
 struct Station{
 	String name,talk;
 	Uint16 mark;
-	int ontv;
+	int id,ontv;
 };
 
 struct Prg{
 	Uint8 week,hour,minute;
-	int station,time,work;
+	int id,season_id,station,time,work;
 };
 
 struct Work{
 	String title;
 	char query[600];
-	int mark,prg,num,tnum;
+	int id,mark,prg,num,tnum;
 	Uint8 r,g,b;
 	bool notExist;
 };
@@ -211,14 +211,14 @@ struct Work{
 struct Area{
 	String name;
 	Uint8 st_num, button[10];
-	int tower,num,town,town_num,station[10];
+	int id,tower,num,town,town_num,station[10];
 };
 
 struct Tower{
 	String name;
 	Uint8 ch[10], kw, kw2, erp, erp2, c1, c2, bias, r_num;
 	int rcv[10];
-	int area;
+	int id,area;
 	short r_h[20];
 	Uint16 x, y, h, x_3d, y_3d, work[10], r_dis[20],r_m[20];
 	float power[10];
@@ -230,6 +230,7 @@ struct Tower{
 struct Mount{
 	Uint16 x, y, h, slope;
 	Uint8 range, city;
+	int id;
 	bool volcano;
 	float dis, dir, dir1, dir2;
 };
@@ -237,7 +238,24 @@ struct Mount{
 struct Town{
 	String name;
 	Uint16 x,y;
+	int id,area_id;
 };
+
+struct Areacode{
+	String name;
+	int id;
+	Uint8 code[12];
+};
+extern Areacode *areacode;
+
+struct Timeslot{
+	int id, season_id;
+	Uint8 week,hour,minute;
+};
+extern Timeslot *timeslot;
+
+extern size_t areacode_num, allofworks_num, timeslot_num;
+extern Work *allofworks;
 
 struct Key{
 	Uint8 left,right,up,down,z,x,c,a,F1,F4,F5,F10;
@@ -374,5 +392,6 @@ extern SDL_Event ev;
 #include "animation.h"
 #include "drawimage.h"
 #include "image_search.h"
+#include "sql.h"
 
 #endif
