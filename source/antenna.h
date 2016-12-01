@@ -63,10 +63,9 @@ public:
 };
 
 class ButtonRod : public Antenna{
-	Uint8 push, set, b_num, button[12], button2[12], **codes;
-	String *areaname;
+	Uint8 push, set, b_num, button[12], button2[12];
 	int *rc, *st;
-	size_t area_num, code;
+	size_t code;
 	void code_set();
 	void auto_set();
 	void set_button();

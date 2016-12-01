@@ -449,7 +449,7 @@ void ButtonRod::auto_set(){
 }
 
 void ButtonRod::code_set(){
-	for(int i=0 ; i<12 ; i++)button[i]=codes[code][i];
+	for(int i=0 ; i<12 ; i++)button[i]=areacode[code].code[i];
 	b_num=11;
 	ch_up();
 	receive();
@@ -482,32 +482,11 @@ ButtonRod::ButtonRod(){
 	rc=new int[CHANNELS];
 	st=new int[CHANNELS];
 	for(int i=0 ; i<12 ; i++)button[i]=0;
-	loadFile("file/data/tower/areacode.dat");
-	size_t fc=0;
-	area_num=fsize/12;
-	areaname=new String[area_num];
-	codes=new Uint8*[area_num];
-	for(size_t i=0 ; i<area_num ; i++){
-		codes[i]=new Uint8[12];
-		for(int j=0 ; j<12 ; j++)codes[i][j]=fstr[i*12+j];
-	}
-	for(int k=0 ; k<2 ; k++){
-		fc=0;
-		if(k==0)loadFile("file/data/tower/areacode_name_jp.dat");
-		else loadFile("file/data/tower/areacode_name_en.dat");
-		for(size_t i=0 ; i<area_num ; i++){
-			for(int j=0 ; j<60 ; j++){
-				areaname[i].str[k][j]=fstr[fc];
-				fc++;
-				if(fstr[fc-1]==0)break;
-			}
-		}
-	}
+	readSQL("file/data/sql/areacode.sql");
 }
+
 ButtonRod::~ButtonRod(){
-	for(size_t i=0 ; i<12 ; i++)delete [] codes[i];
-	delete [] codes;
-	delete [] areaname;
+	delete [] areacode;
 	delete [] rc;
 	delete [] st;
 }
@@ -544,7 +523,7 @@ void ButtonRod::pushL(){
 	if(ant_mode==TURN)turnL();
 	else if(!key_wait(key.left)){
 		if(set==4){
-			if(code==0)code=area_num-1;
+			if(code==0)code=areacode_num-1;
 			else code--;
 		}
 		else if(set==0 && push%3>0)push--;
@@ -554,7 +533,7 @@ void ButtonRod::pushR(){
 	if(ant_mode==TURN)turnR();
 	else if(!key_wait(key.right)){
 		if(set==4){
-			if(code==area_num-1)code=0;
+			if(code==areacode_num-1)code=0;
 			else code++;
 		}
 		else if(set==0 && push%3<2)push++;
@@ -618,7 +597,7 @@ void ButtonRod::drawAntenna(SDL_Surface* scr){
 		drawText2(scr,100,80,toChar(text[MENUTEXT+4]),30);
 	}
 	else if(set==4){
-		sprintf_s(str,"[%3d]%s",code,areaname[code].str[CHAR_CODE]);
+		sprintf_s(str,"[%3d]%s",code,areacode[code].name.str[CHAR_CODE]);
 		drawText(scr,180,40,str,(int)strlen(str));
 	}
 	else if(set>=5)auto_set();

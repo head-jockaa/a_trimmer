@@ -551,7 +551,7 @@ void getAreaSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"station_id")==0) {
 			intValue=fetchInt(c);
-			if(get)BSstation[index]=intValue;
+			if(get)BSstation[index]=intValue-1;
 		}
 	}
 	else if(strcmp(tname,"season")==0) {

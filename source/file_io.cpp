@@ -2,7 +2,6 @@
 
 char hex[16]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
-void extra_station();
 void extra_work(int n, int mark, String title);
 void extra_tower();
 
@@ -47,18 +46,9 @@ void load_haziashop(){
 
 void load_index(){
 	load_haziashop();
-	char fn[50];
 	size_t fc=0;
-	if(index_num)delete [] indexName;
-	index_num=0;
 	gd.hazia=0;
-	while(true){
-		sprintf_s(fn,"file/data/work/work%d.dat",index_num+1);
-		if(!loadFile(fn))break;
-		index_num++;
-	}
-	indexName=new Index[index_num];
-
+	readSQL("file/data/sql/season.sql");
 	if(!loadFile("save/clear.dat")){
 		for(int i=0 ; i<18 ; i++)gd.bought[i]=false;
 		for(int i=0 ; i<index_num ; i++){
@@ -82,87 +72,13 @@ void load_index(){
 			clear_num++;
 		}
 	}
-
-	for(int k=0 ; k<2 ; k++){
-		fc=0;
-		if(k==0)loadFile("file/data/index_jp.dat");
-		else loadFile("file/data/index_en.dat");
-		for(int i=0 ; i<index_num ; i++){
-			for(int j=0 ; j<60 ; j++){
-				indexName[i].name.str[k][j]=fstr[fc];
-				fc++;
-				if(fstr[fc-1]==0)break;
-			}
-		}
-	}
 }
 
 void load_station(){
 	if(stas)return;
-	int fc=0;
-	stas=0;
-
-	loadFile("file/data/station.dat");
-	while(fstr[fc]!=EOF || fstr[fc+1]!=EOF){
-		stas++;
-		fc+=2;
-	}
-	sta=new Station[stas+1];
-	for(int k=0 ; k<2 ; k++){
-		fc=0;
-		if(k==0)loadFile("file/data/station_name_jp.dat");
-		else loadFile("file/data/station_name_en.dat");
-		for(int i=0 ; i<stas ; i++){
-			for(int j=0 ; j<60 ; j++){
-				sta[i].name.str[k][j]=fstr[fc];
-				fc++;
-				if(fstr[fc-1]==0)break;
-			}
-		}
-	}
-	for(int k=0 ; k<2 ; k++){
-		fc=0;
-		if(k==0)loadFile("file/data/station_talk_jp.dat");
-		else loadFile("file/data/station_talk_en.dat");
-		for(int i=0 ; i<stas ; i++){
-			for(int j=0 ; j<200 ; j++){
-				if(fstr[fc]==0){
-					sta[i].talk.str[k][j]=' ';
-					sta[i].talk.str[k][j+1]=0;
-				}
-				else sta[i].talk.str[k][j]=fstr[fc];
-				fc++;
-				if(fstr[fc-1]==0)break;
-			}
-		}
-	}
+	readSQL("file/data/sql/station.sql");
+	readSQL("file/data/sql/satellite.sql");
 	for(int i=0 ; i<stas ; i++)putHeadMark(sta[i].talk);
-	fc=0;
-	loadFile("file/data/station.dat");
-	for(int i=0 ; i<stas ; i++){
-		sta[i].mark=to16int(fstr[fc],fstr[fc+1]);
-		fc+=2;
-	}
-	fc+=2;
-
-	for(int i=0 ; i<12 ; i++){
-		if(fstr[fc]==0)BSstation[i]=EOF;
-		else{
-			BSchannel[i]=to8int(fstr[fc]);
-			BSstation[i]=to16int(fstr[fc+1],fstr[fc+2]);
-		}
-		fc+=3;
-	}
-	extra_station();
-}
-
-void extra_station(){
-	for(int k=0 ; k<2 ; k++){
-		sprintf_s(sta[stas].name.str[k],text[ANTENNATEXT+14].str[k]);
-		sprintf_s(sta[stas].talk.str[k],text[ANTENNATEXT+15].str[k]);
-	}
-	stas++;
-
 }
 
 void load_story(int n){
@@ -339,7 +255,7 @@ void load_works(int n){
 	delete [] mark;
 	delete [] col;
 
-	if(gd.timeslot!=NULL)delete [] gd.timeslot;
+	if(gd.x!=NULL)delete [] gd.timeslot;
 	sprintf_s(str,"file/data/work/timeslot%d.dat",n);
 	loadFile(str);
 	gd.timeslot = new int[fsize+1];
@@ -546,39 +462,7 @@ void extra_tower(){
 
 void load_mounts(){
 	if(mounts)return;
-	size_t fc=0;
-	mounts=0;
-
-	loadFile("file/data/mount.dat");
-
-	mounts=(int)(fsize/8);
-	mount=new Mount[mounts];
-	fc=0;
-
-	Mount *mt=mount;
-	for(int i=0 ; i<mounts ; i++){
-		mt->x=to16int(fstr[fc],fstr[fc+1]);
-		fc+=2;
-		mt->y=to16int(fstr[fc],fstr[fc+1]);
-		fc+=2;
-		mt->h=to16int(fstr[fc],fstr[fc+1]);
-		fc+=2;
-		mt->slope=fstr[fc];
-		mt->slope=mt->h*mt->slope/100;
-		fc++;
-		mt->range=to8int(fstr[fc])%64;
-		mt->city=0;
-		mt->volcano=false;
-		if(to8int(fstr[fc])>=192){
-			mt->volcano=true;
-		}
-		else if(to8int(fstr[fc])>=128){
-			mt->slope=mt->h;
-			mt->city=fstr[fc-1];
-		}
-		mt++;fc++;
-	}
-
+	readSQL("file/data/sql/mountain.sql");
 }
 
 void load_towns(){

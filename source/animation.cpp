@@ -344,9 +344,11 @@ void loadCartoon(const char *filename){
 	freeCartoon();
 	loadFile(filename);
 	cartoonJsonSize=fsize;
-	cartoonJson=new char[cartoonJsonSize];
-	strcpy_s(cartoonJson,fstr);
-	nextCut();
+	if(fsize){
+		cartoonJson=new char[cartoonJsonSize];
+		strcpy_s(cartoonJson,fstr);
+		nextCut();
+	}
 }
 
 bool readCartoon(char *json, int timer){
