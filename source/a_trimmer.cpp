@@ -280,7 +280,13 @@ void endAll(){
 	if(index_num)delete [] indexName;
 	if(stas)delete [] sta;
 	if(allworks)delete [] animebook;
-	if(works){delete [] prg;delete [] work;delete [] gd.timeslot;}
+	if(works){
+		for(int i=0 ; i<works ; i++){
+			delete [] work[i].prg;
+		}
+		delete [] work;
+		delete [] gd.timeslot;
+	}
 	if(towers){delete [] area;delete [] tower;}
 	if(mounts)delete [] mount;
 	if(towns)delete [] town;

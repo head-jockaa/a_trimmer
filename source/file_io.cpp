@@ -162,100 +162,75 @@ void save_animebook(){
 void load_works(int n){
 	load_station();
 	load_animebook();
+
+	readSQL("file/data/sql/cartoon.sql");
+	sprintf_s(str,"file/data/sql/timetable%d.sql",n);
+	readSQL(str);
+	for(int i=0 ; i<prgs ; i++){
+		allofworks[prg[i].work-1].exist=true;
+	}
 	if(works){
-		delete [] prg;
+		for(int i=0 ; i<works ; i++){
+			if(work[i].prg_num){
+				delete [] work[i].prg;
+			}
+		}
 		delete [] work;
 	}
-	char fn[50];
-	size_t fc=0;
-	prgs=0;
 	works=0;
-	sprintf_s(fn,"file/data/work/work%d.dat",n);
-	loadFile(fn);
-
-	while(fc<fsize){
-		fc+=2;
-		while(fstr[fc]!=EOF || fstr[fc+1]!=EOF){
-			prgs++;
-			fc+=6;
+	for(int i=0 ; i<allofworks_num ; i++){
+		if(allofworks[i].exist){
+			works++;
 		}
-		works++;
-		fc+=2;
 	}
-	prg=new Prg[prgs];
 	work=new Work[works];
+	works=0;
+	for(int i=0 ; i<allofworks_num ; i++){
+		if(allofworks[i].exist){
+			strcpy_s(work[works].title.str[0],allofworks[i].title.str[0]);
+			strcpy_s(work[works].title.str[1],allofworks[i].title.str[1]);
+			work[works].mark=allofworks[i].mark;
+			work[works].r=allofworks[i].r;
+			work[works].g=allofworks[i].g;
+			work[works].b=allofworks[i].b;
+			work[works].exist=true;
+			work[works].prg_num=0;
+			work[works].tnum=i;
+			works++;
+		}
+	}
+	int *prg_count=new int[allofworks_num];
+	for(int i=0 ; i<allofworks_num ; i++){
+		prg_count[i]=0;
+	}
+	for(int i=0 ; i<prgs ; i++){
+		prg_count[prg[i].work-1]++;
+	}
+	for(int i=0 ; i<works ; i++){
+		if(prg_count[work[i].tnum]){
+			work[i].prg = new Prg[prg_count[work[i].tnum]];
+		}
+	}
+	for(int i=0 ; i<works ; i++){
+		work[i].prg_num=0;
+		int n=work[i].tnum+1;
+		for(int j=0 ; j<prgs ; j++){
+			if(prg[j].work==n){
+				int n2=work[i].prg_num;
+				work[i].prg[n2].week=prg[j].week;
+				work[i].prg[n2].hour=prg[j].hour;
+				work[i].prg[n2].minute=prg[j].minute;
+				work[i].prg[n2].time=prg[j].time;
+				work[i].prg[n2].station=prg[j].station-1;
+				work[i].prg_num++;
+			}
+		}
+	}
+	delete [] prg;
+	delete [] allofworks;
 	prgs=0;
-	fc=0;
-
-	for(int i=0 ; i<works ; i++){
-		work[i].num=0;
-		work[i].notExist=false;
-		work[i].prg=prgs;
-		work[i].tnum=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		while(fstr[fc]!=EOF || fstr[fc+1]!=EOF){
-			prg[prgs].work=i;
-			prg[prgs].station=to16int(fstr[fc],fstr[fc+1]);
-			fc+=2;
-			prg[prgs].week=fstr[fc];
-			fc++;
-			prg[prgs].hour=fstr[fc];
-			fc++;
-			prg[prgs].minute=fstr[fc];
-			fc++;
-			prg[prgs].time=to8int(fstr[fc]);
-			fc++;
-			work[i].num++;
-			prgs++;
-		}
-		fc+=2;
-	}
-
-	String *title;
-	int *mark;
-	SDL_Color *col;
-	fc=0;
-	loadFile("file/data/work/works.dat");
-	title=new String[allworks];
-	mark=new int[allworks];
-	col=new SDL_Color[allworks];
-	fc=0;
-	for(int i=0 ; i<allworks ; i++){
-		mark[i]=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		col[i].r=to8int(fstr[fc]);fc++;
-		col[i].g=to8int(fstr[fc]);fc++;
-		col[i].b=to8int(fstr[fc]);fc++;
-	}
-
-	fc=0;
-	loadFile("file/data/work/work_name_jp.dat");
-	for(int i=0 ; i<allworks ; i++){
-		for(int j=0 ; j<200 ; j++){
-			title[i].str[0][j]=fstr[fc];
-			fc++;
-			if(fstr[fc-1]==0)break;
-		}
-		if(fstr[fc]==EOF)break;
-	}
-
-	for(int i=0 ; i<works ; i++){
-		work[i].mark=mark[work[i].tnum];
-		work[i].r=col[work[i].tnum].r;
-		work[i].g=col[work[i].tnum].g;
-		work[i].b=col[work[i].tnum].b;
-		for(int k=0 ; k<2 ; k++)for(int j=0 ; j<200 ; j++){
-			work[i].title.str[k][j]=0;
-		}
-		sprintf_s(work[i].title.str[0],"%s",title[work[i].tnum].str[0]);
-		sprintf_s(work[i].title.str[1],"%s",title[work[i].tnum].str[1]);
-	}
-
-	for(int i=0 ; i<works ; i++)putHeadMark(work[i].title);
-
-	delete [] title;
-	delete [] mark;
-	delete [] col;
-
-	if(gd.x!=NULL)delete [] gd.timeslot;
+	allofworks=0;
+	if(gd.x!=0)delete [] gd.timeslot;
 	sprintf_s(str,"file/data/work/timeslot%d.dat",n);
 	loadFile(str);
 	gd.timeslot = new int[fsize+1];
@@ -263,74 +238,79 @@ void load_works(int n){
 		gd.timeslot[i]=fstr[i];
 	}
 	gd.timeslot[fsize]=EOF;
-	load_searchQueries();
 }
 
-void load_searchQueries(){
+void load_searchQueries(Work *wk, int wk_num){
 	loadFile("file/data/work/search_query.dat");
-	int num = 0;
+	int query_num = 0;
 	int j = 0;
 	String *query;
-	query=new String[allworks];
 
 	for(size_t i=0 ; i<fsize ; i++){
+		if(fstr[i]==0){
+			query_num++;
+		}
+	}
+	query=new String[query_num];
+	query_num=0;
+	for(size_t i=0 ; i<fsize ; i++){
 		if(j<200){
-			query[num].str[0][j] = fstr[i];
+			query[query_num].str[0][j] = fstr[i];
 		}
 		j++;
 
 		if(fstr[i]==0){
 			j = 0;
-			num++;
+			query_num++;
 		}
 	}
 
 	int value, w;
-	for(int i=0 ; i<works ; i++){
+	for(int i=0 ; i<wk_num ; i++){
 		j = 0;
-		w = work[i].tnum;
+		w = wk[i].tnum;
 		for(int k=0 ; k<200 ; k++){
 			if(query[w].str[0][k] == 0){
-				work[i].query[j] = 0;
+				wk[i].query[j] = 0;
 				break;
 			}
 			else if(query[w].str[0][k] == 32){
-				work[i].query[j] = '+';j++;
+				wk[i].query[j] = '+';j++;
 			}
 			else if(query[w].str[0][k]<=-33 && query[w].str[0][k]>=-62){
-				work[i].query[j] = '%';j++;
-				value = query[i].str[0][k];
+				wk[i].query[j] = '%';j++;
+				value = query[w].str[0][k];
 				if(value < 0)value += 256;
-				work[i].query[j] = hex[value/16];j++;
-				work[i].query[j] = hex[value%16];j++;
+				wk[i].query[j] = hex[value/16];j++;
+				wk[i].query[j] = hex[value%16];j++;
 				k++;
-				work[i].query[j] = '%';j++;
-				value = query[i].str[0][k];
+				wk[i].query[j] = '%';j++;
+				value = query[w].str[0][k];
 				if(value < 0)value += 256;
-				work[i].query[j] = hex[value/16];j++;
-				work[i].query[j] = hex[value%16];j++;
+				wk[i].query[j] = hex[value/16];j++;
+				wk[i].query[j] = hex[value%16];j++;
 			}
 			else if(query[w].str[0][k]<=-17 && query[w].str[0][k]>=-32){
-				work[i].query[j] = '%';j++;
+				wk[i].query[j] = '%';j++;
 				value = query[w].str[0][k];
 				if(value < 0)value += 256;
-				work[i].query[j] = hex[value/16];j++;
-				work[i].query[j] = hex[value%16];j++;
+				wk[i].query[j] = hex[value/16];j++;
+				wk[i].query[j] = hex[value%16];j++;
 				k++;
-				work[i].query[j] = '%';j++;
+				wk[i].query[j] = '%';j++;
 				value = query[w].str[0][k];
 				if(value < 0)value += 256;
-				work[i].query[j] = hex[value/16];j++;
-				work[i].query[j] = hex[value%16];j++;
+				wk[i].query[j] = hex[value/16];j++;
+				wk[i].query[j] = hex[value%16];j++;
 				k++;
-				work[i].query[j] = '%';j++;
+				wk[i].query[j] = '%';j++;
 				value = query[w].str[0][k];
 				if(value < 0)value += 256;
-				work[i].query[j] = hex[value/16];j++;
-				work[i].query[j] = hex[value%16];j++;
+				wk[i].query[j] = hex[value/16];j++;
+				wk[i].query[j] = hex[value%16];j++;
 			}
 			else{
-				work[i].query[j] = query[w].str[0][k];j++;
+				wk[i].query[j] = query[w].str[0][k];j++;
 			}
 		}
 	}

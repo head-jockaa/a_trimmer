@@ -13,7 +13,7 @@ void load_story(int n);
 void load_animebook();
 void save_animebook();
 void load_works(int n);
-void load_searchQueries();
+void load_searchQueries(Work *wk, int wk_num);
 void load_towers();
 void load_mounts();
 void load_towns();

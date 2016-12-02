@@ -203,9 +203,10 @@ struct Prg{
 struct Work{
 	String title;
 	char query[600];
-	int id,mark,prg,num,tnum;
+	int id,mark,prg_num,tnum;
+	Prg *prg;
 	Uint8 r,g,b;
-	bool notExist;
+	bool exist;
 };
 
 struct Area{

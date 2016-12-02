@@ -167,6 +167,7 @@ void initGame2(){
 			dataNo=rand()%index_num+1;
 		}
 		load_works(dataNo);
+		load_searchQueries(work,works);
 		if(!fishbox.loaded())fishbox.initFishBox(works);
 		for(int i=0 ; i<works ; i++){
 			gd.score+=fishbox.getSC(i);
@@ -204,10 +205,10 @@ void initGame2(){
 	}
 
 	if(gd.game_mode==SELECT)for(int i=0 ; i<works ; i++){
-		work[i].notExist=true;
-		for(int j=work[i].prg ; j<work[i].prg+work[i].num ; j++){
-			if(prg[j].week==gd.week || (prg[j].week==(gd.week+6)%7 && in_time(prg[j].week,prg[j].hour,prg[j].minute,prg[j].time))){
-				work[i].notExist=false;
+		work[i].exist=false;
+		for(int j=0 ; j<work[i].prg_num ; j++){
+			if(work[i].prg[j].week==gd.week || (work[i].prg[j].week==(gd.week+6)%7 && in_time(work[i].prg[j].week,work[i].prg[j].hour,work[i].prg[j].minute,work[i].prg[j].time))){
+				work[i].exist=true;
 				break;
 			}
 		}
@@ -1341,7 +1342,7 @@ int getScore(int n, double pw, int x, int y){
 	int a=map.rural[x/map.rural_size][y/map.rural_size];
 	if(a==EOF)return 0;
 	if(n==-1)sc=(int)( sqrt(10000.0/pw) * map.rural_rate[a] );
-	else sc=(int)( sqrt(10000.0/pw) * map.rural_rate[a] * 25/sqrt(1.0*work[n].num) );
+	else sc=(int)( sqrt(10000.0/pw) * map.rural_rate[a] * 25/sqrt(1.0*work[n].prg_num) );
 	return sc;
 }
 
@@ -1351,11 +1352,11 @@ int getMissing(){
 	for(int i=0 ; i<works ; i++){
 		if(fishbox.getSC(i)==0){
 			hit=false;
-			for(int j=work[i].prg ; j<work[i].prg+work[i].num ; j++){
-				if(prg[j].week>gd.week ||
-				   (prg[j].week==gd.week && prg[j].hour*100+prg[j].minute>=gd.hour*100+gd.minute)
+			for(int j=0 ; j<work[i].prg_num ; j++){
+				if(work[i].prg[j].week>gd.week ||
+				   (work[i].prg[j].week==gd.week && work[i].prg[j].hour*100+work[i].prg[j].minute>=gd.hour*100+gd.minute)
 				  )hit=true;
-				if(in_time(prg[j].week,prg[j].hour,prg[j].minute,prg[j].time))hit=true;
+				if(in_time(work[i].prg[j].week,work[i].prg[j].hour,work[i].prg[j].minute,work[i].prg[j].time))hit=true;
 			}
 			if(!hit)a++;
 		}
@@ -1388,9 +1389,9 @@ void televise(){
 			pre[i]=sta[i].ontv;
 			sta[i].ontv=EOF;
 		}
-		for(int i=0 ; i<works ; i++)for(int j=work[i].prg ; j<work[i].prg+work[i].num ; j++){
-			if( in_time(prg[j].week, prg[j].hour, prg[j].minute, prg[j].time) ){
-				sta[ prg[j].station ].ontv=i;
+		for(int i=0 ; i<works ; i++)for(int j=0 ; j<work[i].prg_num ; j++){
+			if( in_time(work[i].prg[j].week, work[i].prg[j].hour, work[i].prg[j].minute, work[i].prg[j].time) ){
+				sta[ work[i].prg[j].station ].ontv=i;
 			}
 		}
 	}
@@ -2475,7 +2476,7 @@ void timerFishUp(){
 		int n;
 		if(phase==FISHUP)n=sta[ant->station].ontv;
 		else n=md.fish[0].title_num;
-		startThread(n);
+		startThread(work[n].tnum, work[n].query);
 	}
 	if(start==72){
 		Mix_PlayChannel(0, sf.get, 0);
@@ -2490,9 +2491,9 @@ void timerFishUp(){
 	}
 }
 
-void startThread(int n){
-	tm.selected=work[n].tnum;
-	strcpy_s(tm.query, 300, work[n].query);
+void startThread(int id, char *query){
+	tm.selected=id;
+	strcpy_s(tm.query, 300, query);
 	tm.timeout=0;
 	tm.which=1;
 	tm.finish=false;
@@ -2510,7 +2511,7 @@ void timerBSAttack(){
 	if(start==49){
 		fishbox.text_count=1;
 		int n=sta[ BSstation[gd.bs_ch] ].ontv;
-		startThread(n);
+		startThread(work[n].tnum, work[n].query);
 	}
 	if(start==0 && tm.finish && !tm.failure){
 		createSearchImage(tm.selected);
@@ -2668,8 +2669,8 @@ void estimate_rural(){
 	for(int i=0 ; i<areas ; i++){
 		for(int j=0 ; j<area[i].st_num ; j++){
 			for(int k=0 ; k<works ; k++){
-				for(int n=work[k].prg ; n<work[k].prg+work[k].num ; n++){
-					if(prg[n].station==area[i].station[j]){
+				for(int n=0 ; n<work[k].prg_num ; n++){
+					if(work[k].prg[n].station==area[i].station[j]){
 						t[i]++;
 						break;
 					}
@@ -2772,11 +2773,11 @@ void boss_attack(){
 	map.buffered2=false;
 	srand(SDL_GetTicks());
 	int wk=rand()%works;
-	bd.num=work[wk].num;
+	bd.num=work[wk].prg_num;
 	for(int i=0 ; i<bd.num ; i++){
 		bd.atkX[i]=bd.bossX+10;
 		bd.atkY[i]=bd.bossY+10;
-		bd.station[i]=prg[work[wk].prg+i].station;
+		bd.station[i]=work[wk].prg[i].station;
 		bd.color[i]=rand()%2+1;
 		bd.tower[i]=EOF;
 		for(int j=0 ; j<areas ; j++){

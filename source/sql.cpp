@@ -233,8 +233,8 @@ void initVariableArray(char *tname, int data_size) {
 		allofworks_num=data_size;
 		allofworks=new Work[allofworks_num];
 		for(int i=0 ; i<allofworks_num ; i++) {
-			allofworks[i].num=0;
-			allofworks[i].notExist=false;
+			allofworks[i].prg_num=0;
+			allofworks[i].exist=false;
 		}
 	}
 	else if(strcmp(tname,"mountain")==0) {
@@ -482,7 +482,7 @@ void getAreaSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 			intValue=fetchInt(c);
 			if(get) {
 				allofworks[index].id=intValue;
-				allofworks[index].tnum=intValue;
+				allofworks[index].tnum=intValue-1;
 			}
 		}
 		else if(strcmp(cname,"name_jp")==0) {
@@ -629,7 +629,7 @@ void getAreaSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 			intValue=fetchInt(c);
 			if(get)prg[index].work=intValue;
 		}
-		else if(strcmp(cname,"stationid")==0) {
+		else if(strcmp(cname,"station_id")==0) {
 			intValue=fetchInt(c);
 			if(get)prg[index].station=intValue;
 		}

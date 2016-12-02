@@ -311,7 +311,7 @@ void FishBox::drawFishBox(SDL_Surface* scr){
 	panelColor(n);
 	drawImage(scr,img.menuback,40,60,0,0,560,240,128);
 	for(int i=0 ; i<14 ; i++)for(int j=0 ; j<6 ; j++){
-		if((j+offset)*14+i>=max || work[(j+offset)*14+i].notExist)drawImage(scr,img.symbol,i*40+40,j*40+60,476,0,34,34,255);
+		if((j+offset)*14+i>=max || !work[(j+offset)*14+i].exist)drawImage(scr,img.symbol,i*40+40,j*40+60,476,0,34,34,255);
 		else if(fish[(j+offset)*14+i].score!=0)drawImage(scr,img.symbol,i*40+40,j*40+60,(work[(j+offset)*14+i].mark%16)*34,(work[(j+offset)*14+i].mark/16)*34,34,34,255);
 	}
 	if(count%40<20)drawImage(scr,img.chr,cx*40+40,cy*40+60,566,0,40,40,255);
