@@ -243,14 +243,18 @@ void createMap_mount(){
 
 void createMap_town(){
 	load_towns();
-	Town *tw=town;
-	for(int i=0 ; i<towns ; i++){
-		if(tw->x<0 || tw->x>=map.mapW || tw->y<0 || tw->y>=map.mapH){
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Town *tw=ar->town;
+		for(int j=0 ; j<(ar->town_num) ; j++){
+			if(tw->x<0 || tw->x>=map.mapW || tw->y<0 || tw->y>=map.mapH){
+				tw++;
+				continue;
+			}
+			map.type[tw->x+tw->y*map.mapW]=TOWN;
 			tw++;
-			continue;
 		}
-		map.type[tw->x+tw->y*map.mapW]=TOWN;
-		tw++;
+		ar++;
 	}
 }
 
@@ -359,7 +363,9 @@ void drawMap(SDL_Surface* scr, int X, int Y){
 					drawImage(scr,img.chr,100,0,220,240,20,50,255);
 					for(int i=0 ; i<20 ; i++)drawImage(scr,img.chr,120+i*20,0,240,240,20,50,255);
 					drawImage(scr,img.chr,520,0,260,240,20,50,255);
-					if(gd.location!=EOF)drawText2(scr,320-(int)strlen(town[gd.location].name.str[CHAR_CODE])*8,8,town[gd.location].name);
+					if(gd.current_area!=EOF && gd.current_town!=EOF){
+						drawText2(scr,320-(int)strlen(area[gd.current_area].town[gd.current_town].name.str[CHAR_CODE])*8,8,area[gd.current_area].town[gd.current_town].name);
+					}
 				}
 			}
 		}

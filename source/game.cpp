@@ -97,7 +97,8 @@ void initGame(){
 	gd.week=0;gd.hour=4;gd.minute=0;gd.second=0;gd.score=0;gd.get_score=0;gd.gradeup=0;gd.crops=0;gd.player_dir=0;
 	gd.ta_count=0;start=75;count=0;gd.speed=0;gd.real_speed=0;gd.town_count=400;gd.timeslot_count=0;
 	gd.pre_rural=0;gd.count_rural=0;gd.kirby_count=0;gd.kirby_count2=0;
-	gd.kulisaped=0;gd.ant_dir=270;gd.memma_count=0;gd.location=EOF;gd.gaze_count=0;
+	gd.kulisaped=0;gd.ant_dir=270;gd.memma_count=0;gd.gaze_count=0;
+	gd.current_area=EOF;gd.current_town=EOF;
 	bd.bossHP=30000;bd.pre_bossHP=30000;bd.talking=0;
 	rd.received=false;
 	setSMR=true;
@@ -678,24 +679,28 @@ void walking(){
 	}
 
 	if(MAGNIFY>=8 && (key.up||key.down||key.left||key.right)){
-		double a=3;
-		int loc=EOF;
-		for(int i=0 ; i<towns ; i++){
-			if(std::abs(town[i].x-gd.x)>3)continue;
-			if(std::abs(town[i].y-gd.y)>3)continue;
-			double X=town[i].x-gd.x, Y=town[i].y-gd.y;
-			if(sqrt(X*X+Y*Y)<a){
-				a=sqrt(X*X+Y*Y);
-				loc=i;
+		double distance=3;
+		int this_area=EOF,this_town=EOF;
+		for(int i=0 ; i<areas ; i++){
+			for(int j=0 ; j<area[i].town_num ; j++){
+				if(std::abs(area[i].town[j].x-gd.x)>3)continue;
+				if(std::abs(area[i].town[j].y-gd.y)>3)continue;
+				double X=area[i].town[j].x-gd.x, Y=area[i].town[j].y-gd.y;
+				if(sqrt(X*X+Y*Y)<distance){
+					distance=sqrt(X*X+Y*Y);
+					this_area=i;
+					this_town=j;
+				}
 			}
 		}
-		if(a==3){
-			gd.location=EOF;
+		if(distance==3){
+			gd.current_area=EOF;gd.current_town=EOF;
 			if(gd.town_count<30)gd.town_count=400-gd.town_count;
 			else if(gd.town_count<370)gd.town_count=370;
 		}
-		else if(gd.location!=loc){
-			gd.location=loc;
+		else if(gd.current_area!=this_area || gd.current_town!=this_town){
+			gd.current_area=this_area;
+			gd.current_town=this_town;
 			gd.town_count=0;
 		}
 	}
@@ -993,7 +998,9 @@ void keyPrefList_trans(){
 	if(key.z && !key_stop(key.z)){
 		int n=menu[PREF_LIST].selected();
 		menu[TOWN_LIST].setMenu(100,60,20,8,area[n].town_num);
-		for(int i=0 ; i<area[n].town_num ; i++)menu[TOWN_LIST].stack(town[area[n].town+i].name);
+		for(int i=0 ; i<area[n].town_num ; i++){
+			menu[TOWN_LIST].stack(area[n].town[i].name);
+		}
 		menu[TOWN_LIST].setViewMode(VISIBLE);
 		phase=TOWN_LIST;
 		menu[PREF_LIST].setViewMode(GRAY);
@@ -1012,13 +1019,14 @@ void keyTownList(){
 	if(key.z && !key_stop(key.z)){
 		int m=menu[PREF_LIST].selected();
 		int n=menu[TOWN_LIST].selected();
-		gd.x=town[area[m].town+n].x;
-		gd.y=town[area[m].town+n].y;
+		gd.x=area[m].town[n].x;
+		gd.y=area[m].town[n].y;
 		fix_XY();
 		fix_scrXY();
 		map.buffered=false;
 		map.buffered2=false;
-		gd.location=area[m].town+n;
+		gd.current_area=m;
+		gd.current_town=n;
 		gd.town_count=0;
 		rd.received=false;
 		phase=READY;

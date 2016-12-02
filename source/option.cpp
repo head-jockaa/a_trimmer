@@ -137,7 +137,10 @@ void switchSetting(int n, bool up_key){
 				map.buffered=false;
 				map.buffered2=false;
 			}
-			if(MAGNIFY<8)gd.location=EOF;
+			if(MAGNIFY<8){
+				gd.current_area=EOF;
+				gd.current_town=EOF;
+			}
 		}
 	}
 	else if(n==6){

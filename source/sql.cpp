@@ -209,6 +209,9 @@ void readSQL(const char *filename) {
 void initVariableArray(char *tname, int data_size) {
 	if(strcmp(tname,"area")==0) {
 		if(areas) {
+			for(int i=0 ; i<areas ; i++){
+				if(area[i].town_num)delete [] area[i].town;
+			}
 			delete [] area;
 		}
 		areas=data_size;

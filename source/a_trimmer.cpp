@@ -282,14 +282,19 @@ void endAll(){
 	if(allworks)delete [] animebook;
 	if(works){
 		for(int i=0 ; i<works ; i++){
-			delete [] work[i].prg;
+			if(work[i].prg_num)delete [] work[i].prg;
 		}
 		delete [] work;
 		delete [] gd.timeslot;
 	}
 	if(towers){delete [] area;delete [] tower;}
 	if(mounts)delete [] mount;
-	if(towns)delete [] town;
+	if(towns){
+		for(int i=0 ; i<areas ; i++){
+			if(area[i].town_num)delete [] area[i].town;
+		}
+		delete [] town;
+	}
 	if(CHANNELS)delete [] mhz;
 	fishbox.endAll();
 	if(map_loaded)map.reset();

@@ -76,7 +76,8 @@ extern int mwave[68];
 
 struct GameData{
 	int scrX,scrY,startX,startY,save_cursor,player_dir,ant_dir,hazia,hazia2;
-	int second,score,get_score,gradeup,crops,m_wave,firework,pre_rural,count_rural,location;
+	int second,score,get_score,gradeup,crops,m_wave,firework,pre_rural,count_rural;
+	int current_area,current_town;
 	int text_count,talk_count,face_count,talk_open_count,scene_count,shake_count,ta_count,town_count,timeslot_count;
 	int talk_kulisap,face_kulisap,kirby_count,kirby_count2,gaze_count,gaze_num;
 	int summerX_start,summerY_start,summerX,summerY,memmaX,memmaY,memma_count;

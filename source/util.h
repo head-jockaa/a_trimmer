@@ -209,10 +209,17 @@ struct Work{
 	bool exist;
 };
 
+struct Town{
+	String name;
+	Uint16 x,y;
+	int id,area_id;
+};
+
 struct Area{
 	String name;
 	Uint8 st_num, button[10];
-	int id,tower,num,town,town_num,station[10];
+	int id,tower,num,town_num,station[10];
+	Town *town;
 };
 
 struct Tower{
@@ -234,12 +241,6 @@ struct Mount{
 	int id;
 	bool volcano;
 	float dis, dir, dir1, dir2;
-};
-
-struct Town{
-	String name;
-	Uint16 x,y;
-	int id,area_id;
 };
 
 struct Areacode{

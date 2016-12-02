@@ -321,16 +321,9 @@ void load_searchQueries(Work *wk, int wk_num){
 void load_towers(){
 	if(towers)return;
 	size_t fc=0;
-	areas=0;
 	towers=0;
-
 	char fn[50];
-	while(true){
-		sprintf_s(fn,"file/data/tower/tower%d.dat",areas);
-		if(!loadFile(fn))break;
-		areas++;
-	}
-
+	readSQL("file/data/sql/area.sql");
 	for(int i=0 ; i<areas ; i++){
 		fc=0;
 		sprintf_s(fn,"file/data/tower/tower%d.dat",i);
@@ -342,7 +335,6 @@ void load_towers(){
 			towers++;
 		}
 	}
-	area=new Area[areas+1];
 	tower=new Tower[towers+1];
 	Tower *tw=tower;
 	towers=0;
@@ -353,6 +345,7 @@ void load_towers(){
 		loadFile(fn);
 		area[i].num=0;
 		area[i].tower=towers;
+		area[i].town_num=0;
 		area[i].st_num=fstr[fc];fc++;
 		for(int j=0 ; j<area[i].st_num ; j++){
 			area[i].station[j]=to16int(fstr[fc],fstr[fc+1]);
@@ -380,19 +373,6 @@ void load_towers(){
 		}
 	}
 
-	for(int j=0 ; j<2 ; j++){
-		fc=0;
-		if(j==0)loadFile("file/data/tower/area_name_jp.dat");
-		else loadFile("file/data/tower/area_name_en.dat");
-		for (int i=0 ; i<areas ; i++){
-			for(int k=0 ; k<60 ; k++){
-				area[i].name.str[j][k]=fstr[fc];
-				fc++;
-				if(fstr[fc-1]==0)break;
-			}
-		}
-	}
-
 	int n=0;
 	for(int j=0 ; j<2 ; j++){
 		n=0;
@@ -411,7 +391,6 @@ void load_towers(){
 			}
 		}
 	}
-	extra_tower();
 }
 
 void extra_tower(){
@@ -447,44 +426,24 @@ void load_mounts(){
 
 void load_towns(){
 	if(towns)return;
-	load_towers();
-	size_t fc=0;
-	towns=0;
-
-	loadFile("file/data/town.dat");
-
-	towns=(int)((fsize-(areas-1)*2)/4);
-	town=new Town[towns];
-	fc=0;
-
-	int a=0;
-	for(int i=0 ; i<areas-1 ; i++){
-		area[i].town=a;
-		area[i].town_num=to16int(fstr[fc],fstr[fc+1]);
-		a+=area[i].town_num;
-		fc+=2;
-	}
+	readSQL("file/data/sql/area.sql");
+	readSQL("file/data/sql/town.sql");
 
 	for(int i=0 ; i<towns ; i++){
-		town[i].x=to16int(fstr[fc],fstr[fc+1]);
-		fc+=2;
-		town[i].y=to16int(fstr[fc],fstr[fc+1]);
-		fc+=2;
+		area[town[i].area_id].town_num++;
 	}
-
-	int n;
-	for(int j=0 ; j<2 ; j++){
-		n=0;
-		fc=0;
-		if(j==0)loadFile("file/data/town_name_jp.dat");
-		else loadFile("file/data/town_name_en.dat");
-		while(fc<fsize && n<towns){
-			for(int k=0 ; k<60 ; k++){
-				town[n].name.str[j][k]=fstr[fc];
-				fc++;
-				if(fstr[fc-1]==0)break;
+	for(int i=0 ; i<areas ; i++){
+		area[i].town=new Town[area[i].town_num];
+		area[i].town_num=0;
+		for(int j=0 ; j<towns ; j++){
+			if(town[j].area_id-1==i){
+				int n=area[i].town_num;
+				area[i].town[n].x=town[j].x;
+				area[i].town[n].y=town[j].y;
+				strcpy_s(area[i].town[n].name.str[0], town[j].name.str[0]);
+				strcpy_s(area[i].town[n].name.str[1], town[j].name.str[1]);
+				area[i].town_num++;
 			}
-			n++;
 		}
 	}
 }
