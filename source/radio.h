@@ -9,7 +9,7 @@ void startSMR(int st);
 double asin_q(double D, double X, double Y);
 double acos_q(double D, double X, double Y);
 double atan_q(double X, double Y);
-int receive_mg(int aim_tower, int CH, int DIR);
+int receive_mg(int target_area, int target_tower, int CH, int DIR);
 
 extern bool saveSMR, SMRscanned;
 extern int SMRcount,SMRfast;

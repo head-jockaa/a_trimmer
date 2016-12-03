@@ -279,7 +279,7 @@ void FishBox::initFishBox(int a){
 	for(int i=0 ; i<a ; i++){
 		fish[i].title_num=i;
 		fish[i].x=0;fish[i].y=0;
-		fish[i].sta=0;fish[i].tower=0;fish[i].ch=0;
+		fish[i].sta=0;fish[i].area=0;fish[i].tower=0;fish[i].ch=0;
 		fish[i].hour=0;fish[i].minute=0;fish[i].week=0;
 		fish[i].rcv=0;fish[i].mg_rcv=0;fish[i].score=0;
 		fish[i].bs=false;
@@ -300,7 +300,9 @@ void FishBox::setFish(Fish f){
 	fish[f.title_num].x=f.x;fish[f.title_num].y=f.y;
 	fish[f.title_num].hour=f.hour;fish[f.title_num].minute=f.minute;
 	fish[f.title_num].week=f.week;
-	fish[f.title_num].sta=f.sta;fish[f.title_num].tower=f.tower;
+	fish[f.title_num].sta=f.sta;
+	fish[f.title_num].area=f.area;
+	fish[f.title_num].tower=f.tower;
 	fish[f.title_num].ch=f.ch;
 	fish[f.title_num].rcv=f.rcv;fish[f.title_num].mg_rcv=f.mg_rcv;
 	fish[f.title_num].score=f.score;
@@ -329,7 +331,7 @@ void FishBox::drawTable(SDL_Surface* scr, Fish f){
 		if(f.bs)sprintf_s(str,"%s",toChar(sta[f.sta].name));
 		else{
 			sprintf_s(str,"%s",toChar(sta[f.sta].name));
-			sprintf_s(str,"%s %s Ch%2d",str,toChar(tower[f.tower].name),f.ch);
+			sprintf_s(str,"%s %s Ch%2d",str,toChar(area[f.area].tower[f.tower].name),f.ch);
 		}
 		drawText(scr, 64, 402, str, (int)strlen(str));
 		sprintf_s(str,"%2d:%2d(%s)",f.hour,f.minute,weekChar[f.week][CHAR_CODE]);
@@ -426,6 +428,10 @@ int FishBox::getSC(int i){
 	if(i<0 || i>=max)return 0;
 	return fish[i].score;
 }
+int FishBox::getRCV(int i){
+	if(i<0 || i>=max)return 0;
+	return fish[n].rcv;
+}
 bool FishBox::loaded(){
 	if(max==0)return false;
 	else return true;
@@ -436,14 +442,15 @@ int FishBox::getData(int i, int k){
 	if(k==1)return fish[i].y;
 	if(k==2)return fish[i].sta;
 	if(k==3)return fish[i].bs;
-	if(k==4)return fish[i].tower;
-	if(k==5)return fish[i].ch;
-	if(k==6)return fish[i].hour;
-	if(k==7)return fish[i].minute;
-	if(k==8)return fish[i].week;
-	if(k==9)return fish[i].rcv;
-	if(k==10)return fish[i].mg_rcv;
-	if(k==11)return fish[i].score;
+	if(k==4)return fish[i].area;
+	if(k==5)return fish[i].tower;
+	if(k==6)return fish[i].ch;
+	if(k==7)return fish[i].hour;
+	if(k==8)return fish[i].minute;
+	if(k==9)return fish[i].week;
+	if(k==10)return fish[i].rcv;
+	if(k==11)return fish[i].mg_rcv;
+	if(k==12)return fish[i].score;
 	return 0;
 }
 void FishBox::setData(int i, int k, int data){
@@ -452,14 +459,15 @@ void FishBox::setData(int i, int k, int data){
 	if(k==1)fish[i].y=data;
 	if(k==2)fish[i].sta=data;
 	if(k==3)fish[i].bs=toBool(data);
-	if(k==4)fish[i].tower=data;
-	if(k==5)fish[i].ch=data;
-	if(k==6)fish[i].hour=data;
-	if(k==7)fish[i].minute=data;
-	if(k==8)fish[i].week=data;
-	if(k==9)fish[i].rcv=data;
-	if(k==10)fish[i].mg_rcv=data;
-	if(k==11)fish[i].score=data;
+	if(k==4)fish[i].area=data;
+	if(k==5)fish[i].tower=data;
+	if(k==6)fish[i].ch=data;
+	if(k==7)fish[i].hour=data;
+	if(k==8)fish[i].minute=data;
+	if(k==9)fish[i].week=data;
+	if(k==10)fish[i].rcv=data;
+	if(k==11)fish[i].mg_rcv=data;
+	if(k==12)fish[i].score=data;
 }
 
 int to8int(char c){

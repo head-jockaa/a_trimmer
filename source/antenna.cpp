@@ -11,6 +11,7 @@ void Antenna::setTmpFish(){
 	tmp_fish.minute=gd.minute;
 	tmp_fish.sta=station;
 	tmp_fish.bs=false;
+	tmp_fish.area=A;
 	tmp_fish.tower=T;
 	tmp_fish.ch=ch;
 	if(rcv>100)tmp_fish.rcv=100;
@@ -26,44 +27,51 @@ void Antenna::receive(){
 	station=EOF;rcv=0;A=0,T=0,C=0;m_wave2=70;
 	mg_rcv=0;
 	if(ADJ_DIR==AUTO && ant_mode==TUNE){
-		Tower *tw=tower;
-		for(int i=0 ; i<towers ; i++){
-			for(int j=0 ; j<area[tw->area].st_num ; j++){
-				if(tw->ch[j]!=ch)continue;
-				if( rcv<tw->rcv[j] ){
-					mg_rcv=0;
-					rcv=tw->rcv[j];
-					T=i;C=j;
+		Area *ar=area;
+		for(int i=0 ; i<areas ; i++){
+			Tower *tw=ar->tower;
+			for(int j=0 ; j<(area->tower_num) ; j++){
+				for(int k=0 ; k<10 ; k++){
+					if(tw->ch[k]!=ch)continue;
+					if( rcv<tw->rcv[k] ){
+						mg_rcv=0;
+						rcv=tw->rcv[k];
+						A=i;T=j;C=k;
+					}
 				}
+				tw++;
 			}
-			tw++;
+			ar++;
 		}
-		gd.ant_dir=(int)tower[T].dir;
-		mg_rcv=receive_mg(T,ch,gd.ant_dir);
+		gd.ant_dir=(int)area[A].tower[T].dir;
+		mg_rcv=receive_mg(A,T,ch,gd.ant_dir);
 	}else{
 		Uint32 dir2=0;
-		Tower *tw=tower;
-		for(int i=0 ; i<towers ; i++){
-			for(int j=0 ; j<area[tw->area].st_num ; j++){
-				if(tw->ch[j]!=ch)continue;
-				dir2=abs((int)(tw->dir-gd.ant_dir));
-				if(dir2>180)dir2=360-dir2;
-				if( rcv<tw->rcv[j]/(int)(dir2/5+1) ){
-					mg_rcv=0;
-					rcv=(int)( tw->rcv[j]/(dir2/5+1) );
-					T=i;C=j;
+		Area *ar=area;
+		for(int i=0 ; i<areas ; i++){
+			Tower *tw=ar->tower;
+			for(int j=0 ; j<(area->tower_num) ; j++){
+				for(int k=0 ; k<10 ; k++){
+					if(tw->ch[k]!=ch)continue;
+					dir2=abs((int)(tw->dir-gd.ant_dir));
+					if(dir2>180)dir2=360-dir2;
+					if( rcv<tw->rcv[k]/(int)(dir2/5+1) ){
+						mg_rcv=0;
+						rcv=(int)( tw->rcv[k]/(dir2/5+1) );
+						A=i;T=j;C=k;
+					}
 				}
+				tw++;
 			}
-			tw++;
+			ar++;
 		}
-		mg_rcv=receive_mg(T,ch,gd.ant_dir);
+		mg_rcv=receive_mg(A,T,ch,gd.ant_dir);
 	}
-	A=tower[T].area;
-	station=area[tower[T].area].station[C];
+	station=area[A].station[C];
 }
 
 void Antenna::catching(){
-	Uint32 dir2=abs((int)(tower[T].dir-gd.ant_dir));
+	Uint32 dir2=abs((int)(area[A].tower[T].dir-gd.ant_dir));
 	if(dir2>180)dir2=360-dir2;
 	if((ant_mode==TURN || (ROD_TYPE!=CONVENIENTROD && ROD_TYPE!=SUPERHANDYROD)) && rcv-mg_rcv>=RCV_LEVEL && dir2<10)Mix_PlayChannel(1,sf.noize,0);
 
@@ -72,16 +80,16 @@ void Antenna::catching(){
 			if(gd.game_mode==BOSS){
 				if(bd.bossHP!=0){
 					Mix_PlayChannel(0,sf.water,0);
-					bd.damage=getScore(bd.num,tower[T].power[C],(int)gd.x,(int)gd.y);
+					bd.damage=getScore(bd.num,area[A].tower[T].power[C],(int)gd.x,(int)gd.y);
 					if(sta[station].ontv==2)bd.damage*=-1;
 					phase=HIT_BOSS;
-					bd.hitX=tower[T].x-10;
-					bd.hitY=tower[T].y-10;
+					bd.hitX=area[A].tower[T].x-10;
+					bd.hitY=area[A].tower[T].y-10;
 					start=130;
 				}
 			}else{
 				setTmpFish();
-				if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getData(tmp_fish.title_num,9)<tmp_fish.rcv-tmp_fish.mg_rcv)){
+				if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getRCV(tmp_fish.title_num)<tmp_fish.rcv-tmp_fish.mg_rcv)){
 					if(fishbox.getSC(tmp_fish.title_num)==0){
 						phase=FISHUP;
 						start=150;
@@ -134,22 +142,22 @@ void Antenna::drawAntennaMode(SDL_Surface* scr){
 	}
 }
 void Antenna::drawBuoy(SDL_Surface* scr){
-	Uint32 dir2=abs((int)(tower[T].dir-gd.ant_dir));
+	Uint32 dir2=abs((int)(area[A].tower[T].dir-gd.ant_dir));
 	if(dir2>180)dir2=360-dir2;
 	if(MAP3D){
 		if(dir2<10 && rcv>0){ //“d”g“ƒ‚Ì•û‚ðŒü‚¢‚Ä‚¢‚é‚Æ‚«
-			if(tower[T].v)drawImage(scr,img.chr, tower[T].x_3d-16, tower[T].y_3d-60, 280,60,40,60,255);
-			else drawImage(scr,img.chr, tower[T].x_3d-16, tower[T].y_3d-60, 240,60,40,60,255);
+			if(area[A].tower[T].v)drawImage(scr,img.chr, area[A].tower[T].x_3d-16, area[A].tower[T].y_3d-60, 280,60,40,60,255);
+			else drawImage(scr,img.chr, area[A].tower[T].x_3d-16, area[A].tower[T].y_3d-60, 240,60,40,60,255);
 		}
 	}else{
 		if(dir2<10 && rcv>0){ //“d”g“ƒ‚Ì•û‚ðŒü‚¢‚Ä‚¢‚é‚Æ‚«
-			if(tower[T].v)drawImage(scr,img.chr, tower[T].x*MAGNIFY-gd.scrX-16, tower[T].y*MAGNIFY-gd.scrY-60, 280,60,40,60,255);
-			else drawImage(scr,img.chr, tower[T].x*MAGNIFY-gd.scrX-16, tower[T].y*MAGNIFY-gd.scrY-60, 240,60,40,60,255);
+			if(area[A].tower[T].v)drawImage(scr,img.chr, area[A].tower[T].x*MAGNIFY-gd.scrX-16, area[A].tower[T].y*MAGNIFY-gd.scrY-60, 280,60,40,60,255);
+			else drawImage(scr,img.chr, area[A].tower[T].x*MAGNIFY-gd.scrX-16, area[A].tower[T].y*MAGNIFY-gd.scrY-60, 240,60,40,60,255);
 			if(ant_mode==TURN && start>0 && start%40<20){
-				drawImage(scr,img.chr, tower[T].x*MAGNIFY-gd.scrX-44, tower[T].y*MAGNIFY-gd.scrY-88, 120,220,90,90,255);
+				drawImage(scr,img.chr, area[A].tower[T].x*MAGNIFY-gd.scrX-44, area[A].tower[T].y*MAGNIFY-gd.scrY-88, 120,220,90,90,255);
 			}
 		}else{
-			if(tower[T].v)drawImage(scr,img.chr, (int)(gd.x*MAGNIFY)-gd.scrX-16+(int)(100*cos(gd.ant_dir*PI/180)), (int)(gd.y*MAGNIFY)-gd.scrY-60-(int)(100*sin(gd.ant_dir*PI/180)), 280,60,40,60,255);
+			if(area[A].tower[T].v)drawImage(scr,img.chr, (int)(gd.x*MAGNIFY)-gd.scrX-16+(int)(100*cos(gd.ant_dir*PI/180)), (int)(gd.y*MAGNIFY)-gd.scrY-60-(int)(100*sin(gd.ant_dir*PI/180)), 280,60,40,60,255);
 			else drawImage(scr,img.chr, (int)(gd.x*MAGNIFY)-gd.scrX-16+(int)(100*cos(gd.ant_dir*PI/180)), (int)(gd.y*MAGNIFY)-gd.scrY-60-(int)(100*sin(gd.ant_dir*PI/180)), 240,60,40,60,255);
 			if(ant_mode==TURN && start>0 && start%40<20){
 				drawImage(scr,img.chr, (int)(gd.x*MAGNIFY)-gd.scrX-44+(int)(100*cos(gd.ant_dir*PI/180)), (int)(gd.y*MAGNIFY)-gd.scrY-88-(int)(100*sin(gd.ant_dir*PI/180)), 120,220,90,90,255);
@@ -158,11 +166,11 @@ void Antenna::drawBuoy(SDL_Surface* scr){
 	}
 }
 void Antenna::drawWaterBall(SDL_Surface* scr){
-	if(start>120)drawImage(scr,img.chr,tower[T].x*MAGNIFY-gd.scrX-20,tower[T].y*MAGNIFY-gd.scrY-140+(start-120)*4,420+(((count/5))%2)*40,170,40,40,255);
-	else if(start>90)drawImage(scr,img.chr,tower[T].x*MAGNIFY-gd.scrX-20,tower[T].y*MAGNIFY-gd.scrY-140,420+(((count/5))%2)*40,170,40,40,255);
+	if(start>120)drawImage(scr,img.chr,area[A].tower[T].x*MAGNIFY-gd.scrX-20,area[A].tower[T].y*MAGNIFY-gd.scrY-140+(start-120)*4,420+(((count/5))%2)*40,170,40,40,255);
+	else if(start>90)drawImage(scr,img.chr,area[A].tower[T].x*MAGNIFY-gd.scrX-20,area[A].tower[T].y*MAGNIFY-gd.scrY-140,420+(((count/5))%2)*40,170,40,40,255);
 	else{
-		int X=(int)(gd.x*MAGNIFY+(tower[T].x-gd.x)*MAGNIFY*(start-70)/20);
-		int Y=(int)(gd.y*MAGNIFY+(tower[T].y-gd.y)*MAGNIFY*(start-70)/20);
+		int X=(int)(gd.x*MAGNIFY+(area[A].tower[T].x-gd.x)*MAGNIFY*(start-70)/20);
+		int Y=(int)(gd.y*MAGNIFY+(area[A].tower[T].y-gd.y)*MAGNIFY*(start-70)/20);
 		drawImage(scr,img.chr,X-gd.scrX-20,Y-gd.scrY-140+(90-start)*4,420+(((count/5))%2)*40,170,40,40,255);
 	}
 }
@@ -178,7 +186,7 @@ void Antenna::drawDirectionLine(SDL_Surface* scr){
 	int a,b;
 	int length=400;
 	if(ant_mode==TUNE){
-		length=tower[T].r_dis[tower[T].r_num-1]*MAGNIFY+MAGNIFY/2;
+		length=area[A].tower[T].r_dis[area[A].tower[T].r_num-1]*MAGNIFY+MAGNIFY/2;
 		if(length>400)length=400;
 	}
 	for(int i=0 ; i<length ; i++){
@@ -190,12 +198,12 @@ void Antenna::drawDirectionLine(SDL_Surface* scr){
 void Antenna::drawMountainHeight(SDL_Surface* scr){
 	if(MAP3D)return;
 	if(m_wave2>0){
-		for(int i=1 ; i<tower[T].r_num ; i++){
+		for(int i=1 ; i<area[A].tower[T].r_num ; i++){
 			int X=(int)(gd.x*MAGNIFY)-gd.scrX;
 			int Y=(int)(gd.y*MAGNIFY)-gd.scrY;
-			X+=(int)(tower[T].r_dis[i]*cos(tower[T].dir*PI/180))*MAGNIFY;
-			Y-=(int)(tower[T].r_dis[i]*sin(tower[T].dir*PI/180))*MAGNIFY;
-			drawM(scr,m_wave2,tower[T].r_h[i],X,Y);
+			X+=(int)(area[A].tower[T].r_dis[i]*cos(area[A].tower[T].dir*PI/180))*MAGNIFY;
+			Y-=(int)(area[A].tower[T].r_dis[i]*sin(area[A].tower[T].dir*PI/180))*MAGNIFY;
+			drawM(scr,m_wave2,area[A].tower[T].r_h[i],X,Y);
 		}
 		m_wave2--;
 	}
@@ -217,7 +225,7 @@ void Antenna::drawRader(SDL_Surface* scr){
 	}
 	if(rcv!=0 && gd.game_mode!=BOSS)drawMountainHeight(scr);
 	if(rcv>0){
-		sprintf_s(str,"%s",toChar(tower[T].name));
+		sprintf_s(str,"%s",toChar(area[A].tower[T].name));
 		drawImage(scr,img.menuback,120,0,0,0,(int)strlen(str)*18,40,128);
 		drawText2(scr,120,0,str,(int)strlen(str));
 	}
@@ -353,16 +361,19 @@ void SimpleRod::drawAntenna(SDL_Surface* scr){
 }
 void SimpleRod::trolling(){
 	for(int i=0 ; i<62 ; i++)rc[i]=0;
-	Tower *tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		for(int k=0 ; k<area[tw->area].st_num ; k++){
-			int a=tw->ch[k];
-			if(a!=0 && a!=CHANNELS+1){
-				a--;
-				if(rc[a]<tw->rcv[k])rc[a]=tw->rcv[k];
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			for(int k=0 ; k<10 ; k++){
+				int this_ch=tw->ch[k];
+				if(this_ch!=0 && this_ch!=CHANNELS+1){
+					if(rc[this_ch-1]<tw->rcv[k])rc[this_ch-1]=tw->rcv[k];
+				}
 			}
+			tw++;
 		}
-		tw++;
+		ar++;
 	}
 	for(int i=0 ; i<62 ; i++){
 		if(rc[i]>100)rc[i]=100;
@@ -385,16 +396,20 @@ void ButtonRod::set_button(){
 	for(int i=0 ; i<CHANNELS ; i++){
 		rc[i]=0;st[i]=EOF;bt[i]=0;
 	}
-	Tower *tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		for(int k=0 ; k<area[tw->area].st_num ; k++){
-			if(tw->ch[k]!=0 && tw->ch[k]!=CHANNELS+1 && rc[ tw->ch[k]-1 ]<tw->rcv[k]){
-				rc[ tw->ch[k]-1 ]=tw->rcv[k];
-				st[ tw->ch[k]-1 ]=area[tw->area].station[k];
-				bt[ tw->ch[k]-1 ]=area[tw->area].button[k];
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			for(int k=0 ; k<10 ; k++){
+				if(tw->ch[k]!=0 && tw->ch[k]!=CHANNELS+1 && rc[ tw->ch[k]-1 ]<tw->rcv[k]){
+					rc[ tw->ch[k]-1 ]=tw->rcv[k];
+					st[ tw->ch[k]-1 ]=ar->station[k];
+					bt[ tw->ch[k]-1 ]=ar->button[k];
+				}
 			}
+			tw++;
 		}
-		tw++;
+		ar++;
 	}
 
 	for(int i=0 ; i<CHANNELS ; i++){
@@ -729,19 +744,23 @@ void UVRod::drawAntenna(SDL_Surface* scr){
 void UVRod::trolling(){
 	for(int i=0 ; i<10 ; i++){net[i]=0;net2[i]=0;}
 	for(int i=0 ; i<stas ; i++)st[i]=0;
-	Tower *tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		for(int k=0 ; k<area[tw->area].st_num ; k++){
-			if(tw->ch[k]!=0 && tw->ch[k]!=CHANNELS+1){
-				if(tw->rcv[k]>=100){
-					st[area[tw->area].station[k]]=2;
-				}
-				else if(tw->rcv[k]>=RCV_LEVEL){
-					if(st[area[tw->area].station[k]]!=2)st[area[tw->area].station[k]]=1;
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			for(int k=0 ; k<10 ; k++){
+				if(tw->ch[k]!=0 && tw->ch[k]!=CHANNELS+1){
+					if(tw->rcv[k]>=100){
+						st[ar->station[k]]=2;
+					}
+					else if(tw->rcv[k]>=RCV_LEVEL){
+						if(st[ar->station[k]]!=2)st[ar->station[k]]=1;
+					}
 				}
 			}
+			tw++;
 		}
-		tw++;
+		ar++;
 	}
 	for(int i=0 ; i<stas ; i++){
 		if(st[i]==2)net[sta[i].mark-5]++;
@@ -848,16 +867,19 @@ void MHzRod::drawAntenna(SDL_Surface* scr){
 }
 void MHzRod::trolling(){
 	for(int i=0 ; i<62 ; i++)rc[i]=0;
-	Tower *tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		for(int k=0 ; k<area[tw->area].st_num ; k++){
-			int a=tw->ch[k];
-			if(a!=0 && a!=CHANNELS+1){
-				a--;
-				if(rc[a]<tw->rcv[k])rc[a]=tw->rcv[k];
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			for(int k=0 ; k<10 ; k++){
+				int this_ch=tw->ch[k];
+				if(this_ch!=0 && this_ch!=CHANNELS+1){
+					if(rc[this_ch-1]<tw->rcv[k])rc[this_ch-1]=tw->rcv[k];
+				}
 			}
+			tw++;
 		}
-		tw++;
+		ar++;
 	}
 }
 void MHzRod::drawTrolling(SDL_Surface* scr){
@@ -871,32 +893,37 @@ void MHzRod::drawTrolling(SDL_Surface* scr){
 }
 
 void ConvenientRod::makeList(){
-	for(int i=0 ; i<stas ; i++){rc[i]=0;mr[i]=0;st[i]=EOF;tw[i]=0;chn[i]=0;}
-	Tower *tow=tower;
-	for(int i=0 ; i<towers ; i++){
-		for(int k=0 ; k<area[tow->area].st_num ; k++){
-			int a=area[tow->area].station[k];
-			if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
-
-				int mr2=0;
-				mr2=receive_mg(i,tow->ch[k],(int)tow->dir);
-
-				if(tow->rcv[k]-mr2<rc[a]-mr[a])continue;
-				rc[a]=tow->rcv[k];
-				st[a]=a;
-				tw[a]=i;
-				chn[a]=k;
-				mr[a]=mr2;
+	for(int i=0 ; i<stas ; i++){
+		rc[i]=0;mr[i]=0;st[i]=EOF;ar[i]=0;tw[i]=0;chn[i]=0;
+	}
+	Area *are=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tow=are->tower;
+		for(int j=0 ; j<(are->tower_num) ; j++){
+			for(int k=0 ; k<10 ; k++){
+				int this_ch=are->station[k];
+				if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
+					int mr2=0;
+					mr2=receive_mg(i,j,tow->ch[k],(int)tow->dir);
+					if(tow->rcv[k]-mr2<rc[this_ch]-mr[this_ch])continue;
+					rc[this_ch]=tow->rcv[k];
+					st[this_ch]=this_ch;
+					ar[this_ch]=i;
+					tw[this_ch]=j;
+					chn[this_ch]=k;
+					mr[this_ch]=mr2;
+				}
 			}
+			tow++;
 		}
-		tow++;
+		are++;
 	}
 
 	for(int i=0 ; i<stas-1 ; i++)for(int j=stas-2 ; j>=i ; j--){
 		if(rc[j]-mr[j]<rc[j+1]-mr[j+1]){
-			int RC=rc[j],ST=st[j],TW=tw[j],CH=chn[j],MR=mr[j];
-			rc[j]=rc[j+1];st[j]=st[j+1];tw[j]=tw[j+1];chn[j]=chn[j+1];mr[j]=mr[j+1];
-			rc[j+1]=RC;st[j+1]=ST;tw[j+1]=TW;chn[j+1]=CH;mr[j+1]=MR;
+			int RC=rc[j],ST=st[j],AR=ar[j],TW=tw[j],CH=chn[j],MR=mr[j];
+			rc[j]=rc[j+1];st[j]=st[j+1];ar[j]=ar[j+1];tw[j]=tw[j+1];chn[j]=chn[j+1];mr[j]=mr[j+1];
+			rc[j+1]=RC;st[j+1]=ST;ar[j+1]=AR;tw[j+1]=TW;chn[j+1]=CH;mr[j+1]=MR;
 		}
 	}
 	st_num=0;
@@ -921,6 +948,7 @@ ConvenientRod::ConvenientRod(){
 	ch=1;A=0;T=0;ant_mode=TUNE;v=HIDE;st_num=0;
 	rc=new int[stas];
 	st=new int[stas];
+	ar=new int[stas];
 	tw=new int[stas];
 	chn=new int[stas];
 	mr=new int[stas];
@@ -929,6 +957,7 @@ ConvenientRod::~ConvenientRod(){
 	st_list.reset();
 	delete [] rc;
 	delete [] st;
+	delete [] ar;
 	delete [] tw;
 	delete [] chn;
 	delete [] mr;
@@ -977,11 +1006,11 @@ void ConvenientRod::setTable(){
 	m_wave2=70;
 	rcv=rc[st_list.selected()];
 	station=st[st_list.selected()];
+	A=ar[st_list.selected()];
 	T=tw[st_list.selected()];
-	A=tower[T].area;
 	C=chn[st_list.selected()];
-	ch=tower[T].ch[C];
-	gd.ant_dir=(int)tower[T].dir;
+	ch=area[A].tower[T].ch[C];
+	gd.ant_dir=(int)area[A].tower[T].dir;
 	mg_rcv=mr[st_list.selected()];
 	catching();
 }
@@ -1039,48 +1068,62 @@ void ConvenientRod::drawTrolling(SDL_Surface* scr){
 
 void SuperHandyRod::makeList2(){
 	st_num=0;
-	for(int i=0 ; i<towers*10 ; i++){rc[i]=0;mr[i]=0;st[i]=EOF;tw[i]=0;chn[i]=0;}
-	for(int i=0 ; i<16 ; i++){rc2[i]=-1;tw2[i]=0;}
-	Tower *tow=tower;
-	for(int i=0 ; i<towers ; i++){
-		for(int k=0 ; k<area[tow->area].st_num ; k++){
-			if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
-
-				int mr2=0;
-				mr2=receive_mg(i,tow->ch[k],(int)tow->dir);
-
-				if(tow->rcv[k]-mr2<RCV_LEVEL)continue;
-				rc[st_num]=tow->rcv[k];
-				st[st_num]=area[tow->area].station[k];
-				tw[st_num]=i;
-				chn[st_num]=k;
-				mr[st_num]=mr2;
-				st_num++;
+	int tower_num=0;
+	Area *are=area;
+	for(int i=0 ; i<areas ; i++){
+		tower_num+=are->tower_num;
+		are++;
+	}
+	for(int i=0 ; i<tower_num*10 ; i++){
+		rc[i]=0;mr[i]=0;st[i]=EOF;ar[i]=0;tw[i]=0;chn[i]=0;
+	}
+	for(int i=0 ; i<16 ; i++){rc2[i]=-1;ar2[i]=0;tw2[i]=0;}
+	are=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tow=are->tower;
+		for(int j=0 ; j<(are->tower_num) ; j++){
+			for(int k=0 ; k<10 ; k++){
+				if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
+					int mr2=0;
+					mr2=receive_mg(i,j,tow->ch[k],(int)tow->dir);
+					if(tow->rcv[k]-mr2<RCV_LEVEL)continue;
+					rc[st_num]=tow->rcv[k];
+					st[st_num]=are->station[k];
+					ar[st_num]=i;
+					tw[st_num]=j;
+					chn[st_num]=k;
+					mr[st_num]=mr2;
+					st_num++;
+				}
 			}
+			tow++;
 		}
-		tow++;
+		are++;
 	}
 	for(int i=0 ; i<st_num-1 ; i++)for(int j=st_num-2 ; j>=i ; j--){
 		if(rc[j]-mr[j]<rc[j+1]-mr[j+1]){
-			int RC=rc[j],ST=st[j],TW=tw[j],CH=chn[j],MR=mr[j];
-			rc[j]=rc[j+1];st[j]=st[j+1];tw[j]=tw[j+1];chn[j]=chn[j+1];mr[j]=mr[j+1];
-			rc[j+1]=RC;st[j+1]=ST;tw[j+1]=TW;chn[j+1]=CH;mr[j+1]=MR;
+			int RC=rc[j],ST=st[j],AR=ar[j],TW=tw[j],CH=chn[j],MR=mr[j];
+			rc[j]=rc[j+1];st[j]=st[j+1];ar[j]=ar[j+1];tw[j]=tw[j+1];chn[j]=chn[j+1];mr[j]=mr[j+1];
+			rc[j+1]=RC;st[j+1]=ST;ar[j+1]=AR;tw[j+1]=TW;chn[j+1]=CH;mr[j+1]=MR;
 		}
 	}
 	for(int i=0 ; i<st_num-1 ; i++)for(int j=st_num-2 ; j>=i ; j--){
 		if(st[j]>st[j+1]){
-			int RC=rc[j],ST=st[j],TW=tw[j],CH=chn[j],MR=mr[j];
-			rc[j]=rc[j+1];st[j]=st[j+1];tw[j]=tw[j+1];chn[j]=chn[j+1];mr[j]=mr[j+1];
-			rc[j+1]=RC;st[j+1]=ST;tw[j+1]=TW;chn[j+1]=CH;mr[j+1]=MR;
+			int RC=rc[j],ST=st[j],AR=ar[j],TW=tw[j],CH=chn[j],MR=mr[j];
+			rc[j]=rc[j+1];st[j]=st[j+1];ar[j]=ar[j+1];tw[j]=tw[j+1];chn[j]=chn[j+1];mr[j]=mr[j+1];
+			rc[j+1]=RC;st[j+1]=ST;ar[j+1]=AR;tw[j+1]=TW;chn[j+1]=CH;mr[j+1]=MR;
 		}
 	}
 	for(int i=0 ; i<st_num ; i++){
 		for(int j=0 ; j<16 ; j++){
-			if(rc2[j]!=-1 && tw2[j]==tw[i]){
+			if(rc2[j]!=-1 && ar2[j]==ar[i] && tw2[j]==tw[i]){
 				if(rc2[j]>rc[i]-mr[i])rc2[j]=rc[i]-mr[i];
 				break;
 			}
-			if(rc2[j]==-1){rc2[j]=rc[i]-mr[i];tw2[j]=tw[i];break;}
+			if(rc2[j]==-1){
+				rc2[j]=rc[i]-mr[i];ar2[j]=ar[i];tw2[j]=tw[i];
+				break;
+			}
 		}
 	}
 }
@@ -1089,9 +1132,9 @@ void SuperHandyRod::make_st_list2(){
 	String s;
 	for(int i=0 ; i<st_num ; i++){
 		sprintf_s(s.str[0],"%s",sta[st[i]].name.str[0]);
-		sprintf_s(s.str[0],"%s:%d:%s",s.str[0],(int)tower[tw[i]].rcv[chn[i]],tower[tw[i]].name.str[0]);
+		sprintf_s(s.str[0],"%s:%d:%s",s.str[0],(int)area[ar[i]].tower[tw[i]].rcv[chn[i]],area[ar[i]].tower[tw[i]].name.str[0]);
 		sprintf_s(s.str[1],"%s",sta[st[i]].name.str[1]);
-		sprintf_s(s.str[1],"%s:%d:%s",s.str[1],tower[tw[i]].rcv[chn[i]],tower[tw[i]].name.str[1]);
+		sprintf_s(s.str[1],"%s:%d:%s",s.str[1],area[ar[i]].tower[tw[i]].rcv[chn[i]],area[ar[i]].tower[tw[i]].name.str[1]);
 		st_list.stack(s);
 		st_list.inputMark(i,sta[st[i]].mark);
 		if(rc[i]-mr[i]<100)st_list.gray[i]=true;
@@ -1103,11 +1146,18 @@ SuperHandyRod::SuperHandyRod(){
 	ch=1;A=0;T=0;ant_mode=TUNE;v=HIDE;st_num=0;
 	rd.received=false;
 	load_towers();
-	rc=new int[towers*10];
-	st=new int[towers*10];
-	tw=new int[towers*10];
-	chn=new int[towers*10];
-	mr=new int[towers*10];
+	int tower_num=0;
+	Area *are=area;
+	for(int i=0 ; i<areas ; i++){
+		tower_num+=are->tower_num;
+		are++;
+	}
+	rc=new int[tower_num*10];
+	st=new int[tower_num*10];
+	ar=new int[tower_num*10];
+	tw=new int[tower_num*10];
+	chn=new int[tower_num*10];
+	mr=new int[tower_num*10];
 }
 
 void SuperHandyRod::hoist(){
@@ -1140,7 +1190,7 @@ void SuperHandyRod::drawTrolling(SDL_Surface* scr){
 		int a=255;
 		if(rc2[i]<100)a=128;
 		fontA=a;
-		drawText(scr,(i/8)*160+20,(i%8)*20+20,tower[tw2[i]].name,60);
+		drawText(scr,(i/8)*160+20,(i%8)*20+20,area[ar2[i]].tower[tw2[i]].name,60);
 	}
 	fontA=255;
 }

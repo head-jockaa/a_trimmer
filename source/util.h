@@ -215,24 +215,26 @@ struct Town{
 	int id,area_id;
 };
 
-struct Area{
-	String name;
-	Uint8 st_num, button[10];
-	int id,tower,num,town_num,station[10];
-	Town *town;
-};
-
 struct Tower{
 	String name;
-	Uint8 ch[10], kw, kw2, erp, erp2, c1, c2, bias, r_num;
+	Uint8 ch[10], c1, c2, bias, r_num;
+	double kw, erp;
 	int rcv[10];
-	int id,area;
+	int id,area_id;
 	short r_h[20];
 	Uint16 x, y, h, x_3d, y_3d, work[10], r_dis[20],r_m[20];
 	float power[10];
 	float dir;
 	bool remove, v;
 	Uint8 out[10];
+};
+
+struct Area{
+	String name;
+	Uint8 st_num, button[10];
+	int id,tower_num,town_num,station[10];
+	Tower *tower;
+	Town *town;
 };
 
 struct Mount{
@@ -273,7 +275,7 @@ struct Image{
 
 struct Fish{
 	Uint8 ch,hour,minute,week,rcv,mg_rcv;
-	int x,y,title_num,sta,tower,score;
+	int x,y,title_num,sta,area,tower,score;
 	bool bs;
 };
 
@@ -305,6 +307,7 @@ public:
 	int getH();
 	int getM();
 	int getSC(int i);
+	int getRCV(int i);
 	int getData(int i, int k);
 	bool loaded();
 	void setData(int i, int k, int data);

@@ -1,7 +1,8 @@
 #include "util.h"
 
 int *prgs_of_each_season;
-int this_tower[10],which_tower;
+int this_area[10],this_tower[10];
+int which_tower;
 bool talk_3dtv=false, talk_seoiha=false,movie_test=false;
 bool showSearchImage=false;
 Uint8 scr_design=NULL;
@@ -692,28 +693,38 @@ void keyPrefList_tower(){
 
 void keyStaList_tower(){
 	if(key.z && !key_stop(key.z)){
-		for(int i=0 ; i<towers ; i++)tower[i].remove=false;
-		for(int i=0 ; i<towers ; i++){
-			if(tower[i].area!=menu[PREF_LIST_MIYAZAKI].selected())tower[i].remove=true;
-			if(menu[GUIDE_STA].selected()!=0){
-				if(tower[i].ch[menu[GUIDE_STA].selected()-1]==0)tower[i].remove=true;
-				if(tower[i].ch[menu[GUIDE_STA].selected()-1]==CHANNELS+1)tower[i].remove=true;
+		for(int i=0 ; i<areas ; i++){
+			for(int j=0 ; j<area[i].tower_num ; j++){
+				area[i].tower[j].remove=false;
+				if(i!=menu[PREF_LIST_MIYAZAKI].selected())area[i].tower[j].remove=true;
+				if(menu[GUIDE_STA].selected()!=0){
+					if(area[i].tower[j].ch[menu[GUIDE_STA].selected()-1]==0){
+						area[i].tower[j].remove=true;
+					}
+					if(area[i].tower[j].ch[menu[GUIDE_STA].selected()-1]==CHANNELS+1){
+						area[i].tower[j].remove=true;
+					}
+				}
+				if(i==menu[PREF_LIST_MIYAZAKI].selected() && !area[i].tower[j].remove){
+					gd.x=area[i].tower[j].x;
+					gd.y=area[i].tower[j].y;
+					break;
+				}
 			}
 		}
-		for(int i=0 ; i<towers; i++){
-			if(tower[i].area==menu[PREF_LIST_MIYAZAKI].selected() && !tower[i].remove){
-				gd.x=tower[i].x;
-				gd.y=tower[i].y;
-				break;
-			}
+		for(int i=0 ; i<10 ; i++){
+			this_area[i]=EOF;
+			this_tower[i]=EOF;
 		}
-		for(int i=0 ; i<10 ; i++)this_tower[i]=EOF;
 		int n=0;
-		for(int i=0 ; i<towers ; i++)if(!tower[i].remove){
-			if(tower[i].x==gd.x && tower[i].y==gd.y){
-				this_tower[n]=i;
-				if(n==9)break;
-				n++;
+		for(int i=0 ; i<areas ; i++){
+			for(int j=0 ; j<area[i].tower_num ; j++)if(!area[i].tower[j].remove){
+				if(area[i].tower[j].x==gd.x && area[i].tower[j].y==gd.y){
+					this_area[n]=i;
+					this_tower[n]=j;
+					if(n==9)break;
+					n++;
+				}
 			}
 		}
 		menu[PREF_LIST_MIYAZAKI].setViewMode(HIDE);
@@ -738,14 +749,11 @@ void keyTowerList(){
 				if(this_tower[i]==EOF)break;
 				n++;
 			}
-			double a;
 			String s;
 			menu[WHICH_TOWER].setMenu(60,60,20,5,n);
 			for(int i=0 ; i<n ; i++){
-				a=tower[this_tower[i]].kw*1.0;
-				for(int j=0 ; j<tower[this_tower[i]].kw2 ; j++)a/=10;
-				sprintf_s(s.str[0],"%s %.6gkw",tower[this_tower[i]].name.str[0],a);
-				sprintf_s(s.str[1],"%s %.6gkw",tower[this_tower[i]].name.str[1],a);
+				sprintf_s(s.str[0],"%s %.6gkw",area[this_area[i]].tower[this_tower[i]].name.str[0],area[this_area[i]].tower[this_tower[i]].kw);
+				sprintf_s(s.str[1],"%s %.6gkw",area[this_area[i]].tower[this_tower[i]].name.str[1],area[this_area[i]].tower[this_tower[i]].kw);
 				menu[WHICH_TOWER].stack(s);
 			}
 			menu[WHICH_TOWER].setViewMode(VISIBLE);
@@ -757,18 +765,24 @@ void keyTowerList(){
 		}
 	}
 	if(key.x && !key_stop(key.x)){
-		for(int i=0 ; i<towers ; i++)tower[i].remove=false;
+		for(int i=0 ; i<areas ; i++){
+			for(int j=0 ; j<towers ; j++){
+				area[i].tower[j].remove=false;
+			}
+		}
 		if(NHK_REMOVE){
 			bool ok;
-			for(int i=0 ; i<towers ; i++)if(tower[i].kw2!=0){
-				ok=false;
-				for(int j=0 ; j<10 ; j++)if(tower[i].ch[j]!=0){
-					if(sta[area[tower[i].area].station[j]].mark!=5 && sta[area[tower[i].area].station[j]].mark!=6){
-						ok=true;break;
+			for(int i=0 ; i<areas ; i++){
+				for(int j=0 ; j<towers ; j++)if(area[i].tower[j].kw<1){
+					ok=false;
+					for(int k=0 ; k<10 ; k++)if(area[i].tower[j].ch[k]!=0){
+						if(sta[area[i].station[k]].mark!=5 && sta[area[i].station[k]].mark!=6){
+							ok=true;break;
+						}
 					}
+					if(ok)area[i].tower[j].remove=false;
+					else area[i].tower[j].remove=true;
 				}
-				if(ok)tower[i].remove=false;
-				else tower[i].remove=true;
 			}
 		}
 		createMap_tower();
@@ -787,13 +801,19 @@ void keyTowerList(){
 		map.buffered=false;
 	}
 	if(key.left||key.right||key.up||key.down){
-		for(int i=0 ; i<10 ; i++)this_tower[i]=EOF;
+		for(int i=0 ; i<10 ; i++){
+			this_area[i]=EOF;
+			this_tower[i]=EOF;
+		}
 		int n=0;
-		for(int i=0 ; i<towers ; i++)if(!tower[i].remove){
-			if(tower[i].x==gd.x && tower[i].y==gd.y){
-				this_tower[n]=i;
-				if(n==9)break;
-				n++;
+		for(int i=0 ; i<areas ; i++){
+			for(int j=0 ; j<towers ; j++)if(!area[i].tower[j].remove){
+				if(area[i].tower[j].x==gd.x && area[i].tower[j].y==gd.y){
+					this_area[n]=i;
+					this_tower[n]=j;
+					if(n==9)break;
+					n++;
+				}
 			}
 		}
 	}
@@ -1237,28 +1257,26 @@ void drawTowerList(SDL_Surface* scr){
 	drawImage(scr,img.chr,290,210,180,60,60,60,255);
 	if(phase==SHOW_TOWERDATA){
 		drawText(scr,0,0,tower[this_tower[which_tower]].name);
-		double n=tower[this_tower[which_tower]].kw*1.0;
-		for(int m=0 ; m<tower[this_tower[which_tower]].kw2 ; m++)n/=10.0;
-		sprintf_s(str,"%.6gkw",n);
+		sprintf_s(str,"%.6gkw",tower[this_tower[which_tower]].kw);
 		drawText(scr,0,40,str);
-		for(int i=0 ; i<area[tower[this_tower[which_tower]].area].st_num ; i++){
+		for(int i=0 ; i<10 ; i++){
 			drawImage(scr,img.symbol,0,i*40+80,
-					  (sta[area[tower[this_tower[which_tower]].area].station[i]].mark%17)*34,
-					  (sta[area[tower[this_tower[which_tower]].area].station[i]].mark/17)*34,
+					  (sta[area[ this_area[which_tower] ].station[i]].mark%17)*34,
+					  (sta[area[ this_area[which_tower] ].station[i]].mark/17)*34,
 					  34,34,255);
-			drawText(scr,40,i*40+80,sta[area[tower[this_tower[which_tower]].area].station[i]].name);
-			if(tower[this_tower[which_tower]].ch[i]==0)drawText(scr,400,i*40+80,"----");
-			else if(tower[this_tower[which_tower]].ch[i]==CHANNELS+1)drawText(scr,400,i*40+80,"****");
+			drawText(scr,40,i*40+80,sta[area[ this_area[which_tower] ].station[i]].name);
+			if(area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]==0)drawText(scr,400,i*40+80,"----");
+			else if(area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]==CHANNELS+1)drawText(scr,400,i*40+80,"****");
 			else{
-				sprintf_s(str,"ch%2d",tower[this_tower[which_tower]].ch[i]);
+				sprintf_s(str,"ch%2d",area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]);
 				drawText(scr,400,i*40+80,str);
 			}
 		}
-		if(tower[this_tower[which_tower]].v)drawImage(scr,img.back,560,0,1240,640,80,80,255);
+		if(area[this_area[which_tower]].tower[this_tower[which_tower]].v)drawImage(scr,img.back,560,0,1240,640,80,80,255);
 		else drawImage(scr,img.back,560,0,1240,560,80,80,255);
 		if(((count/20)%4)!=3){
 			for(int i=0 ; i<8 ; i++){
-				if(((tower[this_tower[which_tower]].bias>>i)&1)==1){
+				if(((area[this_area[which_tower]].tower[this_tower[which_tower]].bias>>i)&1)==1){
 					drawImage(scr,img.back,480,0,600+i*80,560+((count/20)%4)*80,80,80,255);
 				}
 			}
@@ -1266,7 +1284,7 @@ void drawTowerList(SDL_Surface* scr){
 	}else{
 		for(int i=0 ; i<10 ; i++){
 			if(this_tower[i]==EOF)break;
-			drawText(scr,0,i*40,tower[this_tower[i]].name);
+			drawText(scr,0,i*40,area[this_area[i]].tower[this_tower[i]].name);
 		}
 	}
 }

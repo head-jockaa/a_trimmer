@@ -100,7 +100,7 @@ struct ManekiData{
 	bool bs[300];
 	double manekiX,manekiY;
 	int maneki_count[300],fish_num;
-	int ch[300],tower[300],station[300],rcv[300],mg_rcv[300],st_num;
+	int ch[300],area[300],tower[300],station[300],rcv[300],mg_rcv[300],st_num;
 };
 extern ManekiData md;
 

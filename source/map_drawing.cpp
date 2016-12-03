@@ -260,31 +260,38 @@ void createMap_town(){
 
 void createMap_tower(){
 	load_towers();
-	Tower *tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		if(tw->x<0 || tw->x>=map.mapW || tw->y<0 || tw->y>=map.mapH){
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			if(tw->x<0 || tw->x>=map.mapW || tw->y<0 || tw->y>=map.mapH){
+				tw++;
+				continue;
+			}
+			map.type[tw->x+tw->y*map.mapW]=NULL;
 			tw++;
-			continue;
 		}
-		map.type[tw->x+tw->y*map.mapW]=NULL;
-		tw++;
+		ar++;
 	}
 
-	tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		if(tw->x<0 || tw->x>=map.mapW || tw->y<0 || tw->y>=map.mapH){
+	ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			if(tw->x<0 || tw->x>=map.mapW || tw->y<0 || tw->y>=map.mapH){
+				tw++;
+				continue;
+			}
+			if(tw->remove){tw++;continue;}
+			int m=0;
+			if(tw->kw>10)m=2;
+			else if(tw->kw>1)m=1;
+			if(m>=2)map.type[tw->x+tw->y*map.mapW]=TOWER_L;
+			else if(m==1 && map.type[tw->x+tw->y*map.mapW]!=TOWER_L)map.type[tw->x+tw->y*map.mapW]=TOWER_M;
+			else if(m==0 && map.type[tw->x+tw->y*map.mapW]!=TOWER_L && map.type[tw->x+tw->y*map.mapW]!=TOWER_M)map.type[tw->x+tw->y*map.mapW]=TOWER_S;
 			tw++;
-			continue;
 		}
-		if(tw->remove){tw++;continue;}
-		int m=1;
-		if(tw->kw>0)m++;
-		if(tw->kw>10)m++;
-		m-=tw->kw2;
-		if(m>=2)map.type[tw->x+tw->y*map.mapW]=TOWER_L;
-		else if(m==1 && map.type[tw->x+tw->y*map.mapW]!=TOWER_L)map.type[tw->x+tw->y*map.mapW]=TOWER_M;
-		else if(m<=0 && map.type[tw->x+tw->y*map.mapW]!=TOWER_L && map.type[tw->x+tw->y*map.mapW]!=TOWER_M)map.type[tw->x+tw->y*map.mapW]=TOWER_S;
-		tw++;
+		ar++;
 	}
 }
 
@@ -1138,28 +1145,33 @@ void drawColorLight(int x, int y, int w, int h, bool buf){
 
 	fillRect(img.buffer[2],0,0,640,480,0,0,0,255);
 
-	for(int i=0 ; i<towers ; i++){
-		if(tower[i].remove)continue;
-		int n=tower[i].c1, m=tower[i].c2-1;
-		if(n==0 || m<0 || m>=8)continue;
-		X=tower[i].x*MAGNIFY-gd.scrX-m*5;
-		Y=tower[i].y*MAGNIFY-gd.scrY-m*5;
-		X2=0;Y2=0;W=m*10+10;H=m*10+10;
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=area->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			if(tw->remove)continue;
+			int n=tw->c1, m=tw->c2 - 1;
+			if(n==0 || m<0 || m>=8)continue;
+			X=tw->x*MAGNIFY-gd.scrX-m*5;
+			Y=tw->y*MAGNIFY-gd.scrY-m*5;
+			X2=0;Y2=0;W=m*10+10;H=m*10+10;
 
+			if(X>=x+w || Y>=y+h)continue;
+			if(X+W<x|| Y+H<y)continue;
+			if(X<x){X2+=x-X;W-=x-X;X=x;}
+			if(Y<y){Y2+=y-Y;H-=y-Y;Y=y;}
+			if(X+W>x+w)W=x+w-X;
+			if(Y+H>y+h)H=y+h-Y;
 
-		if(X>=x+w || Y>=y+h)continue;
-		if(X+W<x|| Y+H<y)continue;
-		if(X<x){X2+=x-X;W-=x-X;X=x;}
-		if(Y<y){Y2+=y-Y;H-=y-Y;Y=y;}
-		if(X+W>x+w)W=x+w-X;
-		if(Y+H>y+h)H=y+h-Y;
+			illuminateImage(img.buffer[2],img.colorlight,X,Y,X2+m*80,Y2+(n-1)*80,W,H,255);
 
-		illuminateImage(img.buffer[2],img.colorlight,X,Y,X2+m*80,Y2+(n-1)*80,W,H,255);
-
-		if(minX>X-1)minX=X-1;
-		if(maxX<X+W)maxX=X+W;
-		if(minY>Y-1)minY=Y-1;
-		if(maxY<Y+H)maxY=Y+H;
+			if(minX>X-1)minX=X-1;
+			if(maxX<X+W)maxX=X+W;
+			if(minY>Y-1)minY=Y-1;
+			if(maxY<Y+H)maxY=Y+H;
+			tw++;
+		}
+		ar++;
 	}
 
 	map.airX=minX+1;
@@ -1404,56 +1416,59 @@ void make3dview_tower(double X, double Y, int D){
 	double span=8.0*sqrt(1.0*Z);
 	int mg=(int)(span*2/3);
 
-	Tower *tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		tw->x_3d=400;
-		dis=sqrt(1.0*(tw->x-X)*(tw->x-X)+1.0*(tw->y-Y)*(tw->y-Y));
-		if(dis>=mg){tw++;continue;}
-		double mound=(mg/8.0)*(mg/8.0)*sqrt( 1-(std::abs(dis-span)/span) );
-		xd=atan_q(tw->x-X,Y-tw->y);
-		zd=atan_q(dis*MAP_SCALE*1000,tw->h+map.h[tw->x][tw->y]-Z+mound);
-		zd2=atan_q(dis*MAP_SCALE*1000,map.h[tw->x][tw->y]-Z+mound);
-		if(xd>180 && D<90)xd-=360;
-		if(xd<180 && D>270)xd+=360;
-		xd=D-xd;
-		if(zd>180)zd-=360;
-		if(zd2>180)zd2-=360;
-		int m=1;
-		if(tw->kw>0)m++;
-		if(tw->kw>10)m++;
-		m-=tw->kw2;
-		int A=160+(int)(80.0*xd/gd.zoom), B=120-(int)(80.0*zd/gd.zoom);
-		tw->x_3d=A;
-		tw->y_3d=B;
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			tw->x_3d=400;
+			dis=sqrt(1.0*(tw->x-X)*(tw->x-X)+1.0*(tw->y-Y)*(tw->y-Y));
+			if(dis>=mg){tw++;continue;}
+			double mound=(mg/8.0)*(mg/8.0)*sqrt( 1-(std::abs(dis-span)/span) );
+			xd=atan_q(tw->x-X,Y-tw->y);
+			zd=atan_q(dis*MAP_SCALE*1000,tw->h+map.h[tw->x][tw->y]-Z+mound);
+			zd2=atan_q(dis*MAP_SCALE*1000,map.h[tw->x][tw->y]-Z+mound);
+			if(xd>180 && D<90)xd-=360;
+			if(xd<180 && D>270)xd+=360;
+			xd=D-xd;
+			if(zd>180)zd-=360;
+			if(zd2>180)zd2-=360;
+			int m=0;
+			if(tw->kw>10)m=2;
+			else if(tw->kw>1)m=1;
+			int A=160+(int)(80.0*xd/gd.zoom), B=120-(int)(80.0*zd/gd.zoom);
+			tw->x_3d=A;
+			tw->y_3d=B;
 
-		if(A<0 || A>=320 || B<0 || B>=240){tw++;continue;}
+			if(A<0 || A>=320 || B<0 || B>=240){tw++;continue;}
 
-		for(int a=0 ; a<=(int)std::abs(zd-zd2)*10 ; a++){
-			if(B+a<0 || B+a>=240)continue;
-			if(m>=2 && A-1>=0){
-				if(map.z[(B+a)*320+(A-1)]>(Uint16)dis){
-					img.buffer[0]->RGB[(B+a)*320+A-1]=setRGB(255,255,0);
-					img.buffer[1]->RGB[(B+a)*320+A-1]=setRGB(255,255,255);
-					map.z[(B+a)*320+(A-1)]=(Uint16)dis;
+			for(int a=0 ; a<=(int)std::abs(zd-zd2)*10 ; a++){
+				if(B+a<0 || B+a>=240)continue;
+				if(m>=2 && A-1>=0){
+					if(map.z[(B+a)*320+(A-1)]>(Uint16)dis){
+						img.buffer[0]->RGB[(B+a)*320+A-1]=setRGB(255,255,0);
+						img.buffer[1]->RGB[(B+a)*320+A-1]=setRGB(255,255,255);
+						map.z[(B+a)*320+(A-1)]=(Uint16)dis;
+					}
+				}
+				if(m>=1 && A+1<320){
+					if(map.z[(B+a)*320+(A+1)]>(Uint16)dis){
+						if(m>=2)img.buffer[0]->RGB[(B+a)*320+A+1]=setRGB(255,255,0);
+						else if(m==1)img.buffer[0]->RGB[(B+a)*320+A+1]=setRGB(255,0,0);
+						img.buffer[1]->RGB[(B+a)*320+A+1]=setRGB(255,255,255);
+						map.z[(B+a)*320+(A+1)]=(Uint16)dis;
+					}
+				}
+				if(map.z[(B+a)*320+A]>(Uint16)dis){
+					if(m>=2)img.buffer[0]->RGB[(B+a)*320+A]=setRGB(255,255,0);
+					else if(m==1)img.buffer[0]->RGB[(B+a)*320+A]=setRGB(255,0,0);
+					else img.buffer[0]->RGB[(B+a)*320+A]=setRGB(0,0,255);
+					img.buffer[1]->RGB[(B+a)*320+A]=setRGB(255,255,255);
+					map.z[(B+a)*320+A]=(Uint16)dis;
 				}
 			}
-			if(m>=1 && A+1<320){
-				if(map.z[(B+a)*320+(A+1)]>(Uint16)dis){
-					if(m>=2)img.buffer[0]->RGB[(B+a)*320+A+1]=setRGB(255,255,0);
-					else if(m==1)img.buffer[0]->RGB[(B+a)*320+A+1]=setRGB(255,0,0);
-					img.buffer[1]->RGB[(B+a)*320+A+1]=setRGB(255,255,255);
-					map.z[(B+a)*320+(A+1)]=(Uint16)dis;
-				}
-			}
-			if(map.z[(B+a)*320+A]>(Uint16)dis){
-				if(m>=2)img.buffer[0]->RGB[(B+a)*320+A]=setRGB(255,255,0);
-				else if(m==1)img.buffer[0]->RGB[(B+a)*320+A]=setRGB(255,0,0);
-				else img.buffer[0]->RGB[(B+a)*320+A]=setRGB(0,0,255);
-				img.buffer[1]->RGB[(B+a)*320+A]=setRGB(255,255,255);
-				map.z[(B+a)*320+A]=(Uint16)dis;
-			}
+			tw++;
 		}
-		tw++;
+		ar++;
 	}
 	setAlpha(img.buffer[1],0,0,0);
 }

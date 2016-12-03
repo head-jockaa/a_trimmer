@@ -210,6 +210,7 @@ void initVariableArray(char *tname, int data_size) {
 	if(strcmp(tname,"area")==0) {
 		if(areas) {
 			for(int i=0 ; i<areas ; i++){
+				if(area[i].tower_num)delete [] area[i].tower;
 				if(area[i].town_num)delete [] area[i].town;
 			}
 			delete [] area;
@@ -218,7 +219,7 @@ void initVariableArray(char *tname, int data_size) {
 		area=new Area[areas];
 		for(int i=0 ; i<areas ; i++) {
 			area[i].st_num=0;
-			area[i].num=0;
+			area[i].tower_num=0;
 			area[i].town_num=0;
 		}
 	}
@@ -379,43 +380,43 @@ void getAreaSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"tv1")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[0]=intValue;
+			if(get)area[index].station[0]=intValue-1;
 		}
 		else if(strcmp(cname,"tv2")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[1]=intValue;
+			if(get)area[index].station[1]=intValue-1;
 		}
 		else if(strcmp(cname,"tv3")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[2]=intValue;
+			if(get)area[index].station[2]=intValue-1;
 		}
 		else if(strcmp(cname,"tv4")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[3]=intValue;
+			if(get)area[index].station[3]=intValue-1;
 		}
 		else if(strcmp(cname,"tv5")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[4]=intValue;
+			if(get)area[index].station[4]=intValue-1;
 		}
 		else if(strcmp(cname,"tv6")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[5]=intValue;
+			if(get)area[index].station[5]=intValue-1;
 		}
 		else if(strcmp(cname,"tv7")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[6]=intValue;
+			if(get)area[index].station[6]=intValue-1;
 		}
 		else if(strcmp(cname,"tv8")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[7]=intValue;
+			if(get)area[index].station[7]=intValue-1;
 		}
 		else if(strcmp(cname,"tv9")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[8]=intValue;
+			if(get)area[index].station[8]=intValue-1;
 		}
 		else if(strcmp(cname,"tv10")==0) {
 			intValue=fetchInt(c);
-			if(get)area[index].station[9]=intValue;
+			if(get)area[index].station[9]=intValue-1;
 		}
 	}
 	else if(strcmp(tname,"areacode")==0) {
@@ -660,7 +661,7 @@ void getAreaSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"area_id")==0) {
 			intValue=fetchInt(c);
-			if(get)tower[index].area=intValue;
+			if(get)tower[index].area_id=intValue;
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			fetchSqlString2(c,str);

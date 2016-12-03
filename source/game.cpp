@@ -127,25 +127,29 @@ void initGame(){
 	for(int i=0 ; i<areas-1 ; i++)menu[PREF_LIST].stack(area[i].name);
 	if(gd.game_mode!=NO_RELAY){
 		bool ok;
-		for(int i=0 ; i<towers ; i++){
-			ok=false;
-			if(NHK_REMOVE && tower[i].kw2!=0){
-				for(int j=0 ; j<10 ; j++)if(tower[i].ch[j]!=0){
-					if(sta[area[tower[i].area].station[j]].mark!=5 && sta[area[tower[i].area].station[j]].mark!=6){
-						ok=true;break;
+		for(int i=0 ; i<areas ; i++){
+			for(int j=0 ; j<area[i].tower_num ; j++){
+				ok=false;
+				if(NHK_REMOVE && area[i].tower[j].kw<1){
+					for(int k=0 ; k<10 ; k++)if(area[i].tower[j].ch[k]!=0){
+						if(sta[area[i].station[k]].mark!=5 && sta[area[i].station[k]].mark!=6){
+							ok=true;break;
+						}
 					}
 				}
+				else ok=true;
+				if(ok)area[i].tower[j].remove=false;
+				else area[i].tower[j].remove=true;
 			}
-			else ok=true;
-			if(ok)tower[i].remove=false;
-			else tower[i].remove=true;
 		}
 	}
 	createMap();
 	if(gd.game_mode==NO_RELAY){
-		for(int i=0 ; i<towers ; i++){
-			if(tower[i].kw2!=0)tower[i].remove=true;
-			else tower[i].remove=false;
+		for(int i=0 ; i<areas ; i++){
+			for(int j=0 ; j<area[i].tower_num ; j++){
+				if(area[i].tower[j].kw<1)area[i].tower[j].remove=true;
+				else area[i].tower[j].remove=false;
+			}
 		}
 		createMap_tower();
 	}
@@ -251,14 +255,18 @@ void endGame(){
 	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT||gd.game_mode==BOSS)freeMusic();
 	if(pre_magnify!=EOF)MAGNIFY=pre_magnify;
 	if(gd.game_mode==NO_RELAY){
-		for(int i=0 ; i<towers ; i++){
-			tower[i].remove=false;
+		for(int i=0 ; i<areas ; i++){
+			for(int j=0 ; j<area[i].tower_num ; j++){
+				area[i].tower[j].remove=false;
+			}
 		}
 		createMap_tower();
 	}
-	for(int i=0 ; i<towers ; i++){
-		tower[i].c1=0;
-		tower[i].c2=0;
+	for(int i=0 ; i<areas ; i++){
+		for(int j=0 ; j<area[i].tower_num ; j++){
+			area[i].tower[j].c1=0;
+			area[i].tower[j].c2=0;
+		}
 	}
 	delete ant;
 	fishbox.endFishBox();
@@ -1403,21 +1411,27 @@ void televise(){
 			}
 		}
 	}
-	for(int i=0 ; i<towers ; i++){
-		tower[i].c1=0;tower[i].c2=0;
-		for(int k=0 ; k<area[tower[i].area].st_num ; k++){
-			if(tower[i].ch[k]!=0 && sta[ area[tower[i].area].station[k] ].ontv!=EOF){
-				if(gd.game_mode==BOSS){
-					tower[i].c1=sta[ area[tower[i].area].station[k] ].ontv;
-				}
-				else if(tower[i].c1<3)tower[i].c1++;
-				if(tower[i].ch[k]!=CHANNELS+1){
-					int n=0;
-					if(tower[i].kw2==0 && tower[i].kw>=30)n=8;
-					else if(tower[i].kw2==0 && tower[i].kw>=20)n=7;
-					else if(tower[i].kw2==0 && tower[i].kw>=10)n=6;
-					else if(tower[i].kw2<=3)n=5-tower[i].kw2;
-					if(tower[i].c2<n)tower[i].c2=n;
+	for(int i=0 ; i<areas ; i++){
+		for(int j=0 ; j<area[i].tower_num ; j++){
+			area[i].tower[j].c1=0;area[i].tower[j].c2=0;
+			for(int k=0 ; k<10 ; k++){
+				if(area[i].tower[j].ch[k]!=0 && sta[ area[i].station[k] ].ontv!=EOF){
+					if(gd.game_mode==BOSS){
+						area[i].tower[j].c1=sta[ area[i].station[k] ].ontv;
+					}
+					else if(area[i].tower[j].c1<3)area[i].tower[j].c1++;
+					if(area[i].tower[j].ch[k]!=CHANNELS+1){
+						int n=0;
+						if(area[i].tower[j].kw>=30)n=8;
+						else if(area[i].tower[j].kw>=20)n=7;
+						else if(area[i].tower[j].kw>=10)n=6;
+						else if(area[i].tower[j].kw>=1)n=5;
+						else if(area[i].tower[j].kw>=0.1)n=4;
+						else if(area[i].tower[j].kw>=0.01)n=3;
+						else if(area[i].tower[j].kw>=0.001)n=2;
+						else n=1;
+						if(area[i].tower[j].c2<n)area[i].tower[j].c2=n;
+					}
 				}
 			}
 		}
@@ -2774,9 +2788,11 @@ void head_of_timeslot(){
 
 void boss_attack(){
 	for(int i=0 ; i<stas ; i++)sta[i].ontv=EOF;
-	for(int i=0 ; i<towers ; i++){
-		tower[i].c1=0;
-		tower[i].c2=0;
+	for(int i=0 ; i<areas ; i++){
+		for(int j=0 ; j<area[i].tower_num ; j++){
+			area[i].tower[j].c1=0;
+			area[i].tower[j].c2=0;
+		}
 	}
 	map.buffered2=false;
 	srand(SDL_GetTicks());
@@ -2791,7 +2807,7 @@ void boss_attack(){
 		for(int j=0 ; j<areas ; j++){
 			for(int k=0 ; k<area[j].st_num ; k++){
 				if(area[j].station[k]==bd.station[i]){
-					bd.tower[i]=area[j].tower;
+					//bd.tower[i]=area[j].tower;
 					break;
 				}
 			}
@@ -2911,8 +2927,9 @@ void setTmpFish_maneki(int n){
 	tmp_fish.minute=gd.minute;
 	tmp_fish.sta=md.station[n];
 	tmp_fish.bs=md.bs[n];
+	tmp_fish.area=md.area[n];
 	tmp_fish.tower=md.tower[n];
-	tmp_fish.ch=tower[md.tower[n]].ch[md.ch[n]];
+	tmp_fish.ch=area[md.area[n]].tower[md.tower[n]].ch[md.ch[n]];
 	if(md.rcv[n]>100)tmp_fish.rcv=100;
 	else tmp_fish.rcv=md.rcv[n];
 	if(md.rcv[n]-md.mg_rcv[n]>100)tmp_fish.mg_rcv=0;
@@ -2920,7 +2937,7 @@ void setTmpFish_maneki(int n){
 	else if(md.rcv[n]>100)tmp_fish.mg_rcv=100-(md.rcv[n]-md.mg_rcv[n]);
 	else tmp_fish.mg_rcv=md.mg_rcv[n];
 	if(md.bs[n])tmp_fish.score=1;
-	else tmp_fish.score=getScore(sta[tmp_fish.sta].ontv,tower[tmp_fish.tower].power[md.ch[n]],(int)md.manekiX,(int)md.manekiY);
+	else tmp_fish.score=getScore(sta[tmp_fish.sta].ontv,area[tmp_fish.area].tower[tmp_fish.tower].power[md.ch[n]],(int)md.manekiX,(int)md.manekiY);
 }
 
 void setFish_maneki(Fish f){
@@ -2930,7 +2947,9 @@ void setFish_maneki(Fish f){
 	md.fish[md.fish_num].x=f.x;md.fish[md.fish_num].y=f.y;
 	md.fish[md.fish_num].hour=f.hour;md.fish[md.fish_num].minute=f.minute;
 	md.fish[md.fish_num].week=f.week;
-	md.fish[md.fish_num].sta=f.sta;md.fish[md.fish_num].tower=f.tower;
+	md.fish[md.fish_num].sta=f.sta;
+	md.fish[md.fish_num].area=f.area;
+	md.fish[md.fish_num].tower=f.tower;
 	md.fish[md.fish_num].ch=f.ch;
 	md.fish[md.fish_num].rcv=f.rcv;md.fish[md.fish_num].mg_rcv=f.mg_rcv;
 	md.fish[md.fish_num].score=f.score;
@@ -2960,33 +2979,37 @@ void shiftFish_maneki(){
 
 void setManekiData(){
 	for(int i=0 ; i<stas ; i++){
-		md.rcv[i]=0;md.mg_rcv[i]=0;md.station[i]=EOF;md.tower[i]=0;md.ch[i]=0;
+		md.rcv[i]=0;md.mg_rcv[i]=0;md.station[i]=EOF;
+		md.area[i]=0;md.tower[i]=0;md.ch[i]=0;
 	}
-	Tower *tow=tower;
-	for(int i=0 ; i<towers ; i++){
-		for(int k=0 ; k<area[tow->area].st_num ; k++){
-			int a=area[tow->area].station[k];
-			if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
-
-				int mr2=0;
-				mr2=receive_mg(i,tow->ch[k],(int)tow->dir);
-
-				if(tow->rcv[k]-mr2<md.rcv[a]-md.mg_rcv[a])continue;
-				md.rcv[a]=tow->rcv[k];
-				md.station[a]=a;
-				md.tower[a]=i;
-				md.ch[a]=k;
-				md.mg_rcv[a]=mr2;
+	Area *are=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tow=are->tower;
+		for(int j=0 ; j<(are->tower_num) ; j++){
+			for(int k=0 ; k<10 ; k++){
+				int this_ch=area[i].station[k];
+				if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
+					int mr2=0;
+					mr2=receive_mg(i,j,tow->ch[k],(int)tow->dir);
+					if(tow->rcv[k]-mr2<md.rcv[this_ch]-md.mg_rcv[this_ch])continue;
+					md.rcv[this_ch]=tow->rcv[k];
+					md.station[this_ch]=this_ch;
+					md.area[this_ch]=i;
+					md.tower[this_ch]=j;
+					md.ch[this_ch]=k;
+					md.mg_rcv[this_ch]=mr2;
+				}
 			}
+			tow++;
 		}
-		tow++;
+		are++;
 	}
 
 	for(int i=0 ; i<stas-1 ; i++)for(int j=stas-2 ; j>=i ; j--){
 		if(md.rcv[j]-md.mg_rcv[j]<md.rcv[j+1]-md.mg_rcv[j+1]){
-			int RC=md.rcv[j],ST=md.station[j],TW=md.tower[j],CH=md.ch[j],MR=md.mg_rcv[j];
-			md.rcv[j]=md.rcv[j+1];md.station[j]=md.station[j+1];md.tower[j]=md.tower[j+1];md.ch[j]=md.ch[j+1];md.mg_rcv[j]=md.mg_rcv[j+1];
-			md.rcv[j+1]=RC;md.station[j+1]=ST;md.tower[j+1]=TW;md.ch[j+1]=CH;md.mg_rcv[j+1]=MR;
+			int RC=md.rcv[j],ST=md.station[j],AR=md.area[j],TW=md.tower[j],CH=md.ch[j],MR=md.mg_rcv[j];
+			md.rcv[j]=md.rcv[j+1];md.station[j]=md.station[j+1];;md.area[j]=md.area[j+1];md.tower[j]=md.tower[j+1];md.ch[j]=md.ch[j+1];md.mg_rcv[j]=md.mg_rcv[j+1];
+			md.rcv[j+1]=RC;md.station[j+1]=ST;md.area[j+1]=AR;md.tower[j+1]=TW;md.ch[j+1]=CH;md.mg_rcv[j+1]=MR;
 		}
 	}
 	md.st_num=0;
@@ -3028,13 +3051,16 @@ void ManekiTV_throw(){
 			setTmpFish_maneki(i);
 			skip=false;
 			for(int j=0 ; j<md.fish_num ; j++){
-				if(md.fish[j].title_num==tmp_fish.title_num && md.fish[j].sta==tmp_fish.sta && md.fish[j].tower==tmp_fish.tower){
+				if(md.fish[j].title_num==tmp_fish.title_num
+				&& md.fish[j].sta==tmp_fish.sta
+				&& md.fish[j].area==tmp_fish.area
+				&& md.fish[j].tower==tmp_fish.tower){
 					skip=true;
 					continue;
 				}
 			}
 			if(skip)continue;
-			if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getData(tmp_fish.title_num,9)<tmp_fish.rcv-tmp_fish.mg_rcv)){
+			if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getRCV(tmp_fish.title_num)<tmp_fish.rcv-tmp_fish.mg_rcv)){
 				if(md.fish_num==0)md.maneki_count[0]=40;
 				else{
 					if(md.maneki_count[md.fish_num-1]>30)md.maneki_count[md.fish_num]=md.maneki_count[md.fish_num-1]+10;

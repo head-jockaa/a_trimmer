@@ -2,9 +2,6 @@
 
 char hex[16]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
-void extra_work(int n, int mark, String title);
-void extra_tower();
-
 void load_text(){
 	size_t fc=0;
 
@@ -320,103 +317,35 @@ void load_searchQueries(Work *wk, int wk_num){
 
 void load_towers(){
 	if(towers)return;
-	size_t fc=0;
-	towers=0;
-	char fn[50];
-	readSQL("file/data/sql/area.sql");
-	for(int i=0 ; i<areas ; i++){
-		fc=0;
-		sprintf_s(fn,"file/data/tower/tower%d.dat",i);
-		loadFile(fn);
-		int st_num=fstr[fc];
-		fc+=st_num*3+1;
-		while(fc<fsize){
-			fc+=st_num+9;
-			towers++;
-		}
+	if(!areas){
+		readSQL("file/data/sql/area.sql");
 	}
-	tower=new Tower[towers+1];
-	Tower *tw=tower;
-	towers=0;
-
-	for(int i=0 ; i<areas ; i++){
-		fc=0;
-		sprintf_s(fn,"file/data/tower/tower%d.dat",i);
-		loadFile(fn);
-		area[i].num=0;
-		area[i].tower=towers;
-		area[i].town_num=0;
-		area[i].st_num=fstr[fc];fc++;
-		for(int j=0 ; j<area[i].st_num ; j++){
-			area[i].station[j]=to16int(fstr[fc],fstr[fc+1]);
-			fc+=2;
-			area[i].button[j]=fstr[fc];fc++;
-		}
-		while(fc<fsize){
-			tw->area=i;
-			tw->x=to16int(fstr[fc],fstr[fc+1]);
-			fc+=2;
-			tw->y=to16int(fstr[fc],fstr[fc+1]);
-			fc+=2;
-			tw->h=to8int(fstr[fc]);fc++;
-			tw->kw=fstr[fc];fc++;
-			tw->kw2=fstr[fc];fc++;
-			tw->erp=fstr[fc];fc++;
-			tw->erp2=fstr[fc];fc++;
-			tw->v=toBool(fstr[fc]);fc++;
-			tw->bias=to8int(fstr[fc]);fc++;
-			for(int j=0 ; j<area[i].st_num ; j++){
-				tw->ch[j]=fstr[fc];fc++;
-			}
-			area[i].num++;
-			tw++;towers++;
-		}
+	readSQL("file/data/sql/tower.sql");
+	for(int i=0 ; i<towers ; i++){
+		area[tower[i].area_id-1].tower_num++;
 	}
-
-	int n=0;
-	for(int j=0 ; j<2 ; j++){
-		n=0;
-		for(int i=0 ; i<areas ; i++){
-			fc=0;
-			if(j==0)sprintf_s(fn,"file/data/tower/tower%d_name_jp.dat",i);
-			else sprintf_s(fn,"file/data/tower/tower%d_name_en.dat",i);
-			loadFile(fn);
-			while(fc<fsize && n<towers){
-				for(int k=0 ; k<60 ; k++){
-					tower[n].name.str[j][k]=fstr[fc];
-					fc++;
-					if(fstr[fc-1]==0)break;
+	for(int i=0 ; i<areas ; i++){
+		area[i].tower=new Tower[area[i].tower_num];
+		area[i].tower_num=0;
+		for(int j=0 ; j<towers ; j++){
+			if(tower[j].area_id-1==i){
+				int n=area[i].tower_num;
+				strcpy_s(area[i].tower[n].name.str[0], tower[j].name.str[0]);
+				strcpy_s(area[i].tower[n].name.str[1], tower[j].name.str[1]);
+				area[i].tower[n].x=tower[j].x;
+				area[i].tower[n].y=tower[j].y;
+				area[i].tower[n].h=tower[j].h;
+				area[i].tower[n].kw=tower[j].kw;
+				area[i].tower[n].erp=tower[j].erp;
+				area[i].tower[n].v=tower[j].v;
+				area[i].tower[n].bias=tower[j].bias;
+				for(int k=0 ; k<10 ; k++){
+					area[i].tower[n].ch[k]=tower[j].ch[k];
 				}
-				n++;
+				area[i].tower_num++;
 			}
 		}
 	}
-}
-
-void extra_tower(){
-	area[areas].button[0]=1;
-	area[areas].name.str[0][0]=0;
-	area[areas].name.str[1][0]=0;
-	area[areas].num=1;
-	area[areas].st_num=1;
-	area[areas].station[0]=stas-1;
-	area[areas].tower=towers;
-	for(int j=0 ; j<10 ; j++){
-		area[areas].station[j]=0;
-		area[areas].button[j]=0;
-	}
-	tower[towers].area=areas;
-	tower[towers].bias=255;
-	tower[towers].ch[0]=CHANNELS;
-	tower[towers].h=1;
-	tower[towers].kw=5;
-	tower[towers].kw2=5;
-	for(int k=0 ; k<2 ; k++){
-		sprintf_s(tower[towers].name.str[k],text[ANTENNATEXT+16].str[k]);
-	}
-	tower[towers].x=1121;
-	tower[towers].y=2585;
-	areas++;towers++;
 }
 
 void load_mounts(){
@@ -426,11 +355,12 @@ void load_mounts(){
 
 void load_towns(){
 	if(towns)return;
-	readSQL("file/data/sql/area.sql");
+	if(!areas){
+		readSQL("file/data/sql/area.sql");
+	}
 	readSQL("file/data/sql/town.sql");
-
 	for(int i=0 ; i<towns ; i++){
-		area[town[i].area_id].town_num++;
+		area[town[i].area_id-1].town_num++;
 	}
 	for(int i=0 ; i<areas ; i++){
 		area[i].town=new Town[area[i].town_num];
@@ -796,7 +726,7 @@ void load_record(int n){
 
 void save_game(int n){
 	if(fsize)delete [] fstr;
-	fsize=works*39+19;
+	fsize=works*43+19;
 	fstr=new char[fsize];
 	FILE* hFile;
 	size_t fc=0;
@@ -835,14 +765,16 @@ void save_game(int n){
 		fstr[fc]=fishbox.getData(i,3);fc++;
 		fstr[fc]=fishbox.getData(i,4)%256;fc++;
 		fstr[fc]=fishbox.getData(i,4)/256;fc++;
-		fstr[fc]=fishbox.getData(i,5);fc++;
+		fstr[fc]=fishbox.getData(i,5)%256;fc++;
+		fstr[fc]=fishbox.getData(i,5)/256;fc++;
 		fstr[fc]=fishbox.getData(i,6);fc++;
 		fstr[fc]=fishbox.getData(i,7);fc++;
 		fstr[fc]=fishbox.getData(i,8);fc++;
 		fstr[fc]=fishbox.getData(i,9);fc++;
 		fstr[fc]=fishbox.getData(i,10);fc++;
-		fstr[fc]=fishbox.getData(i,11)%256;fc++;
-		fstr[fc]=fishbox.getData(i,11)/256;fc++;
+		fstr[fc]=fishbox.getData(i,11);fc++;
+		fstr[fc]=fishbox.getData(i,12)%256;fc++;
+		fstr[fc]=fishbox.getData(i,12)/256;fc++;
 	}
 	for(int i=0 ; i<today_num ; i++){
 		fstr[fc]=fishbox.today[i]%256;fc++;
@@ -859,6 +791,8 @@ void save_game(int n){
 		fstr[fc]=md.fish[i].sta%256;fc++;
 		fstr[fc]=md.fish[i].sta/256;fc++;
 		fstr[fc]=md.fish[i].bs;fc++;
+		fstr[fc]=md.fish[i].area%256;fc++;
+		fstr[fc]=md.fish[i].area/256;fc++;
 		fstr[fc]=md.fish[i].tower%256;fc++;
 		fstr[fc]=md.fish[i].tower/256;fc++;
 		fstr[fc]=md.fish[i].ch;fc++;
@@ -904,13 +838,14 @@ void load_game(int n){
 		fishbox.setData(i,2,to16int(fstr[fc],fstr[fc+1]));fc+=2;
 		fishbox.setData(i,3,fstr[fc]);fc++;
 		fishbox.setData(i,4,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,5,fstr[fc]);fc++;
+		fishbox.setData(i,5,to16int(fstr[fc],fstr[fc+1]));fc+=2;
 		fishbox.setData(i,6,fstr[fc]);fc++;
 		fishbox.setData(i,7,fstr[fc]);fc++;
 		fishbox.setData(i,8,fstr[fc]);fc++;
 		fishbox.setData(i,9,fstr[fc]);fc++;
 		fishbox.setData(i,10,fstr[fc]);fc++;
-		fishbox.setData(i,11,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(i,11,fstr[fc]);fc++;
+		fishbox.setData(i,12,to16int(fstr[fc],fstr[fc+1]));fc+=2;
 	}
 	for(int i=0 ; i<today_num ; i++){
 		fishbox.today[i]=to16int(fstr[fc],fstr[fc+1]);fc+=2;
@@ -922,6 +857,7 @@ void load_game(int n){
 		md.fish[i].y=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].sta=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].bs=toBool(fstr[fc]);fc++;
+		md.fish[i].area=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].tower=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].ch=fstr[fc];fc++;
 		md.fish[i].hour=fstr[fc];fc++;

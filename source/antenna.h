@@ -130,7 +130,7 @@ class ConvenientRod : public Antenna{
 	void makeList();
 	void make_st_list();
 protected:
-	int *rc, *st, *tw, *chn, *mr, st_num;
+	int *rc, *st, *ar, *tw, *chn, *mr, st_num;
 	Menu st_list;
 public:
 	ConvenientRod();
@@ -152,7 +152,7 @@ public:
 class SuperHandyRod : public ConvenientRod{
 	void makeList2();
 	void make_st_list2();
-	int rc2[16], tw2[16];
+	int rc2[16], ar2[16], tw2[16];
 public:
 	SuperHandyRod();
 	void hoist();

@@ -166,18 +166,20 @@ void switchSetting(int n, bool up_key){
 		else NHK_REMOVE=true;
 		if(mode==GAME && gd.game_mode!=NO_RELAY){
 			bool ok;
-			for(int i=0 ; i<towers ; i++){
-				ok=false;
-				if(NHK_REMOVE && tower[i].kw2!=0){
-					for(int j=0 ; j<10 ; j++)if(tower[i].ch[j]!=0){
-						if(sta[area[tower[i].area].station[j]].mark!=5 && sta[area[tower[i].area].station[j]].mark!=6){
-							ok=true;break;
+			for(int i=0 ; i<areas ; i++){
+				for(int j=0 ; j<towers ; j++){
+					ok=false;
+					if(NHK_REMOVE && area[i].tower[j].kw<1){
+						for(int k=0 ; k<10 ; k++)if(tower[j].ch[k]!=0){
+							if(sta[area[i].station[k]].mark!=5 && sta[area[i].station[k]].mark!=6){
+								ok=true;break;
+							}
 						}
 					}
+					else ok=true;
+					if(ok)area[i].tower[j].remove=false;
+					else area[i].tower[j].remove=true;
 				}
-				else ok=true;
-				if(ok)tower[i].remove=false;
-				else tower[i].remove=true;
 			}
 			createMap_tower();
 			map.buffered=false;

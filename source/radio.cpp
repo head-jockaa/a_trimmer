@@ -12,52 +12,56 @@ void estimate(){
 	double A=(DIS62CH-DIS1CH)/674.0;
 	double B=DIS1CH-A*91;
 	double C=CURVE_TOP,D=CURVE_RISE;
-	Tower *tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		double n=tw->kw*1000.0;
-		for(int m=0 ; m<tw->kw2 ; m++)n/=10.0;
-		double ERP=tw->erp;
-		for(int m=0 ; m<tw->erp2 ; m++)ERP/=10.0;
-		n*=ERP;
-		for(int k=0 ; k<area[tw->area].st_num ; k++){
-			if(tw->ch[k]==0 || tw->ch[k]>=CHANNELS+1)tw->power[k]=0;
-			else{
-				double E=mhz[tw->ch[k]-1].mhz*A+B;
-				if(mhz[tw->ch[k]-1].mhz<C)E+=D*sin( (PI/2)*(mhz[tw->ch[k]-1].mhz-91)/(C-91) );
-				else E+=D*cos( (PI/2)*(mhz[tw->ch[k]-1].mhz-C)/(759-C) );
-				tw->power[k]=(float)(sqrt(n)*E);
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			double n=tw->kw*1000.0;
+			double ERP=tw->erp;
+			n*=ERP;
+			for(int k=0 ; k<10 ; k++){
+				if(tw->ch[k]==0 || tw->ch[k]>=CHANNELS+1)tw->power[k]=0;
+				else{
+					double E=mhz[tw->ch[k]-1].mhz*A+B;
+					if(mhz[tw->ch[k]-1].mhz<C)E+=D*sin( (PI/2)*(mhz[tw->ch[k]-1].mhz-91)/(C-91) );
+					else E+=D*cos( (PI/2)*(mhz[tw->ch[k]-1].mhz-C)/(759-C) );
+					tw->power[k]=(float)(sqrt(n)*E);
+				}
 			}
-		}
 /*ìdîgìÉÇÃçÇÇ≥*/
-		int tX=tw->x,tY=tw->y,tH=tw->h;
-		Mount *mt=mount;
-		for(int k=0 ; k<mounts ; k++){
-			if(mt->city){mt++;continue;}
-			int mX=mt->x,mY=mt->y;
-			double mount_dis=sqrt(1.0*(tX-mX)*(tX-mX)+(tY-mY)*(tY-mY));
-			if(mX-mt->range-2<=tX && tX<=mX+mt->range+2 && mY-mt->range-2<=tY && tY<=mY+mt->range+2){
-				int a=mt->h - (int)((mt->h-mt->slope)*mount_dis/mt->range);
-				if(tw->h<tH+a)tw->h=tH+a;
+			int tX=tw->x,tY=tw->y,tH=tw->h;
+			Mount *mt=mount;
+			for(int k=0 ; k<mounts ; k++){
+				if(mt->city){mt++;continue;}
+				int mX=mt->x,mY=mt->y;
+				double mount_dis=sqrt(1.0*(tX-mX)*(tX-mX)+(tY-mY)*(tY-mY));
+				if(mX-mt->range-2<=tX && tX<=mX+mt->range+2 && mY-mt->range-2<=tY && tY<=mY+mt->range+2){
+					int a=mt->h - (int)((mt->h-mt->slope)*mount_dis/mt->range);
+					if(tw->h<tH+a)tw->h=tH+a;
+				}
+				mt++;
 			}
-			mt++;
+			tw++;
 		}
-		tw++;
+		ar++;
 	}
 /*ÉrÉãäXÇÃçÇÇ≥*/
 	Mount *mt=mount;
 	Mount *mt2;
-	for(int i=0 ; i<mounts ; i++)if(mt->city){
-		int a=0;
-		mt2=mount;
-		for(int j=0 ; j<mounts ; j++)if(!mt2->city){
-			double X=abs(mt2->x-mt->x),Y=abs(mt2->y-mt->y);
-			if(X<=mt2->range && Y<=mt2->range){
-				if(a<mt2->h-(int)( (mt2->h-mt2->slope)*sqrt(1.0*X*X+Y*Y)/mt2->range ))
-				a=mt2->h-(int)( (mt2->h-mt2->slope)*sqrt(1.0*X*X+Y*Y)/mt2->range );
+	for(int i=0 ; i<mounts ; i++){
+		if(mt->city){
+			int altitude=0;
+			mt2=mount;
+			for(int j=0 ; j<mounts ; j++)if(!mt2->city){
+				double X=abs(mt2->x-mt->x),Y=abs(mt2->y-mt->y);
+				if(X<=mt2->range && Y<=mt2->range){
+					if(altitude<mt2->h-(int)( (mt2->h-mt2->slope)*sqrt(1.0*X*X+Y*Y)/mt2->range ))
+						altitude=mt2->h-(int)( (mt2->h-mt2->slope)*sqrt(1.0*X*X+Y*Y)/mt2->range );
+				}
+				mt2++;
 			}
-			mt2++;
+			mt->h+=altitude;
 		}
-		mt->h+=a;
 		mt++;
 	}
 	create_atan_table();
@@ -271,49 +275,57 @@ void receive_each_ch(double X, double Y, Tower* T, int S){
 
 void receiveAll(double X, double Y){
 	mount_dis(X,Y);
-	Tower *tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		if(tw->remove){
-			for(int k=0 ; k<area[tw->area].st_num ; k++)tw->rcv[k]=0;
-			tw++;
-			continue;
-		}
-		rd.tower_dis_multi2=1.0*MAP_SCALE*MAP_SCALE*( 1.0*(X-tw->x)*(X-tw->x)+1.0*(Y-tw->y)*(Y-tw->y) );
-		bool skip=true;
-		for(int k=0 ; k<area[tw->area].st_num ; k++){
-			if(tw->power[k] >= rd.tower_dis_multi2/100)skip=false;
-		}
-		if(skip){
-			for(int k=0 ; k<area[tw->area].st_num ; k++){
-				tw->rcv[k]=0;
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			if(tw->remove){
+				for(int k=0 ; k<10 ; k++)tw->rcv[k]=0;
+				tw++;
+				continue;
+			}
+			rd.tower_dis_multi2=1.0*MAP_SCALE*MAP_SCALE*( 1.0*(X-tw->x)*(X-tw->x)+1.0*(Y-tw->y)*(Y-tw->y) );
+			bool skip=true;
+			for(int k=0 ; k<10 ; k++){
+				if(tw->power[k] >= rd.tower_dis_multi2/100)skip=false;
+			}
+			if(skip){
+				for(int k=0 ; k<10 ; k++){
+					tw->rcv[k]=0;
+				}
+				tw++;
+				continue;
+			}
+			receive_each_tower(X,Y,tw);
+			shield_each_tower(X,Y,tw);
+			for(int k=0 ; k<10 ; k++){
+				receive_each_ch(X,Y,tw,k);
+				shield_each_ch(tw,k);
 			}
 			tw++;
-			continue;
 		}
-		receive_each_tower(X,Y,tw);
-		shield_each_tower(X,Y,tw);
-		for(int j=0 ; j<area[tw->area].st_num ; j++){
-			receive_each_ch(X,Y,tw,j);
-			shield_each_ch(tw,j);
-		}
-		tw++;
+		ar++;
 	}
 }
 
-int receive_mg(int aim_tower, int CH, int DIR){
+int receive_mg(int target_area, int target_tower, int CH, int DIR){
 	Uint32 dir2=0,mr=0;
-	Tower *tw=tower;
-	for(int i=0 ; i<towers ; i++){
-		for(int j=0 ; j<area[tw->area].st_num ; j++){
-			if(tw->ch[j]!=CH)continue;
-			if(i==aim_tower)continue;
-			dir2=abs((int)(tw->dir-DIR));
-			if(dir2>180)dir2=360-dir2;
-			Uint32 a=tw->rcv[j]/(dir2/5+1);
-			if(tower[aim_tower].v!=tw->v)a/=2;
-			if( mr<a )mr=a;
+	Area *ar=area;
+	for(int i=0 ; i<areas ; i++){
+		Tower *tw=ar->tower;
+		for(int j=0 ; j<(ar->tower_num) ; j++){
+			for(int k=0 ; k<10 ; k++){
+				if(tw->ch[k]!=CH)continue;
+				if(i==target_area && j==target_tower)continue;
+				dir2=abs((int)(tw->dir-DIR));
+				if(dir2>180)dir2=360-dir2;
+				Uint32 a=tw->rcv[k]/(dir2/5+1);
+				if(area[target_area].tower[target_tower].v!=tw->v)a/=2;
+				if( mr<a )mr=a;
+			}
+			tw++;
 		}
-		tw++;
+		ar++;
 	}
 	return mr;
 }
@@ -331,15 +343,16 @@ void startSMR(int st){
 		if(map.smr[X][Y]!=0)continue;
 		saveSMR=true;
 
+		Area *ar=area;
 		for(int i=0 ; i<areas ; i++){
 			int s=-1;
-			for(int j=0 ; j<area[i].st_num ; j++){
-				if(area[i].station[j]==st)s=j;
+			for(int j=0 ; j<10 ; j++){
+				if(ar->station[j]==st)s=j;
 			}
-			if(s==-1)continue;
+			if(s==-1){ar++;continue;}
 
-			Tower *tw=&tower[area[i].tower];
-			for(int j=0 ; j<area[i].num ; j++){
+			Tower *tw=ar->tower;
+			for(int j=0 ; j<(area->tower_num) ; j++){
 				if(tw->remove){tw++;continue;}
 				if(tw->ch[s]==0 || tw->ch[s]==CHANNELS+1){tw++;continue;}
 
@@ -368,7 +381,7 @@ void startSMR(int st){
 			}
 			if(end)break;
 		}
-
+		ar++;
 	}
 	SMRcount++;
 }

@@ -287,14 +287,16 @@ void endAll(){
 		delete [] work;
 		delete [] gd.timeslot;
 	}
-	if(towers){delete [] area;delete [] tower;}
-	if(mounts)delete [] mount;
-	if(towns){
+	if(areas){
 		for(int i=0 ; i<areas ; i++){
+			if(area[i].tower_num)delete [] area[i].tower;
 			if(area[i].town_num)delete [] area[i].town;
 		}
-		delete [] town;
+		delete [] area;
 	}
+	if(towers)delete [] tower;
+	if(mounts)delete [] mount;
+	if(towns)delete [] town;
 	if(CHANNELS)delete [] mhz;
 	fishbox.endAll();
 	if(map_loaded)map.reset();
