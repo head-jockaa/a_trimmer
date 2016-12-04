@@ -1,108 +1,38 @@
 #include "animation.h"
 
-#define CARTOON_IMAGE 1
-#define CARTOON_BGM 2
-#define CARTOON_SET 3
-#define CARTOON_MOVE 4
-#define CARTOON_RESET 5
-#define CARTOON_NOTE 6
-#define CARTOON_ID 7
-#define CARTOON_X 8
-#define CARTOON_Y 9
-#define CARTOON_IX 10
-#define CARTOON_IY 11
-#define CARTOON_W 12
-#define CARTOON_H 13
-#define CARTOON_ALPHA 14
-#define CARTOON_MAG 15
-#define CARTOON_COL_GRAD_Y 16
-#define CARTOON_COL 17
-#define CARTOON_SHAKE 18
-#define CARTOON_WAVE 19
-#define CARTOON_SLIDE 20
-#define CARTOON_FLIP 21
-#define CARTOON_JUMP 22
-#define CARTOON_FROM 23
-#define CARTOON_TO 24
-#define CARTOON_SIN 25
-#define CARTOON_RANGE 26
-#define CARTOON_INTERVAL 27
-#define CARTOON_NUM 28
-#define CARTOON_STEP 29
-#define CARTOON_FADE 30
-#define CARTOON_G 31
-#define CARTOON_DRAWIMAGE 32
-#define CARTOON_FILLRECT 33
-#define CARTOON_FILLRECT_GRAD 34
-#define CARTOON_DRAWIMAGE_WAVE 35
-#define CARTOON_CACHE 36
-#define CARTOON_DRAW_TO 37
-#define CARTOON_TURNBACK 38
-#define CARTOON_COL_R 39
-#define CARTOON_COL_G 40
-#define CARTOON_COL_B 41
-#define CARTOON_POS 42
-#define CARTOON_LANG 43
-#define CARTOON_FILE 44
-#define CARTOON_LOAD_TEXT 45
-#define CARTOON_TALK 46
-#define CARTOON_FACE 47
-#define CARTOON_TEXT_ID 48
-#define CARTOON_IMG_ID 49
-#define CARTOON_END 50
-#define CARTOON_REPEAT 51
-#define CARTOON_LOAD_SOUND 52
-#define CARTOON_SOUND 53
-#define CARTOON_CHANNEL 54
-#define CARTOON_TIME 55
-#define CARTOON_ACT 56
-#define CARTOON_DATE 57
-#define CARTOON_TYPE 58
-#define CARTOON_CARLIGHT 59
-#define CARTOON_ILLUMINATE 60
-#define CARTOON_RESET_TIMER 61
-#define CARTOON_SYNC 62
-
+#define CARTOON_DRAWIMAGE 1
+#define CARTOON_FILLRECT 2
+#define CARTOON_FILLRECT_GRAD 3
+#define CARTOON_DRAWIMAGE_WAVE 4
+#define CARTOON_CARLIGHT 5
+#define CARTOON_ILLUMINATE 6
 #define JSON_ARRAY_START 1
 #define JSON_STARTTIME 2
-#define JSON_GETTIME 3
-#define JSON_DATA_START 4
-#define JSON_GETNAME 5
-#define JSON_COLON 6
-#define JSON_GETVALUE 7
-#define JSON_NEXTDATA 8
-#define JSON_ENDDATA 9
-#define JSON_ENDTIME 10
-#define JSON_DATA_START2 11
-#define JSON_GETNAME2 12
-#define JSON_COLON2 13
-#define JSON_GETVALUE2 14
+#define JSON_DATA_START 3
+#define JSON_GETNAME 4
+#define JSON_COLON 5
+#define JSON_GETVALUE 6
+#define JSON_NEXTDATA 7
+#define JSON_ENDDATA 8
 
-void readSetObject(char *json, int timer);
 bool readCartoonAct(char *json, int timer);
-void readMoveObject(char *json, int timer);
-void readSlideAnime(char *json, int timer);
-void readFlipAnime(char *json, int timer);
-void readJumpAnime(char *json, int timer);
-void readColorGrad(char *json, int timer);
-void readColorGrad_shift(char *json, int timer);
-void readStoryFile(char *json, int timer);
-void readCartoonDate(char *json, int timer);
-void readCartoonTalk(char *json, int timer);
-void readCartoonImage(char *json, int timer);
-void readCartoonBgm(char *json, int timer);
-void readCartoonLoadSound(char *json, int timer);
-void readCartoonSound(char *json, int timer);
-void readWaveAnime(char *json, int timer);
 void resetObject(char *json, int timer);
+void readJsonObject(char *json, char *name, int timer);
+void readJsonSubObject(char *json, char *name1, char *name2, int timer);
+void readJsonArray(char *json, char *name, int timer);
 
 int playtime,cartoonNextTime;
 int timestamp,loadtime,pausetime;
-int max_obj,this_id;
+int max_obj;
 int call_week,call_hour,call_minute;
 bool talkmode=false,skipThisTime=false,cartoonSync=false;
 size_t cartoonJsonSize,cartoonPointer;
 char *cartoonJson, cartoonBgmName[200];
+
+char jsonName[100][100], jsonValueString[100][1000];
+int jsonValueNum;
+double jsonValueDouble[100];
+bool jsonValueBool[100];
 
 struct ObjectSetting{
 	double x,y,ix,iy,w,h,mag,alpha,shake;
@@ -259,32 +189,24 @@ void fetchString(char *&s, char *value) {
 	cartoonPointer-=2;
 }
 
-void fetchColor(char *&s, SDL_Color *col) {
+void parseColor(char *s, SDL_Color *col) {
 	int a=0;
-	bool start=false;
-	while(*s && *s!=',' && *s!=']' && *s!='}' && a<6) {
-		if(*s=='"'){
-			start=true;
+	while(*s && a<6) {
+		if(a==1){
+			sprintf_s(str,"%d",hextoint(*(s-1))*16+hextoint(*s));
+			col->r=hextoint(*(s-1))*16+hextoint(*s);
 		}
-		else if(start){
-			if(a==1){
-				sprintf_s(str,"%d",hextoint(*(s-1))*16+hextoint(*s));
-				col->r=hextoint(*(s-1))*16+hextoint(*s);
-			}
-			else if(a==3){
-				sprintf_s(str,"%d",hextoint(*(s-1))*16+hextoint(*s));
-				col->g=hextoint(*(s-1))*16+hextoint(*s);
-			}
-			else if(a==5){
-				sprintf_s(str,"%d",hextoint(*(s-1))*16+hextoint(*s));
-				col->b=hextoint(*(s-1))*16+hextoint(*s);
-			}
-			a++;
+		else if(a==3){
+			sprintf_s(str,"%d",hextoint(*(s-1))*16+hextoint(*s));
+			col->g=hextoint(*(s-1))*16+hextoint(*s);
 		}
-		cartoonPointer++;
+		else if(a==5){
+			sprintf_s(str,"%d",hextoint(*(s-1))*16+hextoint(*s));
+			col->b=hextoint(*(s-1))*16+hextoint(*s);
+		}
+		a++;
 		s++;
 	}
-	cartoonPointer--;
 }
 
 void parseDate(char *s) {
@@ -353,12 +275,12 @@ void loadCartoon(const char *filename){
 
 bool readCartoon(char *json, int timer){
 	int mode=JSON_ARRAY_START;
-	int datamode=0;
+	char dataname[20];
 	bool waitForNextTime=false, end=false;
 
 	if(talkmode) {
 		mode=JSON_GETVALUE;
-		datamode=CARTOON_ACT;
+		sprintf_s(dataname,"act");
 	}
 	else if(cartoonPointer!=0) {
 		mode=JSON_NEXTDATA;
@@ -381,16 +303,7 @@ bool readCartoon(char *json, int timer){
 			}
 		}
 		else if(mode==JSON_GETNAME) {
-			fetchString(c,str);
-			if(strcmp(str, "time")==0) {
-				datamode=CARTOON_TIME;
-			}
-			else if(strcmp(str, "date")==0) {
-				datamode=CARTOON_DATE;
-			}
-			else if(strcmp(str, "act")==0) {
-				datamode=CARTOON_ACT;
-			}
+			fetchString(c,dataname);
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_COLON) {
@@ -399,13 +312,13 @@ bool readCartoon(char *json, int timer){
 			}
 		}
 		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_TIME) {
+			if(strcmp(dataname, "time")==0) {
 				cartoonNextTime=fetchInt(c);
 				if(cartoonNextTime!=playtime || end) {
 					waitForNextTime=true;
 				}
 			}
-			else if(datamode==CARTOON_DATE) {
+			else if(strcmp(dataname, "date")==0) {
 				fetchString(c,str);
 				parseDate(str);
 				if(call_week>gd.week
@@ -420,7 +333,7 @@ bool readCartoon(char *json, int timer){
 					skipThisTime=true;
 				}
 			}
-			else if(datamode==CARTOON_ACT) {
+			else if(strcmp(dataname, "act")==0) {
 				end = readCartoonAct(json,timer);
 				if(talkmode){
 					break;
@@ -454,7 +367,7 @@ bool readCartoon(char *json, int timer){
 
 bool readCartoonAct(char *json, int timer){
 	int mode=JSON_DATA_START;
-	int datamode=0;
+	char dataname[20];
 	bool end=false;
 
 	if(talkmode) {
@@ -473,46 +386,7 @@ bool readCartoonAct(char *json, int timer){
 			}
 		}
 		else if(mode==JSON_GETNAME) {
-			fetchString(c,str);
-			if(strcmp(str, "image")==0) {
-				datamode=CARTOON_IMAGE;
-			}
-			else if(strcmp(str, "bgm")==0) {
-				datamode=CARTOON_BGM;
-			}
-			else if(strcmp(str, "load-sound")==0) {
-				datamode=CARTOON_LOAD_SOUND;
-			}
-			else if(strcmp(str, "sound")==0) {
-				datamode=CARTOON_SOUND;
-			}
-			else if(strcmp(str, "load-text")==0) {
-				datamode=CARTOON_LOAD_TEXT;
-			}
-			else if(strcmp(str, "set")==0) {
-				datamode=CARTOON_SET;
-			}
-			else if(strcmp(str, "move")==0) {
-				datamode=CARTOON_MOVE;
-			}
-			else if(strcmp(str, "talk")==0) {
-				datamode=CARTOON_TALK;
-			}
-			else if(strcmp(str, "reset-timer")==0) {
-				datamode=CARTOON_RESET_TIMER;
-			}
-			else if(strcmp(str, "reset")==0) {
-				datamode=CARTOON_RESET;
-			}
-			else if(strcmp(str, "sync")==0) {
-				datamode=CARTOON_SYNC;
-			}
-			else if(strcmp(str, "end")==0) {
-				datamode=CARTOON_END;
-			}
-			else if(strcmp(str, "note")==0) {
-				datamode=CARTOON_NOTE;
-			}
+			fetchString(c,dataname);
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_COLON) {
@@ -522,47 +396,48 @@ bool readCartoonAct(char *json, int timer){
 		}
 		else if(mode==JSON_GETVALUE) {
 			if(talkmode) {
-				readCartoonTalk(json,timer);
+				sprintf_s(dataname,"talk");
+				readJsonArray(json, dataname, timer);
 				if(talkmode){
 					cartoonPointer++;
 					break;
 				}
 			}
-			else if(datamode==CARTOON_IMAGE) {
-				readCartoonImage(json,timer);
+			else if(strcmp(dataname, "image")==0) {
+				readJsonArray(json, dataname, timer);
 			}
-			else if(datamode==CARTOON_BGM) {
-				readCartoonBgm(json,timer);
+			else if(strcmp(dataname, "bgm")==0) {
+				readJsonObject(json, dataname, timer);
 			}
-			else if(datamode==CARTOON_LOAD_SOUND) {
-				readCartoonLoadSound(json,timer);
+			else if(strcmp(dataname, "load-sound")==0) {
+				readJsonArray(json, dataname, timer);
 			}
-			else if(datamode==CARTOON_SOUND) {
-				readCartoonSound(json,timer);
+			else if(strcmp(dataname, "sound")==0) {
+				readJsonObject(json, dataname, timer);
 			}
-			else if(datamode==CARTOON_LOAD_TEXT) {
-				readStoryFile(json,timer);
+			else if(strcmp(dataname, "load-text")==0) {
+				readJsonArray(json, dataname, timer);
 			}
-			else if(datamode==CARTOON_SET) {
-				readSetObject(json,timer);
+			else if(strcmp(dataname, "set")==0) {
+				readJsonArray(json,dataname,timer);
 			}
-			else if(datamode==CARTOON_MOVE) {
-				readMoveObject(json,timer);
+			else if(strcmp(dataname, "move")==0) {
+				readJsonArray(json,dataname,timer);
 			}
-			else if(datamode==CARTOON_TALK) {
-				readCartoonTalk(json,timer);
+			else if(strcmp(dataname, "talk")==0) {
+				readJsonArray(json, dataname, timer);
 				if(talkmode){
 					cartoonPointer++;
 					break;
 				}
 			}
-			else if(datamode==CARTOON_RESET_TIMER) {
+			else if(strcmp(dataname, "reset-timer")==0) {
 				playtime=fetchInt(c);
 			}
-			else if(datamode==CARTOON_RESET) {
+			else if(strcmp(dataname, "reset")==0) {
 				resetObject(json,timer);
 			}
-			else if(datamode==CARTOON_SYNC) {
+			else if(strcmp(dataname, "sync")==0) {
 				if(startsWith(c,"true")){
 					loadtime=SDL_GetTicks();
 					cartoonSync=true;
@@ -571,12 +446,12 @@ bool readCartoonAct(char *json, int timer){
 					cartoonSync=false;
 				}
 			}
-			else if(datamode==CARTOON_END) {
+			else if(strcmp(dataname, "end")==0) {
 				if(startsWith(c,"true")){
 					end=true;
 				}
 			}
-			else if(datamode==CARTOON_NOTE) {
+			else if(strcmp(dataname, "note")==0) {
 				fetchString(c, str);
 			}
 			mode=JSON_NEXTDATA;
@@ -594,965 +469,333 @@ bool readCartoonAct(char *json, int timer){
 	return false;
 }
 
-void readSetObject(char *json, int timer){
+void applyJsonData(char *json, char *name, int timer){
+	if(strcmp(name,"set")==0){
+		SDL_Color col;
+		int id=0;
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
+		}
+		if(max_obj<id) {
+			max_obj=id;
+		}
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"img_id")==0)obj[id].set.img_id=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"x")==0)obj[id].set.x=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"y")==0)obj[id].set.y=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"ix")==0){
+				obj[id].set.ix=jsonValueDouble[i];
+				obj[id].set.type=CARTOON_DRAWIMAGE;
+			}
+			else if(strcmp(jsonName[i],"iy")==0){
+				obj[id].set.iy=jsonValueDouble[i];
+				obj[id].set.type=CARTOON_DRAWIMAGE;
+			}
+			else if(strcmp(jsonName[i],"w")==0)obj[id].set.w=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"h")==0)obj[id].set.h=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"a")==0)obj[id].set.alpha=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"mag")==0)obj[id].set.mag=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"col")==0){
+				parseColor(jsonValueString[i],&col);
+				obj[id].set.R=col.r;
+				obj[id].set.G=col.g;
+				obj[id].set.B=col.b;
+				obj[id].set.type=CARTOON_FILLRECT;
+			}
+			else if(strcmp(jsonName[i],"col_grad_y from")==0){
+				parseColor(jsonValueString[i],&col);
+				obj[id].set.gradRfrom=col.r;
+				obj[id].set.gradGfrom=col.g;
+				obj[id].set.gradBfrom=col.b;
+				obj[id].set.type=CARTOON_FILLRECT_GRAD;
+			}
+			else if(strcmp(jsonName[i],"col_grad_y to")==0){
+				parseColor(jsonValueString[i],&col);
+				obj[id].set.gradRto=col.r;
+				obj[id].set.gradGto=col.g;
+				obj[id].set.gradBto=col.b;
+				obj[id].set.type=CARTOON_FILLRECT_GRAD;
+			}
+			else if(strcmp(jsonName[i],"shake")==0)obj[id].set.shake=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"draw_to")==0)obj[id].set.drawTo=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"type")==0){
+				if(strcmp(jsonValueString[i],"carlight")==0)obj[id].set.type=CARTOON_CARLIGHT;
+				else if(strcmp(jsonValueString[i],"illuminate")==0)obj[id].set.type=CARTOON_ILLUMINATE;
+			}
+			else if(strcmp(jsonName[i],"lang")==0){
+				if(strcmp(jsonValueString[i],"jp")==0)obj[id].set.lang=JAPANESE;
+				else if(strcmp(jsonValueString[i],"en")==0)obj[id].set.lang=EUROPEAN;
+			}
+			else if(strcmp(jsonName[i],"wave sin")==0){
+				obj[id].waveSIN=jsonValueDouble[i];
+				obj[id].set.type=CARTOON_DRAWIMAGE_WAVE;
+			}
+			else if(strcmp(jsonName[i],"wave range")==0){
+				obj[id].waveRange=jsonValueDouble[i];
+				obj[id].set.type=CARTOON_DRAWIMAGE_WAVE;
+			}
+		}
+	}
+	if(strcmp(name,"move")==0){
+		int id=0;
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
+		}
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"x")==0)obj[id].move.x=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"y")==0)obj[id].move.y=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"mag")==0)obj[id].move.mag=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"a")==0)obj[id].move.alpha=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide x step")==0){
+				obj[id].slideX.step=jsonValueDouble[i];
+				if(obj[id].slideX.step<0){
+					obj[id].slideX.step*=-1;
+					obj[id].slideX.back=true;
+				}else{
+					obj[id].slideX.back=false;
+				}
+			}
+			else if(strcmp(jsonName[i],"slide x from")==0)obj[id].slideX.from=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide x to")==0)obj[id].slideX.to=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide x pos")==0)obj[id].slideX.position=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide x turnback")==0)obj[id].slideX.turnBack=jsonValueBool[i];
+			else if(strcmp(jsonName[i],"slide y step")==0){
+				obj[id].slideY.step=jsonValueDouble[i];
+				if(obj[id].slideY.step<0){
+					obj[id].slideY.step*=-1;
+					obj[id].slideY.back=true;
+				}else{
+					obj[id].slideY.back=false;
+				}
+			}
+			else if(strcmp(jsonName[i],"slide y from")==0)obj[id].slideY.from=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide y to")==0)obj[id].slideY.to=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide y pos")==0)obj[id].slideY.position=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide y turnback")==0)obj[id].slideY.turnBack=jsonValueBool[i];
+			else if(strcmp(jsonName[i],"slide ix step")==0){
+				obj[id].slideIX.step=jsonValueDouble[i];
+				if(obj[id].slideIX.step<0){
+					obj[id].slideIX.step*=-1;
+					obj[id].slideIX.back=true;
+				}else{
+					obj[id].slideIX.back=false;
+				}
+			}
+			else if(strcmp(jsonName[i],"slide ix from")==0)obj[id].slideIX.from=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide ix to")==0)obj[id].slideIX.to=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide ix pos")==0)obj[id].slideIX.position=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide ix turnback")==0)obj[id].slideIX.turnBack=jsonValueBool[i];
+			else if(strcmp(jsonName[i],"slide iy step")==0){
+				obj[id].slideIY.step=jsonValueDouble[i];
+				if(obj[id].slideIY.step<0){
+					obj[id].slideIY.step*=-1;
+					obj[id].slideIY.back=true;
+				}else{
+					obj[id].slideIY.back=false;
+				}
+			}
+			else if(strcmp(jsonName[i],"slide iy from")==0)obj[id].slideIY.from=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide iy to")==0)obj[id].slideIY.to=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide iy pos")==0)obj[id].slideIY.position=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide iy turnback")==0)obj[id].slideIY.turnBack=jsonValueBool[i];
+			else if(strcmp(jsonName[i],"slide a step")==0){
+				obj[id].slideAlpha.step=jsonValueDouble[i];
+				if(obj[id].slideAlpha.step<0){
+					obj[id].slideAlpha.step*=-1;
+					obj[id].slideAlpha.back=true;
+				}else{
+					obj[id].slideAlpha.back=false;
+				}
+			}
+			else if(strcmp(jsonName[i],"slide a from")==0)obj[id].slideAlpha.from=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide a to")==0)obj[id].slideAlpha.to=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide a pos")==0)obj[id].slideAlpha.position=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide a turnback")==0)obj[id].slideAlpha.turnBack=jsonValueBool[i];
+			else if(strcmp(jsonName[i],"slide mag step")==0){
+				obj[id].slideMag.step=jsonValueDouble[i];
+				if(obj[id].slideMag.step<0){
+					obj[id].slideMag.step*=-1;
+					obj[id].slideMag.back=true;
+				}else{
+					obj[id].slideMag.back=false;
+				}
+			}
+			else if(strcmp(jsonName[i],"slide mag from")==0)obj[id].slideMag.from=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide mag to")==0)obj[id].slideMag.to=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide mag pos")==0)obj[id].slideMag.position=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"slide mag turnback")==0)obj[id].slideMag.turnBack=jsonValueBool[i];
+			else if(strcmp(jsonName[i],"jump g")==0)obj[id].jumpG=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"jump y")==0)obj[id].jumpY=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"ix")==0)obj[id].move.ix=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"iy")==0)obj[id].move.iy=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"w")==0)obj[id].move.w=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"h")==0)obj[id].move.h=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"shake")==0)obj[id].move.shake=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"flip in")==0){
+				obj[id].flip.interval=jsonValueDouble[i];
+				obj[id].flip.count=0;
+			}
+			else if(strcmp(jsonName[i],"flip ix")==0){
+				obj[id].flip.ix=jsonValueDouble[i];
+				obj[id].flip.count=0;
+			}
+			else if(strcmp(jsonName[i],"flip iy")==0){
+				obj[id].flip.iy=jsonValueDouble[i];
+				obj[id].flip.count=0;
+			}
+			else if(strcmp(jsonName[i],"flip n")==0){
+				obj[id].flip.num=jsonValueDouble[i];
+				obj[id].flip.count=0;
+			}
+			else if(strcmp(jsonName[i],"flip turnback")==0){
+				obj[id].flip.turnBack=jsonValueDouble[i];
+				obj[id].flip.count=0;
+			}
+			else if(strcmp(jsonName[i],"col_grad_y from col_r")==0)obj[id].move.gradRfrom=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"col_grad_y from col_g")==0)obj[id].move.gradGfrom=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"col_grad_y from col_b")==0)obj[id].move.gradBfrom=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"col_grad_y to col_r")==0)obj[id].move.gradRto=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"col_grad_y to col_g")==0)obj[id].move.gradGto=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"col_grad_y to col_b")==0)obj[id].move.gradBto=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"col_r")==0)obj[id].move.R=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"col_g")==0)obj[id].move.G=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"col_b")==0)obj[id].move.B=jsonValueDouble[i];
+		}
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"slide x fade")==0){
+				if(obj[id].slideX.to!=obj[id].slideX.from){
+					obj[id].slideX.fadeRate=jsonValueDouble[i]/(obj[id].slideX.to-obj[id].slideX.from);
+				}
+			}
+			else if(strcmp(jsonName[i],"slide y fade")==0){
+				if(obj[id].slideY.to!=obj[id].slideY.from){
+					obj[id].slideY.fadeRate=jsonValueDouble[i]/(obj[id].slideY.to-obj[id].slideY.from);
+				}
+			}
+			else if(strcmp(jsonName[i],"slide ix fade")==0){
+				if(obj[id].slideIX.to!=obj[id].slideIX.from){
+					obj[id].slideIX.fadeRate=jsonValueDouble[i]/(obj[id].slideIX.to-obj[id].slideIX.from);
+				}
+			}
+			else if(strcmp(jsonName[i],"slide iy fade")==0){
+				if(obj[id].slideIY.to!=obj[id].slideIY.from){
+					obj[id].slideIY.fadeRate=jsonValueDouble[i]/(obj[id].slideIY.to-obj[id].slideIY.from);
+				}
+			}
+			else if(strcmp(jsonName[i],"slide a fade")==0){
+				if(obj[id].slideAlpha.to!=obj[id].slideAlpha.from){
+					obj[id].slideAlpha.fadeRate=jsonValueDouble[i]/(obj[id].slideAlpha.to-obj[id].slideAlpha.from);
+				}
+			}
+			else if(strcmp(jsonName[i],"slide mag fade")==0){
+				if(obj[id].slideMag.to!=obj[id].slideMag.from){
+					obj[id].slideMag.fadeRate=jsonValueDouble[i]/(obj[id].slideMag.to-obj[id].slideMag.from);
+				}
+			}
+		}
+	}
+	if(strcmp(name,"image")==0){
+		int id=0,w=0,h=0;
+		char file[100];
+		file[0]=0;
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"file")==0)strcpy_s(file,jsonValueString[i]);
+			else if(strcmp(jsonName[i],"w")==0)w=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"h")==0)h=jsonValueDouble[i];
+		}
+		freeImage(img.bg[id]);
+		if(file[0]){
+			getImage(img.bg[id],file,0,0,255);
+		}
+		if(w!=0 && h!=0){
+			img.bg[id]=new Image(w,h);
+		}
+	}
+	else if(strcmp(name,"load-sound")==0){
+		int id=0;
+		char file[100];
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"file")==0)strcpy_s(file,jsonValueString[i]);
+		}
+		freeSound(sf.sound[id]);
+		sf.sound[id]=Mix_LoadWAV(file);
+	}
+	else if(strcmp(name,"sound")==0){
+		int id=0,ch=0,repeat=0;
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"ch")==0)ch=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"repeat")==0)repeat=jsonValueDouble[i];
+		}
+		Mix_PlayChannel(ch, sf.sound[id], repeat);
+	}
+	else if(strcmp(name,"bgm")==0){
+		int repeat=-1;
+		char file[100];
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"file")==0)strcpy_s(file,jsonValueString[i]);
+			else if(strcmp(jsonName[i],"repeat")==0)repeat=jsonValueDouble[i];
+		}
+		if(strcmp(cartoonBgmName,str)!=0){
+			freeMusic();
+			strcpy_s(cartoonBgmName,file);
+			bgm=Mix_LoadMUS(file);
+			Mix_PlayMusic(bgm, repeat);
+		}
+	}
+	else if(strcmp(name,"load-text")==0){
+		int which_lang=0;
+		char file[100], lang[20];
+		file[0]=0;
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"file")==0)strcpy_s(file,jsonValueString[i]);
+			else if(strcmp(jsonName[i],"lang")==0)strcpy_s(lang,jsonValueString[i]);
+		}
+		if(strcmp(lang, "jp")==0) {
+			which_lang=0;
+		}
+		else if(strcmp(lang, "en")==0) {
+			which_lang=1;
+		}
+		loadFile(file);
+		size_t fc=0;
+		for(int i=0 ; i<1000 ; i++){
+			if(fc>=fsize)break;
+			for(int j=0 ; j<200 ; j++){
+				talk[i].str[which_lang][j]=0;
+			}
+			for(int j=0 ; j<200 ; j++){
+				talk[i].str[which_lang][j]=fstr[fc];fc++;
+				if(talk[i].str[which_lang][j]==0)break;
+			}
+		}
+		for(int i=0 ; i<1000 ; i++){
+			padSpace(i,which_lang,30);
+		}
+	}
+	else if(strcmp(name,"talk")==0){
+		int face=0,text=0,shake=0;
+		for(int i=0 ; i<jsonValueNum ; i++){
+			if(strcmp(jsonName[i],"face")==0)face=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"text")==0)text=jsonValueDouble[i];
+			else if(strcmp(jsonName[i],"shake")==0)shake=jsonValueBool[i];
+		}
+		gd.face_count=face;
+		gd.talk_count=text;
+		if(shake){
+			gd.shake_count=50;
+			Mix_PlayChannel(0,sf.decide,0);
+		}
+	}
+}
+
+void readJsonArray(char *json, char *name, int timer){
 	int mode=JSON_ARRAY_START;
-	int datamode=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_ARRAY_START) {
-			if(*c=='[') {
-				mode=JSON_DATA_START;
-			}
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			if(*c=='}') {
-				mode=JSON_ENDDATA;
-				continue;
-			}
-			fetchString(c,str);
-			if(strcmp(str, "id")==0) {
-				datamode=CARTOON_ID;
-			}
-			if(strcmp(str, "img_id")==0) {
-				datamode=CARTOON_IMG_ID;
-			}
-			else if(strcmp(str, "x")==0) {
-				datamode=CARTOON_X;
-			}
-			else if(strcmp(str, "y")==0) {
-				datamode=CARTOON_Y;
-			}
-			else if(strcmp(str, "ix")==0) {
-				datamode=CARTOON_IX;
-			}
-			else if(strcmp(str, "iy")==0) {
-				datamode=CARTOON_IY;
-			}
-			else if(strcmp(str, "wave")==0) {
-				datamode=CARTOON_WAVE;
-			}
-			else if(strcmp(str, "w")==0) {
-				datamode=CARTOON_W;
-			}
-			else if(strcmp(str, "h")==0) {
-				datamode=CARTOON_H;
-			}
-			else if(strcmp(str, "a")==0) {
-				datamode=CARTOON_ALPHA;
-			}
-			else if(strcmp(str, "mag")==0) {
-				datamode=CARTOON_MAG;
-			}
-			else if(strcmp(str, "col_grad_y")==0) {
-				datamode=CARTOON_COL_GRAD_Y;
-			}
-			else if(strcmp(str, "col")==0) {
-				datamode=CARTOON_COL;
-			}
-			else if(strcmp(str, "shake")==0) {
-				datamode=CARTOON_SHAKE;
-			}
-			else if(strcmp(str, "draw_to")==0) {
-				datamode=CARTOON_DRAW_TO;
-			}
-			else if(strcmp(str, "type")==0) {
-				datamode=CARTOON_TYPE;
-			}
-			else if(strcmp(str, "lang")==0) {
-				datamode=CARTOON_LANG;
-			}
-			else if(strcmp(str, "note")==0) {
-				datamode=CARTOON_NOTE;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_ENDDATA) {
-			if(*c==',') {
-				mode=JSON_DATA_START;
-			}
-			else if(*c==']') {
-				return;
-			}
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_ID) {
-				int id=fetchInt(c);
-				if(max_obj<id) {
-					max_obj=id;
-				}
-				this_id=id;
-			}
-			else if(datamode==CARTOON_IMG_ID) {
-				obj[this_id].set.img_id=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_X) {
-				obj[this_id].set.x=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_Y) {
-				obj[this_id].set.y=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_IX) {
-				obj[this_id].set.ix=fetchDouble(c);
-				obj[this_id].set.type=CARTOON_DRAWIMAGE;
-			}
-			else if(datamode==CARTOON_IY) {
-				obj[this_id].set.iy=fetchDouble(c);
-				obj[this_id].set.type=CARTOON_DRAWIMAGE;
-			}
-			else if(datamode==CARTOON_W) {
-				obj[this_id].set.w=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_H) {
-				obj[this_id].set.h=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_ALPHA) {
-				obj[this_id].set.alpha=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_MAG) {
-				obj[this_id].set.mag=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_COL_GRAD_Y) {
-				readColorGrad(json,timer);
-				obj[this_id].set.type=CARTOON_FILLRECT_GRAD;
-			}
-			else if(datamode==CARTOON_COL) {
-				SDL_Color col;
-				fetchColor(c,&col);
-				obj[this_id].set.type=CARTOON_FILLRECT;
-				obj[this_id].set.R=col.r;
-				obj[this_id].set.G=col.g;
-				obj[this_id].set.B=col.b;
-			}
-			else if(datamode==CARTOON_SHAKE) {
-				obj[this_id].set.shake=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_WAVE) {
-				readWaveAnime(json,timer);
-				obj[this_id].set.type=CARTOON_DRAWIMAGE_WAVE;
-			}
-			else if(datamode==CARTOON_DRAW_TO) {
-				obj[this_id].set.drawTo=fetchInt(c);
-			}
-			else if(datamode==CARTOON_TYPE) {
-				fetchString(c,str);
-				if(strcmp(str, "carlight")==0)obj[this_id].set.type=CARTOON_CARLIGHT;
-				else if(strcmp(str, "cache")==0)obj[this_id].set.type=CARTOON_CACHE;
-				else if(strcmp(str, "illuminate")==0)obj[this_id].set.type=CARTOON_ILLUMINATE;
-			}
-			else if(datamode==CARTOON_LANG) {
-				fetchString(c,str);
-				if(strcmp(str, "jp")==0)obj[this_id].set.lang=JAPANESE;
-				else if(strcmp(str, "en")==0)obj[this_id].set.lang=EUROPEAN;
-			}
-			else if(datamode==CARTOON_NOTE) {
-				fetchString(c,str);
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				mode=JSON_ENDDATA;
-			}
-		}
-		cartoonPointer++;
-	}
-}
 
-void readMoveObject(char *json, int timer){
-	int mode=JSON_ARRAY_START;
-	int datamode=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_ARRAY_START) {
-			if(*c=='[') {
-				mode=JSON_DATA_START;
-			}
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			if(*c=='}') {
-				mode=JSON_ENDDATA;
-				continue;
-			}
-			fetchString(c,str);
-			if(strcmp(str, "id")==0) {
-				datamode=CARTOON_ID;
-			}
-			else if(strcmp(str, "x")==0) {
-				datamode=CARTOON_X;
-			}
-			else if(strcmp(str, "y")==0) {
-				datamode=CARTOON_Y;
-			}
-			else if(strcmp(str, "mag")==0) {
-				datamode=CARTOON_MAG;
-			}
-			else if(strcmp(str, "slide")==0) {
-				datamode=CARTOON_SLIDE;
-			}
-			else if(strcmp(str, "flip")==0) {
-				datamode=CARTOON_FLIP;
-			}
-			else if(strcmp(str, "jump")==0) {
-				datamode=CARTOON_JUMP;
-			}
-			else if(strcmp(str, "a")==0) {
-				datamode=CARTOON_ALPHA;
-			}
-			else if(strcmp(str, "ix")==0) {
-				datamode=CARTOON_IX;
-			}
-			else if(strcmp(str, "iy")==0) {
-				datamode=CARTOON_IY;
-			}
-			else if(strcmp(str, "w")==0) {
-				datamode=CARTOON_W;
-			}
-			else if(strcmp(str, "h")==0) {
-				datamode=CARTOON_H;
-			}
-			else if(strcmp(str, "shake")==0) {
-				datamode=CARTOON_SHAKE;
-			}
-			else if(strcmp(str, "note")==0) {
-				datamode=CARTOON_NOTE;
-			}
-			else if(strcmp(str, "col_grad_y")==0) {
-				datamode=CARTOON_COL_GRAD_Y;
-			}
-			else if(strcmp(str, "col_r")==0) {
-				datamode=CARTOON_COL_R;
-			}
-			else if(strcmp(str, "col_g")==0) {
-				datamode=CARTOON_COL_G;
-			}
-			else if(strcmp(str, "col_b")==0) {
-				datamode=CARTOON_COL_B;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_ENDDATA) {
-			if(*c==',') {
-				mode=JSON_DATA_START;
-			}
-			else if(*c==']') {
-				return;
-			}
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_ID) {
-				int id=fetchInt(c);
-				if(max_obj<id) {
-					max_obj=id;
-				}
-				this_id=id;
-			}
-			else if(datamode==CARTOON_X) {
-				obj[this_id].move.x=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_Y) {
-				obj[this_id].move.y=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_MAG) {
-				obj[this_id].move.mag=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_ALPHA) {
-				obj[this_id].move.alpha=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_SLIDE) {
-				readSlideAnime(json,timer);
-			}
-			else if(datamode==CARTOON_JUMP) {
-				readJumpAnime(json,timer);
-			}
-			else if(datamode==CARTOON_IX) {
-				obj[this_id].move.ix=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_IY) {
-				obj[this_id].move.iy=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_W) {
-				obj[this_id].move.w=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_H) {
-				obj[this_id].move.h=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_SHAKE) {
-				obj[this_id].move.shake=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_FLIP) {
-				obj[this_id].flip.count=0;
-				readFlipAnime(json,timer);
-			}
-			else if(datamode==CARTOON_NOTE) {
-				fetchString(c,str);
-			}
-			else if(datamode==CARTOON_COL_GRAD_Y) {
-				readColorGrad_shift(json,timer);
-			}
-			else if(datamode==CARTOON_COL_R) {
-				obj[this_id].move.R=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_COL_G) {
-				obj[this_id].move.R=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_COL_B) {
-				obj[this_id].move.R=fetchDouble(c);
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				mode=JSON_ENDDATA;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readColorGrad(char *json, int timer){
-	int mode=JSON_DATA_START;
-	int datamode=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			if(*c=='}') {
-				return;
-			}
-			fetchString(c,str);
-			if(strcmp(str, "from")==0) {
-				datamode=CARTOON_FROM;
-			}
-			else if(strcmp(str, "to")==0) {
-				datamode=CARTOON_TO;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_FROM) {
-				SDL_Color col;
-				fetchColor(c,&col);
-				obj[this_id].set.gradRfrom=col.r;
-				obj[this_id].set.gradGfrom=col.g;
-				obj[this_id].set.gradBfrom=col.b;
-			}
-			else if(datamode==CARTOON_TO) {
-				SDL_Color col;
-				fetchColor(c,&col);
-				obj[this_id].set.gradRto=col.r;
-				obj[this_id].set.gradGto=col.g;
-				obj[this_id].set.gradBto=col.b;
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				return;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readColorGrad_shift(char *json, int timer){
-	int mode=JSON_DATA_START;
-	int datamode1=0,datamode2=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			fetchString(c,str);
-			if(strcmp(str, "from")==0) {
-				datamode1=CARTOON_FROM;
-			}
-			else if(strcmp(str, "to")==0) {
-				datamode1=CARTOON_TO;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_DATA_START2;
-			}
-		}
-		else if(mode==JSON_DATA_START2) {
-			if(*c=='{') {
-				mode=JSON_GETNAME2;
-			}
-		}
-		else if(mode==JSON_GETNAME2) {
-			fetchString(c,str);
-			if(strcmp(str, "col_r")==0) {
-				datamode2=CARTOON_COL_R;
-			}
-			else if(strcmp(str, "col_g")==0) {
-				datamode2=CARTOON_COL_G;
-			}
-			else if(strcmp(str, "col_b")==0) {
-				datamode2=CARTOON_COL_B;
-			}
-			mode=JSON_COLON2;
-		}
-		else if(mode==JSON_COLON2) {
-			if(*c==':') {
-				mode=JSON_GETVALUE2;
-			}
-		}
-		else if(mode==JSON_GETVALUE2) {
-			if(datamode1==CARTOON_FROM) {
-				if(datamode2==CARTOON_COL_R)obj[this_id].move.gradRfrom=fetchDouble(c);
-				else if(datamode2==CARTOON_COL_G)obj[this_id].move.gradGfrom=fetchDouble(c);
-				else if(datamode2==CARTOON_COL_B)obj[this_id].move.gradBfrom=fetchDouble(c);
-			}
-			else if(datamode1==CARTOON_TO) {
-				if(datamode2==CARTOON_COL_R)obj[this_id].move.gradRto=fetchDouble(c);
-				else if(datamode2==CARTOON_COL_G)obj[this_id].move.gradGto=fetchDouble(c);
-				else if(datamode2==CARTOON_COL_B)obj[this_id].move.gradBto=fetchDouble(c);
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME2;
-			}
-			else if(*c=='}') {
-				mode=JSON_ENDDATA;
-			}
-		}
-		else if(mode==JSON_ENDDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				return;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readWaveAnime(char *json, int timer){
-	int mode=JSON_DATA_START;
-	int datamode=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			if(*c=='}') {
-				return;
-			}
-			fetchString(c,str);
-			if(strcmp(str, "sin")==0) {
-				datamode=CARTOON_SIN;
-			}
-			else if(strcmp(str, "range")==0) {
-				datamode=CARTOON_RANGE;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_SIN) {
-				obj[this_id].waveSIN=fetchDouble(c);
-			}
-			if(datamode==CARTOON_RANGE) {
-				obj[this_id].waveRange=fetchDouble(c);
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				return;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readFlipAnime(char *json, int timer){
-	int mode=JSON_DATA_START;
-	int datamode=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			if(*c=='}') {
-				return;
-			}
-			fetchString(c,str);
-			if(strcmp(str, "in")==0) {
-				datamode=CARTOON_INTERVAL;
-			}
-			else if(strcmp(str, "ix")==0) {
-				datamode=CARTOON_IX;
-			}
-			else if(strcmp(str, "iy")==0) {
-				datamode=CARTOON_IY;
-			}
-			else if(strcmp(str, "n")==0) {
-				datamode=CARTOON_NUM;
-			}
-			else if(strcmp(str, "turnback")==0) {
-				datamode=CARTOON_TURNBACK;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_INTERVAL) {
-				obj[this_id].flip.interval=fetchInt(c);
-			}
-			else if(datamode==CARTOON_IX) {
-				obj[this_id].flip.ix=fetchInt(c);
-			}
-			else if(datamode==CARTOON_IY) {
-				obj[this_id].flip.iy=fetchInt(c);
-			}
-			else if(datamode==CARTOON_NUM) {
-				obj[this_id].flip.num=fetchInt(c);
-			}
-			else if(datamode==CARTOON_TURNBACK) {
-				if(startsWith(c,"true")){
-					obj[this_id].flip.turnBack=true;
-				}
-				else if(startsWith(c,"false")){
-					obj[this_id].flip.turnBack=false;
-				}
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				return;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readSlideAnime(char *json, int timer){
-	int mode=JSON_DATA_START;
-	int datamode1=0,datamode2=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			fetchString(c,str);
-			if(strcmp(str, "a")==0) {
-				datamode1=CARTOON_ALPHA;
-			}
-			else if(strcmp(str, "x")==0) {
-				datamode1=CARTOON_X;
-			}
-			else if(strcmp(str, "y")==0) {
-				datamode1=CARTOON_Y;
-			}
-			else if(strcmp(str, "ix")==0) {
-				datamode1=CARTOON_IX;
-			}
-			else if(strcmp(str, "iy")==0) {
-				datamode1=CARTOON_IY;
-			}
-			else if(strcmp(str, "mag")==0) {
-				datamode1=CARTOON_MAG;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_DATA_START2;
-			}
-		}
-		else if(mode==JSON_DATA_START2) {
-			if(*c=='{') {
-				mode=JSON_GETNAME2;
-			}
-		}
-		else if(mode==JSON_GETNAME2) {
-			fetchString(c,str);
-			if(strcmp(str, "step")==0) {
-				datamode2=CARTOON_STEP;
-			}
-			else if(strcmp(str, "from")==0) {
-				datamode2=CARTOON_FROM;
-			}
-			else if(strcmp(str, "to")==0) {
-				datamode2=CARTOON_TO;
-			}
-			else if(strcmp(str, "pos")==0) {
-				datamode2=CARTOON_POS;
-			}
-			else if(strcmp(str, "turnback")==0) {
-				datamode2=CARTOON_TURNBACK;
-			}
-			else if(strcmp(str, "fade")==0) {
-				datamode2=CARTOON_FADE;
-			}
-			mode=JSON_COLON2;
-		}
-		else if(mode==JSON_COLON2) {
-			if(*c==':') {
-				mode=JSON_GETVALUE2;
-			}
-		}
-		else if(mode==JSON_GETVALUE2) {
-			if(datamode2==CARTOON_STEP) {
-				if(datamode1==CARTOON_X){
-					obj[this_id].slideX.step=fetchDouble(c);
-					if(obj[this_id].slideX.step<0){
-						obj[this_id].slideX.step*=-1;
-						obj[this_id].slideX.back=true;
-					}else{
-						obj[this_id].slideX.back=false;
-					}
-				}
-				else if(datamode1==CARTOON_Y){
-					obj[this_id].slideY.step=fetchDouble(c);
-					if(obj[this_id].slideY.step<0){
-						obj[this_id].slideY.step*=-1;
-						obj[this_id].slideY.back=true;
-					}else{
-						obj[this_id].slideY.back=false;
-					}
-				}
-				else if(datamode1==CARTOON_IX){
-					obj[this_id].slideIX.step=fetchDouble(c);
-					if(obj[this_id].slideIX.step<0){
-						obj[this_id].slideIX.step*=-1;
-						obj[this_id].slideIX.back=true;
-					}else{
-						obj[this_id].slideIX.back=false;
-					}
-				}
-				else if(datamode1==CARTOON_IY){
-					obj[this_id].slideIY.step=fetchDouble(c);
-					if(obj[this_id].slideIY.step<0){
-						obj[this_id].slideIY.step*=-1;
-						obj[this_id].slideIY.back=true;
-					}else{
-						obj[this_id].slideIY.back=false;
-					}
-				}
-				else if(datamode1==CARTOON_MAG){
-					obj[this_id].slideMag.step=fetchDouble(c);
-					if(obj[this_id].slideMag.step<0){
-						obj[this_id].slideMag.step*=-1;
-						obj[this_id].slideMag.back=true;
-					}else{
-						obj[this_id].slideMag.back=false;
-					}
-				}
-				else if(datamode1==CARTOON_ALPHA){
-					obj[this_id].slideAlpha.step=fetchDouble(c);
-					if(obj[this_id].slideAlpha.step<0){
-						obj[this_id].slideAlpha.step*=-1;
-						obj[this_id].slideAlpha.back=true;
-					}else{
-						obj[this_id].slideAlpha.back=false;
-					}
-				}
-			}
-			else if(datamode2==CARTOON_FROM) {
-				if(datamode1==CARTOON_X)obj[this_id].slideX.from=fetchDouble(c);
-				else if(datamode1==CARTOON_Y)obj[this_id].slideY.from=fetchDouble(c);
-				else if(datamode1==CARTOON_IX)obj[this_id].slideIX.from=fetchDouble(c);
-				else if(datamode1==CARTOON_IY)obj[this_id].slideIY.from=fetchDouble(c);
-				else if(datamode1==CARTOON_MAG)obj[this_id].slideMag.from=fetchDouble(c);
-				else if(datamode1==CARTOON_ALPHA)obj[this_id].slideAlpha.from=fetchDouble(c);
-			}
-			else if(datamode2==CARTOON_TO) {
-				if(datamode1==CARTOON_X)obj[this_id].slideX.to=fetchDouble(c);
-				else if(datamode1==CARTOON_Y)obj[this_id].slideY.to=fetchDouble(c);
-				else if(datamode1==CARTOON_IX)obj[this_id].slideIX.to=fetchDouble(c);
-				else if(datamode1==CARTOON_IY)obj[this_id].slideIY.to=fetchDouble(c);
-				else if(datamode1==CARTOON_MAG)obj[this_id].slideMag.to=fetchDouble(c);
-				else if(datamode1==CARTOON_ALPHA)obj[this_id].slideAlpha.to=fetchDouble(c);
-			}
-			else if(datamode2==CARTOON_POS) {
-				if(datamode1==CARTOON_X)obj[this_id].slideX.position=fetchDouble(c);
-				else if(datamode1==CARTOON_Y)obj[this_id].slideY.position=fetchDouble(c);
-				else if(datamode1==CARTOON_IX)obj[this_id].slideIX.position=fetchDouble(c);
-				else if(datamode1==CARTOON_IY)obj[this_id].slideIY.position=fetchDouble(c);
-				else if(datamode1==CARTOON_MAG)obj[this_id].slideMag.position=fetchDouble(c);
-				else if(datamode1==CARTOON_ALPHA)obj[this_id].slideAlpha.position=fetchDouble(c);
-			}
-			else if(datamode2==CARTOON_TURNBACK) {
-				bool b=false;
-				if(startsWith(c,"true"))b=true;
-				else if(startsWith(c,"false"))b=false;
-				if(datamode1==CARTOON_X)obj[this_id].slideX.turnBack=b;
-				else if(datamode1==CARTOON_Y)obj[this_id].slideY.turnBack=b;
-				else if(datamode1==CARTOON_IX)obj[this_id].slideIX.turnBack=b;
-				else if(datamode1==CARTOON_IY)obj[this_id].slideIY.turnBack=b;
-				else if(datamode1==CARTOON_MAG)obj[this_id].slideMag.turnBack=b;
-				else if(datamode1==CARTOON_ALPHA)obj[this_id].slideAlpha.turnBack=b;
-			}
-			else if(datamode2==CARTOON_FADE) {
-				if(datamode1==CARTOON_ALPHA){
-					obj[this_id].slideAlpha.fadeRate=fetchDouble(c)/(obj[this_id].set.alpha+obj[this_id].slideAlpha.to);
-					obj[this_id].slideAlpha.fade=1;
-				}
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME2;
-			}
-			else if(*c=='}') {
-				mode=JSON_ENDDATA;
-			}
-		}
-		else if(mode==JSON_ENDDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				return;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readJumpAnime(char *json, int timer){
-	int mode=JSON_DATA_START;
-	int datamode=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			if(*c=='}') {
-				return;
-			}
-			fetchString(c,str);
-			if(strcmp(str, "g")==0) {
-				datamode=CARTOON_G;
-			}
-			else if(strcmp(str, "y")==0) {
-				datamode=CARTOON_Y;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_G) {
-				obj[this_id].jumpG=fetchDouble(c);
-			}
-			else if(datamode==CARTOON_Y) {
-				obj[this_id].jumpY=fetchDouble(c);
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				return;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readStoryFile(char *json, int timer){
-	int mode=JSON_ARRAY_START;
-	int datamode=0,lang=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_ARRAY_START) {
-			if(*c=='[') {
-				mode=JSON_DATA_START;
-			}
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			fetchString(c,str);
-			if(strcmp(str, "lang")==0) {
-				datamode=CARTOON_LANG;
-			}
-			else if(strcmp(str, "file")==0) {
-				datamode=CARTOON_FILE;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_LANG) {
-				fetchString(c,str);
-				if(strcmp(str, "jp")==0) {
-					lang=0;
-				}
-				else if(strcmp(str, "en")==0) {
-					lang=1;
-				}
-			}
-			else if(datamode==CARTOON_FILE) {
-				fetchString(c,str);
-				loadFile(str);
-				size_t fc=0;
-				for(int i=0 ; i<1000 ; i++){
-					if(fc>=fsize)break;
-					for(int j=0 ; j<200 ; j++){
-						talk[i].str[lang][j]=0;
-					}
-					for(int j=0 ; j<200 ; j++){
-						talk[i].str[lang][j]=fstr[fc];fc++;
-						if(talk[i].str[lang][j]==0)break;
-					}
-				}
-				for(int i=0 ; i<1000 ; i++){
-					padSpace(i,lang,30);
-				}
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				mode=JSON_ENDDATA;
-			}
-		}
-		else if(mode==JSON_ENDDATA) {
-			if(*c==',') {
-				mode=JSON_DATA_START;
-			}
-			else if(*c==']') {
-				return;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readCartoonTalk(char *json, int timer){
-	int mode=JSON_ARRAY_START;
-	int datamode=0;
 	if(talkmode) {
-		mode=JSON_ENDDATA;
+		mode=JSON_NEXTDATA;
 	}
 
 	while(json[cartoonPointer]) {
@@ -1563,145 +806,26 @@ void readCartoonTalk(char *json, int timer){
 		}
 		if(mode==JSON_ARRAY_START) {
 			if(*c=='[') {
-				mode=JSON_DATA_START;
+				readJsonObject(json,name,timer);
+				if(talkmode){
+					break;
+				}
+				mode=JSON_NEXTDATA;
 			}
 		}
-		else if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			fetchString(c,str);
-			if(strcmp(str, "face")==0) {
-				datamode=CARTOON_FACE;
-			}
-			else if(strcmp(str, "text")==0) {
-				datamode=CARTOON_TEXT_ID;
-			}
-			else if(strcmp(str, "shake")==0) {
-				datamode=CARTOON_SHAKE;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_FACE) {
-				gd.face_count=fetchInt(c);
-			}
-			else if(datamode==CARTOON_TEXT_ID) {
-				gd.talk_count=fetchInt(c);
-			}
-			else if(datamode==CARTOON_SHAKE) {
-				if(startsWith(c,"true")){
-					gd.shake_count=50;
-					Mix_PlayChannel(0,sf.decide,0);
+		else if(mode==JSON_NEXTDATA) {
+			if(*c==',') {
+				cartoonPointer++;
+				readJsonObject(json,name,timer);
+				if(talkmode){
+					break;
 				}
 			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				if(!skipThisTime)talkmode=true;
-				gd.text_count=0;
-				break;
-			}
-		}
-		else if(mode==JSON_ENDDATA) {
-			if(*c==',') {
-				mode=JSON_DATA_START;
-			}
 			else if(*c==']') {
-				talkmode=false;
-				playtime=0;
-				break;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readCartoonImage(char *json, int timer){
-	int mode=JSON_ARRAY_START;
-	int datamode=0, img_id=0, w=0, h=0;
-
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_ARRAY_START) {
-			if(*c=='[') {
-				mode=JSON_DATA_START;
-			}
-		}
-		else if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			fetchString(c,str);
-			if(strcmp(str, "id")==0) {
-				datamode=CARTOON_ID;
-			}
-			else if(strcmp(str, "file")==0) {
-				datamode=CARTOON_FILE;
-			}
-			else if(strcmp(str, "w")==0) {
-				datamode=CARTOON_W;
-			}
-			else if(strcmp(str, "h")==0) {
-				datamode=CARTOON_H;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_ID) {
-				img_id=fetchInt(c);
-			}
-			else if(datamode==CARTOON_FILE) {
-				fetchString(c,str);
-				freeImage(img.bg[img_id]);
-				getImage(img.bg[img_id],str,0,0,255);
-			}
-			else if(datamode==CARTOON_W) {
-				w=fetchInt(c);
-			}
-			else if(datamode==CARTOON_H) {
-				h=fetchInt(c);
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				if(w!=0 && h!=0 && img.bg[img_id]==NULL){
-					img.bg[img_id]=new Image(w,h);
+				if(strcmp(name,"talk")==0){
+					talkmode=false;
+					playtime=0;
 				}
-				mode=JSON_ENDDATA;
-			}
-		}
-		else if(mode==JSON_ENDDATA) {
-			if(*c==',') {
-				mode=JSON_DATA_START;
-			}
-			else if(*c==']') {
 				break;
 			}
 		}
@@ -1709,75 +833,69 @@ void readCartoonImage(char *json, int timer){
 	}
 }
 
-void readCartoonLoadSound(char *json, int timer){
-	int mode=JSON_ARRAY_START;
-	int datamode=0, sound_id=0;
-
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_ARRAY_START) {
-			if(*c=='[') {
-				mode=JSON_DATA_START;
-			}
-		}
-		else if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			fetchString(c,str);
-			if(strcmp(str, "id")==0) {
-				datamode=CARTOON_ID;
-			}
-			else if(strcmp(str, "file")==0) {
-				datamode=CARTOON_FILE;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_ID) {
-				sound_id=fetchInt(c);
-			}
-			else if(datamode==CARTOON_FILE) {
-				fetchString(c,str);
-				freeSound(sf.sound[sound_id]);
-				sf.sound[sound_id]=Mix_LoadWAV(str);
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
-				mode=JSON_ENDDATA;
-			}
-		}
-		else if(mode==JSON_ENDDATA) {
-			if(*c==',') {
-				mode=JSON_DATA_START;
-			}
-			else if(*c==']') {
-				break;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readCartoonBgm(char *json, int timer){
+void readJsonObject(char *json, char *name, int timer){
 	int mode=JSON_DATA_START;
-	int datamode=0,repeat=-1;
+	while(json[cartoonPointer]) {
+		char *c = &json[cartoonPointer];
+		if(*c==' ' || *c==10 || *c==13) {
+			cartoonPointer++;
+			continue;
+		}
+		if(mode==JSON_DATA_START) {
+			if(*c=='{') {
+				jsonValueNum=0;
+				mode=JSON_GETNAME;
+			}
+		}
+		else if(mode==JSON_GETNAME) {
+			fetchString(c,jsonName[jsonValueNum]);
+			mode=JSON_COLON;
+		}
+		else if(mode==JSON_COLON) {
+			if(*c==':') {
+				mode=JSON_GETVALUE;
+			}
+		}
+		else if(mode==JSON_GETVALUE) {
+			if(*c=='"'){
+				fetchString(c,jsonValueString[jsonValueNum]);
+			}
+			else if((*c>='0' && *c<='9') || *c=='-'){
+				jsonValueDouble[jsonValueNum]=fetchDouble(c);
+			}
+			else if(*c=='{'){
+				char basename[20];
+				strcpy_s(basename,jsonName[jsonValueNum]);
+				readJsonSubObject(json,name,basename,timer);
+			}
+			else if(startsWith(c,"true")){
+				jsonValueBool[jsonValueNum]=true;
+			}
+			else if(startsWith(c,"false")){
+				jsonValueBool[jsonValueNum]=false;
+			}
+			jsonValueNum++;
+			mode=JSON_NEXTDATA;
+		}
+		else if(mode==JSON_NEXTDATA) {
+			if(*c==',') {
+				mode=JSON_GETNAME;
+			}
+			else if(*c=='}') {
+				applyJsonData(json,name,timer);
+				if(strcmp(name,"talk")==0){
+					if(!skipThisTime)talkmode=true;
+					gd.text_count=0;
+				}
+				break;
+			}
+		}
+		cartoonPointer++;
+	}
+}
+
+void readJsonSubObject(char *json, char *name1, char *name2, int timer){
+	int mode=JSON_DATA_START;
 	while(json[cartoonPointer]) {
 		char *c = &json[cartoonPointer];
 		if(*c==' ' || *c==10 || *c==13) {
@@ -1790,16 +908,8 @@ void readCartoonBgm(char *json, int timer){
 			}
 		}
 		else if(mode==JSON_GETNAME) {
-			if(*c=='}') {
-				break;
-			}
 			fetchString(c,str);
-			if(strcmp(str, "repeat")==0) {
-				datamode=CARTOON_REPEAT;
-			}
-			else if(strcmp(str, "file")==0) {
-				datamode=CARTOON_FILE;
-			}
+			sprintf_s(jsonName[jsonValueNum],"%s %s",name2,str);
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_COLON) {
@@ -1808,18 +918,24 @@ void readCartoonBgm(char *json, int timer){
 			}
 		}
 		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_REPEAT) {
-				repeat=fetchInt(c);
+			if(*c=='"'){
+				fetchString(c,jsonValueString[jsonValueNum]);
 			}
-			else if(datamode==CARTOON_FILE) {
-				fetchString(c, str);
-				if(strcmp(cartoonBgmName,str)!=0){
-					freeMusic();
-					strcpy_s(cartoonBgmName,str);
-					bgm=Mix_LoadMUS(str);
-					Mix_PlayMusic(bgm, repeat);
-				}
+			else if((*c>='0' && *c<='9') || *c=='-'){
+				jsonValueDouble[jsonValueNum]=fetchDouble(c);
 			}
+			else if(*c=='{'){
+				char basename[20];
+				strcpy_s(basename,jsonName[jsonValueNum]);
+				readJsonSubObject(json,name2,basename,timer);
+			}
+			else if(startsWith(c,"true")){
+				jsonValueBool[jsonValueNum]=true;
+			}
+			else if(startsWith(c,"false")){
+				jsonValueBool[jsonValueNum]=false;
+			}
+			jsonValueNum++;
 			mode=JSON_NEXTDATA;
 		}
 		else if(mode==JSON_NEXTDATA) {
@@ -1827,65 +943,7 @@ void readCartoonBgm(char *json, int timer){
 				mode=JSON_GETNAME;
 			}
 			else if(*c=='}') {
-				break;
-			}
-		}
-		cartoonPointer++;
-	}
-}
-
-void readCartoonSound(char *json, int timer){
-	int mode=JSON_DATA_START;
-	int datamode=0,sound_id=0,repeat=0;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
-		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
-			continue;
-		}
-		if(mode==JSON_DATA_START) {
-			if(*c=='{') {
-				mode=JSON_GETNAME;
-			}
-		}
-		else if(mode==JSON_GETNAME) {
-			if(*c=='}') {
-				break;
-			}
-			fetchString(c,str);
-			if(strcmp(str, "id")==0) {
-				datamode=CARTOON_ID;
-			}
-			else if(strcmp(str, "repeat")==0) {
-				datamode=CARTOON_REPEAT;
-			}
-			else if(strcmp(str, "ch")==0) {
-				datamode=CARTOON_CHANNEL;
-			}
-			mode=JSON_COLON;
-		}
-		else if(mode==JSON_COLON) {
-			if(*c==':') {
-				mode=JSON_GETVALUE;
-			}
-		}
-		else if(mode==JSON_GETVALUE) {
-			if(datamode==CARTOON_ID) {
-				sound_id=fetchInt(c);
-			}
-			else if(datamode==CARTOON_REPEAT) {
-				repeat=fetchInt(c);
-			}
-			else if(datamode==CARTOON_CHANNEL) {
-				Mix_PlayChannel(fetchInt(c), sf.sound[sound_id], repeat);
-			}
-			mode=JSON_NEXTDATA;
-		}
-		else if(mode==JSON_NEXTDATA) {
-			if(*c==',') {
-				mode=JSON_GETNAME;
-			}
-			else if(*c=='}') {
+				jsonValueNum--;
 				break;
 			}
 		}
@@ -2177,80 +1235,72 @@ void drawAnimationCut(SDL_Surface* scr){
 		int h=(int)obj[i].set.h;
 		int a=(int)((obj[i].set.alpha+obj[i].slideAlpha.position)*fade);
 		double mag=obj[i].set.mag+obj[i].slideMag.position;
-		if(obj[i].set.type==CARTOON_CACHE){
-			if(mag==1){
-				drawImage(scr,img.cache,x,y,ix,iy,w,h,a);
-			}else{
-				drawImage_x(scr,img.cache,x,y,mag,ix,iy,w,h,a);
+		if(obj[i].set.drawTo!=-1){
+			if(obj[i].set.type==CARTOON_DRAWIMAGE){
+				if(mag==1){
+					drawImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+				}else{
+					drawImage_x(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+				}
+			}
+			if(obj[i].set.type==CARTOON_ILLUMINATE){
+				if(mag==1){
+					illuminateImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+				}else{
+					illuminateImage_x(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+				}
+			}
+			else if(obj[i].set.type==CARTOON_FILLRECT){
+				fillRect(img.bg[obj[i].set.drawTo],x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+			}
+			else if(obj[i].set.type==CARTOON_CARLIGHT){
+				drawLightBall(img.bg[obj[i].set.drawTo],x,y,w,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B);
+			}
+			else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
+				for(int j=0 ; j<h ; j++){
+					int R=(int)(obj[i].set.gradRfrom+(obj[i].set.gradRto-obj[i].set.gradRfrom)*j/h);
+					int G=(int)(obj[i].set.gradGfrom+(obj[i].set.gradGto-obj[i].set.gradGfrom)*j/h);
+					int B=(int)(obj[i].set.gradBfrom+(obj[i].set.gradBto-obj[i].set.gradBfrom)*j/h);
+					fillRect(img.bg[obj[i].set.drawTo],x,y+j,w,1,R,G,B,a);
+				}
+			}
+			else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
+				for(int j=0 ; j<h ; j++){
+					drawImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
+				}
 			}
 		}else{
-			if(obj[i].set.drawTo!=-1){
-				if(obj[i].set.type==CARTOON_DRAWIMAGE){
-					if(mag==1){
-						drawImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
-					}else{
-						drawImage_x(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
-					}
+			if(obj[i].set.type==CARTOON_DRAWIMAGE){
+				if(mag==1){
+					drawImage(scr,img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+				}else{
+					drawImage_x(scr,img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
 				}
-				if(obj[i].set.type==CARTOON_ILLUMINATE){
-					if(mag==1){
-						illuminateImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
-					}else{
-						illuminateImage_x(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
-					}
+			}
+			if(obj[i].set.type==CARTOON_ILLUMINATE){
+				if(mag==1){
+					illuminateImage(scr,img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+				}else{
+					illuminateImage_x(scr,img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
 				}
-				else if(obj[i].set.type==CARTOON_FILLRECT){
-					fillRect(img.bg[obj[i].set.drawTo],x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+			}
+			else if(obj[i].set.type==CARTOON_FILLRECT){
+				fillRect(scr,x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+			}
+			else if(obj[i].set.type==CARTOON_CARLIGHT){
+				drawLightBall(scr,x,y,w,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B);
+			}
+			else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
+				for(int j=0 ; j<h ; j++){
+					int R=(int)(obj[i].set.gradRfrom+(obj[i].set.gradRto-obj[i].set.gradRfrom)*j/h);
+					int G=(int)(obj[i].set.gradGfrom+(obj[i].set.gradGto-obj[i].set.gradGfrom)*j/h);
+					int B=(int)(obj[i].set.gradBfrom+(obj[i].set.gradBto-obj[i].set.gradBfrom)*j/h);
+					fillRect(scr,x,y+j,w,1,R,G,B,a);
 				}
-				else if(obj[i].set.type==CARTOON_CARLIGHT){
-					drawLightBall(img.bg[obj[i].set.drawTo],x,y,w,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B);
-				}
-				else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
-					for(int j=0 ; j<h ; j++){
-						int R=(int)(obj[i].set.gradRfrom+(obj[i].set.gradRto-obj[i].set.gradRfrom)*j/h);
-						int G=(int)(obj[i].set.gradGfrom+(obj[i].set.gradGto-obj[i].set.gradGfrom)*j/h);
-						int B=(int)(obj[i].set.gradBfrom+(obj[i].set.gradBto-obj[i].set.gradBfrom)*j/h);
-						fillRect(img.bg[obj[i].set.drawTo],x,y+j,w,1,R,G,B,a);
-					}
-				}
-				else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
-					for(int j=0 ; j<h ; j++){
-						drawImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
-					}
-				}
-			}else{
-				if(obj[i].set.type==CARTOON_DRAWIMAGE){
-					if(mag==1){
-						drawImage(scr,img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
-					}else{
-						drawImage_x(scr,img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
-					}
-				}
-				if(obj[i].set.type==CARTOON_ILLUMINATE){
-					if(mag==1){
-						illuminateImage(scr,img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
-					}else{
-						illuminateImage_x(scr,img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
-					}
-				}
-				else if(obj[i].set.type==CARTOON_FILLRECT){
-					fillRect(scr,x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
-				}
-				else if(obj[i].set.type==CARTOON_CARLIGHT){
-					drawLightBall(scr,x,y,w,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B);
-				}
-				else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
-					for(int j=0 ; j<h ; j++){
-						int R=(int)(obj[i].set.gradRfrom+(obj[i].set.gradRto-obj[i].set.gradRfrom)*j/h);
-						int G=(int)(obj[i].set.gradGfrom+(obj[i].set.gradGto-obj[i].set.gradGfrom)*j/h);
-						int B=(int)(obj[i].set.gradBfrom+(obj[i].set.gradBto-obj[i].set.gradBfrom)*j/h);
-						fillRect(scr,x,y+j,w,1,R,G,B,a);
-					}
-				}
-				else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
-					for(int j=0 ; j<h ; j++){
-						drawImage(scr,img.bg[obj[i].set.img_id],x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
-					}
+			}
+			else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
+				for(int j=0 ; j<h ; j++){
+					drawImage(scr,img.bg[obj[i].set.img_id],x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
 				}
 			}
 		}
