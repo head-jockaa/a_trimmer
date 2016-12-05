@@ -1147,23 +1147,23 @@ void drawColorLight(int x, int y, int w, int h, bool buf){
 
 	Area *ar=area;
 	for(int i=0 ; i<areas ; i++){
-		Tower *tw=area->tower;
+		Tower *tw=ar->tower;
 		for(int j=0 ; j<(ar->tower_num) ; j++){
-			if(tw->remove)continue;
-			int n=tw->c1, m=tw->c2 - 1;
-			if(n==0 || m<0 || m>=8)continue;
-			X=tw->x*MAGNIFY-gd.scrX-m*5;
-			Y=tw->y*MAGNIFY-gd.scrY-m*5;
-			X2=0;Y2=0;W=m*10+10;H=m*10+10;
+			if(tw->remove){tw++;continue;}
+			int num=tw->onair_num, size=tw->colorlight_size;
+			if(num==0 || size<0 || size>=8){tw++;continue;}
+			X=tw->x*MAGNIFY-gd.scrX-size*5;
+			Y=tw->y*MAGNIFY-gd.scrY-size*5;
+			X2=0;Y2=0;W=size*10+10;H=size*10+10;
 
-			if(X>=x+w || Y>=y+h)continue;
-			if(X+W<x|| Y+H<y)continue;
+			if(X>=x+w || Y>=y+h){tw++;continue;}
+			if(X+W<x|| Y+H<y){tw++;continue;}
 			if(X<x){X2+=x-X;W-=x-X;X=x;}
 			if(Y<y){Y2+=y-Y;H-=y-Y;Y=y;}
 			if(X+W>x+w)W=x+w-X;
 			if(Y+H>y+h)H=y+h-Y;
 
-			illuminateImage(img.buffer[2],img.colorlight,X,Y,X2+m*80,Y2+(n-1)*80,W,H,255);
+			illuminateImage(img.buffer[2],img.colorlight,X,Y,X2+size*80,Y2+(num-1)*80,W,H,255);
 
 			if(minX>X-1)minX=X-1;
 			if(maxX<X+W)maxX=X+W;

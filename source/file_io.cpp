@@ -113,15 +113,16 @@ void load_story(int n){
 }
 
 void load_animebook(){
-	if(allworks)return;
-	allworks=0;collection=0;
+	if(animedex_num)return;
+	animedex_num=0;
+	collection=0;
 	loadFile("file/data/work/works.dat");
-	allworks=(int)(fsize/5);
-	animebook=new bool[allworks];
+	animedex_num=(int)(fsize/5);
+	animebook=new bool[animedex_num];
 	if(!loadFile("save/animebook.dat")){
-		for(int i=0 ; i<allworks ; i++)animebook[i]=false;
+		for(int i=0 ; i<animedex_num ; i++)animebook[i]=false;
 	}else{
-		for(int i=0 ; i<allworks ; i++){
+		for(int i=0 ; i<animedex_num ; i++){
 			animebook[i]=(fstr[i/8]>>i%8 & 1);
 			if(animebook[i])collection++;
 		}
@@ -130,13 +131,13 @@ void load_animebook(){
 
 void save_animebook(){
 	if(fsize)delete [] fstr;
-	fsize=allworks/8+1;
+	fsize=animedex_num/8+1;
 	fstr=new char[fsize];
 	FILE* hFile;
 	int a=0;
 
 	for(int i=0 ; i<(int)fsize ; i++)fstr[i]=0;
-	for(int i=0 ; i<allworks ; i++){
+	for(int i=0 ; i<animedex_num ; i++){
 		if(i%8==0)a+=animebook[i];
 		else if(i%8==1)a+=animebook[i]*2;
 		else if(i%8==2)a+=animebook[i]*4;
@@ -145,7 +146,7 @@ void save_animebook(){
 		else if(i%8==5)a+=animebook[i]*32;
 		else if(i%8==6)a+=animebook[i]*64;
 		else if(i%8==7)a+=animebook[i]*128;
-		if(i%8==7 || i==allworks-1){
+		if(i%8==7 || i==animedex_num-1){
 			fstr[i/8]=a;
 			a=0;
 		}

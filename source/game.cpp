@@ -1,7 +1,6 @@
 #include "game.h"
 
 GameData gd;
-BossData bd;
 ManekiData md;
 int pre_magnify;
 
@@ -30,8 +29,6 @@ void drawSMR(SDL_Surface* scr);
 void estimate_rural();
 void initManekiTV();
 void setManekiData();
-void boss_attack();
-void timer_boss();
 
 void setAntenna(){
 	if(ROD_TYPE==SIMPLEROD){
@@ -99,10 +96,9 @@ void initGame(){
 	gd.pre_rural=0;gd.count_rural=0;gd.kirby_count=0;gd.kirby_count2=0;
 	gd.kulisaped=0;gd.ant_dir=270;gd.memma_count=0;gd.gaze_count=0;
 	gd.current_area=EOF;gd.current_town=EOF;
-	bd.bossHP=30000;bd.pre_bossHP=30000;bd.talking=0;
 	rd.received=false;
 	setSMR=true;
-	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT)phase=GAMESTART;
+	if(gd.game_mode==STORYMODE)phase=GAMESTART;
 	else phase=READY;
 
 	img.searchImage=NULL;
@@ -153,12 +149,6 @@ void initGame(){
 		}
 		createMap_tower();
 	}
-	if(gd.game_mode==BOSS){
-		pre_magnify=MAGNIFY;
-		MAGNIFY=1;
-		TalkingAt(1);
-	}
-	if(gd.game_mode!=STORYMODE)gd.week=rand()%7;
 	gd.talk_count=EOF;
 }
 
@@ -166,11 +156,7 @@ void initGame2(){
 	if(gd.hour<=5 || gd.hour>=23)createMap_color(200);
 	else createMap_color(1000);
 	createMap_tower();
-	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT||gd.game_mode==BOSS){
-		if(gd.game_mode==BOSS){
-			srand(SDL_GetTicks());
-			dataNo=rand()%index_num+1;
-		}
+	if(gd.game_mode==STORYMODE){
 		load_works(dataNo);
 		load_searchQueries(work,works);
 		if(!fishbox.loaded())fishbox.initFishBox(works);
@@ -178,8 +164,6 @@ void initGame2(){
 			gd.score+=fishbox.getSC(i);
 		}
 		estimate_rural();
-	}
-	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT){
 		televise();
 	}else{
 		for(int i=0 ; i<stas ; i++)sta[i].ontv=EOF;
@@ -192,14 +176,11 @@ void initGame2(){
 		setManekiData();
 	}
 
-	if(gd.game_mode==BOSS){
-		getImage(img.back,"file/img/epilogue.png",0,0,255);
-	}
-	else if(phase!=READY){
+	if(phase!=READY){
 		sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
 		loadCartoon(str);
 	}
-	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT){
+	if(gd.game_mode==STORYMODE){
 		sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
 		bgm=Mix_LoadMUS(str);
 	}
@@ -207,16 +188,6 @@ void initGame2(){
 	if(MAP3D)make3dview(gd.x,gd.y,gd.ant_dir);
 	else{
 		map.buffered=false;
-	}
-
-	if(gd.game_mode==SELECT)for(int i=0 ; i<works ; i++){
-		work[i].exist=false;
-		for(int j=0 ; j<work[i].prg_num ; j++){
-			if(work[i].prg[j].week==gd.week || (work[i].prg[j].week==(gd.week+6)%7 && in_time(work[i].prg[j].week,work[i].prg[j].hour,work[i].prg[j].minute,work[i].prg[j].time))){
-				work[i].exist=true;
-				break;
-			}
-		}
 	}
 }
 
@@ -232,27 +203,27 @@ void endGame(){
 		freeImage(img.searchImage);
 		img.searchImage=NULL;
 	}
-	Mix_FreeChunk(sf.water);
-	Mix_FreeChunk(sf.thunder);
-	Mix_FreeChunk(sf.meow);
-	Mix_FreeChunk(sf.snore);
-	Mix_FreeChunk(sf.fw_sound);
-	Mix_FreeChunk(sf.noon);
-	Mix_FreeChunk(sf.sunset);
-	Mix_FreeChunk(sf.hold);
-	Mix_FreeChunk(sf.drag_s);
-	Mix_FreeChunk(sf.noize);
-	Mix_FreeChunk(sf.bupyo);
-	Mix_FreeChunk(sf.knob);
-	Mix_FreeChunk(sf.calling);
-	Mix_FreeChunk(sf.coin);
-	Mix_FreeChunk(sf.swish);
-	Mix_FreeChunk(sf.get);
-	Mix_FreeChunk(sf.lamp);
-	Mix_FreeChunk(sf.bubble);
-	Mix_FreeChunk(sf.gaze);
+	freeSound(sf.water);
+	freeSound(sf.thunder);
+	freeSound(sf.meow);
+	freeSound(sf.snore);
+	freeSound(sf.fw_sound);
+	freeSound(sf.noon);
+	freeSound(sf.sunset);
+	freeSound(sf.hold);
+	freeSound(sf.drag_s);
+	freeSound(sf.noize);
+	freeSound(sf.bupyo);
+	freeSound(sf.knob);
+	freeSound(sf.calling);
+	freeSound(sf.coin);
+	freeSound(sf.swish);
+	freeSound(sf.get);
+	freeSound(sf.lamp);
+	freeSound(sf.bubble);
+	freeSound(sf.gaze);
 	gd.ta_count=0;
-	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT||gd.game_mode==BOSS)freeMusic();
+	freeMusic();
 	if(pre_magnify!=EOF)MAGNIFY=pre_magnify;
 	if(gd.game_mode==NO_RELAY){
 		for(int i=0 ; i<areas ; i++){
@@ -264,8 +235,8 @@ void endGame(){
 	}
 	for(int i=0 ; i<areas ; i++){
 		for(int j=0 ; j<area[i].tower_num ; j++){
-			area[i].tower[j].c1=0;
-			area[i].tower[j].c2=0;
+			area[i].tower[j].onair_num=0;
+			area[i].tower[j].colorlight_size=0;
 		}
 	}
 	delete ant;
@@ -290,7 +261,7 @@ void keyGameStart(){
 void keyFishup(){
 	if((key.z||key.x||key.c||key.left||key.right||key.up||key.down)){
 		if(!key_stop(key.z) || !key_stop(key.x) || !key_stop(key.c) || !key_stop(key.left) || !key_stop(key.right) || !key_stop(key.up) || !key_stop(key.down)){
-			if(gd.game_mode!=BOSS && start<40){
+			if(start<40){
 				int n;
 				if(phase==FISHUP || phase==GRADEUP){
 					phase=ANTENNA;
@@ -388,11 +359,7 @@ void keyGetHazia(){
 void keyResult(){
 	if((key.z || key.x || key.c) && (!key_stop(key.z) || !key_stop(key.x) || !key_stop(key.c))){
 		if(start==0){
-			if(gd.game_mode==SELECT){
-				endGame();
-				initGameMenu();
-			}
-			else if(gd.game_mode==STORYMODE){
+			if(gd.game_mode==STORYMODE){
 				if(gd.week==6){
 					phase=GET_HAZIA;
 					sprintf_s(str,"file/data/cartoon/end%d.json",dataNo);
@@ -563,13 +530,6 @@ void walking(){
 		walking_3d();
 		return;
 	}
-	if(gd.game_mode==BOSS && bd.bossHP==0){
-		if((int)gd.x==0 || (int)gd.y==0 || (int)gd.x==map.mapW || (int)gd.y==map.mapH){
-			phase=SUMMERWARS;
-			TalkingAt(8);
-			count=0;
-		}
-	}
 
 	gd.speedX=0;
 	gd.speedY=0;
@@ -648,10 +608,8 @@ void walking(){
 		if(gd.kirby_count2>0)gd.kirby_count2--;
 		gd.kirby_count=0;
 		if(!gd.m_waved){
-			if(gd.game_mode!=BOSS){
-				gd.m_wave=70;
-				gd.m_waved=true;
-			}
+			gd.m_wave=70;
+			gd.m_waved=true;
 			getH();
 		}
 	}
@@ -747,7 +705,7 @@ void keyPlaying(){
 		start=30;
 		Mix_PlayChannel(1, sf.decide2, 0);
 	}
-	if(key.x && gd.game_mode!=BOSS && !key_wait(key.x)){
+	if(key.x && !key_wait(key.x)){
 		if(!key.up && !key.down && !key.left && !key.right){
 			if(key.x==50)Mix_PlayChannel(1, sf.snore, 0);
 			gd.doze=true;
@@ -824,7 +782,7 @@ void keyMenuWhileInGame(){
 			start=65;
 		}
 		else if(gd.menu_selected==3){
-			if(gd.game_mode==STORYMODE||gd.game_mode==SELECT){
+			if(gd.game_mode==STORYMODE){
 				fishbox.text_count=60;
 				phase=CROP;
 			}
@@ -836,7 +794,7 @@ void keyMenuWhileInGame(){
 			}
 		}
 		else if(gd.menu_selected==4){
-			if(gd.game_mode==STORYMODE||gd.game_mode==SELECT){
+			if(gd.game_mode==STORYMODE){
 				phase=SAVEMENU;
 				makeSaveMenu(SAVEMENU);
 				for(int i=0 ; i<gd.save_cursor ; i++)menu[SAVEMENU].cursorDown();
@@ -850,7 +808,7 @@ void keyMenuWhileInGame(){
 		else if(gd.menu_selected==5){
 			gd.menu_selected=0;
 			endGame();
-			if(gd.game_mode==STORYMODE||gd.game_mode==SELECT||gd.game_mode==BOSS){
+			if(gd.game_mode==STORYMODE){
 				initGameMenu();
 			}else{
 				initMiyazaki();
@@ -1175,7 +1133,6 @@ void keyManekiTalking(){
 }
 
 void keyGameTalking(){
-	if(phase==SUMMERWARS && count<660)return;
 	if(key.z && !key_stop(key.z) && start==0){
 		if(nextTalk()){
 			Mix_PlayChannel(0, sf.noize, 0);
@@ -1274,8 +1231,7 @@ void keyGame(){
 		case TOWN_LIST:keyTownList();break;
 		case ANTENNA_MENU:keyAntennaMenu();break;
 		case BS_ATTACK:keyBSAttack();break;
-		case TALKING:
-		case SUMMERWARS:keyGameTalking();break;
+		case TALKING:keyGameTalking();break;
 		case MANEKI:keyManekiTalking();break;
 		case MANEKI_CONFIRM:keyManekiConfirm();break;
 		case END_YN:keyRecordYN();break;
@@ -1400,37 +1356,32 @@ bool in_time(int w, int h, int m, int t){
 void televise(){
 	int *pre;
 	pre=new int[stas];
-	if(gd.game_mode!=BOSS){
-		for(int i=0 ; i<stas ; i++){
-			pre[i]=sta[i].ontv;
-			sta[i].ontv=EOF;
-		}
-		for(int i=0 ; i<works ; i++)for(int j=0 ; j<work[i].prg_num ; j++){
-			if( in_time(work[i].prg[j].week, work[i].prg[j].hour, work[i].prg[j].minute, work[i].prg[j].time) ){
-				sta[ work[i].prg[j].station ].ontv=i;
-			}
+	for(int i=0 ; i<stas ; i++){
+		pre[i]=sta[i].ontv;
+		sta[i].ontv=EOF;
+	}
+	for(int i=0 ; i<works ; i++)for(int j=0 ; j<work[i].prg_num ; j++){
+		if( in_time(work[i].prg[j].week, work[i].prg[j].hour, work[i].prg[j].minute, work[i].prg[j].time) ){
+			sta[ work[i].prg[j].station ].ontv=i;
 		}
 	}
 	for(int i=0 ; i<areas ; i++){
 		for(int j=0 ; j<area[i].tower_num ; j++){
-			area[i].tower[j].c1=0;area[i].tower[j].c2=0;
+			area[i].tower[j].onair_num=0;
+			area[i].tower[j].colorlight_size=0;
 			for(int k=0 ; k<10 ; k++){
-				if(area[i].tower[j].ch[k]!=0 && sta[ area[i].station[k] ].ontv!=EOF){
-					if(gd.game_mode==BOSS){
-						area[i].tower[j].c1=sta[ area[i].station[k] ].ontv;
-					}
-					else if(area[i].tower[j].c1<3)area[i].tower[j].c1++;
+				if(area[i].tower[j].ch[k]!=0 && area[i].tower[j].ch[k]!=CHANNELS+1 && sta[ area[i].station[k] ].ontv!=EOF){
+					if(area[i].tower[j].onair_num<3)area[i].tower[j].onair_num++;
 					if(area[i].tower[j].ch[k]!=CHANNELS+1){
 						int n=0;
-						if(area[i].tower[j].kw>=30)n=8;
-						else if(area[i].tower[j].kw>=20)n=7;
-						else if(area[i].tower[j].kw>=10)n=6;
-						else if(area[i].tower[j].kw>=1)n=5;
-						else if(area[i].tower[j].kw>=0.1)n=4;
-						else if(area[i].tower[j].kw>=0.01)n=3;
-						else if(area[i].tower[j].kw>=0.001)n=2;
-						else n=1;
-						if(area[i].tower[j].c2<n)area[i].tower[j].c2=n;
+						if(area[i].tower[j].kw>=30)n=7;
+						else if(area[i].tower[j].kw>=20)n=6;
+						else if(area[i].tower[j].kw>=10)n=5;
+						else if(area[i].tower[j].kw>=1)n=4;
+						else if(area[i].tower[j].kw>=0.1)n=3;
+						else if(area[i].tower[j].kw>=0.01)n=2;
+						else if(area[i].tower[j].kw>=0.001)n=1;
+						if(area[i].tower[j].colorlight_size<n)area[i].tower[j].colorlight_size=n;
 					}
 				}
 			}
@@ -1479,29 +1430,6 @@ void drawSMR(SDL_Surface* scr){
 	if(EXPLAIN){
 		drawKeyboard(scr,key.xC,0,460);
 		drawText(scr,20,460,text[GAMETEXT+23]);
-	}
-}
-
-void drawBossGame(SDL_Surface* scr){
-	drawImage(scr,img.chr,0,0,380,120,60,40,255);
-	if(bd.bossHP<=bd.pre_bossHP){
-		drawImage(scr,img.chr,60,20,0,560,(int)(bd.pre_bossHP*56/3000.0),20,255);
-		drawImage(scr,img.chr,60,20,0,580,(int)(bd.bossHP*56/3000.0),20,255);
-	}else{
-		drawImage(scr,img.chr,60,20,0,560,(int)(bd.bossHP*56/3000.0),20,255);
-		drawImage(scr,img.chr,60,20,0,580,(int)(bd.pre_bossHP*56/3000.0),20,255);
-	}
-	if(bd.bossHP>0)drawImage(scr,img.chr,60,20,0,580,2,20,255);
-	drawImage(scr,img.chr,400,120,280+((count/5)%2)*50,170,50,70,255);
-	for(int i=0 ; i<bd.num ; i++){
-		if(bd.color[i]==1)drawImage(scr,img.chr,(int)(bd.atkX[i]-gd.scrX),(int)(bd.atkY[i]-gd.scrY)-40,380,170,40,40,255);
-		else drawImage(scr,img.chr,(int)(bd.atkX[i]-gd.scrX),(int)(bd.atkY[i]-gd.scrY)-40,380,210,40,40,255);
-	}
-	if(phase==HIT_BOSS){
-		int a=0;
-		if(bd.damage<0)a=40;
-		if(start>70)drawImage(scr,img.chr,(int)bd.hitX-gd.scrX,(int)bd.hitY-gd.scrY,420+((count/5)%2)*40,170+a,40,40,255);
-		else drawM(scr,start,abs(bd.damage),420,180);
 	}
 }
 
@@ -1678,7 +1606,7 @@ void drawFishup(SDL_Surface* scr){
 		else drawImage(scr,img.fishup,20,40,0,300,320,320,255);
 		if(!animebook[ work[sta[BSstation[gd.bs_ch]].ontv].tnum ]){
 			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
-			sprintf_s(str,"%4d/%4d",collection+1,allworks);
+			sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
 			drawText2(scr,380,220,str);
 		}
 	}
@@ -1700,7 +1628,7 @@ void drawFishup(SDL_Surface* scr){
 		drawImage(scr,img.chr,560,40,(BSchannel[gd.bs_ch]/10)*20,480,20,40,255);
 		drawImage(scr,img.chr,580,40,(BSchannel[gd.bs_ch]%10)*20,480,20,40,255);
 	}
-	if((phase==FISHUP||phase==MANEKI_FISHUP) && gd.game_mode!=BOSS){
+	if(phase==FISHUP || phase==MANEKI_FISHUP){
 		if(start>40)drawImage(scr,img.fishup,(start-40)*20,40,320,300,320,320,255);
 		else drawImage(scr,img.fishup,0,40,320,300,320,320,255);
 		int n;
@@ -1708,7 +1636,7 @@ void drawFishup(SDL_Surface* scr){
 		else n=work[md.fish[0].title_num].tnum;
 		if(start<70 && !animebook[n]){
 			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
-			sprintf_s(str,"%4d/%4d",collection+1,allworks);
+			sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
 			drawText2(scr,380,220,str);
 		}
 	}
@@ -1800,7 +1728,7 @@ void drawAntennaMenuBox(SDL_Surface* scr){
 void drawRural(SDL_Surface* scr){
 	int a=map.rural[(int)gd.x/map.rural_size][(int)gd.y/map.rural_size];
 	if(a<0 || a>=areas)return;
-	if(gd.game_mode!=STORYMODE && gd.game_mode!=SELECT && gd.game_mode!=BOSS)return;
+	if(gd.game_mode!=STORYMODE)return;
 	if(gd.pre_rural!=map.rural_rate[a]){
 		gd.pre_rural=map.rural_rate[a];
 		gd.count_rural=100;
@@ -1921,13 +1849,7 @@ void drawGame(SDL_Surface* scr){
 	}
 	else if(phase==RESULT || phase==TODAYS_CROP)drawResult(scr);
 	else if(phase==GET_HAZIA)drawGetHazia(scr);
-	else if(phase==SUMMERWARS)drawSummerWars(scr);
-	else if(gd.game_mode==BOSS && phase==TALKING && bd.talking==4 && gd.scene_count==1){
-		fillRect(scr,0,0,640,480,0,0,0,255);
-		drawImage(scr,img.back,0,40,0,0,640,400,255);
-		drawImage(scr,img.back,120,120+abs(20-(count/5)%40)*2,640,0,120,80,255);
-		drawTalking(scr);
-	}else{
+	else{
 		SDL_Color col=getSkyColor(gd.hour,gd.minute);
 		fillRect(scr,0,0,640,480,col.r,col.g,col.b,255);
 		drawMap(scr, gd.scrX, gd.scrY);
@@ -1967,12 +1889,13 @@ void drawGame(SDL_Surface* scr){
 			}
 		}
 
-		if(gd.game_mode==STORYMODE||gd.game_mode==SELECT){
+		if(gd.game_mode==STORYMODE){
 			drawClock(scr);
 			drawScore(scr);
 		}
-		if(gd.game_mode==BOSS)drawBossGame(scr);
-		if(gd.m_wave>0)drawM(scr,gd.m_wave,rd.seeH[0],(int)(gd.x*MAGNIFY)-gd.scrX-20,(int)(gd.y*MAGNIFY)-gd.scrY+30);
+		if(gd.m_wave>0){
+			drawM(scr,gd.m_wave,rd.seeH[0],(int)(gd.x*MAGNIFY)-gd.scrX-20,(int)(gd.y*MAGNIFY)-gd.scrY+30);
+		}
 		if(phase==READY){
 			if(count>=100)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX,(int)(gd.y*MAGNIFY)-gd.scrY-(125-count)*12-50,550,0,10,60,255);
 			else if(count%20<10)drawText2(scr,300,200,"READY");
@@ -2037,13 +1960,8 @@ void drawGameExplain(SDL_Surface* scr){
 				drawText(scr,20,460,text[GAMETEXT+8]);
 			}
 			else if(count%1000<400){
-				if(gd.game_mode==BOSS){
-					drawKeyboard(scr,key.xC,0,460);
-					drawText(scr,20,460,text[GAMETEXT+11]);
-				}else{
-					drawKeyboard(scr,key.xC,0,460);
-					drawText(scr,20,460,text[GAMETEXT+10]);
-				}
+				drawKeyboard(scr,key.xC,0,460);
+				drawText(scr,20,460,text[GAMETEXT+10]);
 			}
 			else if(count%1000<600){
 				drawKeyboard(scr,key.cC,0,460);
@@ -2203,7 +2121,7 @@ void drawGameExplain(SDL_Surface* scr){
 				drawText(scr,40,460,text[MENUTEXT+15]);
 			}
 		}
-		else if(phase==TALKING || (phase==MANEKI && gd.scene_count<3) || (phase==SUMMERWARS && count>=660)){
+		else if(phase==TALKING || (phase==MANEKI && gd.scene_count<3)){
 			drawKeyboard(scr,key.zC,70,0);
 			drawText(scr,90,0,text[EPILOGUE+1]);
 		}
@@ -2358,25 +2276,6 @@ void timerSavingRecord(){
 	if(count==150)Mix_PlayChannel(0,sf.coin,0);
 }
 
-void timerSummerWars(){
-	if(count==0){
-		gd.x=gd.summerX_start;gd.y=gd.summerY_start;
-		fix_scrXY();
-	}
-	if(count>=200 && count<300){
-		gd.x+=(gd.summerX-gd.summerX_start)/100.0;
-		gd.y+=(gd.summerY-gd.summerY_start)/100.0;
-	}
-	if(count==400){
-		Mix_HaltMusic();
-		Mix_PlayChannel(0,sf.swish,0);
-	}
-	if(count>=420 && count<600){
-		if(count%10==0)Mix_PlayChannel(0,sf.thunder,0);
-	}
-	if(count==500)Mix_PlayChannel(1,sf.meow,0);
-}
-
 void timerMemma(){
 	if(gd.memma_count>0)gd.memma_count--;
 	if(abs((int)gd.x-gd.memmaX)<20 && abs((int)gd.y-gd.memmaY)<20){
@@ -2464,7 +2363,7 @@ void moveClock(){
 	if(gd.minute==60){gd.hour++;gd.minute=0;}
 	if(gd.second>=100*MAGNIFY){
 		gd.second=0;
-		if(gd.game_mode==STORYMODE||gd.game_mode==SELECT)televise();
+		if(gd.game_mode==STORYMODE)televise();
 		if(md.maneki_mode==PLUGGED_IN)ManekiTV_throw();
 	}
 	if(gd.hour==28){
@@ -2549,7 +2448,7 @@ void timerThrowPhoto(){
 }
 
 void timerGame(){
-	if(gd.game_mode!=BOSS && (gd.game_mode==STORYMODE||gd.game_mode==SELECT)){
+	if(gd.game_mode==STORYMODE){
 		if(count==1){
 			Mix_PlayMusic(bgm,0);
 			timestamp=SDL_GetTicks();
@@ -2573,30 +2472,27 @@ void timerGame(){
 		if(count==100)Mix_PlayChannel(0,sf.swish,0);
 		if(count==125)phase=PLAYING;
 	}
-	else if(phase==PLAYING || phase==HIT_BOSS){
-		if(gd.game_mode==BOSS)timer_boss();
-		else{
-			if(MAP3D){
-				if(talk_3dtv && count==300){
-					TalkingAt(22);
-					gd.talk_open_count=1;
-					phase=TALKING;
-					talk_3dtv=false;
-				}
+	else if(phase==PLAYING){
+		if(MAP3D){
+			if(talk_3dtv && count==300){
+				TalkingAt(22);
+				gd.talk_open_count=1;
+				phase=TALKING;
+				talk_3dtv=false;
 			}
-			moveClock();
-			timerMemma();
-			timerSunMovement();
-			timerCatchPhone();
-			for(int i=0 ; i<md.fish_num ; i++){
-				if(md.maneki_count[i]!=0){
-					if(md.maneki_count[i]==40){
-						if(md.fish[i].bs)Mix_PlayChannel(0,sf.swish,0);
-						else Mix_PlayChannel(0,sf.meow,0);
-					}
-					md.maneki_count[i]--;
-					if(md.maneki_count[i]==0)ManekiTV_catch();
+		}
+		moveClock();
+		timerMemma();
+		timerSunMovement();
+		timerCatchPhone();
+		for(int i=0 ; i<md.fish_num ; i++){
+			if(md.maneki_count[i]!=0){
+				if(md.maneki_count[i]==40){
+					if(md.fish[i].bs)Mix_PlayChannel(0,sf.swish,0);
+					else Mix_PlayChannel(0,sf.meow,0);
 				}
+				md.maneki_count[i]--;
+				if(md.maneki_count[i]==0)ManekiTV_catch();
 			}
 		}
 	}
@@ -2609,12 +2505,11 @@ void timerGame(){
 	else if(phase==SAVING)timerSavingGame();
 	else if(phase==SAVING_RECORD)timerSavingRecord();
 	else if(phase==LEAVE_MAP)timerLeaveMap();
-	else if(phase==SUMMERWARS)timerSummerWars();
 	else if(phase==FISHUP || phase==MANEKI_FISHUP)timerFishUp();
 	else if(phase==BS_ATTACK)timerBSAttack();
 	else if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)timerThrowPhoto();
 
-	if(phase==TALKING || (phase==GET_HAZIA && start==0) || phase==MANEKI || phase==MANEKI_CONFIRM || (phase==SUMMERWARS && count>=660)){
+	if(phase==TALKING || (phase==GET_HAZIA && start==0) || phase==MANEKI || phase==MANEKI_CONFIRM){
 		controlTextCount(true);
 	}else{
 		controlTextCount(false);
@@ -2662,7 +2557,7 @@ void drawM(SDL_Surface* scr, int w, int m, int x, int y){
 	if(m>=100)drawImage(scr,img.chr,x-64,y-Y2-18,((m/100)%10)*16,404,16,18,255);
 	if(m>=10)drawImage(scr,img.chr,x-48,y-Y3-18,((m/10)%10)*16,404,16,18,255);
 	drawImage(scr,img.chr,x-32,y-Y4-18,(m%10)*16,404,16,18,255);
-	if(gd.game_mode!=BOSS)drawImage(scr,img.chr,x-16,y-18,160,404,16,18,255);
+	drawImage(scr,img.chr,x-16,y-18,160,404,16,18,255);
 }
 
 void drawTerop(SDL_Surface* scr, String str, int rcv, int mg_rcv){
@@ -2742,38 +2637,7 @@ void initManekiTV(){
 	md.maneki_mode=NULL;
 }
 
-void head_of_talking(){
-	if(gd.game_mode==BOSS)return;
-	if(dataNo==1)TalkingAt(2);
-	else TalkingAt(1);
-	if(face[gd.face_count]==HANGUP){
-		while(gd.face_count<1000){
-			if(face[gd.face_count+1]<gd.week
-			|| (face[gd.face_count+1]==gd.week && face[gd.face_count+2]<gd.hour)
-			|| (face[gd.face_count+1]==gd.week && face[gd.face_count+2]==gd.hour && face[gd.face_count+3]<gd.minute)
-			){
-				gd.face_count+=4;
-				while(face[gd.face_count+1]!=HANGUP && face[gd.face_count]!=EOF){
-					if(face[gd.face_count]==COMMA || face[gd.face_count]==SHAKE){
-						gd.face_count++;
-					}else{
-						gd.talk_count++;
-						gd.face_count++;
-					}
-				}
-				if(face[gd.face_count]==EOF){
-					gd.face_count++;
-					break;
-				}
-			}
-			else break;
-		}
-	}
-	else gd.face_count++;
-}
-
 void head_of_timeslot(){
-	if(gd.game_mode==BOSS)return;
 	gd.timeslot_count=0;
 	while(gd.timeslot[gd.timeslot_count]!=EOF){
 		if(gd.timeslot[gd.timeslot_count]<gd.week
@@ -2783,138 +2647,6 @@ void head_of_timeslot(){
 			gd.timeslot_count+=4;
 		}
 		else break;
-	}
-}
-
-void boss_attack(){
-	for(int i=0 ; i<stas ; i++)sta[i].ontv=EOF;
-	for(int i=0 ; i<areas ; i++){
-		for(int j=0 ; j<area[i].tower_num ; j++){
-			area[i].tower[j].c1=0;
-			area[i].tower[j].c2=0;
-		}
-	}
-	map.buffered2=false;
-	srand(SDL_GetTicks());
-	int wk=rand()%works;
-	bd.num=work[wk].prg_num;
-	for(int i=0 ; i<bd.num ; i++){
-		bd.atkX[i]=bd.bossX+10;
-		bd.atkY[i]=bd.bossY+10;
-		bd.station[i]=work[wk].prg[i].station;
-		bd.color[i]=rand()%2+1;
-		bd.tower[i]=EOF;
-		for(int j=0 ; j<areas ; j++){
-			for(int k=0 ; k<area[j].st_num ; k++){
-				if(area[j].station[k]==bd.station[i]){
-					//bd.tower[i]=area[j].tower;
-					break;
-				}
-			}
-			if(bd.tower[i]!=EOF)break;
-		}
-		if(bd.tower[i]==EOF){
-			bd.num--;
-			i--;
-			break;
-		}
-		bd.atk_count[i]=50+i*10;
-	}
-	if(bd.num==0)count=-1;
-}
-
-void timer_boss(){
-	bd.bossX=gd.scrX+200;
-	bd.bossY=gd.scrY+60;
-	if(phase==HIT_BOSS){
-		if(start>100)bd.hitY--;
-		else if(start==100){
-			bd.hit_speedX=(bd.bossX-bd.hitX)/30.0;
-			bd.hit_speedY=(bd.bossY+20-bd.hitY)/30.0;
-		}
-		else if(start>70){
-			bd.hitX+=bd.hit_speedX;
-			bd.hitY+=bd.hit_speedY;
-		}
-		else if(start==70){
-			bd.bossHP-=bd.damage;
-			if(bd.bossHP<0)bd.bossHP=0;
-			if(bd.bossHP>30000)bd.bossHP=30000;
-			if(bd.damage<0)Mix_PlayChannel(0,sf.meow,0);
-			else Mix_PlayChannel(0,sf.decide,0);
-		}
-		if(start==0){
-			phase=PLAYING;
-			count=399;
-			ant->lower();
-		}
-	}else{
-		for(int i=0 ; i<30 ; i++){
-			if(bd.pre_bossHP>bd.bossHP)bd.pre_bossHP--;
-			if(bd.pre_bossHP<bd.bossHP)bd.pre_bossHP++;
-		}
-		if(bd.talking==0){
-			TalkingAt(1);
-			phase=CALLING;
-			Mix_PlayChannel(0,sf.calling,0);
-			count=0;
-			bd.talking++;
-		}
-		else if(bd.pre_bossHP<24000 && bd.talking==1){
-			TalkingAt(2);
-			phase=TALKING;
-			bd.talking++;
-		}
-		else if(bd.pre_bossHP<18000 && bd.talking==2){
-			TalkingAt(3);
-			phase=TALKING;
-			bd.talking++;
-		}
-		else if(bd.pre_bossHP<15000 && bd.talking==3){
-			TalkingAt(4);
-			phase=CALLING;
-			Mix_PlayChannel(0,sf.calling,0);
-			count=0;
-			bd.talking++;
-		}
-		else if(bd.pre_bossHP<12000 && bd.talking==4){
-			TalkingAt(5);
-			phase=TALKING;
-			bd.talking++;
-		}
-		else if(bd.pre_bossHP<6000 && bd.talking==5){
-			TalkingAt(6);
-			phase=TALKING;
-			bd.talking++;
-		}
-		else if(bd.pre_bossHP==0 && bd.talking==6){
-			TalkingAt(7);
-			phase=TALKING;
-			bd.talking++;
-		}
-		if(count%400==0 && bd.bossHP!=0)boss_attack();
-		for(int i=0 ; i<bd.num ; i++){
-			if(bd.atk_count[i]==50){
-				Mix_PlayChannel(2,sf.thunder,0);
-				if(bd.tower[i]==EOF){
-					bd.atx_speedX[i]=0;
-					bd.atx_speedY[i]=0;
-				}else{
-					bd.atx_speedX[i]=(tower[bd.tower[i]].x-bd.atkX[i])/50.0;
-					bd.atx_speedY[i]=(tower[bd.tower[i]].y-bd.atkY[i])/50.0;
-				}
-			}
-			if(bd.atk_count[i]>0 && bd.atk_count[i]<=50){
-				bd.atkX[i]+=bd.atx_speedX[i];
-				bd.atkY[i]+=bd.atx_speedY[i];
-			}
-			if(bd.atk_count[i]==1){
-				sta[bd.station[i]].ontv=bd.color[i];
-				televise();
-				map.buffered2=false;
-			}
-			if(bd.atk_count[i]>0)bd.atk_count[i]--;
-		}
 	}
 }
 

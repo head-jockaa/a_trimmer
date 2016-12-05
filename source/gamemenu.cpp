@@ -21,7 +21,6 @@ void initGameMenu(){
 	menu[GAMEMODE].stack(text[MENUTEXT+12]);
 	phase=MAIN;
 	count=-1;start=20;
-	img.boss=NULL;
 	getImage(img.back,"file/img/gamemenu.png",0,0,255);
 	bgm=Mix_LoadMUS("file/bgm/3.ogg");
 	sf.thunder=Mix_LoadWAV("file/se/14.wav");
@@ -31,16 +30,12 @@ void initGameMenu(){
 
 void endGameMenu(){
 	if(phase==RECORD)fishbox.endFishBox();
-	if(phase==KOMORO){
-		for(int i=0 ; i<14 ; i++)freeImage(img.photo[i]);
-	}
-	if(img.boss!=NULL)freeImage(img.boss);
 	freeImage(img.back);
 	if(phase!=GOTO_GAME || dataNo!=index_num+1){
 		freeMusic();
 	}
-	Mix_FreeChunk(sf.thunder);
-	Mix_FreeChunk(sf.swish);
+	freeSound(sf.thunder);
+	freeSound(sf.swish);
 	for(int i=0 ; i<15 ; i++)menu[i].reset();
 }
 
@@ -58,8 +53,7 @@ void gotoGame(){
 		c=true;
 		n=menu[SAVEDATA].selected();
 	}
-	if(dataNo==index_num+1)gd.game_mode=BOSS;
-	else gd.game_mode=STORYMODE;
+	gd.game_mode=STORYMODE;
 	endGameMenu();
 	initGame();
 	if(c){
@@ -71,57 +65,10 @@ void gotoGame(){
 	if((dataNo-1)%4==1){gd.sunrise_hour=5;gd.sunset_hour=19;}
 	else if((dataNo-1)%4==3){gd.sunrise_hour=7;gd.sunset_hour=17;}
 	else {gd.sunrise_hour=6;gd.sunset_hour=18;}
-	if(dataNo==index_num+1)gd.hour=12;//last stage
 	initGame2();
 	head_of_timeslot();
 	gd.talk_count=EOF;
 	kick_count=1;
-}
-
-void timerSeaSide(){
-	if(dataNo==index_num+1 && gd.scene_count==1 && start==1)Mix_PlayMusic(bgm,-1);
-	if(face[gd.face_count]==EOF){
-		if(start==99){
-			Mix_PlayChannel(0,sf.swish,0);
-		}
-		if(start==1){
-			if(movie_test){
-				endGameMenu();
-				initMiyazaki();
-				start=0;
-				gd.x=1600;gd.y=1280;
-			}else{
-				phase=GOTO_GAME;
-				freeImage(img.back);
-				getImage(img.back,"file/img/back.png",0,0,255);
-				freeMusic();
-				count=0;
-			}
-		}
-	}
-}
-
-void timerKomoro(){
-	if(gd.scene_count==6){
-		if(count==200)Mix_PlayChannel(0,sf.decide,0);
-	}
-	if(face[gd.face_count]==EOF && start==1){
-		if(movie_test){
-			endGameMenu();
-			initMiyazaki();
-			phase=MIYAZAKI_MUSEUM;
-			start=0;
-			gd.x=1600;gd.y=1280;
-			for(int i=0 ; i<32 ; i++)menu[BGM_TEST].cursorDown();
-		}else{
-			phase=GOTO_GAME;
-			freeImage(img.back);
-			getImage(img.back,"file/img/back.png",0,0,255);
-			for(int i=0 ; i<14 ; i++)freeImage(img.photo[i]);
-			freeMusic();
-			count=0;
-		}
-	}
 }
 
 void timerPrologue(){
@@ -148,13 +95,8 @@ void timerPrologue(){
 void timerGameMenu(){
 	if(phase==GOTO_GAME && count==1)gotoGame();
 	else if(phase==GOTO_RECORD && count==1)gotoRecord();
-	if(phase==PROLOGUE || phase==SEASIDE || phase==KOMORO){
-	}else{
-		controlTextCount(false);
-	}
+	if(phase!=PROLOGUE)controlTextCount(false);
 	if(phase==PROLOGUE)timerPrologue();
-	if(phase==SEASIDE)timerSeaSide();
-	if(phase==KOMORO)timerKomoro();
 }
 
 void keyGameMenu(){
@@ -164,9 +106,7 @@ void keyGameMenu(){
 		case SAVEDATA:keySaveData();break;
 		case RECORDMENU:keyRecordMenu();break;
 		case RECORD:keyGameRecord();break;
-		case PROLOGUE:
-		case SEASIDE:
-		case KOMORO:keyPrologue();break;
+		case PROLOGUE:keyPrologue();break;
 		case NODATA:keyNoData();break;
 		default:break;
 	}
@@ -358,7 +298,7 @@ void drawGameRecord(SDL_Surface* scr){
 
 void drawGamemenuExplain(SDL_Surface* scr){
 	if(EXPLAIN){
-		if(phase==PROLOGUE || phase==SEASIDE || phase==KOMORO){
+		if(phase==PROLOGUE){
 			drawKeyboard(scr,key.zC,0,0);
 			drawText(scr,20,0,text[EPILOGUE+1]);
 			drawKeyboard(scr,key.cC,400,0);

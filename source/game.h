@@ -34,18 +34,16 @@
 #define SAVING_RECORD 39
 #define LEAVE_MAP 40
 #define PREF_LIST_TRANS 41
-#define HIT_BOSS 42
-#define SUMMERWARS 43
-#define MANEKI_CONFIRM 44
-#define MANEKI_FISHUP 45
-#define MANEKI_GRADEUP 46
-#define ADJUST_HEIGHT 47
-#define ADJUST_ZOOM 48
-#define GAME_OPTION_SETTING 49
-#define GAME_KEY_SETTING 50
-#define THROW_PHOTO 51
-#define MANEKI_THROW_PHOTO 52
-#define BS_THROW_PHOTO 53
+#define MANEKI_CONFIRM 42
+#define MANEKI_FISHUP 43
+#define MANEKI_GRADEUP 44
+#define ADJUST_HEIGHT 45
+#define ADJUST_ZOOM 46
+#define GAME_OPTION_SETTING 47
+#define GAME_KEY_SETTING 48
+#define THROW_PHOTO 49
+#define MANEKI_THROW_PHOTO 50
+#define BS_THROW_PHOTO 51
 #define CARRYING 1
 #define PLUGGED_IN 2
 
@@ -61,7 +59,6 @@ void drawTerop(SDL_Surface* scr, String str, int rcv, int mg_rcv);
 void drawM(SDL_Surface* scr, int w, int m, int x, int y);
 int getScore(int n, double pw, int x, int y);
 bool in_time(int w, int h, int m, int t);
-void head_of_talking();
 void head_of_timeslot();
 void setManekiData();
 void makeColorLight();
@@ -103,13 +100,5 @@ struct ManekiData{
 	int ch[300],area[300],tower[300],station[300],rcv[300],mg_rcv[300],st_num;
 };
 extern ManekiData md;
-
-struct BossData{
-	int bossHP,pre_bossHP,bossX,bossY,talking;
-	int atk_count[100],station[100],tower[100],color[100],num,damage;
-	double hitX,hitY,hit_speedX,hit_speedY;
-	double atkX[100],atkY[100],atx_speedX[100],atx_speedY[100];
-};
-extern BossData bd;
 
 #endif

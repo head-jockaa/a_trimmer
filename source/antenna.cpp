@@ -20,7 +20,7 @@ void Antenna::setTmpFish(){
 	else if(rcv-mg_rcv<0)tmp_fish.mg_rcv=100;
 	else if(rcv>100)tmp_fish.mg_rcv=100-(rcv-mg_rcv);
 	else tmp_fish.mg_rcv=mg_rcv;
-	tmp_fish.score=getScore(sta[station].ontv,tower[T].power[C],(int)gd.x,(int)gd.y);
+	tmp_fish.score=getScore(sta[station].ontv,area[A].tower[T].power[C],(int)gd.x,(int)gd.y);
 }
 
 void Antenna::receive(){
@@ -75,42 +75,34 @@ void Antenna::catching(){
 	if(dir2>180)dir2=360-dir2;
 	if((ant_mode==TURN || (ROD_TYPE!=CONVENIENTROD && ROD_TYPE!=SUPERHANDYROD)) && rcv-mg_rcv>=RCV_LEVEL && dir2<10)Mix_PlayChannel(1,sf.noize,0);
 
-	if(gd.game_mode==STORYMODE||gd.game_mode==SELECT||gd.game_mode==BOSS){
+	if(gd.game_mode==STORYMODE){
 		if(rcv-mg_rcv>=RCV_LEVEL && sta[station].ontv!=EOF){
-			if(gd.game_mode==BOSS){
-				if(bd.bossHP!=0){
-					Mix_PlayChannel(0,sf.water,0);
-					bd.damage=getScore(bd.num,area[A].tower[T].power[C],(int)gd.x,(int)gd.y);
-					if(sta[station].ontv==2)bd.damage*=-1;
-					phase=HIT_BOSS;
-					bd.hitX=area[A].tower[T].x-10;
-					bd.hitY=area[A].tower[T].y-10;
-					start=130;
-				}
-			}else{
-				setTmpFish();
-				if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getRCV(tmp_fish.title_num)<tmp_fish.rcv-tmp_fish.mg_rcv)){
-					if(fishbox.getSC(tmp_fish.title_num)==0){
-						phase=FISHUP;
-						start=150;
-						gd.get_score+=tmp_fish.score;
-						for(int i=0 ; i<works ; i++)if(fishbox.today[i]==EOF){
-							fishbox.today[i]=tmp_fish.title_num;
-							break;
-						}
-					}else{
-						phase=GRADEUP;
-						start=67;
-						fishbox.text_count=(int)strlen(work[tmp_fish.title_num].title.str[0]);
-						gd.gradeup = tmp_fish.score-fishbox.getSC(tmp_fish.title_num);
-						gd.get_score+=gd.gradeup;
-						Mix_PlayChannel(1, sf.decide, 0);
+			setTmpFish();
+			if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getRCV(tmp_fish.title_num)<tmp_fish.rcv-tmp_fish.mg_rcv)){
+				std::cout << (int)fishbox.getRCV(tmp_fish.title_num);
+				std::cout << " ";
+				std::cout << (int)tmp_fish.rcv-tmp_fish.mg_rcv;
+				std::cout << "\n";
+				if(fishbox.getSC(tmp_fish.title_num)==0){
+					phase=FISHUP;
+					start=150;
+					gd.get_score+=tmp_fish.score;
+					for(int i=0 ; i<works ; i++)if(fishbox.today[i]==EOF){
+						fishbox.today[i]=tmp_fish.title_num;
+						break;
 					}
-					setTmpFish();
-					fishbox.setFish(tmp_fish);
+				}else{
+					phase=GRADEUP;
+					start=67;
+					fishbox.text_count=(int)strlen(work[tmp_fish.title_num].title.str[0]);
+					gd.gradeup = tmp_fish.score-fishbox.getSC(tmp_fish.title_num);
+					gd.get_score+=gd.gradeup;
+					Mix_PlayChannel(1, sf.decide, 0);
 				}
-				fishbox.panelColor(tmp_fish.title_num);
+				setTmpFish();
+				fishbox.setFish(tmp_fish);
 			}
+			fishbox.panelColor(tmp_fish.title_num);
 		}
 	}
 
@@ -211,7 +203,7 @@ void Antenna::drawMountainHeight(SDL_Surface* scr){
 void Antenna::drawRader(SDL_Surface* scr){
 	if(!MAP3D)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-30,(int)(gd.y*MAGNIFY)-gd.scrY-30,180,60,60,60,255);
 	drawBuoy(scr);
-	if(rcv-mg_rcv>=RCV_LEVEL && sta[station].ontv!=EOF && gd.game_mode!=BOSS){
+	if(rcv-mg_rcv>=RCV_LEVEL && sta[station].ontv!=EOF){
 		if(phase==FISHUP && start>67){
 			drawWaterBall(scr);
 		}else{
@@ -223,8 +215,8 @@ void Antenna::drawRader(SDL_Surface* scr){
 		drawAntennaMode(scr);
 		drawRadioWaveMeter(scr);
 	}
-	if(rcv!=0 && gd.game_mode!=BOSS)drawMountainHeight(scr);
 	if(rcv>0){
+		drawMountainHeight(scr);
 		sprintf_s(str,"%s",toChar(area[A].tower[T].name));
 		drawImage(scr,img.menuback,120,0,0,0,(int)strlen(str)*18,40,128);
 		drawText2(scr,120,0,str,(int)strlen(str));

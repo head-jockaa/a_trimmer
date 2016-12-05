@@ -60,9 +60,9 @@ void initMiyazaki(){
 void endMiyazaki(){
 	movie_test=false;
 	freeMusic();
-	Mix_FreeChunk(sf.thunder);
-	Mix_FreeChunk(sf.swish);
-	Mix_FreeChunk(sf.meow);
+	freeSound(sf.thunder);
+	freeSound(sf.swish);
+	freeSound(sf.meow);
 	freeImage(img.back);
 	if(prgs_of_each_season)delete [] prgs_of_each_season;
 	for(int i=0 ; i<20 ; i++)menu[i].reset();
@@ -91,20 +91,6 @@ void timerSeoiHa(){
 			talk_seoiha=true;
 			scr_design=GAMEBOY;
 		}
-		Mix_PlayMusic(bgm,-1);
-	}
-}
-
-void timerSummerWars_miyazaki(){
-	if(count==401)Mix_PlayChannel(0,sf.swish,0);
-	if(count>=420 && count<600){
-		if(count%10==0)Mix_PlayChannel(0,sf.thunder,0);
-	}
-	if(count==500)Mix_PlayChannel(1,sf.meow,0);
-	if(count==599){
-		phase=MIYAZAKI_MUSEUM;
-		freeImage(img.back);
-		getImage(img.back,"file/img/miyazaki.png",0,0,255);
 		Mix_PlayMusic(bgm,-1);
 	}
 }
@@ -166,21 +152,6 @@ void gotoMovieTest(){
 		loadCartoon("file/data/cartoon/story13.json");
 		phase=PROLOGUE;
 	}
-	else if(n==15){
-		freeImage(img.back);
-		getImage(img.back,"file/img/epilogue.png",0,0,255);
-		phase=SUMMERWARS;
-		count=400;
-	}
-	else if(n==16){
-		initLastStory();
-	}
-	else if(n==17){
-		initLastStory2();
-	}
-	else if(n==18){
-		initLastEnding();
-	}
 	kick_count=0;
 }
 
@@ -200,7 +171,6 @@ void timerMiyazaki(){
 			initGameMenu();
 		}
 	}
-	else if(phase==SUMMERWARS)timerSummerWars_miyazaki();
 	else if(phase==SEOI_HA)timerSeoiHa();
 	else if(phase==GAMESTART){
 		nextCut();
@@ -340,7 +310,7 @@ void keyGuideTop(){
 	}
 	if(key.x && !key_stop(key.x)){
 		menu[GUIDE_TOP].setViewMode(HIDE);
-		if(collection==allworks){
+		if(collection==animedex_num){
 			phase=DEPLOMA_TALK;
 			TalkingAt(24);
 			gd.text_count=0;
@@ -1321,12 +1291,12 @@ void drawMiyazakiMuseum(SDL_Surface* scr){
 	drawImage(scr,img.chr,(int)gd.x-gd.scrX-14,420,gd.player_dir*30,0,30,60,255);
 	if(key.left || key.right)drawImage(scr,img.chr,(int)gd.x-gd.scrX-26,440,((count/5)%2)*60,110,60,60,255);
 	if(phase==GUIDE_ALL){
-		sprintf_s(str,"%4d/%4d",menu[GUIDE_ALL].selected()+1,allworks);
+		sprintf_s(str,"%4d/%4d",menu[GUIDE_ALL].selected()+1,animedex_num);
 		drawText2(scr,0,0,str,(int)strlen(str));
 	}
 	if(phase==GUIDE_TOP){
 		drawImage(scr,img.back,300,240,0,660,240,120,255);
-		sprintf_s(str,"%4d/%4d",collection,allworks);
+		sprintf_s(str,"%4d/%4d",collection,animedex_num);
 		drawText2(scr,380,300,str);
 	}
 }
@@ -1358,9 +1328,6 @@ void drawMiyazaki(SDL_Surface* scr){
 	}
 	else if(phase==GAMESTART){
 		drawAnimationCut(scr);
-	}
-	else if(phase==SUMMERWARS){
-		drawSummerWars(scr);
 	}
 	else drawMiyazakiMuseum(scr);
 	if(phase==GUIDE_STALIST || phase==GUIDE_STALIST_ALL)drawImage(scr,fishbox.panel,0,40,0,0,640,400,255);
@@ -1394,7 +1361,7 @@ void drawMiyazaki(SDL_Surface* scr){
 
 void drawMiyazakiExplain(SDL_Surface *scr){
 	if(phase==COME_MIYAZAKI || phase==LEAVE_MIYAZAKI)return;
-	if(phase==GOTO_MOVIE || phase==SUMMERWARS)return;
+	if(phase==GOTO_MOVIE)return;
 	if(EXPLAIN){
 		if(phase==MIYAZAKI_MUSEUM){
 			drawKeyboard(scr,key.leftC,0,0);

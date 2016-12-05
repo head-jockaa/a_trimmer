@@ -89,7 +89,7 @@ void endTitle(){
 	freeImage(img.back);
 	freeMusic();
 	freeCartoon();
-	Mix_FreeChunk(sf.gaze);
+	freeSound(sf.gaze);
 	kick_count=1;
 }
 

@@ -7,17 +7,11 @@
 #define GET_MEDAL 2
 #define ENDING_ANIME 5
 #define WARNING 6
-#define ANIME_GOD 7
-#define LAST_STORY 8
-#define LAST_ENDING 9
 
 void initEnding();
 void initMedalAward(int n);
 void initEndingAnime();
 void initEndingMainAnime();
-void initLastStory();
-void initLastStory2();
-void initLastEnding();
 void keyEnding();
 void timerEnding();
 void drawEnding(SDL_Surface* scr);

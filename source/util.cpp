@@ -23,7 +23,7 @@ size_t fsize=0;
 String text[1000],talk[1000];
 bool run,setSMR,map_loaded=false, *animebook, ABGR;
 double test=0;
-int stas=0,works=0,prgs=0,allworks=0,collection=0,areas=0,towers=0,mounts=0,towns=0,index_num=0,clear_num=0;
+int stas=0,works=0,prgs=0,animedex_num=0,collection=0,areas=0,towers=0,mounts=0,towns=0,index_num=0,clear_num=0;
 int count=0,bg_count=0,face[1000],start=0;
 Uint8 mode=0,phase=0,dataNo=1,fontA=255,kick_count=0,pauseGame;
 bool SHOW_TOWER, EXPLAIN, NHK_REMOVE;
@@ -430,7 +430,7 @@ int FishBox::getSC(int i){
 }
 int FishBox::getRCV(int i){
 	if(i<0 || i>=max)return 0;
-	return fish[n].rcv;
+	return fish[i].rcv;
 }
 bool FishBox::loaded(){
 	if(max==0)return false;
@@ -836,128 +836,6 @@ void getSymbolImage(){
 	setAlpha(img.symbol,0,0,254);
 }
 
-void drawLight(SDL_Surface* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a){
-	if(scr==NULL || img==NULL)return;
-	if(a<0)a=0;
-	if(a>255)a=255;
-	SDL_LockSurface(scr);
-	SDL_PixelFormat *f = scr->format;
-	Uint8 *px = (Uint8*)scr->pixels;
-	Uint16 pitch = scr->pitch;
-	Uint8 bypp = f->BytesPerPixel;
-	Uint8 *rgb=(Uint8*)img->RGB;
-	Uint16 px_skip,rgb_skip;
-
-	if(x2<0){w2+=x2;x2=0;}
-	if(y2<0){h2+=y2;y2=0;}
-	if(x2+w2>(img->w))w2=(img->w)-x2;
-	if(y2+h2>(img->h))h2=(img->h)-y2;
-	if(x<0){x2-=x;w2+=x;x=0;}
-	if(y<0){y2-=y;h2+=y;y=0;}
-	if(x+w2>(scr->w))w2=(scr->w)-x;
-	if(y+h2>(scr->h))h2=(scr->h)-y;
-	px=px+pitch*y+bypp*x;
-	px_skip=pitch-bypp*w2;
-	rgb=rgb+(y2*(img->w)+x2)*4;
-	rgb_skip=((img->w)-w2)*4;
-
-	if(a==255){
-		for(int k=0 ; k<h2 ; k++){
-			for(int j=0 ; j<w2 ; j++){
-				if(*px+*rgb>255)*px=255;
-				else *px+=*rgb;
-				px++;rgb++;
-				if(*px+*rgb>255)*px=255;
-				else *px+=*rgb;
-				px++;rgb++;
-				if(*px+*rgb>255)*px=255;
-				else *px+=*rgb;
-				px++;rgb++;
-				px++;rgb++;
-			}
-			px+=px_skip;
-			rgb+=rgb_skip;
-		}
-	}else{
-		for(int k=0 ; k<h2 ; k++){
-			for(int j=0 ; j<w2 ; j++){
-				if(*px+(*rgb)*a/255>255)*px=255;
-				else *px+=(*rgb)*a/255;
-				px++;rgb++;
-				if(*px+(*rgb)*a/255>255)*px=255;
-				else *px+=(*rgb)*a/255;
-				px++;rgb++;
-				if(*px+(*rgb)*a/255>255)*px=255;
-				else *px+=(*rgb)*a/255;
-				px++;rgb++;
-				px++;rgb++;
-			}
-			px+=px_skip;
-			rgb+=rgb_skip;
-		}
-	}
-
-	SDL_UnlockSurface(scr);
-}
-
-void drawLight(Image* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a){
-	if(scr==NULL || img==NULL)return;
-	if(a<0)a=0;
-	if(a>255)a=255;
-	Uint8 *px=(Uint8*)scr->RGB;
-	Uint8 *rgb=(Uint8*)img->RGB;
-	Uint16 px_skip,rgb_skip;
-
-	if(x2<0){w2+=x2;x2=0;}
-	if(y2<0){h2+=y2;y2=0;}
-	if(x2+w2>(img->w))w2=(img->w)-x2;
-	if(y2+h2>(img->h))h2=(img->h)-y2;
-	if(x<0){x2-=x;w2+=x;x=0;}
-	if(y<0){y2-=y;h2+=y;y=0;}
-	if(x+w2>(scr->w))w2=(scr->w)-x;
-	if(y+h2>(scr->h))h2=(scr->h)-y;
-	px=px+(y*(scr->w)+x)*4;
-	px_skip=((scr->w)-w2)*4;
-	rgb=rgb+(y2*(img->w)+x2)*4;
-	rgb_skip=((img->w)-w2)*4;
-
-	if(a==255){
-		for(int k=0 ; k<h2 ; k++){
-			for(int j=0 ; j<w2 ; j++){
-				if(*px+*rgb>255)*px=255;
-				else *px+=*rgb;
-				px++;rgb++;
-				if(*px+*rgb>255)*px=255;
-				else *px+=*rgb;
-				px++;rgb++;
-				if(*px+*rgb>255)*px=255;
-				else *px+=*rgb;
-				px++;rgb++;
-				px++;rgb++;
-			}
-			px+=px_skip;
-			rgb+=rgb_skip;
-		}
-	}else{
-		for(int k=0 ; k<h2 ; k++){
-			for(int j=0 ; j<w2 ; j++){
-				if(*px+(*rgb)*a/255>255)*px=255;
-				else *px+=(*rgb)*a/255;
-				px++;rgb++;
-				if(*px+(*rgb)*a/255>255)*px=255;
-				else *px+=(*rgb)*a/255;
-				px++;rgb++;
-				if(*px+(*rgb)*a/255>255)*px=255;
-				else *px+=(*rgb)*a/255;
-				px++;rgb++;
-				px++;rgb++;
-			}
-			px+=px_skip;
-			rgb+=rgb_skip;
-		}
-	}
-}
-
 void drawSurface(SDL_Surface* sdl, SDL_Surface* img, int x, int y, int x2, int y2, int w2, int h2, int a){
 	if(img==NULL)return;
 	if(a<0)a=0;
@@ -1063,57 +941,6 @@ void drawTalking(SDL_Surface* scr, int fc, String st){
 	if(c!=0)drawText2(scr,120+d,440,&(st.str[CHAR_CODE][60]),c);
 }
 
-void fillRect(SDL_Surface* scr, int x, int y, int w, int h, int R,int G,int B, int a){
-	SDL_LockSurface(scr);
-	SDL_PixelFormat *f = scr->format;
-	Uint16 pitch = scr->pitch;
-	Uint8 bypp = f->BytesPerPixel;
-	Uint16 px_skip;
-
-	if(a<0)a=0;
-	if(a>255)a=255;
-	if(x<0){w+=x;x=0;}
-	if(y<0){h+=y;y=0;}
-	if(x+w>(scr->w))w=(scr->w)-x;
-	if(y+h>(scr->h))h=(scr->h)-y;
-
-	if(a==255){
-		Uint32 *px = (Uint32*)scr->pixels;
-		px=px + ((scr->pitch)/4)*y + x;
-		px_skip=(scr->pitch)/4-w;
-		Uint32 color=setRGB(R,G,B);
-		for(int j=0 ; j<h ; j++){
-			for(int i=0 ; i<w ; i++){
-				*px = color;
-				px++;
-			}
-			px+=px_skip;
-		}
-	}else{
-		Uint8 *px = (Uint8*)scr->pixels;
-		px=px + pitch*y + bypp*x;
-		px_skip=pitch-bypp*w;
-		Uint8 R2,B2;
-		if(ABGR){
-			R2=R;B2=B;
-		}else{
-			R2=B;B2=R;
-		}
-		for(int j=0 ; j<h ; j++){
-			for(int i=0 ; i<w ; i++){
-				*px+=( (a*(R2-*px)) >> 8 );
-				px++;
-				*px+=( a*(G-*px ) >> 8 );
-				px++;
-				*px+=( a*(B2-*px ) >> 8 );
-				px++;px++;
-			}
-			px+=px_skip;
-		}
-	}
-	SDL_UnlockSurface(scr);
-}
-
 void drawRect(Image* scr, int x, int y, int w, int h, int R, int G, int B, int a){
 	fillRect(scr,x,y,w,1,R,G,B,a);
 	fillRect(scr,x,y+h-1,w,1,R,G,B,a);
@@ -1126,51 +953,6 @@ void drawRect(SDL_Surface* scr, int x, int y, int w, int h, int R, int G, int B,
 	fillRect(scr,x,y+h-1,w,1,R,G,B,a);
 	fillRect(scr,x,y,1,h,R,G,B,a);
 	fillRect(scr,x+w-1,y,1,h,R,G,B,a);
-}
-
-void fillRect(Image* scr, int x, int y, int w, int h, int R,int G,int B, int a){
-	Uint16 px_skip;
-	if(a<0)a=0;
-	if(a>255)a=255;
-	if(x<0){w+=x;x=0;}
-	if(y<0){h+=y;y=0;}
-	if(x+w>(scr->w))w=(scr->w)-x;
-	if(y+h>(scr->h))h=(scr->h)-y;
-
-	if(a==255){
-		Uint32 *px=scr->RGB;
-		Uint32 color=setRGB(R,G,B);
-		px=px+y*(scr->w)+x;
-		px_skip=(scr->w)-w;
-		for(int j=0 ; j<h ; j++){
-			for(int i=0 ; i<w ; i++){
-				*px = color;
-				px++;
-			}
-			px+=px_skip;
-		}
-	}else{
-		Uint8 *px = (Uint8*)scr->RGB;
-		Uint8 R2,B2;
-		px=px+(y*(scr->w)+x)*4;
-		px_skip=((scr->w)-w)*4;
-		if(ABGR){
-			R2=R;B2=B;
-		}else{
-			R2=B;B2=R;
-		}
-		for(int j=0 ; j<h ; j++){
-			for(int i=0 ; i<w ; i++){
-				*px+=( a*(R2-*px) >> 8 );
-				px++;
-				*px+=( a*(G-*px ) >> 8 );
-				px++;
-				*px+=( a*(B2-*px ) >> 8 );
-				px++;px++;
-			}
-			px+=px_skip;
-		}
-	}
 }
 
 void setAlpha(Image* scr, int R,int G,int B){

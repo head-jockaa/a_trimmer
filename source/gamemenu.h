@@ -12,9 +12,7 @@
 #define GOTO_GAME 6
 #define GOTO_RECORD 7
 #define PROLOGUE 8
-#define SEASIDE 9
-#define KOMORO 10
-#define NODATA 11
+#define NODATA 9
 
 void initGameMenu();
 void endGameMenu();

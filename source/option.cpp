@@ -119,7 +119,7 @@ void switchSetting(int n, bool up_key){
 		else CHAR_CODE=JAPANESE;
 	}
 	else if(n==5){
-		if(mode!=GAME || gd.game_mode!=BOSS){
+		if(mode!=GAME){
 			if(mode==GAME)gd.second/=MAGNIFY;
 			if(up_key){
 				MAGNIFY*=2;

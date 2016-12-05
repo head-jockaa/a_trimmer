@@ -15,14 +15,14 @@
 #define JSON_NEXTDATA 7
 #define JSON_ENDDATA 8
 
-bool readCartoonAct(char *json, int timer);
-void resetObject(char *json, int timer);
-void readJsonObject(char *json, char *name, int timer);
-void readJsonSubObject(char *json, char *name1, char *name2, int timer);
-void readJsonArray(char *json, char *name, int timer);
+bool readCartoonAct(char *json);
+void resetObject(char *json);
+void readJsonObject(char *json, char *name);
+void readJsonSubObject(char *json, char *name1, char *name2);
+void readJsonArray(char *json, char *name);
 
 int playtime,cartoonNextTime;
-int timestamp,loadtime,pausetime;
+int timestamp,pausetime;
 int max_obj;
 int call_week,call_hour,call_minute;
 bool talkmode=false,skipThisTime=false,cartoonSync=false;
@@ -273,7 +273,7 @@ void loadCartoon(const char *filename){
 	}
 }
 
-bool readCartoon(char *json, int timer){
+bool readCartoon(char *json){
 	int mode=JSON_ARRAY_START;
 	char dataname[20];
 	bool waitForNextTime=false, end=false;
@@ -334,7 +334,7 @@ bool readCartoon(char *json, int timer){
 				}
 			}
 			else if(strcmp(dataname, "act")==0) {
-				end = readCartoonAct(json,timer);
+				end = readCartoonAct(json);
 				if(talkmode){
 					break;
 				}
@@ -365,7 +365,7 @@ bool readCartoon(char *json, int timer){
 	return end;
 }
 
-bool readCartoonAct(char *json, int timer){
+bool readCartoonAct(char *json){
 	int mode=JSON_DATA_START;
 	char dataname[20];
 	bool end=false;
@@ -397,35 +397,35 @@ bool readCartoonAct(char *json, int timer){
 		else if(mode==JSON_GETVALUE) {
 			if(talkmode) {
 				sprintf_s(dataname,"talk");
-				readJsonArray(json, dataname, timer);
+				readJsonArray(json, dataname);
 				if(talkmode){
 					cartoonPointer++;
 					break;
 				}
 			}
 			else if(strcmp(dataname, "image")==0) {
-				readJsonArray(json, dataname, timer);
+				readJsonArray(json, dataname);
 			}
 			else if(strcmp(dataname, "bgm")==0) {
-				readJsonObject(json, dataname, timer);
+				readJsonObject(json, dataname);
 			}
 			else if(strcmp(dataname, "load-sound")==0) {
-				readJsonArray(json, dataname, timer);
+				readJsonArray(json, dataname);
 			}
 			else if(strcmp(dataname, "sound")==0) {
-				readJsonObject(json, dataname, timer);
+				readJsonObject(json, dataname);
 			}
 			else if(strcmp(dataname, "load-text")==0) {
-				readJsonArray(json, dataname, timer);
+				readJsonArray(json, dataname);
 			}
 			else if(strcmp(dataname, "set")==0) {
-				readJsonArray(json,dataname,timer);
+				readJsonArray(json,dataname);
 			}
 			else if(strcmp(dataname, "move")==0) {
-				readJsonArray(json,dataname,timer);
+				readJsonArray(json,dataname);
 			}
 			else if(strcmp(dataname, "talk")==0) {
-				readJsonArray(json, dataname, timer);
+				readJsonArray(json, dataname);
 				if(talkmode){
 					cartoonPointer++;
 					break;
@@ -435,11 +435,11 @@ bool readCartoonAct(char *json, int timer){
 				playtime=fetchInt(c);
 			}
 			else if(strcmp(dataname, "reset")==0) {
-				resetObject(json,timer);
+				resetObject(json);
 			}
 			else if(strcmp(dataname, "sync")==0) {
 				if(startsWith(c,"true")){
-					loadtime=SDL_GetTicks();
+					timestamp=SDL_GetTicks();
 					cartoonSync=true;
 				}
 				else if(startsWith(c,"false")){
@@ -469,7 +469,7 @@ bool readCartoonAct(char *json, int timer){
 	return false;
 }
 
-void applyJsonData(char *json, char *name, int timer){
+void applyJsonData(char *json, char *name){
 	if(strcmp(name,"set")==0){
 		SDL_Color col;
 		int id=0;
@@ -791,7 +791,7 @@ void applyJsonData(char *json, char *name, int timer){
 	}
 }
 
-void readJsonArray(char *json, char *name, int timer){
+void readJsonArray(char *json, char *name){
 	int mode=JSON_ARRAY_START;
 
 	if(talkmode) {
@@ -806,7 +806,7 @@ void readJsonArray(char *json, char *name, int timer){
 		}
 		if(mode==JSON_ARRAY_START) {
 			if(*c=='[') {
-				readJsonObject(json,name,timer);
+				readJsonObject(json,name);
 				if(talkmode){
 					break;
 				}
@@ -816,7 +816,7 @@ void readJsonArray(char *json, char *name, int timer){
 		else if(mode==JSON_NEXTDATA) {
 			if(*c==',') {
 				cartoonPointer++;
-				readJsonObject(json,name,timer);
+				readJsonObject(json,name);
 				if(talkmode){
 					break;
 				}
@@ -833,7 +833,7 @@ void readJsonArray(char *json, char *name, int timer){
 	}
 }
 
-void readJsonObject(char *json, char *name, int timer){
+void readJsonObject(char *json, char *name){
 	int mode=JSON_DATA_START;
 	while(json[cartoonPointer]) {
 		char *c = &json[cartoonPointer];
@@ -866,7 +866,7 @@ void readJsonObject(char *json, char *name, int timer){
 			else if(*c=='{'){
 				char basename[20];
 				strcpy_s(basename,jsonName[jsonValueNum]);
-				readJsonSubObject(json,name,basename,timer);
+				readJsonSubObject(json,name,basename);
 			}
 			else if(startsWith(c,"true")){
 				jsonValueBool[jsonValueNum]=true;
@@ -882,7 +882,7 @@ void readJsonObject(char *json, char *name, int timer){
 				mode=JSON_GETNAME;
 			}
 			else if(*c=='}') {
-				applyJsonData(json,name,timer);
+				applyJsonData(json,name);
 				if(strcmp(name,"talk")==0){
 					if(!skipThisTime)talkmode=true;
 					gd.text_count=0;
@@ -894,7 +894,7 @@ void readJsonObject(char *json, char *name, int timer){
 	}
 }
 
-void readJsonSubObject(char *json, char *name1, char *name2, int timer){
+void readJsonSubObject(char *json, char *name1, char *name2){
 	int mode=JSON_DATA_START;
 	while(json[cartoonPointer]) {
 		char *c = &json[cartoonPointer];
@@ -927,7 +927,7 @@ void readJsonSubObject(char *json, char *name1, char *name2, int timer){
 			else if(*c=='{'){
 				char basename[20];
 				strcpy_s(basename,jsonName[jsonValueNum]);
-				readJsonSubObject(json,name2,basename,timer);
+				readJsonSubObject(json,name2,basename);
 			}
 			else if(startsWith(c,"true")){
 				jsonValueBool[jsonValueNum]=true;
@@ -951,7 +951,7 @@ void readJsonSubObject(char *json, char *name1, char *name2, int timer){
 	}
 }
 
-void resetObject(char *json, int timer){
+void resetObject(char *json){
 	int mode=JSON_ARRAY_START;
 	while(json[cartoonPointer]) {
 		char *c = &json[cartoonPointer];
@@ -1170,7 +1170,7 @@ bool _nextCut(){
 		bool end=false;
 		if(playtime==cartoonNextTime ||
 		   (gd.week==call_week && gd.hour==call_hour && gd.minute==call_minute)){
-			end=readCartoon(cartoonJson,playtime);
+			end=readCartoon(cartoonJson);
 		}
 		playtime++;
 		if(end)return true;
@@ -1189,7 +1189,7 @@ bool nextCut(){
 	bool end=false;
 	int t=1;
 	if(cartoonSync){
-		t=(int)((SDL_GetTicks()-loadtime)/16)-playtime;
+		t=(int)((SDL_GetTicks()-timestamp)/16)-playtime;
 	}
 	for(int i=0 ; i<t ; i++){
 		end=_nextCut();
@@ -1204,7 +1204,7 @@ bool nextTalk(){
 		if(gd.text_count<(int)strlen(talk[gd.talk_count].str[CHAR_CODE])){
 			gd.text_count=90;
 		}else{
-			end=readCartoon(cartoonJson,playtime);
+			end=readCartoon(cartoonJson);
 		}
 		if(end)return true;
 	}
@@ -1309,381 +1309,3 @@ void drawAnimationCut(SDL_Surface* scr){
 		drawTalking(scr,gd.face_count,talk[gd.talk_count]);
 	}
 }
-
-
-// ending2.png
-// このバージョンではまだ使わない
-void drawLastEndingAnim(SDL_Surface* scr, int cn){
-	if(cn>=1300 && cn<2800)fillRect(scr,0,20,320,120,255,192,192,255);
-	if((cn>=2800 && cn<3350) || cn>=3750)fillRect(scr,0,20,320,200,255,255,255,255);
-	if(cn>=3350 && cn<3750)fillRect(scr,0,20,320,200,0,0,0,255);
-	if(cn>=1300 && cn<2800){
-		fillRect(scr,0,140,320,80,128,128,255,255);
-		if(cn%230>=30)drawImage(scr,img.back,60,160,1280,(cn/230)*60,200,60,255);
-	}
-	int a;
-	if(cn<50){
-		drawImage(scr,img.back,0,20,0,0,320,120,255);
-		if(cn<40)drawImage(scr,img.back,150+cn,10+cn*cn/20,0,120,40,40,255);
-		else drawImage(scr,img.back,150+cn,90,0,120,40,40,255);
-		if(cn>=10)drawImage(scr,img.back,80+(cn-10),10+(cn-10)*(cn-10)/20,120,120,40,40,255);
-	}
-	else if(cn<1030){
-		a=cn-50;
-		for(int i=0 ; i<4 ; i++)drawImage(scr,img.back,320*i-a,20,0,0,320,120,255);
-		drawImage(scr,img.back,200,90,abs(2-(a/10)%4)*40,120,40,40,255);
-		drawImage(scr,img.back,120,90,120+abs(2-(a/10)%4)*40,120,40,40,255);
-	}
-	else if(cn<1100){
-		a=cn-1030;
-		drawImage(scr,img.back,0,20,0,600,320,120,255);
-		drawImage(scr,img.back,-70+a*6,170-a*4,abs(2-(a/10)%4)*100,1800,100,100,255);
-		drawImage(scr,img.back,-200+a*6,250-a*4,300+abs(2-(a/10)%4)*100,1800,100,100,255);
-		drawImage(scr,img.back,220,20,460,480,120,120,255);
-	}
-	else if(cn<1170){
-		a=cn-1100;
-		drawImage(scr,img.back,0,20,320,600,270,120,255);
-		if(a<20)drawImage(scr,img.back,150-(int)(a*4.5),20-(int)(a*0.75),810,360,120,120,255);
-		else{
-			drawImage(scr,img.back,60,5,810,360,120,120,255);
-			drawImage(scr,img.back,270-(a-20)*6,-10+(a-20)*2,abs(2-(a/10)%4)*100,1900,100,100,255);
-			drawImage(scr,img.back,370-(a-20)*6,-30+(a-20)*2,300+abs(2-(a/10)%4)*100,1900,100,100,255);
-		}
-		drawImage(scr,img.back,270,20,590,600,50,120,255);
-	}
-	else if(cn<1230){
-		a=cn-1170;
-		drawImage(scr,img.back,0,20,640,600,320,120,255);
-		drawImage(scr,img.back,320-a*7,40-(45-(a-30)*(a-30)/20),abs(2-(a/10)%4)*100,1900,100,100,255);
-		drawImage(scr,img.back,420-a*7,40-(45-(a-30)*(a-30)/20),300+abs(2-(a/10)%4)*100,1900,100,100,255);
-	}
-	else if(cn<1300){
-		a=cn-1230;
-		drawImage(scr,img.back,0,20,960,600,320,120,255);
-		drawImage(scr,img.back,320-a*7,40,abs(2-(a/10)%4)*100,1900,100,100,255);
-		drawImage(scr,img.back,420-a*7,40,300+abs(2-(a/10)%4)*100,1900,100,100,255);
-	}
-	else if(cn<1800){
-		a=cn-1300;
-		if(a<60){
-			drawImage(scr,img.back,0,20,320,0,320,120,255);
-			drawImage(scr,img.back,0,140,0,160,320,15,255);
-		}
-		else if(a<180){
-			drawImage(scr,img.back,0,20,320,120,320,120,255);
-			if(a<80)fillRect(scr,0,20,90,120,255,192,192,255);
-			if(a<120)fillRect(scr,200,20,30,60,255,192,192,255);
-			drawImage(scr,img.back,0,140,0,175,320,30,255);
-		}
-		else if(a<300){
-			drawImage(scr,img.back,0,20,320,240,320,120,255);
-			if(a<195)fillRect(scr,0,20,220,30,255,192,192,255);
-			if(a<210)fillRect(scr,0,50,220,30,255,192,192,255);
-			if(a<225)fillRect(scr,0,80,220,30,255,192,192,255);
-			if(a<240)fillRect(scr,240,20,80,120,255,192,192,255);
-			drawImage(scr,img.back,0,140,0,205,320,30,255);
-		}
-		else if(a<420){
-			drawImage(scr,img.back,0,20,320,360,320,120,255);
-			if(a<320)fillRect(scr,240,20,80,120,255,192,192,255);
-			if(a<360)fillRect(scr,0,20,110,120,255,192,192,255);
-			drawImage(scr,img.back,0,140,0,235,320,30,255);
-		}else{
-			drawImage(scr,img.back,0,20,320,120,320,120,255);
-			fillRect(scr,0,20,90,120,255,192,192,255);
-			fillRect(scr,200,20,30,60,255,192,192,255);
-			if(a>=440)drawImage(scr,img.back,0,20,320,480,110,120,255);
-			if(a>=460)drawImage(scr,img.back,200,20,430,480,30,60,255);
-			drawImage(scr,img.back,0,140,0,265,320,30,255);
-		}
-	}
-	else if(cn<2300){
-		a=cn-1800;
-		if(a<60){
-			drawImage(scr,img.back,0,20,640,0,320,120,255);
-			drawImage(scr,img.back,0,140,0,295,320,15,255);
-		}
-		else if(a<160){
-			drawImage(scr,img.back,0,20,640,120,320,120,255);
-			if(a<80)fillRect(scr,220,20,60,80,255,192,192,255);
-			if(a<120)fillRect(scr,0,20,110,120,255,192,192,255);
-			drawImage(scr,img.back,0,140,0,310,320,30,255);
-		}
-		else if(a<280){
-			if(a<210)drawImage(scr,img.back,80,20,640,240,160,120,255);
-			else drawImage(scr,img.back,80,20,800,240,160,120,255);
-		}
-		else if(a<380){
-			drawImage(scr,img.back,0,20,640,120,320,120,255);
-			fillRect(scr,220,20,60,80,255,192,192,255);
-			fillRect(scr,0,20,110,120,255,192,192,255);
-			if(a>=300)drawImage(scr,img.back,220,20,720,360,50,70,255);
-			if(a>=340)drawImage(scr,img.back,0,20,640,360,80,120,255);
-			drawImage(scr,img.back,0,140,0,340,320,15,255);
-		}else{
-			drawImage(scr,img.back,0,20,640,480,320,80,255);
-			drawImage(scr,img.back,110+abs(5-a%10),50+abs(5-a%10),770,360,40,50,255);
-			drawImage(scr,img.back,0,100,640,560,320,40,255);
-			if(a<400)fillRect(scr,230,20,90,120,255,192,192,255);
-			if(a<440)fillRect(scr,0,20,90,120,255,192,192,255);
-			drawImage(scr,img.back,0,140,0,355,320,30,255);
-		}
-	}
-	else if(cn<2800){
-		a=cn-2300;
-		if(a<60){
-			drawImage(scr,img.back,0,20,960,0,320,120,255);
-			drawImage(scr,img.back,0,140,0,385,320,30,255);
-		}
-		else if(a<160){
-			drawImage(scr,img.back,0,20,960,120,320,120,255);
-			if(a<80)fillRect(scr,270,20,50,120,255,192,192,255);
-			if(a<120)fillRect(scr,0,20,70,120,255,192,192,255);
-			drawImage(scr,img.back,0,140,0,415,320,30,255);
-		}
-		else if(a<260){
-			drawImage(scr,img.back,0,20,960,240,320,120,255);
-			if(a<180)fillRect(scr,0,20,100,120,255,192,192,255);
-			if(a<220)fillRect(scr,240,20,80,120,255,192,192,255);
-			drawImage(scr,img.back,0,140,0,445,320,30,255);
-		}
-		else if(a<380){
-			drawImage(scr,img.back,0,60,960,400,270,80,255);
-			if(a>=280)drawImage(scr,img.back,270,20,1230,360,50,120,255);
-			if(a>=310){
-				drawImage(scr,img.back,110,100,960,360+((a/2)%2)*20,60,20,255);
-				drawImage(scr,img.back,170,100,1020,360+((a/2)%2)*20,60,20,255);
-			}
-			drawImage(scr,img.back,0,140,0,475,320,15,255);
-		}else{
-			drawImage(scr,img.back,0,20,960,480,320,120,255);
-			if(a<400)fillRect(scr,60,20,30,120,255,192,192,255);
-			if(a<420)fillRect(scr,30,20,30,120,255,192,192,255);
-			if(a<440)fillRect(scr,0,20,30,120,255,192,192,255);
-			drawImage(scr,img.back,0,140,0,490,320,30,255);
-		}
-	}
-	else if(cn<3000){
-		a=cn-2800;
-		int b=0;
-		if(a>=60)b=a-60;
-		drawImage_x(scr,img.back,130+a+b*4,120-(int)(b*0.8),(100.0+b*2)/100.0,0,1560,100,100,255);
-		if(a<40)drawImage_x(scr,img.back,240-(int)(a*0.5),200-a-(int)(b*0.5),(20.0+b)/40.0,100+abs(2-(a/10)%4)*40,1600,40,40,255);
-		else if(a<135)drawImage_x(scr,img.back,240-(int)(a*0.5),160-(int)(b*0.5),(20.0+b)/40.0,100+abs(2-(a/10)%4)*40,1600,40,40,255);
-		else drawImage_x(scr,img.back,240-(int)(a*0.5),160-(int)(b*0.5)-(a-135),(20.0+b)/40.0,100+abs(2-(a/10)%4)*40,1600,40,40,255);
-		if(a<20)drawImage_x(scr,img.back,280-(int)(a*0.5),200-(int)(b*0.5),(20.0+b)/40.0,100+abs(2-(a/10)%4)*40,1560,40,40,255);
-		else if(a<60)drawImage_x(scr,img.back,280-(int)(a*0.5),200-(a-20)-(int)(b*0.5),(20.0+b)/40.0,100+abs(2-(a/10)%4)*40,1560,40,40,255);
-		else if(a<135)drawImage_x(scr,img.back,280-(int)(a*0.5),160-(int)(b*0.5),(20.0+b)/40.0,100+abs(2-(a/10)%4)*40,1560,40,40,255);
-		else drawImage_x(scr,img.back,280-(int)(a*0.5),160-(int)(b*0.5)-(a-135),(20.0+b)/40.0,100+abs(2-(a/10)%4)*40,1560,40,40,255);
-		drawImage_x(scr,img.back,120+a/3+(int)(b*3.5),140-(int)(b*1.5),(20.0+b)/80.0,abs(2-(a/10)%4)*80,720,80,160,255);
-		drawImage_x(scr,img.back,-100+a,140-b,(40.0+(b*1.5))/100.0,720,720,100,100,255);
-		fillRect(scr,0,180+(int)(b*0.5),130+a+b*4,40,0,0,0,255);
-	}
-	else if(cn<3050){
-		a=cn-3000;
-		int b=a*2,c;
-		if(a<10)c=1;
-		else if(a<20)c=2;
-		else if(a<30)c=0;
-		else if(a<40)c=3;
-		else c=0;
-		drawImage_x(scr,img.back,100-b/2,b/2,(250.0-b)/100.0,720+c*100,720,100,100,255);
-		drawImage_x(scr,img.back,320-(int)(a*2.5)-(int)(b*0.5),60+(int)(b*0.5),(120.0-(b*0.5))/120.0,360,720,120,160,255);
-		fillRect(scr,0,250-(int)(b*0.5),320,40,0,0,0,255);
-	}
-	else if(cn<3100){
-		a=cn-3050;
-		int b=a;
-		drawImage_x(scr,img.back,50+b/2,50-(int)(b*0.8),(150.0+(b*1.6))/100.0,720,720,100,100,255);
-		drawImage_x(scr,img.back,145+b*3,110-b*2,(70.0+b*3)/120.0,360,720,120,160,255);
-		fillRect(scr,0,170+b*2,320,50,0,0,0,255);
-	}
-	else if(cn<3250){
-		a=cn-3100;
-		double b;
-		int c,d;
-		if(a<50){b=1-a/166.6;c=50-a;d=a;}
-		else if(a<100){b=0.70+(a-50)/166.6;c=a-50;d=50-(a-50);}
-		else{b=1+(a-100)/100.0;c=50+(a-100)*2;d=(a-100)*7;}
-		drawImage_x(scr,img.back,c,40-d+(int)(50*b),b,0,880,100,100,255);
-		drawImage_x(scr,img.back,c+(int)(50*b),40-d+(int)(95*b),b,0,980,100,150,255);
-		drawImage_x(scr,img.back,c+(int)(110*b),40-d+(int)(75*b),b,500,880,170,180,255);
-		drawImage_x(scr,img.back,c+(int)(80*b),40-d,b,1010,880,90,90,255);
-	}
-	else if(cn<3350){
-		a=cn-3250;
-		int b=0,c=0;
-		if(a<85)b=a/3;
-		else c=(a-85)*4;
-		fillRect(scr,0,320-a*4,320,300,0,0,0,255);
-		if(a<50)drawImage_x(scr,img.back,250-a,-40+(int)(a*2.5),(60.0-b)/60.0,((a/5)%6)*60,1680,60,60,255);
-		else if(a<85)drawImage_x(scr,img.back,250-a,-40+(int)(a*2.5),(60.0-b)/60.0,((a/5)%6)*60,1740,60,60,255);
-		else drawImage_x(scr,img.back,165+(int)((a-85)*2.4),172-(int)((a-85)*0.7),(32.0-c/8)/60.0,0,1740,60,60,255);
-		drawImage_x(scr,img.back,-570+a*6,-60+a,(250.0-c)/250.0,0,1130,250,180,255);
-	}
-	else if(cn<3400){
-		a=cn-3350;
-		drawImage_x(scr,img.back,30,40,(190.0+a*1.2)/250.0,0,1130,250,180,255);
-	}
-	else if(cn<3550){
-		a=cn-3400;
-		double b=1+a/75.0;
-		drawImage_x(scr,img.back,(int)(95*b)-a*4,20-a,b,0,1310,100,100,255);
-		drawImage_x(scr,img.back,(int)(105*b)-a*4,20+(int)(65*b)-a,b,570,1440,180,120,255);
-		drawImage_x(scr,img.back,-a*4,20+(int)(30*b)-a,b,300,1310,130,120,255);
-		drawImage_x(scr,img.back,(int)(70*b)-a*4,20+(int)(110*b)-a,b,0,1430,190,130,255);
-	}
-	else if(cn<3750){
-		a=cn-3550;
-		drawImage_x(scr,img.back,80,110-(int)(a*0.25),(100.0+a/5)/120.0,600,1680,120,60,255);
-		drawImage_x(scr,img.back,80,60-(int)(a*0.25),(100.0+a/5)/120.0,360,1680,120,60,255);
-		drawImage_x(scr,img.back,80,110+a/10,(100.0+a/5)/120.0,360,1740,120,60,255);
-	}
-	else if(cn<3900){
-		a=cn-3750;
-		drawImage_x(scr,img.back,80,70,140/120.0,600,1740,120,60,255);
-		drawImage_x(scr,img.back,80,10,140/120.0,480,1680,120,60,255);
-		drawImage_x(scr,img.back,80,130,140/120.0,480,1740,120,60,255);
-	}
-	else if(cn<3950){
-		a=cn-3900;
-		drawImage_x(scr,img.back,80+(int)(a*1.4),70+(int)(a*0.7),(140.0-a*2.8)/120.0,600,1740,120,60,255);
-		drawImage_x(scr,img.back,80+(int)(a*1.4),10+(int)(a*2.0),(140.0-a*2.8)/120.0,480,1680,120,60,255);
-		drawImage_x(scr,img.back,80+(int)(a*1.4),130-(int)(a*0.5),(140.0-a*2.8)/120.0,480,1740,120,60,255);
-	}else{
-		a=cn-3950;
-		drawImage(scr,img.back,0,20,960,1680,320,200,255);
-		if(a>=100 && a<650){
-			drawImage(scr,img.back,110,30,720,1800,110,40,255);
-			drawImage(scr,img.back,50,90,720,1840,220,90,255);
-		}
-	}
-	fillRect(scr,0,0,320,20,0,0,0,255);
-	fillRect(scr,0,220,320,20,0,0,0,255);
-	if(cn<1300){
-		fillRect(scr,0,140,320,80,128,128,255,255);
-		if(cn%230>=30)drawImage(scr,img.back,60,160,1280,(cn/230)*60,200,60,255);
-	}
-}
-
-// epilogue.png
-void drawSummerWars(SDL_Surface* scr){
-	if(count<200){
-		fillRect(scr,0,0,320,240,0,0,0,255);
-		drawImage(scr,img.back,0,20,0,0,320,200,255);
-		drawImage(scr,img.back,60+count/2,60+count/4,320,40+(count%2)*40,60,40,255);
-	}
-	else if(count<300){
-		if(count==200){
-			map.buffered=false;
-		}
-		else{
-			walking();
-		}
-		SDL_Color col=getSkyColor(gd.hour,gd.minute);
-		fillRect(scr,0,0,320,240,col.r,col.g,col.b,255);
-		drawMap(scr,gd.scrX,gd.scrY);
-		if(count==299){
-			drawImage(img.cache,scr,0,0,0,0,320,240,255);
-		}
-	}
-	else if(count<400){
-		drawImage_x(scr,img.cache,0,0,(320.0+(count-300)*4)/320.0,count-300,(int)((count-300)/1.2),320,240,255);
-	}
-	else if(count<500){
-		int a=count-400;
-		int dx=0,dy=0;
-		if(a>=20){
-			dx=(int)(cos(a*0.7)*5);
-			dy=(int)(sin(a*0.7)*5);
-		}
-		drawImage(scr,img.back,-5+dx,15+dy,0,350,330,160,255);
-		if(a<20){
-			drawImage(scr,img.back,160-a*3,-100+a*12,320,120,40,120,255);
-			drawImage(scr,img.back,140-a*3,a*12,360,120,40,40,128);
-			drawImage(scr,img.back,50-a*a,80-a*a,360,180,60,60,a*13);
-			drawImage(scr,img.back,80-a*a/2,70-a*a,360,180,60,60,a*13);
-			drawImage(scr,img.back,120,60-a*a,360,180,60,60,a*13);
-			drawImage(scr,img.back,150-a*a/2,80-a*a,360,180,60,60,a*13);
-			drawImage(scr,img.back,170+a*a,100-a*a/2,360,180,60,60,a*13);
-		}else{
-			drawImage(scr,img.back,80+dx-a,140+dy-a/2,400,0,120,120,255);
-			drawImage(scr,img.back,80+dx-a/2,160+dy-a,520,0,120,120,255);
-			drawImage(scr,img.back,80+dx,220+dy-a*2,640,0,120,120,255);
-			drawImage(scr,img.back,80+dx+a/2,170+dy-a,760,0,120,120,255);
-			drawImage(scr,img.back,80+dx+a,140+dy-a/2,880,0,120,120,255);
-			drawImage(scr,img.back,80+dx,300+dy-a*2,400,120,120,60,255);
-			drawImage(scr,img.back,60+dx-a/2,190+dy-a,420,180,60,60,255);
-			drawImage(scr,img.back,120+dx-a,170+dy-a,420,180,60,60,255);
-			drawImage(scr,img.back,90+dx,240+dy-a*2,420,180,60,60,255);
-			drawImage(scr,img.back,60+dx+a,160+dy-a,420,180,60,60,255);
-			drawImage(scr,img.back,130+dx+a/2,180+dy-a,420,180,60,60,255);
-			drawImage(scr,img.back,160+dx-a,220+dy-a,420,180,60,60,255);
-			drawImage(scr,img.back,20+dx+a,200+dy-a,420,180,60,60,255);
-			drawImage(scr,img.back,60+dx-a/2,200+dy-a*2,540,120,80,160,a*2);
-		}
-		drawImage(scr,img.back,-5+dx,75+dy,0,200,330,150,255);
-		fillRect(scr,0,0,320,20,0,0,0,255);
-		fillRect(scr,0,220,320,20,0,0,0,255);
-	}
-	else if(count<600){
-		int a=count-500;
-		int dx=0,dy=0;
-		dx=(int)(cos(a*0.7)*5);
-		dy=(int)(sin(a*0.7)*5);
-		drawImage(scr,img.back,-5+dx,15+dy,0,510,330,210,255);
-		if(a<30)drawImage(scr,img.back,50+dx+a/3,30+dy-a/3,620,120,240,100,255);
-		else drawImage(scr,img.back,60+dx+(a-30)/2,20+dy-(a-30)/2,620,220,240,100,255);
-		//砂嵐
-		drawImage(scr,img.back,-250+a*3+dx,240-a*6+dy,580,320,200,400,255);
-		drawImage(scr,img.back,-130+a*3+dx,280-a*6+dy,580,320,200,400,255);
-		drawImage(scr,img.back,-10+a*3+dx,310-a*6+dy,580,320,200,400,255);
-		//じゃり
-		drawImage(scr,img.back,20-a/4+dx,140-a+dy,480,180,60,60,255);
-		drawImage(scr,img.back,90+dx,160-a*2+dy,480,180,60,60,255);
-		drawImage(scr,img.back,130+a/4+dx,140-a*2+dy,480,180,60,60,255);
-		drawImage(scr,img.back,160+a/2+dx,110-a+dy,480,180,60,60,255);
-		drawImage(scr,img.back,200+a+dx,110-a/2+dy,480,180,60,60,255);
-		//岩
-		drawImage(scr,img.back,dx,190-a*2+dy,420,240,80,80,255);
-		drawImage(scr,img.back,100+a/4+dx,260-a*4+dy,420,240,80,80,255);
-		drawImage(scr,img.back,140+a/2+dx,230-a*3+dy,420,240,80,80,255);
-		drawImage(scr,img.back,230+a+dx,210-a*2+dy,420,240,80,80,255);
-		//大岩
-		drawImage(scr,img.back,-120+a*2+dx,360-a*4+dy,330,520,180,100,255);
-		drawImage(scr,img.back,40+a*2+dx,380-a*4+dy,330,520,180,100,255);
-		//砂嵐
-		drawImage(scr,img.back,-390+a*4+dx,620-a*8+dy,580,320,200,400,255);
-		drawImage(scr,img.back,-270+a*4+dx,560-a*8+dy,580,320,200,400,255);
-		drawImage(scr,img.back,-150+a*4+dx,600-a*8+dy,580,320,200,400,255);
-		//大砂嵐
-		drawImage(scr,img.back,-560+a*5+dx,930-a*10+dy,780,320,200,400,255);
-		drawImage(scr,img.back,-440+a*5+dx,900-a*10+dy,780,320,200,400,255);
-		drawImage(scr,img.back,-320+a*5+dx,870-a*10+dy,780,320,200,400,255);
-		//黒岩
-		drawImage(scr,img.back,-600+a*6+dx,1260-a*12+dy,420,320,100,100,255);
-		drawImage(scr,img.back,-470+a*6+dx,1200-a*12+dy,420,320,100,100,255);
-		drawImage(scr,img.back,-340+a*6+dx,1220-a*12+dy,420,320,100,100,255);
-		//風
-		drawImage(scr,img.back,(a*2)%25+dx,200-(a%25)*16+dy,330,240,80,200,128);
-		drawImage(scr,img.back,70+a%50+dx,190-(a%50)*8+dy,330,240,80,200,128);
-		drawImage(scr,img.back,150+a%50+dx,210-(a%50)*8+dy,330,240,80,200,128);
-		drawImage(scr,img.back,260+(a*2)%25+dx,220-(a%25)*16+dy,330,240,80,200,128);
-		drawImage(scr,img.back,-200+(a%50)*12+dx,150-a%50+dy,330,440,250,80,128);
-		fillRect(scr,0,0,320,20,0,0,0,255);
-		fillRect(scr,0,220,320,20,0,0,0,255);
-	}else{
-		if(count==600){
-			gd.scrX=gd.summerX-160;
-			gd.scrY=gd.summerY-120;
-			map.buffered=false;
-		}
-		SDL_Color col=getSkyColor(gd.hour,gd.minute);
-		fillRect(scr,0,0,320,240,col.r,col.g,col.b,255);
-		drawMap(scr,gd.scrX,gd.scrY);
-		if(count<660)drawImage(scr,img.back,150,110,380,((count-600)/20)*20,20,20,255);
-		else drawTalking(scr);
-	}
-}
-

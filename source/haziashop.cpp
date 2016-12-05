@@ -34,10 +34,10 @@ void initHaziaShop(){
 void endHaziaShop(){
 	kick_count++;
 	freeImage(img.back);
-	Mix_FreeChunk(sf.coin);
-	Mix_FreeChunk(sf.swish);
-	Mix_FreeChunk(sf.water);
-	Mix_FreeChunk(sf.grumble);
+	freeSound(sf.coin);
+	freeSound(sf.swish);
+	freeSound(sf.water);
+	freeSound(sf.grumble);
 	freeMusic();
 	for(int i=0 ; i<15 ; i++)menu[i].reset();
 }

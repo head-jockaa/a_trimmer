@@ -34,7 +34,6 @@
 #define SELECT 1
 #define WALKING 2
 #define NO_RELAY 3
-#define BOSS 4
 #define HIDE 0
 #define GRAY 1
 #define VISIBLE 2
@@ -105,7 +104,7 @@ void getRGB(Uint32 px, Uint8 *r, Uint8 *g, Uint8 *b);
 extern SDL_Rect scr;
 extern bool run,setSMR,map_loaded,*animebook,ABGR;
 extern Uint8 mode,mode2,dataNo,phase,kick_count,pauseGame;
-extern int stas,works,prgs,allworks,collection,areas,towers,mounts,towns,index_num,clear_num,mapW,mapH;
+extern int stas,works,prgs,animedex_num,collection,areas,towers,mounts,towns,index_num,clear_num,mapW,mapH;
 extern int count,bg_count,face[1000],start;
 extern int talk_kulisap,face_kulisap,ant_dir;
 extern Uint8 fontA;
@@ -217,7 +216,7 @@ struct Town{
 
 struct Tower{
 	String name;
-	Uint8 ch[10], c1, c2, bias, r_num;
+	Uint8 ch[10], onair_num, colorlight_size, bias, r_num;
 	double kw, erp;
 	int rcv[10];
 	int id,area_id;
@@ -323,8 +322,8 @@ extern SoundFile sf;
 
 struct ImageFile{
 	SDL_Surface *iwa, *screen;
-	Image *back, *chr, *menuback, *facechip, *boss, *keyboard, *symbol, *pre_scr;
-	Image *rod, *circle, *fishup, *cache, *colorlight, *tv_asahi;
+	Image *back, *chr, *menuback, *facechip, *keyboard, *symbol, *pre_scr;
+	Image *rod, *circle, *fishup, *colorlight, *tv_asahi;
 	Image *buffer[4], *bg[10], *photo[14];
 	Image *searchImage;
 	Uint8 alphaR, alphaG, alphaB;
@@ -352,13 +351,9 @@ void drawTalking(SDL_Surface* scr);
 void drawTalking(SDL_Surface* scr, int fc, String st);
 void drawRect(SDL_Surface* scr, int x, int y, int w, int h, int R, int G, int B, int a);
 void drawRect(Image* scr, int x, int y, int w, int h, int R, int G, int B, int a);
-void fillRect(SDL_Surface* scr, int x, int y, int w, int h, int R, int G, int B, int a);
-void fillRect(Image* scr, int x, int y, int w, int h, int R, int G, int B, int a);
 void setAlpha(Image* scr, int R,int G,int B);
 void resetAlpha(Image* scr);
 void drawSurface(SDL_Surface* scr, SDL_Surface* img, int x, int y, int x2, int y2, int w2, int h2, int a);
-void drawLight(SDL_Surface* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2,int a);
-void drawLight(Image* scr, Image* img, int x, int y, int x2, int y2, int w2, int h2, int a);
 
 #ifdef __APPLE__
 void sprintf_s(char *s, const char *c, ...);

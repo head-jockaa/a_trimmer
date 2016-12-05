@@ -86,20 +86,19 @@ void key_counter(){
 }
 
 void pauseMovie(){
-	if((mode==OPENING && phase==2) || (mode==ENDING && (phase==ENDING_ANIME || phase==LAST_ENDING))){
+	if((mode==OPENING && phase==2) || (mode==ENDING && phase==ENDING_ANIME)){
 		pausetime=SDL_GetTicks();
 		Mix_HaltMusic();
 //		Mix_PauseMusic();
 	}
 }
 void resumeMovie(){
-	if((mode==OPENING && phase==2) || (mode==ENDING && (phase==ENDING_ANIME || phase==LAST_ENDING))){
+	if((mode==OPENING && phase==2) || (mode==ENDING && phase==ENDING_ANIME)){
 		int n=SDL_GetTicks();
 		timestamp+=n-pausetime;
 //		Mix_ResumeMusic();
 		Mix_PlayMusic(bgm,-1);
-		if(mode==ENDING && phase==LAST_ENDING)Mix_SetMusicPosition((n-timestamp-833)/1000.0);
-		else Mix_SetMusicPosition((n-timestamp)/1000.0);
+		Mix_SetMusicPosition((n-timestamp)/1000.0);
 	}
 }
 
@@ -246,7 +245,6 @@ int main(int argc, char *argv[]) {
 
 void initAll(){
 	img.pre_scr=new Image(640,480);
-	img.cache=new Image(640,480);
 	for(int i=0 ; i<4 ; i++)img.buffer[i]=new Image(640,480);
 	for(int i=0 ; i<10 ; i++){
 		img.bg[i]=NULL;
@@ -279,7 +277,7 @@ void endAll(){
 	if(fsize)delete [] fstr;
 	if(index_num)delete [] indexName;
 	if(stas)delete [] sta;
-	if(allworks)delete [] animebook;
+	if(animedex_num)delete [] animebook;
 	if(works){
 		for(int i=0 ; i<works ; i++){
 			if(work[i].prg_num)delete [] work[i].prg;
@@ -301,7 +299,6 @@ void endAll(){
 	fishbox.endAll();
 	if(map_loaded)map.reset();
 	for(int i=0 ; i<20 ; i++)menu[i].reset();
-	freeImage(img.cache);
 	freeImage(img.chr);
 	freeImage(img.symbol);
 	freeImage(img.keyboard);
@@ -315,9 +312,9 @@ void endAll(){
 		freeImage(img.bg[i]);
 		freeSound(sf.sound[i]=NULL);
 	}
-	Mix_FreeChunk(sf.decide);
-	Mix_FreeChunk(sf.decide2);
-	Mix_FreeChunk(sf.cursor_move);
+	freeSound(sf.decide);
+	freeSound(sf.decide2);
+	freeSound(sf.cursor_move);
 }
 
 void checkEndian(){
