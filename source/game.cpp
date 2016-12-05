@@ -92,9 +92,9 @@ void initGame(){
 		MAGNIFY=1;
 	}
 	gd.week=0;gd.hour=4;gd.minute=0;gd.second=0;gd.score=0;gd.get_score=0;gd.gradeup=0;gd.crops=0;gd.player_dir=0;
-	gd.ta_count=0;start=75;count=0;gd.speed=0;gd.real_speed=0;gd.town_count=400;gd.timeslot_count=0;
+	gd.ta_count=0;start=75;count=0;gd.speed=0;gd.real_speed=0;gd.town_count=400;
 	gd.pre_rural=0;gd.count_rural=0;gd.kirby_count=0;gd.kirby_count2=0;
-	gd.kulisaped=0;gd.ant_dir=270;gd.memma_count=0;gd.gaze_count=0;
+	gd.kulisaped=0;gd.ant_dir=270;gd.memma_count=0;gd.timeslot_count=0;
 	gd.current_area=EOF;gd.current_town=EOF;
 	rd.received=false;
 	setSMR=true;
@@ -1751,11 +1751,11 @@ void drawSpeedMeter(SDL_Surface* scr){
 
 void drawTimeSlot(SDL_Surface* scr){
 	int a=0,b=255;
-	if(gd.gaze_count<20)a=640-gd.gaze_count*32;
-	if(gd.gaze_count>80)b=(100-gd.gaze_count)*13;
+	if(gd.timeslot_count<20)a=640-gd.timeslot_count*32;
+	if(gd.timeslot_count>80)b=(100-gd.timeslot_count)*13;
 	fillRect(scr,a,200,640,80,0,0,255,128);
 	drawImage(scr,img.fishup,a,200,760,0,640,80,b);
-	drawImage(scr,img.fishup,a+280,200,760,gd.gaze_num*80+80,320,80,b);
+	drawImage(scr,img.fishup,a+280,200,760,gd.timeslot_type*80+80,320,80,b);
 }
 
 void drawManekiTV(SDL_Surface *scr){
@@ -1921,7 +1921,7 @@ void drawGame(SDL_Surface* scr){
 		if(ant->ant_mode==TROLL)ant->drawTrolling(scr);
 		else ant->drawAntenna(scr);
 		drawFishup(scr);
-		if(gd.gaze_count!=0)drawTimeSlot(scr);
+		if(gd.timeslot_count!=0)drawTimeSlot(scr);
 
 		if(phase==MENU)drawMenuBox(scr);
 		if(phase==ANTENNA_MENU)drawAntennaMenuBox(scr);
@@ -2291,19 +2291,6 @@ void timerMemma(){
 	}
 }
 
-void timerGazing(){
-	if(gd.game_mode==STORYMODE){
-		if(gd.gaze_count>0)gd.gaze_count++;
-		if(gd.gaze_count>100)gd.gaze_count=0;
-		if(gd.timeslot[gd.timeslot_count]==gd.week && gd.timeslot[gd.timeslot_count+1]==gd.hour && gd.timeslot[gd.timeslot_count+2]==gd.minute){
-			Mix_PlayChannel(0, sf.gaze, 0);
-			gd.gaze_num=gd.timeslot[gd.timeslot_count+3]-1;
-			gd.gaze_count++;
-			gd.timeslot_count+=4;
-		}
-	}
-}
-
 void timerCatchPhone(){
 	if(gd.week==call_week && gd.hour==call_hour && gd.minute==call_minute){
 		Mix_PlayChannel(0, sf.calling, 0);
@@ -2342,6 +2329,15 @@ void timerSunMovement(){
 			if(gd.hour==23){
 				createMap_color(200);
 				map.buffered=false;
+			}
+		}
+		if(gd.game_mode==STORYMODE){
+			for(int i=0 ; i<timeslot_num ; i++){
+				if(timeslot[i].season_id==dataNo && timeslot[i].week==gd.week && timeslot[i].hour==gd.hour && timeslot[i].minute==gd.minute){
+					Mix_PlayChannel(0, sf.gaze, 0);
+					gd.timeslot_type=timeslot[i].type-1;
+					gd.timeslot_count++;
+				}
 			}
 		}
 	}
@@ -2514,9 +2510,11 @@ void timerGame(){
 	}else{
 		controlTextCount(false);
 	}
-	timerGazing();
 	timerScore();
 	manageThread();
+
+	if(gd.timeslot_count>0)gd.timeslot_count++;
+	if(gd.timeslot_count>100)gd.timeslot_count=0;
 }
 
 void manageThread(){
@@ -2635,19 +2633,6 @@ void initManekiTV(){
 	md.fish_num=0;
 	md.maneki_count[0]=0;
 	md.maneki_mode=NULL;
-}
-
-void head_of_timeslot(){
-	gd.timeslot_count=0;
-	while(gd.timeslot[gd.timeslot_count]!=EOF){
-		if(gd.timeslot[gd.timeslot_count]<gd.week
-		|| (gd.timeslot[gd.timeslot_count]==gd.week && gd.timeslot[gd.timeslot_count+1]<gd.hour)
-		|| (gd.timeslot[gd.timeslot_count]==gd.week && gd.timeslot[gd.timeslot_count+1]==gd.hour && gd.timeslot[gd.timeslot_count+2]<gd.minute)
-		){
-			gd.timeslot_count+=4;
-		}
-		else break;
-	}
 }
 
 void setTmpFish_maneki(int n){

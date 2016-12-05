@@ -619,6 +619,10 @@ void getAreaSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 			intValue=fetchInt(c);
 			if(get)timeslot[index].minute=intValue;
 		}
+		else if(strcmp(cname,"type")==0) {
+			intValue=fetchInt(c);
+			if(get)timeslot[index].type=intValue;
+		}
 	}
 	else if(strcmp(tname,"timetable")==0) {
 		if(strcmp(cname,"id")==0) {

@@ -102,7 +102,6 @@ void timerGetMedal(){
 			if(which_medal==0){
 				initGame();
 				initGame2();
-				head_of_timeslot();
 				gd.talk_count=EOF;
 				kick_count=0;
 			}else{

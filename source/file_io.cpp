@@ -228,14 +228,8 @@ void load_works(int n){
 	delete [] allofworks;
 	prgs=0;
 	allofworks=0;
-	if(gd.x!=0)delete [] gd.timeslot;
-	sprintf_s(str,"file/data/work/timeslot%d.dat",n);
-	loadFile(str);
-	gd.timeslot = new int[fsize+1];
-	for(size_t i=0 ; i<fsize ; i++){
-		gd.timeslot[i]=fstr[i];
-	}
-	gd.timeslot[fsize]=EOF;
+
+	readSQL("file/data/sql/timeslot.sql");
 }
 
 void load_searchQueries(Work *wk, int wk_num){

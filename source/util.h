@@ -253,7 +253,7 @@ extern Areacode *areacode;
 
 struct Timeslot{
 	int id, season_id;
-	Uint8 week,hour,minute;
+	Uint8 week,hour,minute,type;
 };
 extern Timeslot *timeslot;
 

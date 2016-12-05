@@ -259,7 +259,6 @@ void initAll(){
 	getImage(img.menuback,"file/img/menuback.png",0,0,0);
 	getImage(img.facechip,"file/img/face.png",0,0,255);
 	getSymbolImage();
-	gd.timeslot=NULL;
 	map.rural_loaded=false;
 	fishbox.initAll();
 	load_parameter();
@@ -283,7 +282,6 @@ void endAll(){
 			if(work[i].prg_num)delete [] work[i].prg;
 		}
 		delete [] work;
-		delete [] gd.timeslot;
 	}
 	if(areas){
 		for(int i=0 ; i<areas ; i++){

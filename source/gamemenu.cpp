@@ -66,7 +66,6 @@ void gotoGame(){
 	else if((dataNo-1)%4==3){gd.sunrise_hour=7;gd.sunset_hour=17;}
 	else {gd.sunrise_hour=6;gd.sunset_hour=18;}
 	initGame2();
-	head_of_timeslot();
 	gd.talk_count=EOF;
 	kick_count=1;
 }
