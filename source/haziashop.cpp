@@ -1,6 +1,6 @@
 #include "util.h"
 
-int price[18], shop_icon[18];
+int price[SHOP_ITEMS], shop_icon[SHOP_ITEMS];
 
 void makeShoppingList();
 
@@ -119,7 +119,7 @@ void keyShopping(){
 	if(key.x && !key_stop(key.x)){
 		gd.text_count=0;
 		bool ok=true;
-		for(int i=0 ; i<18 ; i++)if(!gd.bought[i]){
+		for(int i=0 ; i<SHOP_ITEMS ; i++)if(!gd.bought[i]){
 			ok=false;break;
 		}
 		menu[YNFORM].setViewMode(HIDE);
@@ -419,18 +419,18 @@ void timerHaziaShop(){
 void drawHaziaShopExplain(SDL_Surface* scr){
 	if(EXPLAIN){
 		if(phase==SHOP_FLOOR){
-			drawKeyboard(scr,key.upC,160,460);
-			drawKeyboard(scr,key.downC,180,460);
-			drawKeyboard(scr,key.leftC,200,460);
-			drawKeyboard(scr,key.rightC,220,460);
+			drawKeyboard(scr,key.upC,400,440);
+			drawKeyboard(scr,key.downC,420,440);
+			drawKeyboard(scr,key.leftC,440,440);
+			drawKeyboard(scr,key.rightC,460,440);
 			drawText(scr,480,440,text[GAMETEXT+12]);
-			if((gd.y==140 && gd.x<400) || (gd.y==40 && gd.x>=400)){
-				drawKeyboard(scr,key.zC,0,0);
-				drawText(scr,20,0,text[EPILOGUE+10]);
+			if((gd.y==140 && gd.x>120 && gd.x<240) || (gd.y==40 && gd.x>=400)){
+				drawKeyboard(scr,key.zC,20,60);
+				drawText(scr,40,60,text[EPILOGUE+10]);
 			}
 			if((gd.y==140 && gd.x>300 && gd.x<400)||(gd.y>240 && gd.y<340 && gd.x>400 && gd.x<500)||(gd.x==560 && gd.y>=120 && gd.y<=200)){
-				drawKeyboard(scr,key.zC,0,0);
-				drawText(scr,20,0,text[MIYAZAKITEXT+30]);
+				drawKeyboard(scr,key.zC,20,0);
+				drawText(scr,40,440,text[MIYAZAKITEXT+30]);
 			}
 		}
 		else if(phase==SHOP_TALK || phase==SHOP_LASTTALK || phase==MEMMA_TALK || phase==SHOP_CONFIRM_TALK || phase==OHANA_TALK){
@@ -491,11 +491,11 @@ void drawHaziaShop(SDL_Surface* scr){
 		else drawImage(scr,img.back,80,170,640,740,160,80,255);
 		drawImage(scr,img.back,360,80,640,100+((count/5)%2)*280,160,280,255);
 		if(phase==SHOPPING || phase==BUYING || phase==SELLING){
-			drawText(scr,230,400,text[MIYAZAKITEXT+6]);
+			drawText2(scr,230,400,text[MIYAZAKITEXT+6]);
 			int a=1;
 			for(int i=0 ; i<10 ; i++){
 				if((gd.hazia/a==0 && gd.hazia>0) || (gd.hazia==0 && i>0))continue;
-				drawImage(scr,img.chr,1200-i*30,400,((gd.hazia/a)%10)*20,520,20,40,255);
+				drawImage(scr,img.chr,600-i*30,400,((gd.hazia/a)%10)*20,520,20,40,255);
 				a*=10;
 			}
 		}
@@ -522,7 +522,7 @@ void makeShoppingList(){
 	menu[SHOPPING].setMenu(0,40,40,8,36);
 	menu[SHOPPING].setCombo(2);
 	menu[SHOPPING].setBG(192);
-	for(int i=0 ; i<18 ; i++){
+	for(int i=0 ; i<SHOP_ITEMS ; i++){
 		menu[SHOPPING].stack(text[MIYAZAKITEXT+34+i]);
 		if(gd.bought[i]){
 			menu[SHOPPING].stack(text[MIYAZAKITEXT+12]);

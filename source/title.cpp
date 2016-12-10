@@ -40,7 +40,7 @@ void keyOpening(){
 				gd.scrX=(int)gd.x-320;
 				phase=MIYAZAKI_MUSEUM;
 				start=0;
-				for(int i=0 ; i<29 ; i++)menu[BGM_TEST].cursorDown();
+				for(int i=0 ; i<33 ; i++)menu[BGM_TEST].cursorDown();
 			}else{
 				initTitle2();
 			}
@@ -58,7 +58,7 @@ void timerOpening(){
 				gd.scrX=(int)gd.x-320;
 				phase=MIYAZAKI_MUSEUM;
 				start=0;
-				for(int i=0 ; i<29 ; i++)menu[BGM_TEST].cursorDown();
+				for(int i=0 ; i<33 ; i++)menu[BGM_TEST].cursorDown();
 			}else{
 				endOpening();
 				initTitle2();

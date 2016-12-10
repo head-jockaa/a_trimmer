@@ -7,6 +7,7 @@ void initEnding(){
 	count=0;
 	phase=LEAVE_SHORE;
 	getImage(img.back,"file/img/shore.png",0,0,255);
+	playtime=0;
 }
 
 void initMedalAward(int n){
@@ -41,7 +42,7 @@ void keyEndingAnime(){
 			gd.scrX=(int)gd.x-1320;
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
-			for(int i=0 ; i<31 ; i++)menu[BGM_TEST].cursorDown();
+			for(int i=0 ; i<35 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			if(which_medal!=0){
 				freeImage(img.back);
@@ -96,7 +97,7 @@ void timerGetMedal(){
 			gd.scrX=(int)gd.x-320;
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
-			for(int i=0 ; i<25+which_medal ; i++)menu[BGM_TEST].cursorDown();
+			for(int i=0 ; i<29+which_medal ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			endEnding();
 			if(which_medal==0){
@@ -122,7 +123,7 @@ void timerEndingAnime(){
 				gd.scrX=(int)gd.x-320;
 				phase=MIYAZAKI_MUSEUM;
 				start=0;
-				for(int i=0 ; i<31 ; i++)menu[BGM_TEST].cursorDown();
+				for(int i=0 ; i<35 ; i++)menu[BGM_TEST].cursorDown();
 			}else{
 				if(which_medal!=0 && dataNo!=index_num){//ÅIƒ{ƒX–Ê‚Í•Û—¯
 					freeImage(img.back);
@@ -170,10 +171,10 @@ void drawEnding(SDL_Surface* scr){
 	}
 	else if(phase==WARNING){
 		fillRect(scr,0,0,640,480,0,0,64,255);
-		for(int i=0 ; i<16 ; i++)fillRect(scr,i*40,0,1,240,0,128,0,255);
+		for(int i=0 ; i<16 ; i++)fillRect(scr,i*40,0,1,480,0,128,0,255);
 		for(int i=0 ; i<12 ; i++)fillRect(scr,0,i*40,640,1,0,128,0,255);
-		drawImage(scr,img.back,0,70,((count/5)%8)*220,(((count/5)/8)%2)*410,220,410,255);
-		drawImage(scr,img.back,320,160,1760,0,160,160,abs(128-count%255)*2);
+		drawImage(scr,img.back,0,70,((count/5)%8)*110,(((count/5)/8)%2)*205,110,205,255);
+		drawImage(scr,img.back,320,160,880,0,80,80,abs(128-count%255)*2);
 		if(dataNo==index_num){
 			drawText(scr,280,360,text[EPILOGUE+8]);
 			drawText(scr,280,400,text[EPILOGUE+9]);

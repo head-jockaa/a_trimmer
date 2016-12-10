@@ -2,6 +2,8 @@
 
 int *prgs_of_each_season;
 int this_area[10],this_tower[10];
+int shopPlayerX,shopScrX;
+Uint8 shopPlayerDir;
 int which_tower;
 bool talk_3dtv=false, talk_seoiha=false,movie_test=false;
 bool showSearchImage=false;
@@ -15,7 +17,6 @@ void initMiyazaki(){
 	mode=MIYAZAKI;
 	phase=COME_MIYAZAKI;
 	prgs_of_each_season=NULL;
-	gd.x=30;gd.scrX=0;
 	gd.talk_count=EOF;
 	menu[GUIDE_TOP].setMenu(60,60,26,4,4);
 	menu[GUIDE_TOP].stack(text[MIYAZAKITEXT+1]);
@@ -163,6 +164,9 @@ void timerMiyazaki(){
 		if(nextCut()){
 			phase=MIYAZAKI_MUSEUM;
 			start=200;
+			shopPlayerX=30;
+			shopScrX=0;
+			shopPlayerDir=1;
 		}
 	}
 	else if(phase==LEAVE_MIYAZAKI){
@@ -202,92 +206,92 @@ void timerMiyazaki(){
 void keyMiyazakiMuseum(){
 	if(kick_count>0)return;
 	if(key.z && !key_stop(key.z)){
-		if(gd.x>180 && ((int)gd.x-180)%200<120){
+		if(shopPlayerX>180 && ((int)shopPlayerX-180)%200<120){
 			phase=YNFORM;
 			menu[YNFORM].setViewMode(VISIBLE);
-			if(gd.x>180 && gd.x<300){
+			if(shopPlayerX>180 && shopPlayerX<300){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+14]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+15]);
 			}
-			if(gd.x>380 && gd.x<500){
+			if(shopPlayerX>380 && shopPlayerX<500){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>580 && gd.x<700){
+			if(shopPlayerX>580 && shopPlayerX<700){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+18]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+19]);
 			}
-			if(gd.x>780 && gd.x<900){
+			if(shopPlayerX>780 && shopPlayerX<900){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+20]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+21]);
 			}
-			if(gd.x>980 && gd.x<1100){
+			if(shopPlayerX>980 && shopPlayerX<1100){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>1180 && gd.x<1300 && gd.bought[6]){
+			if(shopPlayerX>1180 && shopPlayerX<1300 && gd.bought[6]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>1380 && gd.x<1500 && gd.bought[15]){
+			if(shopPlayerX>1380 && shopPlayerX<1500 && gd.bought[15]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+22]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+23]);
 			}
-			if(gd.x>1580 && gd.x<1700 && gd.bought[12]){
+			if(shopPlayerX>1580 && shopPlayerX<1700 && gd.bought[12]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>1780 && gd.x<1900 && gd.bought[16]){
+			if(shopPlayerX>1780 && shopPlayerX<1900 && gd.bought[16]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+24]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+25]);
 			}
-			if(gd.x>1980 && gd.x<2100 && gd.bought[9]){
+			if(shopPlayerX>1980 && shopPlayerX<2100 && gd.bought[9]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+16]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+17]);
 			}
-			if(gd.x>2180 && gd.x<2300 && gd.bought[11]){
+			if(shopPlayerX>2180 && shopPlayerX<2300 && gd.bought[11]){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+18]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+19]);
 			}
-			if(gd.x>2380 && gd.x<2500){
+			if(shopPlayerX>2380 && shopPlayerX<2500){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+26]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+27]);
 			}
-			if(gd.x>2580 && gd.x<2700){
+			if(shopPlayerX>2580 && shopPlayerX<2700){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+28]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+29]);
 			}
-			if(gd.x>2780 && gd.x<2900){
+			if(shopPlayerX>2780 && shopPlayerX<2900){
 				menu[YNFORM].input(1,text[MIYAZAKITEXT+18]);
 				menu[YNFORM].input(2,text[MIYAZAKITEXT+19]);
 			}
 		}
 	}
 	if(key.up && !key_stop(key.up)){
-		gd.player_dir=2;
+		shopPlayerDir=2;
 	}
 	if(key.down && !key_stop(key.down)){
-		gd.player_dir=0;
+		shopPlayerDir=0;
 	}
 	if(key.left){
-		gd.x-=6;
-		gd.player_dir=3;
+		shopPlayerX-=6;
+		shopPlayerDir=3;
 	}
 	if(key.right){
-		gd.x+=6;
-		if(gd.x>2800)gd.x=2800;
-		gd.player_dir=1;
+		shopPlayerX+=6;
+		if(shopPlayerX>2800)shopPlayerX=2800;
+		shopPlayerDir=1;
 	}
-	gd.scrX=(int)gd.x-320;
-	if(gd.scrX<0)gd.scrX=0;
-	if(gd.scrX>2160)gd.scrX=2160;
-	if(talk_seoiha && std::abs(gd.x-1440)>200){
+	shopScrX=(int)shopPlayerX-320;
+	if(shopScrX<0)shopScrX=0;
+	if(shopScrX>2160)shopScrX=2160;
+	if(talk_seoiha && std::abs(shopPlayerX-1440)>200){
 		TalkingAt(23);
 		phase=MIYAZAKI_TALK;
 		gd.talk_open_count=1;
 		talk_seoiha=false;
 	}
-	if(gd.x<0){
+	if(shopPlayerX<0){
 		phase=LEAVE_MIYAZAKI;
 		loadCartoon("file/data/cartoon/miyazaki_out.json");
 		count=0;
@@ -374,7 +378,7 @@ void keyGuideAll(){
 			showSearchImage=false;
 		}
 		else if(tm.tcpsock==NULL){
-			startThread(allofworks[menu[GUIDE_ALL].selected()].tnum, allofworks[menu[GUIDE_ALL].selected()].query);
+			startThread(allofworks[menu[GUIDE_ALL].selected()].cartoon_id, allofworks[menu[GUIDE_ALL].selected()].query);
 		}
 	}
 	if(key.up && !key_wait(key.up))menu[GUIDE_ALL].cursorUp();
@@ -391,7 +395,7 @@ void keyGuideSeason(){
 			menu[GUIDE_ANIME].setMenu(0,20,40,10,works);
 			menu[GUIDE_ANIME].lang=JAPANESE;
 			for(int i=0 ; i<works ; i++){
-				if(animebook[work[i].tnum]){
+				if(animebook[work[i].cartoon_id]){
 					menu[GUIDE_ANIME].stack(work[i].title);
 					menu[GUIDE_ANIME].inputMark(i,work[i].mark);
 					menu[GUIDE_ANIME].inputColor(i,work[i].r,work[i].g,work[i].b);
@@ -426,7 +430,7 @@ void keyGuideSeason(){
 			for(int w=0 ; w<7 ; w++)for(int h=4 ; h<=27 ; h++)for(int m=0 ; m<60 ; m++){
 				for(int i=0 ; i<works ; i++)for(int j=0 ; j<work[i].prg_num ; j++){
 					if(work[i].prg[j].week==w && work[i].prg[j].hour==h && work[i].prg[j].minute==m){
-						if(animebook[work[i].tnum]){
+						if(animebook[work[i].cartoon_id]){
 							for(int k=0 ; k<2 ; k++)sprintf_s(s.str[k],"%s",work[i].title.str[k]);
 							menu[GUIDE_TIME].stack(s);
 						}else{
@@ -478,9 +482,9 @@ void keyPrefList(){
 void keyGuideAnime(){
 	if(key.z && !key_stop(key.z)){
 		int n=menu[GUIDE_ANIME].selected();
-		if(animebook[work[n].tnum]){
+		if(animebook[work[n].cartoon_id]){
 			String s;
-			menu[GUIDE_STALIST].setMenu(10,30,30,9,work[n].prg_num);
+			menu[GUIDE_STALIST].setMenu(20,60,30,9,work[n].prg_num);
 			for(int i=0; i<work[n].prg_num ; i++){
 				sprintf_s(s.str[0],"%2d:%2d(%s)%s",work[n].prg[i].hour,work[n].prg[i].minute,weekChar[work[n].prg[i].week][0],sta[work[n].prg[i].station].name.str[0]);
 				sprintf_s(s.str[1],"%2d:%2d(%s)%s",work[n].prg[i].hour,work[n].prg[i].minute,weekChar[work[n].prg[i].week][1],sta[work[n].prg[i].station].name.str[1]);
@@ -568,7 +572,7 @@ void keyGuideSta(){
 		for(int i=0 ; i<cartoon_num ; i++){
 			int a=work_idx[i];
 			int b=prg_idx[i];
-			if(animebook[work[a].tnum]){
+			if(animebook[work[a].cartoon_id]){
 				sprintf_s(s.str[0],"%2d:%2d(%s)%s",work[a].prg[b].hour,work[a].prg[b].minute,weekChar[work[a].prg[b].week][0],work[a].title.str[0]);
 				sprintf_s(s.str[1],"%2d:%2d(%s)%s",work[a].prg[b].hour,work[a].prg[b].minute,weekChar[work[a].prg[b].week][1],work[a].title.str[1]);
 			}else{
@@ -676,8 +680,8 @@ void keyStaList_tower(){
 					}
 				}
 				if(i==menu[PREF_LIST_MIYAZAKI].selected() && !area[i].tower[j].remove){
-					gd.x=area[i].tower[j].x;
-					gd.y=area[i].tower[j].y;
+					gd.x=area[i].tower[j].x*2;
+					gd.y=area[i].tower[j].y*2;
 					break;
 				}
 			}
@@ -697,6 +701,7 @@ void keyStaList_tower(){
 				}
 			}
 		}
+		MAGNIFY=2;
 		menu[PREF_LIST_MIYAZAKI].setViewMode(HIDE);
 		menu[GUIDE_STA].setViewMode(HIDE);
 		phase=GOTO_TOWERLIST;
@@ -736,14 +741,14 @@ void keyTowerList(){
 	}
 	if(key.x && !key_stop(key.x)){
 		for(int i=0 ; i<areas ; i++){
-			for(int j=0 ; j<towers ; j++){
+			for(int j=0 ; j<area[i].tower_num ; j++){
 				area[i].tower[j].remove=false;
 			}
 		}
 		if(NHK_REMOVE){
 			bool ok;
 			for(int i=0 ; i<areas ; i++){
-				for(int j=0 ; j<towers ; j++)if(area[i].tower[j].kw<1){
+				for(int j=0 ; j<area[i].tower_num ; j++)if(area[i].tower[j].kw<1){
 					ok=false;
 					for(int k=0 ; k<10 ; k++)if(area[i].tower[j].ch[k]!=0){
 						if(sta[area[i].station[k]].mark!=5 && sta[area[i].station[k]].mark!=6){
@@ -755,11 +760,10 @@ void keyTowerList(){
 				}
 			}
 		}
+		MAGNIFY=pre_magnify;
 		createMap_tower();
 		menu[GUIDE_STA].setViewMode(VISIBLE);
 		phase=STA_LIST_TOWER;
-		gd.x=1200;
-		gd.scrX=880;
 	}
 	if(!key_wait(key.up) || !key_wait(key.down) || !key_wait(key.left) || !key_wait(key.right)){
 		if(key.up)gd.y--;
@@ -777,8 +781,8 @@ void keyTowerList(){
 		}
 		int n=0;
 		for(int i=0 ; i<areas ; i++){
-			for(int j=0 ; j<towers ; j++)if(!area[i].tower[j].remove){
-				if(area[i].tower[j].x==gd.x && area[i].tower[j].y==gd.y){
+			for(int j=0 ; j<area[i].tower_num ; j++)if(!area[i].tower[j].remove){
+				if(std::abs(area[i].tower[j].x*MAGNIFY-gd.x)<2 && std::abs(area[i].tower[j].y*MAGNIFY-gd.y)<2){
 					this_area[n]=i;
 					this_tower[n]=j;
 					if(n==9)break;
@@ -931,7 +935,7 @@ void keyMiyazakiTalk(){
 	if(key.z && !key_stop(key.z)){
 		int a=controlTalking();
 		if(a==EOF){
-			if(gd.x>180 && gd.x<300 && menu[YNFORM].selected()==1){
+			if(shopPlayerX>180 && shopPlayerX<300 && menu[YNFORM].selected()==1){
 				endMiyazaki();
 				initHaziaShop();
 				kick_count++;
@@ -1065,7 +1069,7 @@ void keyYNForm(){
 		if(menu[YNFORM].selected()==0){
 			gd.text_count=0;
 			phase=MIYAZAKI_TALK;
-			int a=((int)gd.x-180)/200;
+			int a=((int)shopPlayerX-180)/200;
 			if((a==6 && !gd.bought[15]) || (a==8 && !gd.bought[16]) || (a==5 && !gd.bought[6])
 			   || (a==9 && !gd.bought[9]) || (a==10 && !gd.bought[11]) || (a==7 && !gd.bought[12])){
 				TalkingAt(0);
@@ -1077,32 +1081,32 @@ void keyYNForm(){
 		}
 		if(menu[YNFORM].selected()==1){
 			phase=MIYAZAKI_MUSEUM;
-			if(gd.x>180 && gd.x<300){
+			if(shopPlayerX>180 && shopPlayerX<300){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(15);
 			}
-			if(gd.x>380 && gd.x<500){
+			if(shopPlayerX>380 && shopPlayerX<500){
 				phase=GUIDE_TOP;
 				menu[GUIDE_TOP].setViewMode(VISIBLE);
 				load_animebook();
 			}
-			if(gd.x>580 && gd.x<700){
+			if(shopPlayerX>580 && shopPlayerX<700){
 				gd.game_mode=WALKING;
 				phase=GOTO_STROLL;
 				count=0;
 			}
-			if(gd.x>780 && gd.x<900){
+			if(shopPlayerX>780 && shopPlayerX<900){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(16);
 			}
-			if(gd.x>980 && gd.x<1100){
+			if(shopPlayerX>980 && shopPlayerX<1100){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(17);
 			}
-			if(gd.x>1180 && gd.x<1300 && gd.bought[6]){
+			if(shopPlayerX>1180 && shopPlayerX<1300 && gd.bought[6]){
 				load_towers();
 				load_station();
 				menu[PREF_LIST_MIYAZAKI].setMenu(100,40,12,10,areas-1);
@@ -1110,17 +1114,17 @@ void keyYNForm(){
 				phase=PREF_LIST_TOWER;
 				menu[PREF_LIST_MIYAZAKI].setViewMode(VISIBLE);
 			}
-			if(gd.x>1380 && gd.x<1500 && gd.bought[15]){
+			if(shopPlayerX>1380 && shopPlayerX<1500 && gd.bought[15]){
 				Mix_PlayChannel(1,sf.decide,0);
-				gd.player_dir=2;
+				shopPlayerDir=2;
 				phase=SEOI_HA;
 				count=0;
 			}
-			if(gd.x>1580 && gd.x<1700 && gd.bought[12]){
+			if(shopPlayerX>1580 && shopPlayerX<1700 && gd.bought[12]){
 				phase=BGM_TEST;
 				menu[BGM_TEST].setViewMode(VISIBLE);
 			}
-			if(gd.x>1780 && gd.x<1900 && gd.bought[16]){
+			if(shopPlayerX>1780 && shopPlayerX<1900 && gd.bought[16]){
 				if(scr_design==MONO){
 					scr_design=NULL;
 					phase=MIYAZAKI_MUSEUM;
@@ -1131,27 +1135,27 @@ void keyYNForm(){
 					TalkingAt(19);
 				}
 			}
-			if(gd.x>1980 && gd.x<2100 && gd.bought[9]){
+			if(shopPlayerX>1980 && shopPlayerX<2100 && gd.bought[9]){
 				gd.game_mode=WALKING;
 				MAP3D=true;
 				phase=GOTO_STROLL;
 				count=0;
 			}
-			if(gd.x>2180 && gd.x<2300 && gd.bought[11]){
+			if(shopPlayerX>2180 && shopPlayerX<2300 && gd.bought[11]){
 				gd.game_mode=NO_RELAY;
 				phase=GOTO_STROLL;
 				count=0;
 			}
-			if(gd.x>2380 && gd.x<2500){
+			if(shopPlayerX>2380 && shopPlayerX<2500){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(20);
 			}
-			if(gd.x>2580 && gd.x<2700){
+			if(shopPlayerX>2580 && shopPlayerX<2700){
 				phase=DELETE_MENU;
 				menu[DELETE_MENU].setViewMode(VISIBLE);
 			}
-			if(gd.x>2780 && gd.x<2900){
+			if(shopPlayerX>2780 && shopPlayerX<2900){
 				phase=MIYAZAKI_TALK;
 				gd.talk_open_count=1;
 				TalkingAt(21);
@@ -1226,20 +1230,20 @@ void drawTowerList(SDL_Surface* scr){
 	drawMap(scr,(int)gd.x-320,(int)gd.y-240);
 	drawImage(scr,img.chr,290,210,180,60,60,60,255);
 	if(phase==SHOW_TOWERDATA){
-		drawText(scr,0,0,tower[this_tower[which_tower]].name);
+		drawText2(scr,0,0,tower[this_tower[which_tower]].name);
 		sprintf_s(str,"%.6gkw",tower[this_tower[which_tower]].kw);
-		drawText(scr,0,40,str);
+		drawText2(scr,0,40,str);
 		for(int i=0 ; i<10 ; i++){
 			drawImage(scr,img.symbol,0,i*40+80,
 					  (sta[area[ this_area[which_tower] ].station[i]].mark%17)*34,
 					  (sta[area[ this_area[which_tower] ].station[i]].mark/17)*34,
 					  34,34,255);
-			drawText(scr,40,i*40+80,sta[area[ this_area[which_tower] ].station[i]].name);
-			if(area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]==0)drawText(scr,400,i*40+80,"----");
+			drawText2(scr,40,i*40+80,sta[area[ this_area[which_tower] ].station[i]].name);
+			if(area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]==0)drawText2(scr,400,i*40+80,"----");
 			else if(area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]==CHANNELS+1)drawText(scr,400,i*40+80,"****");
 			else{
 				sprintf_s(str,"ch%2d",area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]);
-				drawText(scr,400,i*40+80,str);
+				drawText2(scr,400,i*40+80,str);
 			}
 		}
 		if(area[this_area[which_tower]].tower[this_tower[which_tower]].v)drawImage(scr,img.back,560,0,1240,640,80,80,255);
@@ -1254,7 +1258,7 @@ void drawTowerList(SDL_Surface* scr){
 	}else{
 		for(int i=0 ; i<10 ; i++){
 			if(this_tower[i]==EOF)break;
-			drawText(scr,0,i*40,area[this_area[i]].tower[this_tower[i]].name);
+			drawText2(scr,0,i*40,area[this_area[i]].tower[this_tower[i]].name);
 		}
 	}
 }
@@ -1265,31 +1269,31 @@ void drawMiyazakiMuseum(SDL_Surface* scr){
 	}
 	drawImage(scr,img.back,0,start,0,0,640,480,255-start*255/200);
 	if(start>0){
-		if(start>180)fontA=(200-start)*13;
-		if(start<20)fontA=start*13;
-		drawText2(scr,start/3,120,text[MIYAZAKITEXT+71]);
-		drawText2(scr,50+start/2,200,text[MIYAZAKITEXT+72]);
-		fontA=255;
+		int a=0;
+		if(start>180)a=(200-start)*13;
+		if(start<20)a=start*13;
+		drawText2(scr,start/3,120,text[MIYAZAKITEXT+71],100,a);
+		drawText2(scr,50+start/2,200,text[MIYAZAKITEXT+72],100,a);
 	}
 	int a=0;
 	if(start>40)a=480;
 	else if(start>0)a=start*12;
 	for(int i=0 ; i<16 ; i++){
-		drawImage(scr,img.back,i*160-gd.scrX,abs(25-(count/2+(i%4)*8)%50)*2+a,((count/10)%2)*100,560,100,100,255);
-		drawImage(scr,img.back,i*160-gd.scrX,abs(25-(count/2+(i%4)*8)%50)*2+a,(i%4)*100+200,560,100,100,255);
+		drawImage(scr,img.back,i*160-shopScrX,abs(25-(count/2+(i%4)*8)%50)*2+a,((count/10)%2)*100,560,100,100,255);
+		drawImage(scr,img.back,i*160-shopScrX,abs(25-(count/2+(i%4)*8)%50)*2+a,(i%4)*100+200,560,100,100,255);
 	}
 	for(int i=0 ; i<14 ; i++){
 		if((i==7 && !gd.bought[15]) || (i==9 && !gd.bought[16]) || (i==6 && !gd.bought[6])
 		   || (i==10 && !gd.bought[9]) || (i==11 && !gd.bought[11]) || (i==8 && !gd.bought[12])){
-			drawImage(scr,img.back,i*200-gd.scrX,400,0,480,80,80,255);
+			drawImage(scr,img.back,i*200-shopScrX,400,0,480,80,80,255);
 		}
-		else drawImage(scr,img.back,i*200-gd.scrX,400,80+i*80,480,80,80,255);
+		else drawImage(scr,img.back,i*200-shopScrX,400,80+i*80,480,80,80,255);
 	}
 	if(phase==SEOI_HA){
-		drawImage(scr,img.back,1400-gd.scrX,380,1200+(count/30)*80,480,80,80,255);
+		drawImage(scr,img.back,1400-shopScrX,380,1200+(count/30)*80,480,80,80,255);
 	}
-	drawImage(scr,img.chr,(int)gd.x-gd.scrX-14,420,gd.player_dir*30,0,30,60,255);
-	if(key.left || key.right)drawImage(scr,img.chr,(int)gd.x-gd.scrX-26,440,((count/5)%2)*60,110,60,60,255);
+	drawImage(scr,img.chr,(int)shopPlayerX-shopScrX-14,420,shopPlayerDir*30,0,30,60,255);
+	if(key.left || key.right)drawImage(scr,img.chr,(int)shopPlayerX-shopScrX-26,440,((count/5)%2)*60,110,60,60,255);
 	if(phase==GUIDE_ALL){
 		sprintf_s(str,"%4d/%4d",menu[GUIDE_ALL].selected()+1,animedex_num);
 		drawText2(scr,0,0,str,(int)strlen(str));
@@ -1367,7 +1371,7 @@ void drawMiyazakiExplain(SDL_Surface *scr){
 			drawKeyboard(scr,key.leftC,0,0);
 			drawKeyboard(scr,key.rightC,20,0);
 			drawText(scr,40,0,text[GAMETEXT+12]);
-			if(gd.x>180 && ((int)gd.x-180)%200<120){
+			if(shopPlayerX>180 && ((int)shopPlayerX-180)%200<120){
 				drawKeyboard(scr,key.zC,100,0);
 				drawText(scr,120,0,text[OPTIONTEXT+1]);
 			}
@@ -1405,20 +1409,20 @@ void drawMiyazakiExplain(SDL_Surface *scr){
 			drawText(scr,20,460,text[MENUTEXT+4]);
 		}
 		else if(phase==TOWERLIST){
-			drawKeyboard(scr,key.upC,180,460);
-			drawKeyboard(scr,key.downC,200,460);
-			drawKeyboard(scr,key.leftC,220,460);
-			drawKeyboard(scr,key.rightC,240,460);
-			drawText(scr,260,460,text[GAMETEXT+12]);
+			drawKeyboard(scr,key.upC,360,460);
+			drawKeyboard(scr,key.downC,380,460);
+			drawKeyboard(scr,key.leftC,400,460);
+			drawKeyboard(scr,key.rightC,420,460);
+			drawText(scr,440,460,text[GAMETEXT+12]);
 			if(this_tower[0]!=EOF){
-				drawKeyboard(scr,key.zC,200,440);
-				drawText(scr,220,440,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.zC,400,440);
+				drawText(scr,420,440,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==SHOW_TOWERDATA){
-			drawKeyboard(scr,key.zC,240,460);
-			drawKeyboard(scr,key.xC,260,460);
-			drawText(scr,280,460,text[MENUTEXT+4]);
+			drawKeyboard(scr,key.zC,480,460);
+			drawKeyboard(scr,key.xC,500,460);
+			drawText(scr,520,460,text[MENUTEXT+4]);
 		}
 		else if(phase==MIYAZAKI_TALK || phase==DEPLOMA_TALK){
 			drawKeyboard(scr,key.zC,0,0);

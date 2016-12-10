@@ -43,7 +43,6 @@ void dupcheck(int k){
 	if(key_setting!=5 && key.downC==key.pressed)key.downC=k;
 	if(key_setting!=6 && key.leftC==key.pressed)key.leftC=k;
 	if(key_setting!=7 && key.rightC==key.pressed)key.rightC=k;
-	key.a=0;key.z=0;key.x=0;key.c=0;key.up=0;key.down=0;key.left=0;key.right=0;
 }
 
 void keySetting(){
@@ -61,7 +60,6 @@ void keySetting(){
 			dupcheck(key.rightC);key.rightC=key.pressed;
 			if(mode==GAME)phase=GAME_OPTION;
 			else phase=OPTION_MENU;
-			key.right=0;
 			Mix_PlayChannel(1, sf.decide, 0);
 			break;
 		default:break;
@@ -119,29 +117,28 @@ void switchSetting(int n, bool up_key){
 		else CHAR_CODE=JAPANESE;
 	}
 	else if(n==5){
-		if(mode!=GAME){
-			if(mode==GAME)gd.second/=MAGNIFY;
-			if(up_key){
-				MAGNIFY*=2;
-				if(!gd.bought[4] && MAGNIFY==8)MAGNIFY=1;
-				else if(MAGNIFY==64)MAGNIFY=1;
-			}else{
-				MAGNIFY/=2;
-				if(!gd.bought[4] && MAGNIFY==0)MAGNIFY=4;
-				else if(MAGNIFY==0)MAGNIFY=32;
-			}
-			if(mode==GAME){
-				gd.second*=MAGNIFY;
-				fix_XY();
-				fix_scrXY();
-				map.buffered=false;
-				map.buffered2=false;
-			}
-			if(MAGNIFY<8){
-				gd.current_area=EOF;
-				gd.current_town=EOF;
-			}
+		if(mode==GAME)gd.second/=MAGNIFY;
+		if(up_key){
+			MAGNIFY*=2;
+			if(!gd.bought[4] && MAGNIFY==8)MAGNIFY=1;
+			else if(MAGNIFY==64)MAGNIFY=1;
+		}else{
+			MAGNIFY/=2;
+			if(!gd.bought[4] && MAGNIFY==0)MAGNIFY=4;
+			else if(MAGNIFY==0)MAGNIFY=32;
 		}
+		if(mode==GAME){
+			gd.second*=MAGNIFY;
+			fix_XY();
+			fix_scrXY();
+			map.buffered=false;
+			map.buffered2=false;
+		}
+		if(MAGNIFY<8){
+			gd.current_area=EOF;
+			gd.current_town=EOF;
+		}
+		pre_magnify=MAGNIFY;
 	}
 	else if(n==6){
 		if(ADJ_DIR==MANUAL)ADJ_DIR=AUTO;
@@ -286,7 +283,6 @@ void keyOptionSetting(){
 
 void drawKeySetting(SDL_Surface* scr){
 	drawImage(scr,img.menuback,0,46,0,0,400,296,128);
-	fontA=255;
 	drawText2(scr,80,50,"[LANGUAGE]");
 	drawKeyboard2(scr,key.aC,40,50);
 	drawText2(scr,80,86,"[Z]");

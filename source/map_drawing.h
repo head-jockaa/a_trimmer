@@ -22,6 +22,7 @@
 void createMap();
 void createMap_tower();
 void createMap_color(int bright);
+void drawSea(SDL_Surface* scr, int X, int Y);
 void drawMap(SDL_Surface* scr, int X, int Y);
 void drawMap2(SDL_Surface* scr, int X, int Y);
 void drawGround(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h, int bright, bool buf);

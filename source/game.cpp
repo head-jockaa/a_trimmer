@@ -2,7 +2,6 @@
 
 GameData gd;
 ManekiData md;
-int pre_magnify;
 
 int mwave[68]={
 11,4,0,0,12,10,2,0,13,11,7,0,11,12,10,3,10,12,11,8,8,11,12,10,
@@ -55,7 +54,7 @@ void initGame(){
 	mode=GAME;
 	load_station();
 
-	img.colorlight=new Image(640,240);
+	img.colorlight=new Image(2560,490);
 	makeColorLight();
 
 	getImage(img.fishup,"file/img/fishup.png",0,0,255);
@@ -84,11 +83,9 @@ void initGame(){
 	gd.zoom=15;
 	gd.height=10;
 	fix_scrXY();
-	pre_magnify=EOF;
 	srand(SDL_GetTicks());
 	gd.randomNumber=rand()%3;
 	if(MAP3D){
-		pre_magnify=MAGNIFY;
 		MAGNIFY=1;
 	}
 	gd.week=0;gd.hour=4;gd.minute=0;gd.second=0;gd.score=0;gd.get_score=0;gd.gradeup=0;gd.crops=0;gd.player_dir=0;
@@ -153,7 +150,7 @@ void initGame(){
 }
 
 void initGame2(){
-	if(gd.hour<=5 || gd.hour>=23)createMap_color(200);
+	if(gd.hour<gd.sunrise_hour || gd.hour>=gd.sunset_hour+2)createMap_color(200);
 	else createMap_color(1000);
 	createMap_tower();
 	if(gd.game_mode==STORYMODE){
@@ -224,7 +221,7 @@ void endGame(){
 	freeSound(sf.gaze);
 	gd.ta_count=0;
 	freeMusic();
-	if(pre_magnify!=EOF)MAGNIFY=pre_magnify;
+	MAGNIFY=pre_magnify;
 	if(gd.game_mode==NO_RELAY){
 		for(int i=0 ; i<areas ; i++){
 			for(int j=0 ; j<area[i].tower_num ; j++){
@@ -265,26 +262,27 @@ void keyFishup(){
 				int n;
 				if(phase==FISHUP || phase==GRADEUP){
 					phase=ANTENNA;
-					n=work[sta[ant->station].ontv].tnum;
+					n=sta[ant->station].ontv;
 				}
 				else if(phase==MANEKI_FISHUP || phase==MANEKI_GRADEUP){
 					phase=PLAYING;
-					n=work[md.fish[0].title_num].tnum;
+					n=md.fish[0].which_work;
 					shiftFish_maneki();
 				}
 				else if(phase==THROW_PHOTO && start==0){
 					phase=ANTENNA;
-					n=work[sta[ant->station].ontv].tnum;
+					n=sta[ant->station].ontv;
 				}
 				else if(phase==MANEKI_THROW_PHOTO && start==0){
 					phase=PLAYING;
-					n=work[sta[ant->station].ontv].tnum;
+					n=sta[ant->station].ontv;
 					shiftFish_maneki();
 				}
 				else if(phase==BS_THROW_PHOTO && start==0){
 					phase=BS_CH;
-					n= work[sta[BSstation[gd.bs_ch]].ontv].tnum;
+					n=sta[BSstation[gd.bs_ch]].ontv;
 				}
+				n=work[n].cartoon_id-1;
 				if(!animebook[n]){
 					animebook[n]=true;
 					collection++;
@@ -300,8 +298,10 @@ void keyBSAttack(){
 		if(!key_stop(key.z) || !key_stop(key.x) || !key_stop(key.c) || !key_stop(key.left) || !key_stop(key.right) || !key_stop(key.up) || !key_stop(key.down)){
 			if(start==0){
 				phase=BS_CH;
-				if(!animebook[ work[sta[BSstation[gd.bs_ch]].ontv].tnum ]){
-					animebook[ work[sta[BSstation[gd.bs_ch]].ontv].tnum ]=true;
+				int n=sta[BSstation[gd.bs_ch]].ontv;
+				n=work[n].cartoon_id-1;
+				if(!animebook[n]){
+					animebook[n]=true;
 					collection++;
 					save_animebook();
 				}
@@ -372,7 +372,8 @@ void keyResult(){
 					freeImage(img.tv_asahi);
 					sprintf_s(str,"file/img/ready%d.png",gd.week%6);
 					getImage(img.tv_asahi,str,0,0,0);
-					createMap_color(1000);
+					if(gd.hour<gd.sunrise_hour || gd.hour>=gd.sunset_hour+2)createMap_color(200);
+					else createMap_color(1000);
 					phase=GAMESTART;
 					sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
 					loadCartoon(str);
@@ -1023,10 +1024,11 @@ void keySMR(){
 		if(ok){
 			saveSMR=false;
 			for(int i=0 ; i<map.mapW ; i++)for(int j=0 ; j<map.mapH ; j++)map.smr[i][j]=0;
-			if(gd.game_mode!=NO_RELAY)load_smr(area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]);
+			if(gd.game_mode!=NO_RELAY){
+				load_smr(area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]);
+			}
 			SMRcount++;
 			phase=SMR_RESULT;
-			pre_magnify=MAGNIFY;
 			MAGNIFY=1;
 			fix_XY();
 			fix_scrXY();
@@ -1047,7 +1049,9 @@ void keySMR(){
 
 void keySmrResult(){
 	if(key.x && !key_stop(key.x)){
-		if(gd.game_mode!=NO_RELAY)save_smr(area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]);
+		if(gd.game_mode!=NO_RELAY){
+			save_smr(area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]);
+		}
 		MAGNIFY=pre_magnify;
 		SMRcount=0;
 		phase=SMR;
@@ -1134,9 +1138,15 @@ void keyManekiTalking(){
 
 void keyGameTalking(){
 	if(key.z && !key_stop(key.z) && start==0){
-		if(nextTalk()){
-			Mix_PlayChannel(0, sf.noize, 0);
-			phase=PLAYING;
+		if(MAP3D){
+			if(controlTalking()==EOF){
+				phase=PLAYING;
+			}
+		}else{
+			if(nextTalk()){
+				Mix_PlayChannel(0, sf.noize, 0);
+				phase=PLAYING;
+			}
 		}
 	}
 }
@@ -1246,7 +1256,7 @@ void keyGame(){
 
 void setTmpFish_bs(){
 	fishbox.text_count=60;
-	tmp_fish.title_num=sta[ BSstation[gd.bs_ch] ].ontv;
+	tmp_fish.which_work=sta[ BSstation[gd.bs_ch] ].ontv;
 	tmp_fish.x=(int)gd.x;
 	tmp_fish.y=(int)gd.y;
 	tmp_fish.week=gd.week;
@@ -1263,11 +1273,11 @@ void setTmpFish_bs(){
 void receiveBS(){
 	if(BSstation[gd.bs_ch]!=EOF && sta[ BSstation[gd.bs_ch] ].ontv!=EOF){
 		setTmpFish_bs();
-		if(fishbox.getSC(tmp_fish.title_num)==0){
+		if(fishbox.getSC(tmp_fish.which_work)==0){
 			fishbox.text_count=1;
 			fishbox.setFish(tmp_fish);
 			for(int i=0 ; i<works ; i++)if(fishbox.today[i]==EOF){
-				fishbox.today[i]=tmp_fish.title_num;
+				fishbox.today[i]=tmp_fish.which_work;
 				break;
 			}
 			Mix_PlayChannel(0,sf.thunder,0);
@@ -1277,7 +1287,7 @@ void receiveBS(){
 			phase=BS_ATTACK;
 			start=50;
 		}
-		fishbox.panelColor(tmp_fish.title_num);
+		fishbox.panelColor(tmp_fish.which_work);
 	}
 }
 
@@ -1370,19 +1380,17 @@ void televise(){
 			area[i].tower[j].onair_num=0;
 			area[i].tower[j].colorlight_size=0;
 			for(int k=0 ; k<10 ; k++){
-				if(area[i].tower[j].ch[k]!=0 && area[i].tower[j].ch[k]!=CHANNELS+1 && sta[ area[i].station[k] ].ontv!=EOF){
+				if(area[i].tower[j].ch[k]>=1 && area[i].tower[j].ch[k]<=CHANNELS && sta[ area[i].station[k] ].ontv!=EOF){
 					if(area[i].tower[j].onair_num<3)area[i].tower[j].onair_num++;
-					if(area[i].tower[j].ch[k]!=CHANNELS+1){
-						int n=0;
-						if(area[i].tower[j].kw>=30)n=7;
-						else if(area[i].tower[j].kw>=20)n=6;
-						else if(area[i].tower[j].kw>=10)n=5;
-						else if(area[i].tower[j].kw>=1)n=4;
-						else if(area[i].tower[j].kw>=0.1)n=3;
-						else if(area[i].tower[j].kw>=0.01)n=2;
-						else if(area[i].tower[j].kw>=0.001)n=1;
-						if(area[i].tower[j].colorlight_size<n)area[i].tower[j].colorlight_size=n;
-					}
+					int n=0;
+					if(area[i].tower[j].kw>=30)n=7;
+					else if(area[i].tower[j].kw>=20)n=6;
+					else if(area[i].tower[j].kw>=10)n=5;
+					else if(area[i].tower[j].kw>=1)n=4;
+					else if(area[i].tower[j].kw>=0.1)n=3;
+					else if(area[i].tower[j].kw>=0.01)n=2;
+					else if(area[i].tower[j].kw>=0.001)n=1;
+					if(area[i].tower[j].colorlight_size<n)area[i].tower[j].colorlight_size=n;
 				}
 			}
 		}
@@ -1483,7 +1491,7 @@ void drawResult(SDL_Surface* scr){
 			if(fishbox.today[n]==EOF)break;
 			if(n<0)continue;
 			drawImage(scr,img.symbol,110,200+i*40,(work[fishbox.today[n]].mark%16)*34,(work[fishbox.today[n]].mark/16)*34,34,34,255);
-			drawText2_lang(scr,140,200+i*40,work[fishbox.today[n]].title,60,JAPANESE);
+			drawText2_lang(scr,140,200+i*40,work[fishbox.today[n]].title,60,255,JAPANESE);
 		}
 	}
 	if(phase==RESULT){
@@ -1572,7 +1580,7 @@ void drawPlayer(SDL_Surface* scr){
 		if(DASH_TYPE==TYPE_MEGAMAN && gd.speed>1)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-66,(int)(gd.y*MAGNIFY)-gd.scrY-38,0,60,60,48,255);
 		else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-14,(int)(gd.y*MAGNIFY)-gd.scrY-50,gd.player_dir*30,0,30,60,255);
 		if(gd.speed>1.5){
-			drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-32,(int)(gd.y*MAGNIFY)-gd.scrY-40,((count/5)%2)*60,110+a*4,60,60,255);
+			drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-32,(int)(gd.y*MAGNIFY)-gd.scrY-40,((count/5)%2)*60,110+a*2,60,60,255);
 			if(CHAR_CODE==JAPANESE)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-32,(int)(gd.y*MAGNIFY)-gd.scrY-40,((count/5)%2)*60,230+a,60,30,255);
 			else drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-32,(int)(gd.y*MAGNIFY)-gd.scrY-40,((count/5)%2)*60,290+a,60,30,255);
 		}
@@ -1604,7 +1612,7 @@ void drawFishup(SDL_Surface* scr){
 	if(phase==BS_ATTACK){
 		if(start>0)drawImage(scr,img.fishup,20,40-abs(start%10-5)*10,0,300,320,320,255);
 		else drawImage(scr,img.fishup,20,40,0,300,320,320,255);
-		if(!animebook[ work[sta[BSstation[gd.bs_ch]].ontv].tnum ]){
+		if(!animebook[ work[sta[BSstation[gd.bs_ch]].ontv].cartoon_id-1 ]){
 			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 			sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
 			drawText2(scr,380,220,str);
@@ -1632,8 +1640,8 @@ void drawFishup(SDL_Surface* scr){
 		if(start>40)drawImage(scr,img.fishup,(start-40)*20,40,320,300,320,320,255);
 		else drawImage(scr,img.fishup,0,40,320,300,320,320,255);
 		int n;
-		if(phase==FISHUP)n=work[sta[ant->station].ontv].tnum;
-		else n=work[md.fish[0].title_num].tnum;
+		if(phase==FISHUP)n=work[sta[ant->station].ontv].cartoon_id-1;
+		else n=work[md.fish[0].which_work].cartoon_id-1;
 		if(start<70 && !animebook[n]){
 			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 			sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
@@ -1884,7 +1892,7 @@ void drawGame(SDL_Surface* scr){
 			if(phase==ADJUST_ZOOM){
 				sprintf_s(str,"%d",gd.zoom);
 				drawImage(scr,img.menuback,120,120,0,0,400,40,128);
-				drawText2(scr,140,124,text[GAMETEXT+26]);
+				drawText2(scr,140,124,text[GAMETEXT+27]);
 				drawText2(scr,400,124,str);
 			}
 		}
@@ -1940,7 +1948,13 @@ void drawGame(SDL_Surface* scr){
 		if(phase==SAVING_RECORD && count>=150)drawText2(scr,160,60,text[EPILOGUE+5]);
 		if(phase==MANEKI)drawTalking(scr,1,text[ANTENNATEXT+17+gd.scene_count]);
 		else if(phase==MANEKI_CONFIRM)drawTalking(scr,1,text[ANTENNATEXT+24+gd.scene_count]);
-		else if(phase==TALKING)drawAnimationCut(scr);
+		else if(phase==TALKING){
+			if(MAP3D){
+				drawTalking(scr);
+			}else{
+				drawAnimationCut(scr);
+			}
+		}
 
 		if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)drawThrowPhoto(scr);
 	}
@@ -2052,14 +2066,14 @@ void drawGameExplain(SDL_Surface* scr){
 		}
 		else if(phase==BS_CH || phase==BS_ATTACK){
 			if(count%400<200){
-				drawKeyboard(scr,key.xC,80,20);
-				drawText(scr,100,20,text[MENUTEXT+4]);
+				drawKeyboard(scr,key.xC,40,60);
+				drawText(scr,60,60,text[MENUTEXT+4]);
 			}else{
-				drawKeyboard(scr,key.leftC,80,20);
-				drawKeyboard(scr,key.rightC,100,20);
-				drawKeyboard(scr,key.upC,120,20);
-				drawKeyboard(scr,key.downC,140,20);
-				drawText(scr,160,20,text[MENUTEXT+15]);
+				drawKeyboard(scr,key.leftC,40,60);
+				drawKeyboard(scr,key.rightC,60,60);
+				drawKeyboard(scr,key.upC,80,60);
+				drawKeyboard(scr,key.downC,100,60);
+				drawText(scr,120,60,text[MENUTEXT+15]);
 			}
 		}
 		else if(phase==FISHUP || phase==GRADEUP){
@@ -2215,6 +2229,18 @@ void timerTodaysCrop(){
 }
 
 void timerGetHazia(){
+	if(gd.scene_count==1){
+		if(start==0 && count%5==0 && gd.hazia2>0){
+			int a=1;
+			for(int i=0 ; i<10 ; i++){
+				if(gd.hazia2/a>=10)a*=10;
+			}
+			gd.hazia2-=a;
+			gd.hazia+=a;
+			if(gd.hazia2==0)Mix_PlayChannel(0,sf.coin,0);
+			else Mix_PlayChannel(0,sf.cursor_move,0);
+		}
+	}
 	if(nextCut()){
 		if(gd.scene_count==2){
 			gd.text_count=0;
@@ -2312,22 +2338,25 @@ void timerSMRcount(){
 
 void timerSunMovement(){
 	if(gd.second==0){
-		if(gd.hour==22 || gd.hour==6 || (gd.hour==6 && gd.minute==0) || (gd.hour==23 && gd.minute==0)){
-			if(MAP3D){
+		if(MAP3D){
+			if(gd.hour==gd.sunrise_hour){
 				make3dview(gd.x,gd.y,gd.ant_dir);
-				make3dview_sky();
 			}
-			else{
-				map.buffered=false;
+			else if(gd.hour==gd.sunset_hour+1){
+				make3dview(gd.x,gd.y,gd.ant_dir);
 			}
-		}
-		if(gd.minute==0){
-			if(gd.hour==6){
+			else make3dview_sky();
+		}else{
+			if(gd.hour==gd.sunrise_hour && gd.minute==0){
 				createMap_color(1000);
+			}
+			if(gd.hour==gd.sunset_hour+2 && gd.minute==0){
+				createMap_color(200);
+			}
+			if(gd.hour==gd.sunrise_hour){
 				map.buffered=false;
 			}
-			if(gd.hour==23){
-				createMap_color(200);
+			if(gd.hour==gd.sunset_hour+1){
 				map.buffered=false;
 			}
 		}
@@ -2392,8 +2421,8 @@ void timerFishUp(){
 		Mix_PlayChannel(1, sf.water, 0);
 		int n;
 		if(phase==FISHUP)n=sta[ant->station].ontv;
-		else n=md.fish[0].title_num;
-		startThread(work[n].tnum, work[n].query);
+		else n=md.fish[0].which_work;
+		startThread(work[n].cartoon_id, work[n].query);
 	}
 	if(start==72){
 		Mix_PlayChannel(0, sf.get, 0);
@@ -2428,7 +2457,7 @@ void timerBSAttack(){
 	if(start==49){
 		fishbox.text_count=1;
 		int n=sta[ BSstation[gd.bs_ch] ].ontv;
-		startThread(work[n].tnum, work[n].query);
+		startThread(work[n].cartoon_id, work[n].query);
 	}
 	if(start==0 && tm.finish && !tm.failure){
 		createSearchImage(tm.selected);
@@ -2484,8 +2513,8 @@ void timerGame(){
 		for(int i=0 ; i<md.fish_num ; i++){
 			if(md.maneki_count[i]!=0){
 				if(md.maneki_count[i]==40){
-					if(md.fish[i].bs)Mix_PlayChannel(0,sf.swish,0);
-					else Mix_PlayChannel(0,sf.meow,0);
+					if(md.fish[i].bs)Mix_PlayChannel(1,sf.swish,0);
+					else Mix_PlayChannel(1,sf.meow,0);
 				}
 				md.maneki_count[i]--;
 				if(md.maneki_count[i]==0)ManekiTV_catch();
@@ -2636,7 +2665,7 @@ void initManekiTV(){
 }
 
 void setTmpFish_maneki(int n){
-	tmp_fish.title_num=sta[md.station[n]].ontv;
+	tmp_fish.which_work=sta[md.station[n]].ontv;
 	tmp_fish.x=(int)md.manekiX;
 	tmp_fish.y=(int)md.manekiY;
 	tmp_fish.week=gd.week;
@@ -2658,9 +2687,9 @@ void setTmpFish_maneki(int n){
 }
 
 void setFish_maneki(Fish f){
-	if(f.title_num<0 || f.title_num>=works)return;
+	if(f.which_work<0 || f.which_work>=works)return;
 	if(md.fish_num>=300)return;
-	md.fish[md.fish_num].title_num=f.title_num;
+	md.fish[md.fish_num].which_work=f.which_work;
 	md.fish[md.fish_num].x=f.x;md.fish[md.fish_num].y=f.y;
 	md.fish[md.fish_num].hour=f.hour;md.fish[md.fish_num].minute=f.minute;
 	md.fish[md.fish_num].week=f.week;
@@ -2676,13 +2705,14 @@ void setFish_maneki(Fish f){
 
 void shiftFish_maneki(){
 	for(int i=0 ; i<md.fish_num-1 ; i++){
-		md.fish[i].title_num=md.fish[i+1].title_num;
+		md.fish[i].which_work=md.fish[i+1].which_work;
 		md.fish[i].x=md.fish[i+1].x;
 		md.fish[i].y=md.fish[i+1].y;
 		md.fish[i].hour=md.fish[i+1].hour;
 		md.fish[i].minute=md.fish[i+1].minute;
 		md.fish[i].week=md.fish[i+1].week;
 		md.fish[i].sta=md.fish[i+1].sta;
+		md.fish[i].area=md.fish[i+1].area;
 		md.fish[i].tower=md.fish[i+1].tower;
 		md.fish[i].ch=md.fish[i+1].ch;
 		md.fish[i].rcv=md.fish[i+1].rcv;
@@ -2705,7 +2735,7 @@ void setManekiData(){
 		for(int j=0 ; j<(are->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
 				int this_ch=area[i].station[k];
-				if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
+				if(tow->ch[k]>=1 && tow->ch[k]<=CHANNELS && tow->rcv[k]>=RCV_LEVEL){
 					int mr2=0;
 					mr2=receive_mg(i,j,tow->ch[k],(int)tow->dir);
 					if(tow->rcv[k]-mr2<md.rcv[this_ch]-md.mg_rcv[this_ch])continue;
@@ -2768,16 +2798,16 @@ void ManekiTV_throw(){
 			setTmpFish_maneki(i);
 			skip=false;
 			for(int j=0 ; j<md.fish_num ; j++){
-				if(md.fish[j].title_num==tmp_fish.title_num
+				if(md.fish[j].which_work==tmp_fish.which_work
 				&& md.fish[j].sta==tmp_fish.sta
 				&& md.fish[j].area==tmp_fish.area
 				&& md.fish[j].tower==tmp_fish.tower){
 					skip=true;
-					continue;
+					break;
 				}
 			}
 			if(skip)continue;
-			if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getRCV(tmp_fish.title_num)<tmp_fish.rcv-tmp_fish.mg_rcv)){
+			if(fishbox.getSC(tmp_fish.which_work)<tmp_fish.score || (fishbox.getSC(tmp_fish.which_work)==tmp_fish.score && fishbox.getRCV(tmp_fish.which_work)<tmp_fish.rcv-tmp_fish.mg_rcv)){
 				if(md.fish_num==0)md.maneki_count[0]=40;
 				else{
 					if(md.maneki_count[md.fish_num-1]>30)md.maneki_count[md.fish_num]=md.maneki_count[md.fish_num-1]+10;
@@ -2791,29 +2821,30 @@ void ManekiTV_throw(){
 
 void ManekiTV_catch(){
 	start=72;
-	if(fishbox.getSC(md.fish[0].title_num)==0){
+	if(fishbox.getSC(md.fish[0].which_work)==0){
 		phase=MANEKI_FISHUP;
 		gd.get_score+=md.fish[0].score;
+		Mix_PlayChannel(0, sf.get, 0);
 		for(int i=0 ; i<works ; i++)if(fishbox.today[i]==EOF){
-			fishbox.today[i]=md.fish[0].title_num;
+			fishbox.today[i]=md.fish[0].which_work;
 			break;
 		}
 	}else{
 		phase=MANEKI_GRADEUP;
-		fishbox.text_count=(int)strlen(work[md.fish[0].title_num].title.str[0]);
-		gd.gradeup = md.fish[0].score-fishbox.getSC(md.fish[0].title_num);
+		fishbox.text_count=(int)strlen(work[md.fish[0].which_work].title.str[0]);
+		gd.gradeup = md.fish[0].score-fishbox.getSC(md.fish[0].which_work);
 		gd.get_score+=gd.gradeup;
 		Mix_PlayChannel(1, sf.decide, 0);
 	}
 	fishbox.setFish(md.fish[0]);
-	fishbox.panelColor(md.fish[0].title_num);
+	fishbox.panelColor(md.fish[0].which_work);
 }
 
 void makeColorLight(){
 	Uint32 *rgb=img.colorlight->RGB;
 	for(int m=0 ; m<3 ; m++){
-		for(int k=0 ; k<8 ; k++){
-			for(int i=0 ; i<80 ; i++)for(int j=0 ; j<80 ; j++){
+		for(int k=0 ; k<16 ; k++){
+			for(int i=0 ; i<160 ; i++)for(int j=0 ; j<160 ; j++){
 				double a=15.97*(sqrt((k*5.0-i)*(k*5-i)+(k*5-j)*(k*5-j))/(k*5));
 				int b=(int)(a*a);
 				int c;
@@ -2823,16 +2854,16 @@ void makeColorLight(){
 					if(AIR_IMG==TYPE1_EDGE||AIR_IMG==TYPE1_BARE)c=b;
 					else c=256-b;
 				}
-				if(m==0)*(rgb+(j)*640+(i+k*80))=setRGB(0,0,c);
-				if(m==1)*(rgb+(j+80)*640+(i+k*80))=setRGB(c,0,0);
-				if(m==2)*(rgb+(j+160)*640+(i+k*80))=setRGB(c,c,0);
+				if(m==0)*(rgb+(j)*2560+(i+k*160))=setRGB(0,0,c);
+				if(m==1)*(rgb+(j+160)*2560+(i+k*160))=setRGB(c,0,0);
+				if(m==2)*(rgb+(j+320)*2560+(i+k*160))=setRGB(c,c,0);
 			}
 		}
 	}
 
 	for(int i=0 ; i<10 ; i++)for(int j=0 ; j<10 ; j++){
 		int a=255-(int)(255.0*(sqrt((5.0-i)*(5-i)+(5-j)*(5-j))/5));
-		if(a<0)*(rgb+(j*640)+i)=0;
-		else *(rgb+(j*640)+i)=setRGB(a,0,0);
+		if(a<0)*(rgb+(j+480)*2560+i)=0;
+		else *(rgb+(j+480)*2560+i)=setRGB(a,0,0);
 	}
 }

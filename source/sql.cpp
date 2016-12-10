@@ -484,10 +484,7 @@ void getAreaSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 	else if(strcmp(tname,"cartoon")==0) {
 		if(strcmp(cname,"id")==0) {
 			intValue=fetchInt(c);
-			if(get) {
-				allofworks[index].id=intValue;
-				allofworks[index].tnum=intValue-1;
-			}
+			if(get)allofworks[index].cartoon_id=intValue;
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			fetchSqlString2(c,str);

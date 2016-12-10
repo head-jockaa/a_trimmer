@@ -152,7 +152,7 @@ public:
 class SuperHandyRod : public ConvenientRod{
 	void makeList2();
 	void make_st_list2();
-	int rc2[16], ar2[16], tw2[16];
+	int rc2[64], ar2[64], tw2[64];
 public:
 	SuperHandyRod();
 	void hoist();

@@ -79,10 +79,12 @@ bool key_wait(int a);
 bool key_stop(int a);
 void drawText(SDL_Surface* scr, int X, int Y, const char* st);
 void drawText(SDL_Surface* scr, int X, int Y, const char* st, int strl);
-void drawText_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang);
+void drawText(SDL_Surface* scr, int X, int Y, const char* st, int strl, Uint8 a);
+void drawText_lang(SDL_Surface* scr, int x, int y, const char* st, int l, Uint8 a, int lang);
 void drawText2(SDL_Surface* scr, int X, int Y, const char* st);
 void drawText2(SDL_Surface* scr, int X, int Y, const char* st, int strl);
-void drawText2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, int lang);
+void drawText2(SDL_Surface* scr, int X, int Y, const char* st, int strl, Uint8 a);
+void drawText2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, Uint8 a, int lang);
 void getSymbolImage();
 void TalkingAt(int n);
 void drawKeyboard(SDL_Surface* scr, int k, int X, int Y);
@@ -107,10 +109,10 @@ extern Uint8 mode,mode2,dataNo,phase,kick_count,pauseGame;
 extern int stas,works,prgs,animedex_num,collection,areas,towers,mounts,towns,index_num,clear_num,mapW,mapH;
 extern int count,bg_count,face[1000],start;
 extern int talk_kulisap,face_kulisap,ant_dir;
-extern Uint8 fontA;
 extern bool SHOW_TOWER, EXPLAIN, NHK_REMOVE;
 extern Uint8 CHAR_CODE,AIR_IMG,WALKING_TYPE,ROD_TYPE,ADJ_DIR,CHANNELS,FULLSCR,SCRSIZE,BGM_VOLUME,SE_VOLUME,CHOSEON,CURVE_TOP,MAGNIFY,MAP3D,DASH_TYPE;
 extern double CURVE_RISE;
+extern int pre_magnify;
 extern double test;
 extern double DIS1CH; // 1Ch 500kw ‚Ì“d”g‚ª”ò‚Ô‹——£
 extern double DIS62CH; // 
@@ -128,10 +130,12 @@ extern String text[1000],talk[1000];
 char* toChar(String s);
 void drawText(SDL_Surface* scr, int X, int Y, String st);
 void drawText(SDL_Surface* scr, int x, int y, String str, int strl);
-void drawText_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang);
+void drawText(SDL_Surface* scr, int x, int y, String str, int strl, Uint8 a);
+void drawText_lang(SDL_Surface* scr, int x, int y, String st, int l, Uint8 a, int lang);
 void drawText2(SDL_Surface* scr, int X, int Y, String st);
 void drawText2(SDL_Surface* scr, int x, int y, String str, int strl);
-void drawText2_lang(SDL_Surface* scr, int x, int y, String st, int l, int lang);
+void drawText2(SDL_Surface* scr, int x, int y, String str, int strl, Uint8 a);
+void drawText2_lang(SDL_Surface* scr, int x, int y, String st, int l, Uint8 a, int lang);
 void putHeadMark(String &s);
 String jummingText(String s, int strl, int rcv, int mg_rcv);
 
@@ -202,7 +206,7 @@ struct Prg{
 struct Work{
 	String title;
 	char query[600];
-	int id,mark,prg_num,tnum;
+	int mark,prg_num,cartoon_id;
 	Prg *prg;
 	Uint8 r,g,b;
 	bool exist;
@@ -257,7 +261,7 @@ struct Timeslot{
 };
 extern Timeslot *timeslot;
 
-extern size_t areacode_num, allofworks_num, timeslot_num;
+extern int areacode_num, allofworks_num, timeslot_num;
 extern Work *allofworks;
 
 struct Key{
@@ -274,7 +278,7 @@ struct Image{
 
 struct Fish{
 	Uint8 ch,hour,minute,week,rcv,mg_rcv;
-	int x,y,title_num,sta,area,tower,score;
+	int x,y,which_work,sta,area,tower,score;
 	bool bs;
 };
 
@@ -305,6 +309,7 @@ public:
 	int getY();
 	int getH();
 	int getM();
+	int getSC();
 	int getSC(int i);
 	int getRCV(int i);
 	int getData(int i, int k);
@@ -332,16 +337,20 @@ extern ImageFile img;
 
 void drawText(Image* img, int X, int Y, const char* st);
 void drawText(Image* img, int X, int Y, const char* st, int strl);
-void drawText_lang(Image* img, int x, int y, const char* st, int l, int lang);
+void drawText(Image* img, int X, int Y, const char* st, int strl, Uint8 a);
+void drawText_lang(Image* img, int x, int y, const char* st, int l, Uint8 a, int lang);
 void drawText(Image* img, int X, int Y, String st);
 void drawText(Image* img, int x, int y, String str, int strl);
-void drawText_lang(Image* img, int x, int y, String st, int l, int lang);
+void drawText(Image* img, int x, int y, String str, int strl, Uint8 a);
+void drawText_lang(Image* img, int x, int y, String st, int l, Uint8 a, int lang);
 void drawText2(Image* img, int X, int Y, const char* st);
 void drawText2(Image* img, int X, int Y, const char* st, int strl);
-void drawText2_lang(Image* img, int x, int y, const char* st, int l, int lang);
+void drawText2(Image* img, int X, int Y, const char* st, int strl, Uint8 a);
+void drawText2_lang(Image* img, int x, int y, const char* st, int l, Uint8 a, int lang);
 void drawText2(Image* img, int X, int Y, String st);
 void drawText2(Image* img, int x, int y, String str, int strl);
-void drawText2_lang(Image* img, int x, int y, String st, int l, int lang);
+void drawText2(Image* img, int x, int y, String str, int strl, Uint8 a);
+void drawText2_lang(Image* img, int x, int y, String st, int l, Uint8 a, int lang);
 void getImage(Image*& img, const char* st, int r, int g, int b);
 void getImage(Image*& im, char* st);
 void freeImage(Image*& im);

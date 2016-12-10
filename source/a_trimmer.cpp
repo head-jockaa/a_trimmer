@@ -86,14 +86,14 @@ void key_counter(){
 }
 
 void pauseMovie(){
-	if((mode==OPENING && phase==2) || (mode==ENDING && phase==ENDING_ANIME)){
+	if((mode==OPENING && phase==1) || (mode==ENDING && phase==ENDING_ANIME)){
 		pausetime=SDL_GetTicks();
 		Mix_HaltMusic();
 //		Mix_PauseMusic();
 	}
 }
 void resumeMovie(){
-	if((mode==OPENING && phase==2) || (mode==ENDING && phase==ENDING_ANIME)){
+	if((mode==OPENING && phase==1) || (mode==ENDING && phase==ENDING_ANIME)){
 		int n=SDL_GetTicks();
 		timestamp+=n-pausetime;
 //		Mix_ResumeMusic();
@@ -197,6 +197,7 @@ int main(int argc, char *argv[]) {
 				if(key.pressed==SDLK_F11)reset_key();
 				if(key.pressed==SDLK_F12){
 					movie_test=false;
+					MAGNIFY=pre_magnify;
 					end();
 					initOpening();
 				}

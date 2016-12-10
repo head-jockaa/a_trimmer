@@ -19,8 +19,9 @@
 #define NAGANO_APPLE 13
 #define ARANCIA 14
 #define STAY_IN 15
+#define SHOP_ITEMS 18
 
-extern int price[18], shop_icon[18];
+extern int price[SHOP_ITEMS], shop_icon[SHOP_ITEMS];
 
 void initHaziaShop();
 void keyHaziaShop();

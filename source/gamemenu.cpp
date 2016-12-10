@@ -59,13 +59,15 @@ void gotoGame(){
 	if(c){
 		load_game(n);
 		phase=READY;
-		sprintf_s(str,"file/data/cartoon/talk%d.json",dataNo);
-		loadCartoon(str);
 	}
 	if((dataNo-1)%4==1){gd.sunrise_hour=5;gd.sunset_hour=19;}
 	else if((dataNo-1)%4==3){gd.sunrise_hour=7;gd.sunset_hour=17;}
 	else {gd.sunrise_hour=6;gd.sunset_hour=18;}
 	initGame2();
+	if(c){
+		sprintf_s(str,"file/data/cartoon/talk%d.json",dataNo);
+		loadCartoon(str);
+	}
 	gd.talk_count=EOF;
 	kick_count=1;
 }
@@ -80,7 +82,7 @@ void timerPrologue(){
 			gd.scrX=(int)gd.x-320;
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
-			for(int i=0 ; i<30 ; i++)menu[BGM_TEST].cursorDown();
+			for(int i=0 ; i<34 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			phase=GOTO_GAME;
 			freeImage(img.back);
@@ -135,6 +137,7 @@ void keyGameMainMenu(){
 			if(makeRecordMenu(RECORDMENU)){
 				phase=GOTO_RECORD;
 				count=0;
+				MAGNIFY=2;
 			}
 			else phase=NODATA;
 		}
@@ -228,6 +231,7 @@ void keyRecordMenu(){
 	if(key.x && !key_stop(key.x)){
 		menu[RECORDMENU].setViewMode(HIDE);
 		phase=MAIN;
+		MAGNIFY=pre_magnify;
 	}
 	if(key.up && !key_wait(key.up))menu[RECORDMENU].cursorUp();
 	if(key.down && !key_wait(key.down))menu[RECORDMENU].cursorDown();
@@ -245,8 +249,6 @@ void keyGameRecord(){
 	if(key.left && !key_wait(key.left))fishbox.cursorLeft();
 	if(key.right && !key_wait(key.right))fishbox.cursorRight();
 	if(preX!=fishbox.getX() || preY!=fishbox.getY()){
-		gd.scrX=fishbox.getX()-320;
-		gd.scrY=fishbox.getY()-240;
 		map.buffered=false;
 	}
 }
@@ -264,7 +266,7 @@ void keyPrologue(){
 			gd.scrX=(int)gd.x-320;
 			phase=MIYAZAKI_MUSEUM;
 			start=0;
-			for(int i=0 ; i<30 ; i++)menu[BGM_TEST].cursorDown();
+			for(int i=0 ; i<34 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			phase=GOTO_GAME;
 			count=0;
@@ -289,7 +291,11 @@ void drawGameMainMenuBox(SDL_Surface* scr){
 void drawGameRecord(SDL_Surface* scr){
 	SDL_Color col=getSkyColor(fishbox.getH(),fishbox.getM());
 	fillRect(scr,0,0,640,480,col.r,col.g,col.b,255);
-	drawMap(scr,fishbox.getX()-320,fishbox.getY()-240);
+	if(fishbox.getSC()==0){
+		drawSea(scr,0,0);
+	}else{
+		drawMap(scr,fishbox.getX()*MAGNIFY-320,fishbox.getY()*MAGNIFY-240);
+	}
 	sprintf_s(str,"%10d",gd.score);
 	drawText(scr,320,0,str);
 	fishbox.drawFishBox(scr);
@@ -364,7 +370,7 @@ void drawGameMenu(SDL_Surface* scr){
 						sprintf_s(str,"%10d",indexName[(gd.scrX+k)*4+i].hiscore);
 						drawText2(scr,266+k*640+start*20,154+i*80,str);
 						if(indexName[(gd.scrX+k)*4+i].rate==100)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,102,0,34,34,255);
-						else if(indexName[(gd.scrX+k)*4+i].rate>=80)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,64,0,34,34,255);
+						else if(indexName[(gd.scrX+k)*4+i].rate>=80)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,68,0,34,34,255);
 						else if(indexName[(gd.scrX+k)*4+i].rate>=60)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,34,0,34,34,255);
 					}
 				}
@@ -428,7 +434,7 @@ bool makeRecordMenu(int n){
 		sc=0;
 		sprintf_s(str,"save/record%d.dat",i);
 		if(!loadFile(str))break;
-		for(int i=17 ; i<(int)fsize ; i+=18){
+		for(int i=18 ; i<(int)fsize ; i+=19){
 			sc+=to16int(fstr[i],fstr[i+1]);
 		}
 		sprintf_s(s.str[0],"%s %10d",indexName[fstr[0]].name.str[0],sc);

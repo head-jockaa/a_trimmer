@@ -3,7 +3,7 @@
 Antenna *ant;
 
 void Antenna::setTmpFish(){
-	tmp_fish.title_num=sta[station].ontv;
+	tmp_fish.which_work=sta[station].ontv;
 	tmp_fish.x=(int)gd.x;
 	tmp_fish.y=(int)gd.y;
 	tmp_fish.week=gd.week;
@@ -30,7 +30,7 @@ void Antenna::receive(){
 		Area *ar=area;
 		for(int i=0 ; i<areas ; i++){
 			Tower *tw=ar->tower;
-			for(int j=0 ; j<(area->tower_num) ; j++){
+			for(int j=0 ; j<(ar->tower_num) ; j++){
 				for(int k=0 ; k<10 ; k++){
 					if(tw->ch[k]!=ch)continue;
 					if( rcv<tw->rcv[k] ){
@@ -50,7 +50,7 @@ void Antenna::receive(){
 		Area *ar=area;
 		for(int i=0 ; i<areas ; i++){
 			Tower *tw=ar->tower;
-			for(int j=0 ; j<(area->tower_num) ; j++){
+			for(int j=0 ; j<(ar->tower_num) ; j++){
 				for(int k=0 ; k<10 ; k++){
 					if(tw->ch[k]!=ch)continue;
 					dir2=abs((int)(tw->dir-gd.ant_dir));
@@ -78,31 +78,27 @@ void Antenna::catching(){
 	if(gd.game_mode==STORYMODE){
 		if(rcv-mg_rcv>=RCV_LEVEL && sta[station].ontv!=EOF){
 			setTmpFish();
-			if(fishbox.getSC(tmp_fish.title_num)<tmp_fish.score || (fishbox.getSC(tmp_fish.title_num)==tmp_fish.score && fishbox.getRCV(tmp_fish.title_num)<tmp_fish.rcv-tmp_fish.mg_rcv)){
-				std::cout << (int)fishbox.getRCV(tmp_fish.title_num);
-				std::cout << " ";
-				std::cout << (int)tmp_fish.rcv-tmp_fish.mg_rcv;
-				std::cout << "\n";
-				if(fishbox.getSC(tmp_fish.title_num)==0){
+			if(fishbox.getSC(tmp_fish.which_work)<tmp_fish.score || (fishbox.getSC(tmp_fish.which_work)==tmp_fish.score && fishbox.getRCV(tmp_fish.which_work)<tmp_fish.rcv-tmp_fish.mg_rcv)){
+				if(fishbox.getSC(tmp_fish.which_work)==0){
 					phase=FISHUP;
 					start=150;
 					gd.get_score+=tmp_fish.score;
 					for(int i=0 ; i<works ; i++)if(fishbox.today[i]==EOF){
-						fishbox.today[i]=tmp_fish.title_num;
+						fishbox.today[i]=tmp_fish.which_work;
 						break;
 					}
 				}else{
 					phase=GRADEUP;
 					start=67;
-					fishbox.text_count=(int)strlen(work[tmp_fish.title_num].title.str[0]);
-					gd.gradeup = tmp_fish.score-fishbox.getSC(tmp_fish.title_num);
+					fishbox.text_count=(int)strlen(work[tmp_fish.which_work].title.str[0]);
+					gd.gradeup = tmp_fish.score-fishbox.getSC(tmp_fish.which_work);
 					gd.get_score+=gd.gradeup;
 					Mix_PlayChannel(1, sf.decide, 0);
 				}
 				setTmpFish();
 				fishbox.setFish(tmp_fish);
 			}
-			fishbox.panelColor(tmp_fish.title_num);
+			fishbox.panelColor(tmp_fish.which_work);
 		}
 	}
 
@@ -359,7 +355,7 @@ void SimpleRod::trolling(){
 		for(int j=0 ; j<(ar->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
 				int this_ch=tw->ch[k];
-				if(this_ch!=0 && this_ch!=CHANNELS+1){
+				if(this_ch>=1 && this_ch<=CHANNELS){
 					if(rc[this_ch-1]<tw->rcv[k])rc[this_ch-1]=tw->rcv[k];
 				}
 			}
@@ -377,8 +373,8 @@ void SimpleRod::drawTrolling(SDL_Surface* scr){
 	drawAntennaMode(scr);
 	for(int i=0 ; i<62 ; i++){
 		sprintf_s(str,"%2d",i+1);
-		drawText(scr,(i/13)*60,(i%13)*17,str);
-		drawImage(scr,img.chr,(i/13)*60+20,(i%13)*17,0,290,rc[i]*40/100,10,255);
+		drawText2(scr,(i/13)*120,(i%13)*34,str);
+		drawImage(scr,img.chr,(i/13)*120+40,(i%13)*34,0,580,rc[i]*80/100,20,255);
 	}
 }
 
@@ -393,7 +389,7 @@ void ButtonRod::set_button(){
 		Tower *tw=ar->tower;
 		for(int j=0 ; j<(ar->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
-				if(tw->ch[k]!=0 && tw->ch[k]!=CHANNELS+1 && rc[ tw->ch[k]-1 ]<tw->rcv[k]){
+				if(tw->ch[k]>=1 && tw->ch[k]<=CHANNELS && rc[ tw->ch[k]-1 ]<tw->rcv[k]){
 					rc[ tw->ch[k]-1 ]=tw->rcv[k];
 					st[ tw->ch[k]-1 ]=ar->station[k];
 					bt[ tw->ch[k]-1 ]=ar->button[k];
@@ -616,7 +612,7 @@ void ButtonRod::drawAntenna(SDL_Surface* scr){
 			drawText2(scr,(i/6)*200+120,(i%6)*40+120,str,2);
 			if(button[i]==0)sprintf_s(str,"-");
 			else sprintf_s(str,"%2d",button[i]);
-			drawText(scr,(i/6)*200+200,(i%6)*40+120,str,2);
+			drawText2(scr,(i/6)*200+200,(i%6)*40+120,str,2);
 		}
 	}
 }
@@ -626,13 +622,13 @@ void ButtonRod::trolling(){
 void ButtonRod::drawTrolling(SDL_Surface* scr){
 	if(v==HIDE)return;
 	drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-30,(int)(gd.y*MAGNIFY)-gd.scrY-30,180,60,60,60,255);
-	drawImage(scr,img.menuback,60,60,0,0,170,120,128);
+	drawImage(scr,img.menuback,120,120,0,0,340,240,128);
 	for(int i=0 ; i<12 ; i++){
 		sprintf_s(str,"%2d",i+1);
-		drawText(scr,(i/6)*100+60,(i%6)*20+60,str,2);
+		drawText2(scr,(i/6)*200+120,(i%6)*40+120,str,2);
 		if(button2[i]==0)sprintf_s(str,"-");
 		else sprintf_s(str,"%2d",button2[i]);
-		drawText(scr,(i/6)*100+100,(i%6)*20+60,str,2);
+		drawText2(scr,(i/6)*200+200,(i%6)*40+120,str,2);
 	}
 	drawAntennaMode(scr);
 }
@@ -741,7 +737,7 @@ void UVRod::trolling(){
 		Tower *tw=ar->tower;
 		for(int j=0 ; j<(ar->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
-				if(tw->ch[k]!=0 && tw->ch[k]!=CHANNELS+1){
+				if(tw->ch[k]>=1 && tw->ch[k]<=CHANNELS){
 					if(tw->rcv[k]>=100){
 						st[ar->station[k]]=2;
 					}
@@ -767,11 +763,11 @@ void UVRod::drawTrolling(SDL_Surface* scr){
 	for(int i=0 ; i<10 ; i++){
 		a=0;
 		for(int j=0 ; j<net[i] ; j++){
-			drawImage(scr,img.symbol,i*20+50,a*20+100,i*17+85,0,17,17,255);
+			drawImage(scr,img.symbol,i*40+100,a*40+200,i*34+170,0,34,34,255);
 			a++;
 		}
 		for(int j=0 ; j<net2[i] ; j++){
-			drawImage(scr,img.symbol,i*20+50,a*20+100,i*17+85,0,17,17,64);
+			drawImage(scr,img.symbol,i*40+100,a*40+200,i*34+170,0,34,34,64);
 			a++;
 		}
 	}
@@ -865,7 +861,7 @@ void MHzRod::trolling(){
 		for(int j=0 ; j<(ar->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
 				int this_ch=tw->ch[k];
-				if(this_ch!=0 && this_ch!=CHANNELS+1){
+				if(this_ch>=1 && this_ch<=CHANNELS){
 					if(rc[this_ch-1]<tw->rcv[k])rc[this_ch-1]=tw->rcv[k];
 				}
 			}
@@ -878,9 +874,9 @@ void MHzRod::drawTrolling(SDL_Surface* scr){
 	if(v==HIDE)return;
 	drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-30,(int)(gd.y*MAGNIFY)-gd.scrY-30,180,60,60,60,255);
 	drawAntennaMode(scr);
-	drawImage(scr,img.rod,10,0,0,0,300,20,255);
+	drawImage(scr,img.rod,20,0,0,0,600,40,255);
 	for(int i=0 ; i<62 ; i++){
-		fillRect(scr,mhz[i].mhz/3+10,20,1,rc[i]/10,255,255,0,255);
+		fillRect(scr,mhz[i].mhz*2/3+20,40,2,rc[i]/5,255,255,0,255);
 	}
 }
 
@@ -894,7 +890,7 @@ void ConvenientRod::makeList(){
 		for(int j=0 ; j<(are->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
 				int this_ch=are->station[k];
-				if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
+				if(tow->ch[k]>=1 && tow->ch[k]<=CHANNELS && tow->rcv[k]>=RCV_LEVEL){
 					int mr2=0;
 					mr2=receive_mg(i,j,tow->ch[k],(int)tow->dir);
 					if(tow->rcv[k]-mr2<rc[this_ch]-mr[this_ch])continue;
@@ -1047,15 +1043,13 @@ void ConvenientRod::drawTrolling(SDL_Surface* scr){
 	if(v==HIDE)return;
 	drawAntennaMode(scr);
 	drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-30,(int)(gd.y*MAGNIFY)-gd.scrY-30,180,60,60,60,255);
-	for(int i=0 ; i<16 ; i++){
+	for(int i=0 ; i<18 ; i++){
 		if(i==st_num)break;
 		int a=255;
 		if(rc[i]-mr[i]<100)a=128;
-		fontA=a;
-		drawText(scr,(i/8)*160+20,(i%8)*20+20,sta[st[i]].name,60);
-		drawImage(scr,img.symbol,(i/8)*160,(i%8)*20+20,(sta[st[i]].mark%16)*17,(sta[st[i]].mark/16)*17,17,17,a);
+		drawText2(scr,(i/9)*320+40,(i%9)*40,sta[st[i]].name,60,a);
+		drawImage(scr,img.symbol,(i/9)*320,(i%9)*40,(sta[st[i]].mark%16)*34,(sta[st[i]].mark/16)*34,34,34,a);
 	}
-	fontA=255;
 }
 
 void SuperHandyRod::makeList2(){
@@ -1069,13 +1063,13 @@ void SuperHandyRod::makeList2(){
 	for(int i=0 ; i<tower_num*10 ; i++){
 		rc[i]=0;mr[i]=0;st[i]=EOF;ar[i]=0;tw[i]=0;chn[i]=0;
 	}
-	for(int i=0 ; i<16 ; i++){rc2[i]=-1;ar2[i]=0;tw2[i]=0;}
+	for(int i=0 ; i<64 ; i++){rc2[i]=-1;ar2[i]=0;tw2[i]=0;}
 	are=area;
 	for(int i=0 ; i<areas ; i++){
 		Tower *tow=are->tower;
 		for(int j=0 ; j<(are->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
-				if(tow->ch[k]!=0 && tow->ch[k]!=CHANNELS+1 && tow->rcv[k]>=RCV_LEVEL){
+				if(tow->ch[k]>=1 && tow->ch[k]<=CHANNELS && tow->rcv[k]>=RCV_LEVEL){
 					int mr2=0;
 					mr2=receive_mg(i,j,tow->ch[k],(int)tow->dir);
 					if(tow->rcv[k]-mr2<RCV_LEVEL)continue;
@@ -1107,7 +1101,7 @@ void SuperHandyRod::makeList2(){
 		}
 	}
 	for(int i=0 ; i<st_num ; i++){
-		for(int j=0 ; j<16 ; j++){
+		for(int j=0 ; j<64 ; j++){
 			if(rc2[j]!=-1 && ar2[j]==ar[i] && tw2[j]==tw[i]){
 				if(rc2[j]>rc[i]-mr[i])rc2[j]=rc[i]-mr[i];
 				break;
@@ -1177,12 +1171,10 @@ void SuperHandyRod::drawTrolling(SDL_Surface* scr){
 	if(v==HIDE)return;
 	drawAntennaMode(scr);
 	drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-30,(int)(gd.y*MAGNIFY)-gd.scrY-30,180,60,60,60,255);
-	for(int i=0 ; i<16 ; i++){
+	for(int i=0 ; i<64 ; i++){
 		if(rc2[i]<RCV_LEVEL)break;
 		int a=255;
 		if(rc2[i]<100)a=128;
-		fontA=a;
-		drawText(scr,(i/8)*160+20,(i%8)*20+20,area[ar2[i]].tower[tw2[i]].name,60);
+		drawText(scr,(i/16)*160+20,(i%16)*20+20,area[ar2[i]].tower[tw2[i]].name,60,a);
 	}
-	fontA=255;
 }

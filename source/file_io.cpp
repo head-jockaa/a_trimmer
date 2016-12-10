@@ -33,10 +33,10 @@ void load_text(){
 void load_haziashop(){
 	loadFile("file/data/haziashop.dat");
 	int fc=0;
-	for(int i=0 ; i<18 ; i++){
+	for(int i=0 ; i<SHOP_ITEMS ; i++){
 		shop_icon[i]=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 	}
-	for(int i=0 ; i<18 ; i++){
+	for(int i=0 ; i<SHOP_ITEMS ; i++){
 		price[i]=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
 	}
 }
@@ -47,14 +47,14 @@ void load_index(){
 	gd.hazia=0;
 	readSQL("file/data/sql/season.sql");
 	if(!loadFile("save/clear.dat")){
-		for(int i=0 ; i<18 ; i++)gd.bought[i]=false;
+		for(int i=0 ; i<SHOP_ITEMS ; i++)gd.bought[i]=false;
 		for(int i=0 ; i<index_num ; i++){
 			indexName[i].rate=0;
 			indexName[i].hiscore=0;
 		}
 		clear_num=1;
 	}else{
-		for(int i=0 ; i<18 ; i++){
+		for(int i=0 ; i<SHOP_ITEMS ; i++){
 			gd.bought[i]=toBool(fstr[fc]);fc++;
 			if(gd.bought[i])gd.hazia-=price[i];
 		}
@@ -114,10 +114,11 @@ void load_story(int n){
 
 void load_animebook(){
 	if(animedex_num)return;
-	animedex_num=0;
+	if(!allofworks_num){
+		readSQL("file/data/sql/cartoon.sql");
+	}
+	animedex_num=allofworks_num;
 	collection=0;
-	loadFile("file/data/work/works.dat");
-	animedex_num=(int)(fsize/5);
 	animebook=new bool[animedex_num];
 	if(!loadFile("save/animebook.dat")){
 		for(int i=0 ; i<animedex_num ; i++)animebook[i]=false;
@@ -130,6 +131,7 @@ void load_animebook(){
 }
 
 void save_animebook(){
+	if(!animedex_num)load_animebook();
 	if(fsize)delete [] fstr;
 	fsize=animedex_num/8+1;
 	fstr=new char[fsize];
@@ -193,7 +195,7 @@ void load_works(int n){
 			work[works].b=allofworks[i].b;
 			work[works].exist=true;
 			work[works].prg_num=0;
-			work[works].tnum=i;
+			work[works].cartoon_id=allofworks[i].cartoon_id;
 			works++;
 		}
 	}
@@ -205,15 +207,14 @@ void load_works(int n){
 		prg_count[prg[i].work-1]++;
 	}
 	for(int i=0 ; i<works ; i++){
-		if(prg_count[work[i].tnum]){
-			work[i].prg = new Prg[prg_count[work[i].tnum]];
+		if(prg_count[work[i].cartoon_id-1]){
+			work[i].prg = new Prg[prg_count[work[i].cartoon_id-1]];
 		}
 	}
 	for(int i=0 ; i<works ; i++){
 		work[i].prg_num=0;
-		int n=work[i].tnum+1;
 		for(int j=0 ; j<prgs ; j++){
-			if(prg[j].work==n){
+			if(prg[j].work==work[i].cartoon_id){
 				int n2=work[i].prg_num;
 				work[i].prg[n2].week=prg[j].week;
 				work[i].prg[n2].hour=prg[j].hour;
@@ -260,7 +261,7 @@ void load_searchQueries(Work *wk, int wk_num){
 	int value, w;
 	for(int i=0 ; i<wk_num ; i++){
 		j = 0;
-		w = wk[i].tnum;
+		w = wk[i].cartoon_id-1;
 		for(int k=0 ; k<200 ; k++){
 			if(query[w].str[0][k] == 0){
 				wk[i].query[j] = 0;
@@ -595,7 +596,8 @@ void load_option(){
 		AIR_IMG=TYPE1_EDGE;
 		DASH_TYPE=TYPE_MARIO;
 		CHAR_CODE=JAPANESE;
-		MAGNIFY=1;
+		MAGNIFY=2;
+		pre_magnify=2;
 		ADJ_DIR=AUTO;
 		EXPLAIN=true;
 		BGM_VOLUME=64;
@@ -610,6 +612,7 @@ void load_option(){
 		DASH_TYPE=fstr[fc];fc++;
 		CHAR_CODE=fstr[fc];fc++;
 		MAGNIFY=fstr[fc];fc++;
+		pre_magnify=MAGNIFY;
 		ADJ_DIR=fstr[fc];fc++;
 		EXPLAIN=toBool(fstr[fc]);fc++;
 		BGM_VOLUME=fstr[fc];fc++;
@@ -631,11 +634,11 @@ void load_option(){
 void save_index(){
 	if(fsize)delete [] fstr;
 	fsize=index_num*5;
-	fstr=new char[fsize+18];
+	fstr=new char[fsize+SHOP_ITEMS];
 	FILE* hFile;
 	size_t fc=0;
 
-	for(int i=0 ; i<18 ; i++){
+	for(int i=0 ; i<SHOP_ITEMS ; i++){
 		fstr[fc]=gd.bought[i];fc++;
 	}
 	for(int i=0 ; i<index_num ; i++){
@@ -654,7 +657,7 @@ void save_index(){
 
 void save_record(int n){
 	if(fsize)delete [] fstr;
-	fsize=works*18+1;
+	fsize=works*19+1;
 	fstr=new char[fsize];
 	FILE* hFile;
 	size_t fc=0;
@@ -667,18 +670,19 @@ void save_record(int n){
 		fstr[fc]=fishbox.getData(i,1)/256;fc++;
 		fstr[fc]=fishbox.getData(i,2)%256;fc++;
 		fstr[fc]=fishbox.getData(i,2)/256;fc++;
-		fstr[fc]=fishbox.getData(i,3)%256;fc++;
-		fstr[fc]=fishbox.getData(i,3)/256;fc++;
+		fstr[fc]=fishbox.getData(i,3);fc++;
 		fstr[fc]=fishbox.getData(i,4)%256;fc++;
 		fstr[fc]=fishbox.getData(i,4)/256;fc++;
-		fstr[fc]=fishbox.getData(i,5);fc++;
+		fstr[fc]=fishbox.getData(i,5)%256;fc++;
+		fstr[fc]=fishbox.getData(i,5)/256;fc++;
 		fstr[fc]=fishbox.getData(i,6);fc++;
 		fstr[fc]=fishbox.getData(i,7);fc++;
 		fstr[fc]=fishbox.getData(i,8);fc++;
 		fstr[fc]=fishbox.getData(i,9);fc++;
 		fstr[fc]=fishbox.getData(i,10);fc++;
-		fstr[fc]=fishbox.getData(i,11)%256;fc++;
-		fstr[fc]=fishbox.getData(i,11)/256;fc++;
+		fstr[fc]=fishbox.getData(i,11);fc++;
+		fstr[fc]=fishbox.getData(i,12)%256;fc++;
+		fstr[fc]=fishbox.getData(i,12)/256;fc++;
 	}
 
 	sprintf_s(str,"save/record%d.dat",n);
@@ -703,15 +707,16 @@ void load_record(int n){
 		fishbox.setData(i,0,to16int(fstr[fc],fstr[fc+1]));fc+=2;
 		fishbox.setData(i,1,to16int(fstr[fc],fstr[fc+1]));fc+=2;
 		fishbox.setData(i,2,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,3,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(i,3,fstr[fc]);fc++;
 		fishbox.setData(i,4,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,5,fstr[fc]);fc++;
+		fishbox.setData(i,5,to16int(fstr[fc],fstr[fc+1]));fc+=2;
 		fishbox.setData(i,6,fstr[fc]);fc++;
 		fishbox.setData(i,7,fstr[fc]);fc++;
 		fishbox.setData(i,8,fstr[fc]);fc++;
 		fishbox.setData(i,9,fstr[fc]);fc++;
 		fishbox.setData(i,10,fstr[fc]);fc++;
-		fishbox.setData(i,11,to16int(fstr[fc],fstr[fc+1]));
+		fishbox.setData(i,11,fstr[fc]);fc++;
+		fishbox.setData(i,12,to16int(fstr[fc],fstr[fc+1]));
 		gd.score+=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 	}
 	load_towers();
@@ -777,8 +782,8 @@ void save_game(int n){
 	}
 	for(int i=0 ; i<md.fish_num ; i++){
 		fstr[fc]=md.maneki_count[i];fc++;
-		fstr[fc]=md.fish[i].title_num%256;fc++;
-		fstr[fc]=md.fish[i].title_num/256;fc++;
+		fstr[fc]=md.fish[i].which_work%256;fc++;
+		fstr[fc]=md.fish[i].which_work/256;fc++;
 		fstr[fc]=md.fish[i].x%256;fc++;
 		fstr[fc]=md.fish[i].x/256;fc++;
 		fstr[fc]=md.fish[i].y%256;fc++;
@@ -847,7 +852,7 @@ void load_game(int n){
 	}
 	for(int i=0 ; i<md.fish_num ; i++){
 		md.maneki_count[i]=fstr[fc];fc++;
-		md.fish[i].title_num=to16int(fstr[fc],fstr[fc+1]);fc+=2;
+		md.fish[i].which_work=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].x=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].y=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].sta=to16int(fstr[fc],fstr[fc+1]);fc+=2;
@@ -901,7 +906,7 @@ void save_smr(int n){
 			}
 			if(a>=30){
 				fstr[fc-1]+=232;
-				fstr[fc]+=a%256;fc++;
+				fstr[fc]=a%256;fc++;
 			}
 			if(a>=256){
 				fstr[fc-2]+=8;

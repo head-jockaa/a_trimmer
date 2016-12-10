@@ -20,7 +20,7 @@ void estimate(){
 			double ERP=tw->erp;
 			n*=ERP;
 			for(int k=0 ; k<10 ; k++){
-				if(tw->ch[k]==0 || tw->ch[k]>=CHANNELS+1)tw->power[k]=0;
+				if(tw->ch[k]<1 || tw->ch[k]>CHANNELS)tw->power[k]=0;
 				else{
 					double E=mhz[tw->ch[k]-1].mhz*A+B;
 					if(mhz[tw->ch[k]-1].mhz<C)E+=D*sin( (PI/2)*(mhz[tw->ch[k]-1].mhz-91)/(C-91) );
@@ -178,7 +178,7 @@ if(!in)return;
 }
 
 void shield_each_ch(Tower* T, int k){
-	if(T->ch[k]==0 || T->ch[k]==CHANNELS+1)return;
+	if(T->ch[k]<1 || T->ch[k]>CHANNELS)return;
 	if(T->rcv[k]==0)return;
 /*‰ñÜ”g‚ª‚©‚·‚ç‚È‚¢Rm‚ğœ‚­*/
 	for(int n=0 ; n<rd.see_mounts-1 ; n++){
@@ -255,7 +255,7 @@ void receive_each_tower(double X, double Y, Tower* T){
 }
 
 void receive_each_ch(double X, double Y, Tower* T, int S){
-	if(T->ch[S]==0 || T->ch[S]==CHANNELS+1)return;
+	if(T->ch[S]<1 || T->ch[S]>CHANNELS)return;
 	if(T->out[S] == 2)return;
 	if(T->x==(int)X && T->y==(int)Y){
 		T->rcv[S]=20000000;
@@ -352,9 +352,9 @@ void startSMR(int st){
 			if(s==-1){ar++;continue;}
 
 			Tower *tw=ar->tower;
-			for(int j=0 ; j<(area->tower_num) ; j++){
+			for(int j=0 ; j<(ar->tower_num) ; j++){
 				if(tw->remove){tw++;continue;}
-				if(tw->ch[s]==0 || tw->ch[s]==CHANNELS+1){tw++;continue;}
+				if(tw->ch[s]<1 || tw->ch[s]>CHANNELS){tw++;continue;}
 
 				rd.tower_dis_multi2=1.0*MAP_SCALE*MAP_SCALE*( 1.0*(X-tw->x)*(X-tw->x)+1.0*(Y-tw->y)*(Y-tw->y) );
 				if(tw->power[s] < rd.tower_dis_multi2/100){tw++;continue;}
