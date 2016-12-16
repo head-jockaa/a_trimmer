@@ -175,7 +175,7 @@ void initGame2(){
 
 	if(phase!=READY){
 		sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
-		loadCartoon(str);
+		loadCartoon(&cartoonJson,str);
 	}
 	if(gd.game_mode==STORYMODE){
 		sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
@@ -250,7 +250,7 @@ void keyGameStart(){
 			else phase=PLAYING;
 			count=2;
 			sprintf_s(str,"file/data/cartoon/talk%d.json",dataNo);
-			loadCartoon(str);
+			loadCartoon(&talkingJson,str);
 		}
 	}
 }
@@ -332,7 +332,7 @@ void keyFinish(){
 
 void keyGetHazia(){
 	if(key.z && !key_stop(key.z)){
-		if(nextTalk()){
+		if(nextTalk(&cartoonJson)){
 			if(gd.scene_count==0){
 				start=300;count=2;
 				gd.hazia2=gd.score-indexName[dataNo-1].hiscore;
@@ -350,7 +350,7 @@ void keyGetHazia(){
 				bgm=Mix_LoadMUS("file/bgm/12.ogg");
 				Mix_PlayMusic(bgm,-1);
 				gd.scene_count++;
-				playtime=0;
+				cartoonJson.playtime=0;
 			}
 		}
 	}
@@ -363,7 +363,7 @@ void keyResult(){
 				if(gd.week==6){
 					phase=GET_HAZIA;
 					sprintf_s(str,"file/data/cartoon/end%d.json",dataNo);
-					loadCartoon(str);
+					loadCartoon(&cartoonJson,str);
 					gd.scene_count=0;
 				}else{
 					freeMusic();
@@ -376,7 +376,7 @@ void keyResult(){
 					else createMap_color(1000);
 					phase=GAMESTART;
 					sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
-					loadCartoon(str);
+					loadCartoon(&cartoonJson,str);
 					sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
 					bgm=Mix_LoadMUS(str);
 					for(int i=0 ; i<works ; i++)fishbox.today[i]=EOF;
@@ -1143,7 +1143,7 @@ void keyGameTalking(){
 				phase=PLAYING;
 			}
 		}else{
-			if(nextTalk()){
+			if(nextTalk(&talkingJson)){
 				Mix_PlayChannel(0, sf.noize, 0);
 				phase=PLAYING;
 			}
@@ -1514,7 +1514,7 @@ void drawResult(SDL_Surface* scr){
 }
 
 void drawGetHazia(SDL_Surface *scr){
-	drawAnimationCut(scr);
+	drawAnimationCut(&cartoonJson,scr);
 	if(gd.scene_count==1){
 		int inc=gd.score-indexName[dataNo-1].hiscore;
 		if(inc<0)inc=0;
@@ -1852,7 +1852,7 @@ void drawNetworkStatus(SDL_Surface* scr){
 
 void drawGame(SDL_Surface* scr){
 	if(phase==GAMESTART){
-		drawAnimationCut(scr);
+		drawAnimationCut(&cartoonJson,scr);
 		drawMap2(scr,gd.scrX,gd.scrY);
 	}
 	else if(phase==RESULT || phase==TODAYS_CROP)drawResult(scr);
@@ -1952,7 +1952,7 @@ void drawGame(SDL_Surface* scr){
 			if(MAP3D){
 				drawTalking(scr);
 			}else{
-				drawAnimationCut(scr);
+				drawAnimationCut(&talkingJson,scr);
 			}
 		}
 
@@ -2241,7 +2241,7 @@ void timerGetHazia(){
 			else Mix_PlayChannel(0,sf.cursor_move,0);
 		}
 	}
-	if(nextCut()){
+	if(nextCut(&cartoonJson)){
 		if(gd.scene_count==2){
 			gd.text_count=0;
 			phase=END_YN;
@@ -2318,9 +2318,9 @@ void timerMemma(){
 }
 
 void timerCatchPhone(){
-	if(gd.week==call_week && gd.hour==call_hour && gd.minute==call_minute){
+	if(gd.week==talkingJson.call_week && gd.hour==talkingJson.call_hour && gd.minute==talkingJson.call_minute){
 		Mix_PlayChannel(0, sf.calling, 0);
-		nextCut();
+		nextCut(&talkingJson);
 		phase=CALLING;
 		count=2;
 	}
@@ -2476,10 +2476,10 @@ void timerGame(){
 	if(gd.game_mode==STORYMODE){
 		if(count==1){
 			Mix_PlayMusic(bgm,0);
-			timestamp=SDL_GetTicks();
+			gd.bgm_timestamp=SDL_GetTicks();
 			gd.secondMusic=false;
 		}
-		if(!gd.secondMusic && gd.hour>=22 && (SDL_GetTicks()-timestamp)/16>10000){
+		if(!gd.secondMusic && gd.hour>=22 && (SDL_GetTicks()-gd.bgm_timestamp)/16>10000){
 			freeMusic();
 			sprintf_s(str,"file/bgm/%d.ogg",20+gd.randomNumber%3);
 			bgm=Mix_LoadMUS(str);
@@ -2522,7 +2522,7 @@ void timerGame(){
 		}
 	}
 	else if(phase==GAMESTART){
-		nextCut();
+		nextCut(&cartoonJson);
 	}
 	else if(phase==CALLING)timerCalling();
 	else if(phase==TODAYS_CROP)timerTodaysCrop();

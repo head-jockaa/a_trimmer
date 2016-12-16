@@ -66,15 +66,15 @@ void gotoGame(){
 	initGame2();
 	if(c){
 		sprintf_s(str,"file/data/cartoon/talk%d.json",dataNo);
-		loadCartoon(str);
+		loadCartoon(&talkingJson, str);
 	}
 	gd.talk_count=EOF;
 	kick_count=1;
 }
 
 void timerPrologue(){
-	if(nextCut()){
-		freeCartoon();
+	if(nextCut(&cartoonJson)){
+		freeCartoon(&cartoonJson);
 		if(movie_test){
 			endGameMenu();
 			initMiyazaki();
@@ -167,7 +167,7 @@ void keyGameSeason(){
 		count=0;
 		dataNo=gd.scrX*4+gd.scrY+1;
 		sprintf_s(str,"file/data/cartoon/story%d.json",dataNo);
-		loadCartoon(str);
+		loadCartoon(&cartoonJson, str);
 		phase=PROLOGUE;
 		kick_count++;
 	}
@@ -255,10 +255,10 @@ void keyGameRecord(){
 
 void keyPrologue(){
 	if(key.z && !key_stop(key.z)){
-		nextTalk();
+		nextTalk(&cartoonJson);
 	}
 	if(key.c && !key_stop(key.c)){
-		freeCartoon();
+		freeCartoon(&cartoonJson);
 		if(movie_test){
 			endGameMenu();
 			initMiyazaki();
@@ -345,7 +345,7 @@ void drawGamemenuExplain(SDL_Surface* scr){
 
 void drawGameMenu(SDL_Surface* scr){
 	if(phase==RECORD)drawGameRecord(scr);
-	else if(phase==PROLOGUE)drawAnimationCut(scr);
+	else if(phase==PROLOGUE)drawAnimationCut(&cartoonJson,scr);
 	else{
 		fillRect(scr,0,0,640,480,0,0,0,255);
 		drawImage(scr,img.back,0,0,640+(count/2)%600,(count/2)%600,640,480,255);

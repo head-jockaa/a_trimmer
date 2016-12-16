@@ -53,7 +53,7 @@ void initMiyazaki(){
 	sf.thunder=Mix_LoadWAV("file/se/14.wav");
 	sf.swish=Mix_LoadWAV("file/se/25.wav");
 	sf.meow=Mix_LoadWAV("file/se/16.wav");
-	loadCartoon("file/data/cartoon/miyazaki_in.json");
+	loadCartoon(&cartoonJson, "file/data/cartoon/miyazaki_in.json");
 	bgm=Mix_LoadMUS("file/bgm/17.ogg");
 	Mix_PlayMusic(bgm,-1);
 }
@@ -125,7 +125,7 @@ void gotoMovieTest(){
 	if(n<=6){
 		gd.week=n;
 		sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
-		loadCartoon(str);
+		loadCartoon(&cartoonJson, str);
 		freeMusic();
 		sprintf_s(str,"file/bgm/%d.ogg",n+5);
 		bgm=Mix_LoadMUS(str);
@@ -142,7 +142,7 @@ void gotoMovieTest(){
 	}
 	else if(n==12){
 		initGameMenu();
-		loadCartoon("file/data/cartoon/story1.json");
+		loadCartoon(&cartoonJson, "file/data/cartoon/story1.json");
 		phase=PROLOGUE;
 	}
 	else if(n==13){
@@ -150,7 +150,7 @@ void gotoMovieTest(){
 	}
 	else if(n==14){
 		initGameMenu();
-		loadCartoon("file/data/cartoon/story13.json");
+		loadCartoon(&cartoonJson, "file/data/cartoon/story13.json");
 		phase=PROLOGUE;
 	}
 	kick_count=0;
@@ -161,7 +161,7 @@ void timerMiyazaki(){
 	else if(phase==GOTO_TOWERLIST && count==1)gotoTowerList();
 	else if(phase==GOTO_MOVIE && count==100)gotoMovieTest();
 	else if(phase==COME_MIYAZAKI){
-		if(nextCut()){
+		if(nextCut(&cartoonJson)){
 			phase=MIYAZAKI_MUSEUM;
 			start=200;
 			shopPlayerX=30;
@@ -170,14 +170,14 @@ void timerMiyazaki(){
 		}
 	}
 	else if(phase==LEAVE_MIYAZAKI){
-		if(nextCut()){
+		if(nextCut(&cartoonJson)){
 			endMiyazaki();
 			initGameMenu();
 		}
 	}
 	else if(phase==SEOI_HA)timerSeoiHa();
 	else if(phase==GAMESTART){
-		nextCut();
+		nextCut(&cartoonJson);
 	}
 
 	if(gd.talk_open_count>0){
@@ -293,7 +293,7 @@ void keyMiyazakiMuseum(){
 	}
 	if(shopPlayerX<0){
 		phase=LEAVE_MIYAZAKI;
-		loadCartoon("file/data/cartoon/miyazaki_out.json");
+		loadCartoon(&cartoonJson, "file/data/cartoon/miyazaki_out.json");
 		count=0;
 	}
 }
@@ -1214,7 +1214,7 @@ void keyMiyazaki(){
 		default:break;
 	}
 	if(phase==GAMESTART && key.z && !key_stop(key.z)){
-		freeCartoon();
+		freeCartoon(&cartoonJson);
 		phase=MIYAZAKI_MUSEUM;
 		freeImage(img.back);
 		getImage(img.back,"file/img/miyazaki.png",0,0,255);
@@ -1322,7 +1322,7 @@ void drawDeploma(SDL_Surface* scr){
 
 void drawMiyazaki(SDL_Surface* scr){
 	if(phase==TOWERLIST || phase==SHOW_TOWERDATA || phase==WHICH_TOWER)drawTowerList(scr);
-	else if(phase==COME_MIYAZAKI || phase==LEAVE_MIYAZAKI)drawAnimationCut(scr);
+	else if(phase==COME_MIYAZAKI || phase==LEAVE_MIYAZAKI)drawAnimationCut(&cartoonJson,scr);
 	else if(phase==DEPLOMA)drawDeploma(scr);
 	else if(phase==GOTO_MOVIE){
 		fillRect(scr,0,0,640,480,0,0,0,255);
@@ -1331,7 +1331,7 @@ void drawMiyazaki(SDL_Surface* scr){
 		if(count>=50)fillRect(scr,0,216,640,42,0,0,0,(count-50)*5);
 	}
 	else if(phase==GAMESTART){
-		drawAnimationCut(scr);
+		drawAnimationCut(&cartoonJson,scr);
 	}
 	else drawMiyazakiMuseum(scr);
 	if(phase==GUIDE_STALIST || phase==GUIDE_STALIST_ALL)drawImage(scr,fishbox.panel,0,40,0,0,640,400,255);

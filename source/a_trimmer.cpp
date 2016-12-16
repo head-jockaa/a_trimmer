@@ -87,7 +87,7 @@ void key_counter(){
 
 void pauseMovie(){
 	if((mode==OPENING && phase==1) || (mode==ENDING && phase==ENDING_ANIME)){
-		pausetime=SDL_GetTicks();
+		cartoonJson.pausetime=SDL_GetTicks();
 		Mix_HaltMusic();
 //		Mix_PauseMusic();
 	}
@@ -95,10 +95,10 @@ void pauseMovie(){
 void resumeMovie(){
 	if((mode==OPENING && phase==1) || (mode==ENDING && phase==ENDING_ANIME)){
 		int n=SDL_GetTicks();
-		timestamp+=n-pausetime;
+		cartoonJson.timestamp+=n-cartoonJson.pausetime;
 //		Mix_ResumeMusic();
 		Mix_PlayMusic(bgm,-1);
-		Mix_SetMusicPosition((n-timestamp)/1000.0);
+		Mix_SetMusicPosition((n-cartoonJson.timestamp)/1000.0);
 	}
 }
 

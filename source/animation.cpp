@@ -15,55 +15,14 @@
 #define JSON_NEXTDATA 7
 #define JSON_ENDDATA 8
 
-bool readCartoonAct(char *json);
-void resetObject(char *json);
-void readJsonObject(char *json, char *name);
-void readJsonSubObject(char *json, char *name1, char *name2);
-void readJsonArray(char *json, char *name);
+bool readCartoonAct(JsonData *json);
+void resetObject(JsonData *json);
+void resetObject(JsonData *json, CartoonObject &obj);
+void readJsonObject(JsonData *json, char *name);
+void readJsonSubObject(JsonData *json, char *name1, char *name2);
+void readJsonArray(JsonData *json, char *name);
 
-int playtime,cartoonNextTime;
-int timestamp,pausetime;
-int max_obj;
-int call_week,call_hour,call_minute;
-bool talkmode=false,skipThisTime=false,cartoonSync=false;
-size_t cartoonJsonSize,cartoonPointer;
-char *cartoonJson, cartoonBgmName[200];
-
-char jsonName[100][100], jsonValueString[100][1000];
-int jsonValueNum;
-double jsonValueDouble[100];
-bool jsonValueBool[100];
-
-struct ObjectSetting{
-	double x,y,ix,iy,w,h,mag,alpha,shake;
-	int type,drawTo,lang,img_id;
-	double R,G,B;
-	double gradRfrom,gradGfrom,gradBfrom;
-	double gradRto,gradGto,gradBto;
-};
-struct ObjectMoving{
-	double x,y,ix,iy,mag,w,h,alpha,shake;
-	double R,G,B,gradRfrom,gradGfrom,gradBfrom,gradRto,gradGto,gradBto;
-};
-struct ObjectFlipping{
-	double ix,iy;
-	int interval,num,count;
-	bool turnBack;
-};
-struct ObjectSliding{
-	double step,from,to,position,fade,fadeRate;
-	bool turnBack,back;
-};
-struct CartoonObject{
-	int id;
-	ObjectSetting set;
-	ObjectMoving move;
-	ObjectFlipping flip;
-	ObjectSliding slideX,slideY,slideIX,slideIY,slideMag,slideAlpha;
-	double jumpG,jumpY;
-	double waveSIN,waveRange;
-};
-CartoonObject obj[1000];
+JsonData cartoonJson,talkingJson;
 
 void resetObjectSetting(ObjectSetting &s){
 	s.x=0;s.y=0;s.ix=0;s.iy=0;s.w=0;s.h=0;
@@ -85,18 +44,18 @@ void resetObjectSliding(ObjectSliding &s){
 	s.step=0;s.from=0;s.to=0;s.fade=1;s.fadeRate=0;s.turnBack=true;
 	s.back=false;s.position=0;
 }
-void resetObject(int n){
-	resetObjectSetting(obj[n].set);
-	resetObjectMoving(obj[n].move);
-	resetObjectFlipping(obj[n].flip);
-	resetObjectSliding(obj[n].slideX);
-	resetObjectSliding(obj[n].slideY);
-	resetObjectSliding(obj[n].slideIX);
-	resetObjectSliding(obj[n].slideIY);
-	resetObjectSliding(obj[n].slideMag);
-	resetObjectSliding(obj[n].slideAlpha);
-	obj[n].jumpG=0;obj[n].jumpY=0;
-	obj[n].waveSIN=0;obj[n].waveRange=0;
+void resetObject(CartoonObject &obj){
+	resetObjectSetting(obj.set);
+	resetObjectMoving(obj.move);
+	resetObjectFlipping(obj.flip);
+	resetObjectSliding(obj.slideX);
+	resetObjectSliding(obj.slideY);
+	resetObjectSliding(obj.slideIX);
+	resetObjectSliding(obj.slideIY);
+	resetObjectSliding(obj.slideMag);
+	resetObjectSliding(obj.slideAlpha);
+	obj.jumpG=0;obj.jumpY=0;
+	obj.waveSIN=0;obj.waveRange=0;
 }
 
 int hextoint(char c){
@@ -121,28 +80,30 @@ int hextoint(char c){
 	}
 }
 
-int fetchInt(char *&s) {
-	int value=0,minus=1;
+int fetchInt(char *s, int *value) {
+	int minus=1, length=0;
+	*value=0;
 	while((*s>='0' && *s<='9') || *s=='-') {
 		if(*s=='-') {
 			minus=-1;
 		}
-		else if(value==0 && *s=='0') {
+		else if(*value==0 && *s=='0') {
 		} else {
-			value*=10;
-			value+=(*s-48);
+			*value*=10;
+			*value+=(*s-48);
 		}
-		cartoonPointer++;
+		length++;
 		s++;
 	}
-	cartoonPointer--;
-	return value*minus;
+	*value *= minus;
+	return length;
 }
 
-double fetchDouble(char *&s) {
-	double value=0,digit=1;
-	int minus=1;
+int fetchDouble(char *s, double *value) {
+	double digit=1;
+	int minus=1, length=0;
 	bool decimal=false;
+	*value=0;
 	while((*s>='0' && *s<='9') || *s=='-' || *s=='.') {
 		if(*s=='-') {
 			minus=-1;
@@ -152,41 +113,47 @@ double fetchDouble(char *&s) {
 			digit=0.1;
 		}
 		else if(decimal) {
-			value += (*s-48)*digit;
+			*value += (*s-48)*digit;
 			digit*=0.1;
 		}
 		else if(value==0 && *s=='0') {
 		} else {
-			value*=10;
-			value+=(*s-48);
+			*value*=10;
+			*value+=(*s-48);
 		}
-		cartoonPointer++;
+		length++;
 		s++;
 	}
-	cartoonPointer--;
-	return value*minus;
+	*value *= minus;
+	return length;
 }
 
-void fetchString(char *&s, char *value) {
+int fetchString(char *s, char brace, char *value) {
 	bool start=false;
-	int pointer=0;
+	int pointer=0, length=0;
 	while(*s) {
 		if(start) {
-			if(*s=='"') {
+			if(*s==brace) {
 				value[pointer]=0;
 				break;
+			}
+			else if(*s=='\\' && *(s+1)==brace) {
+				value[pointer]=brace;
+				pointer+=2;
 			}else{
 				value[pointer]=*s;
 				pointer++;
 			}
 		}
-		else if(*s=='"') {
+		else if(*s==brace) {
 			start=true;
+		}else{
+			break;
 		}
-		cartoonPointer++;
+		length++;
 		s++;
 	}
-	cartoonPointer-=2;
+	return length;
 }
 
 void parseColor(char *s, SDL_Color *col) {
@@ -209,25 +176,25 @@ void parseColor(char *s, SDL_Color *col) {
 	}
 }
 
-void parseDate(char *s) {
-	if(*s=='M' && *(s+1)=='o' && *(s+2)=='n')call_week=0;
-	else if(*s=='T' && *(s+1)=='u' && *(s+2)=='e')call_week=1;
-	else if(*s=='W' && *(s+1)=='e' && *(s+2)=='d')call_week=2;
-	else if(*s=='T' && *(s+1)=='h' && *(s+2)=='u')call_week=3;
-	else if(*s=='F' && *(s+1)=='r' && *(s+2)=='i')call_week=4;
-	else if(*s=='S' && *(s+1)=='u' && *(s+2)=='t')call_week=5;
-	else if(*s=='S' && *(s+1)=='u' && *(s+2)=='n')call_week=6;
+void parseDate(JsonData *json, char *s) {
+	if(*s=='M' && *(s+1)=='o' && *(s+2)=='n')json->call_week=0;
+	else if(*s=='T' && *(s+1)=='u' && *(s+2)=='e')json->call_week=1;
+	else if(*s=='W' && *(s+1)=='e' && *(s+2)=='d')json->call_week=2;
+	else if(*s=='T' && *(s+1)=='h' && *(s+2)=='u')json->call_week=3;
+	else if(*s=='F' && *(s+1)=='r' && *(s+2)=='i')json->call_week=4;
+	else if(*s=='S' && *(s+1)=='u' && *(s+2)=='t')json->call_week=5;
+	else if(*s=='S' && *(s+1)=='u' && *(s+2)=='n')json->call_week=6;
 	s+=3;
 	while(true){
 		if(*s>='0' && *s<='9')break;
 		s++;
 	}
-	call_hour=fetchInt(s);
+	fetchInt(s,&json->call_hour);
 	while(true){
 		if(*s>='0' && *s<='9')break;
 		s++;
 	}
-	call_minute=fetchInt(s);
+	fetchInt(s,&json->call_minute);
 }
 
 bool startsWith(char *s, const char *target) {
@@ -236,25 +203,24 @@ bool startsWith(char *s, const char *target) {
 			return false;
 		}
 	}
-	cartoonPointer+=(int)strlen(target)-1;
 	return true;
 }
 
-void freeCartoon(){
-	max_obj=0;
-	playtime=0;
-	cartoonPointer=0;
-	cartoonNextTime=0;
-	skipThisTime=false;
-	talkmode=false;
-	cartoonSync=false;
-	call_week=-1;call_hour=-1;call_minute=-1;
-	if(cartoonJsonSize){
-		delete [] cartoonJson;
-		cartoonJsonSize=0;
+void freeCartoon(JsonData *json){
+	json->max_obj=0;
+	json->playtime=0;
+	json->pointer=0;
+	json->nextTime=0;
+	json->skipThisTime=false;
+	json->talkmode=false;
+	json->cartoonSync=false;
+	json->call_week=-1;json->call_hour=-1;json->call_minute=-1;
+	if(json->size){
+		delete [] json->text;
+		json->size=0;
 	}
 	for(int i=0 ; i<1000 ; i++){
-		resetObject(i);
+		resetObject(json->obj[i]);
 	}
 	for(int i=0 ; i<10 ; i++){
 		freeImage(img.bg[i]);
@@ -262,34 +228,34 @@ void freeCartoon(){
 	}
 }
 
-void loadCartoon(const char *filename){
-	freeCartoon();
+void loadCartoon(JsonData *json, const char *filename){
+	freeCartoon(json);
 	loadFile(filename);
-	cartoonJsonSize=fsize;
+	json->size=fsize;
 	if(fsize){
-		cartoonJson=new char[cartoonJsonSize];
-		strcpy_s(cartoonJson,fstr);
-		nextCut();
+		json->text=new char[json->size];
+		strcpy_s(json->text,fstr);
+		nextCut(json);
 	}
 }
 
-bool readCartoon(char *json){
+bool readCartoon(JsonData *json){
 	int mode=JSON_ARRAY_START;
 	char dataname[20];
 	bool waitForNextTime=false, end=false;
 
-	if(talkmode) {
+	if(json->talkmode) {
 		mode=JSON_GETVALUE;
 		sprintf_s(dataname,"act");
 	}
-	else if(cartoonPointer!=0) {
+	else if(json->pointer!=0) {
 		mode=JSON_NEXTDATA;
 	}
 
-	while(cartoonPointer < cartoonJsonSize) {
-		char *c = &json[cartoonPointer];
+	while(json->pointer < json->size) {
+		char *c = &json->text[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
+			json->pointer++;
 			continue;
 		}
 		if(mode==JSON_ARRAY_START) {
@@ -303,7 +269,7 @@ bool readCartoon(char *json){
 			}
 		}
 		else if(mode==JSON_GETNAME) {
-			fetchString(c,dataname);
+			json->pointer+=fetchString(c,'"',dataname)-1;
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_COLON) {
@@ -313,29 +279,29 @@ bool readCartoon(char *json){
 		}
 		else if(mode==JSON_GETVALUE) {
 			if(strcmp(dataname, "time")==0) {
-				cartoonNextTime=fetchInt(c);
-				if(cartoonNextTime!=playtime || end) {
+				json->pointer+=fetchInt(c,&json->nextTime)-1;
+				if(json->nextTime!=json->playtime || end) {
 					waitForNextTime=true;
 				}
 			}
 			else if(strcmp(dataname, "date")==0) {
-				fetchString(c,str);
-				parseDate(str);
-				if(call_week>gd.week
-				|| (call_week==gd.week && call_hour>gd.hour)
-				|| (call_week==gd.week && call_hour==gd.hour && call_minute>gd.minute)) {
+				json->pointer+=fetchString(c,'"',str)-1;
+				parseDate(json,str);
+				if(json->call_week>gd.week
+				|| (json->call_week==gd.week && json->call_hour>gd.hour)
+				|| (json->call_week==gd.week && json->call_hour==gd.hour && json->call_minute>gd.minute)) {
 					waitForNextTime=true;
-					skipThisTime=false;
+					json->skipThisTime=false;
 				}
-				if(call_week<gd.week
-				   || (call_week==gd.week && call_hour<gd.hour)
-				   || (call_week==gd.week && call_hour==gd.hour && call_minute<gd.minute)) {
-					skipThisTime=true;
+				if(json->call_week<gd.week
+				   || (json->call_week==gd.week && json->call_hour<gd.hour)
+				   || (json->call_week==gd.week && json->call_hour==gd.hour && json->call_minute<gd.minute)) {
+					json->skipThisTime=true;
 				}
 			}
 			else if(strcmp(dataname, "act")==0) {
 				end = readCartoonAct(json);
-				if(talkmode){
+				if(json->talkmode){
 					break;
 				}
 			}
@@ -360,24 +326,24 @@ bool readCartoon(char *json){
 			else if(*c==']') {
 			}
 		}
-		cartoonPointer++;
+		json->pointer++;
 	}
 	return end;
 }
 
-bool readCartoonAct(char *json){
+bool readCartoonAct(JsonData *json){
 	int mode=JSON_DATA_START;
 	char dataname[20];
 	bool end=false;
 
-	if(talkmode) {
+	if(json->talkmode) {
 		mode=JSON_GETVALUE;
 	}
 
-	while(cartoonPointer < cartoonJsonSize) {
-		char *c = &json[cartoonPointer];
+	while(json->pointer < json->size) {
+		char *c = &json->text[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
+			json->pointer++;
 			continue;
 		}
 		if(mode==JSON_DATA_START) {
@@ -386,7 +352,7 @@ bool readCartoonAct(char *json){
 			}
 		}
 		else if(mode==JSON_GETNAME) {
-			fetchString(c,dataname);
+			json->pointer+=fetchString(c,'"',dataname)-1;
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_COLON) {
@@ -395,28 +361,28 @@ bool readCartoonAct(char *json){
 			}
 		}
 		else if(mode==JSON_GETVALUE) {
-			if(talkmode) {
+			if(json->talkmode) {
 				sprintf_s(dataname,"talk");
-				readJsonArray(json, dataname);
-				if(talkmode){
-					cartoonPointer++;
+				readJsonArray(json,dataname);
+				if(json->talkmode){
+					json->pointer++;
 					break;
 				}
 			}
 			else if(strcmp(dataname, "image")==0) {
-				readJsonArray(json, dataname);
+				readJsonArray(json,dataname);
 			}
 			else if(strcmp(dataname, "bgm")==0) {
-				readJsonObject(json, dataname);
+				readJsonObject(json,dataname);
 			}
 			else if(strcmp(dataname, "load-sound")==0) {
-				readJsonArray(json, dataname);
+				readJsonArray(json,dataname);
 			}
 			else if(strcmp(dataname, "sound")==0) {
-				readJsonObject(json, dataname);
+				readJsonObject(json,dataname);
 			}
 			else if(strcmp(dataname, "load-text")==0) {
-				readJsonArray(json, dataname);
+				readJsonArray(json,dataname);
 			}
 			else if(strcmp(dataname, "set")==0) {
 				readJsonArray(json,dataname);
@@ -425,34 +391,37 @@ bool readCartoonAct(char *json){
 				readJsonArray(json,dataname);
 			}
 			else if(strcmp(dataname, "talk")==0) {
-				readJsonArray(json, dataname);
-				if(talkmode){
-					cartoonPointer++;
+				readJsonArray(json,dataname);
+				if(json->talkmode){
+					json->pointer++;
 					break;
 				}
 			}
 			else if(strcmp(dataname, "reset-timer")==0) {
-				playtime=fetchInt(c);
+				json->pointer+=fetchInt(c,&json->playtime)-1;
 			}
 			else if(strcmp(dataname, "reset")==0) {
 				resetObject(json);
 			}
 			else if(strcmp(dataname, "sync")==0) {
 				if(startsWith(c,"true")){
-					timestamp=SDL_GetTicks();
-					cartoonSync=true;
+					json->pointer+=3;
+					json->timestamp=SDL_GetTicks();
+					json->cartoonSync=true;
 				}
 				else if(startsWith(c,"false")){
-					cartoonSync=false;
+					json->pointer+=4;
+					json->cartoonSync=false;
 				}
 			}
 			else if(strcmp(dataname, "end")==0) {
 				if(startsWith(c,"true")){
+					json->pointer+=3;
 					end=true;
 				}
 			}
 			else if(strcmp(dataname, "note")==0) {
-				fetchString(c, str);
+				json->pointer+=fetchString(c,'"',str)-1;
 			}
 			mode=JSON_NEXTDATA;
 		}
@@ -464,232 +433,232 @@ bool readCartoonAct(char *json){
 				return end;
 			}
 		}
-		cartoonPointer++;
+		json->pointer++;
 	}
 	return false;
 }
 
-void applyJsonData(char *json, char *name){
+void applyJsonData(JsonData *json, char *name){
 	if(strcmp(name,"set")==0){
 		SDL_Color col;
 		int id=0;
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"id")==0)id=json->valueDouble[i];
 		}
-		if(max_obj<id) {
-			max_obj=id;
+		if(json->max_obj<id) {
+			json->max_obj=id;
 		}
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"img_id")==0)obj[id].set.img_id=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"x")==0)obj[id].set.x=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"y")==0)obj[id].set.y=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"ix")==0){
-				obj[id].set.ix=jsonValueDouble[i];
-				obj[id].set.type=CARTOON_DRAWIMAGE;
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"img_id")==0)json->obj[id].set.img_id=json->valueDouble[i];
+			else if(strcmp(json->name[i],"x")==0)json->obj[id].set.x=json->valueDouble[i];
+			else if(strcmp(json->name[i],"y")==0)json->obj[id].set.y=json->valueDouble[i];
+			else if(strcmp(json->name[i],"ix")==0){
+				json->obj[id].set.ix=json->valueDouble[i];
+				json->obj[id].set.type=CARTOON_DRAWIMAGE;
 			}
-			else if(strcmp(jsonName[i],"iy")==0){
-				obj[id].set.iy=jsonValueDouble[i];
-				obj[id].set.type=CARTOON_DRAWIMAGE;
+			else if(strcmp(json->name[i],"iy")==0){
+				json->obj[id].set.iy=json->valueDouble[i];
+				json->obj[id].set.type=CARTOON_DRAWIMAGE;
 			}
-			else if(strcmp(jsonName[i],"w")==0)obj[id].set.w=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"h")==0)obj[id].set.h=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"a")==0)obj[id].set.alpha=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"mag")==0)obj[id].set.mag=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"col")==0){
-				parseColor(jsonValueString[i],&col);
-				obj[id].set.R=col.r;
-				obj[id].set.G=col.g;
-				obj[id].set.B=col.b;
-				obj[id].set.type=CARTOON_FILLRECT;
+			else if(strcmp(json->name[i],"w")==0)json->obj[id].set.w=json->valueDouble[i];
+			else if(strcmp(json->name[i],"h")==0)json->obj[id].set.h=json->valueDouble[i];
+			else if(strcmp(json->name[i],"a")==0)json->obj[id].set.alpha=json->valueDouble[i];
+			else if(strcmp(json->name[i],"mag")==0)json->obj[id].set.mag=json->valueDouble[i];
+			else if(strcmp(json->name[i],"col")==0){
+				parseColor(json->valueString[i],&col);
+				json->obj[id].set.R=col.r;
+				json->obj[id].set.G=col.g;
+				json->obj[id].set.B=col.b;
+				json->obj[id].set.type=CARTOON_FILLRECT;
 			}
-			else if(strcmp(jsonName[i],"col_grad_y from")==0){
-				parseColor(jsonValueString[i],&col);
-				obj[id].set.gradRfrom=col.r;
-				obj[id].set.gradGfrom=col.g;
-				obj[id].set.gradBfrom=col.b;
-				obj[id].set.type=CARTOON_FILLRECT_GRAD;
+			else if(strcmp(json->name[i],"col_grad_y from")==0){
+				parseColor(json->valueString[i],&col);
+				json->obj[id].set.gradRfrom=col.r;
+				json->obj[id].set.gradGfrom=col.g;
+				json->obj[id].set.gradBfrom=col.b;
+				json->obj[id].set.type=CARTOON_FILLRECT_GRAD;
 			}
-			else if(strcmp(jsonName[i],"col_grad_y to")==0){
-				parseColor(jsonValueString[i],&col);
-				obj[id].set.gradRto=col.r;
-				obj[id].set.gradGto=col.g;
-				obj[id].set.gradBto=col.b;
-				obj[id].set.type=CARTOON_FILLRECT_GRAD;
+			else if(strcmp(json->name[i],"col_grad_y to")==0){
+				parseColor(json->valueString[i],&col);
+				json->obj[id].set.gradRto=col.r;
+				json->obj[id].set.gradGto=col.g;
+				json->obj[id].set.gradBto=col.b;
+				json->obj[id].set.type=CARTOON_FILLRECT_GRAD;
 			}
-			else if(strcmp(jsonName[i],"shake")==0)obj[id].set.shake=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"draw_to")==0)obj[id].set.drawTo=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"type")==0){
-				if(strcmp(jsonValueString[i],"carlight")==0)obj[id].set.type=CARTOON_CARLIGHT;
-				else if(strcmp(jsonValueString[i],"illuminate")==0)obj[id].set.type=CARTOON_ILLUMINATE;
+			else if(strcmp(json->name[i],"shake")==0)json->obj[id].set.shake=json->valueDouble[i];
+			else if(strcmp(json->name[i],"draw_to")==0)json->obj[id].set.drawTo=json->valueDouble[i];
+			else if(strcmp(json->name[i],"type")==0){
+				if(strcmp(json->valueString[i],"carlight")==0)json->obj[id].set.type=CARTOON_CARLIGHT;
+				else if(strcmp(json->valueString[i],"illuminate")==0)json->obj[id].set.type=CARTOON_ILLUMINATE;
 			}
-			else if(strcmp(jsonName[i],"lang")==0){
-				if(strcmp(jsonValueString[i],"jp")==0)obj[id].set.lang=JAPANESE;
-				else if(strcmp(jsonValueString[i],"en")==0)obj[id].set.lang=EUROPEAN;
+			else if(strcmp(json->name[i],"lang")==0){
+				if(strcmp(json->valueString[i],"jp")==0)json->obj[id].set.lang=JAPANESE;
+				else if(strcmp(json->valueString[i],"en")==0)json->obj[id].set.lang=EUROPEAN;
 			}
-			else if(strcmp(jsonName[i],"wave sin")==0){
-				obj[id].waveSIN=jsonValueDouble[i];
-				obj[id].set.type=CARTOON_DRAWIMAGE_WAVE;
+			else if(strcmp(json->name[i],"wave sin")==0){
+				json->obj[id].waveSIN=json->valueDouble[i];
+				json->obj[id].set.type=CARTOON_DRAWIMAGE_WAVE;
 			}
-			else if(strcmp(jsonName[i],"wave range")==0){
-				obj[id].waveRange=jsonValueDouble[i];
-				obj[id].set.type=CARTOON_DRAWIMAGE_WAVE;
+			else if(strcmp(json->name[i],"wave range")==0){
+				json->obj[id].waveRange=json->valueDouble[i];
+				json->obj[id].set.type=CARTOON_DRAWIMAGE_WAVE;
 			}
 		}
 	}
 	if(strcmp(name,"move")==0){
 		int id=0;
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"id")==0)id=json->valueDouble[i];
 		}
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"x")==0)obj[id].move.x=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"y")==0)obj[id].move.y=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"mag")==0)obj[id].move.mag=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"a")==0)obj[id].move.alpha=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide x step")==0){
-				obj[id].slideX.step=jsonValueDouble[i];
-				if(obj[id].slideX.step<0){
-					obj[id].slideX.step*=-1;
-					obj[id].slideX.back=true;
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"x")==0)json->obj[id].move.x=json->valueDouble[i];
+			else if(strcmp(json->name[i],"y")==0)json->obj[id].move.y=json->valueDouble[i];
+			else if(strcmp(json->name[i],"mag")==0)json->obj[id].move.mag=json->valueDouble[i];
+			else if(strcmp(json->name[i],"a")==0)json->obj[id].move.alpha=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide x step")==0){
+				json->obj[id].slideX.step=json->valueDouble[i];
+				if(json->obj[id].slideX.step<0){
+					json->obj[id].slideX.step*=-1;
+					json->obj[id].slideX.back=true;
 				}else{
-					obj[id].slideX.back=false;
+					json->obj[id].slideX.back=false;
 				}
 			}
-			else if(strcmp(jsonName[i],"slide x from")==0)obj[id].slideX.from=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide x to")==0)obj[id].slideX.to=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide x pos")==0)obj[id].slideX.position=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide x turnback")==0)obj[id].slideX.turnBack=jsonValueBool[i];
-			else if(strcmp(jsonName[i],"slide y step")==0){
-				obj[id].slideY.step=jsonValueDouble[i];
-				if(obj[id].slideY.step<0){
-					obj[id].slideY.step*=-1;
-					obj[id].slideY.back=true;
+			else if(strcmp(json->name[i],"slide x from")==0)json->obj[id].slideX.from=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide x to")==0)json->obj[id].slideX.to=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide x pos")==0)json->obj[id].slideX.position=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide x turnback")==0)json->obj[id].slideX.turnBack=json->valueBool[i];
+			else if(strcmp(json->name[i],"slide y step")==0){
+				json->obj[id].slideY.step=json->valueDouble[i];
+				if(json->obj[id].slideY.step<0){
+					json->obj[id].slideY.step*=-1;
+					json->obj[id].slideY.back=true;
 				}else{
-					obj[id].slideY.back=false;
+					json->obj[id].slideY.back=false;
 				}
 			}
-			else if(strcmp(jsonName[i],"slide y from")==0)obj[id].slideY.from=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide y to")==0)obj[id].slideY.to=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide y pos")==0)obj[id].slideY.position=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide y turnback")==0)obj[id].slideY.turnBack=jsonValueBool[i];
-			else if(strcmp(jsonName[i],"slide ix step")==0){
-				obj[id].slideIX.step=jsonValueDouble[i];
-				if(obj[id].slideIX.step<0){
-					obj[id].slideIX.step*=-1;
-					obj[id].slideIX.back=true;
+			else if(strcmp(json->name[i],"slide y from")==0)json->obj[id].slideY.from=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide y to")==0)json->obj[id].slideY.to=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide y pos")==0)json->obj[id].slideY.position=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide y turnback")==0)json->obj[id].slideY.turnBack=json->valueBool[i];
+			else if(strcmp(json->name[i],"slide ix step")==0){
+				json->obj[id].slideIX.step=json->valueDouble[i];
+				if(json->obj[id].slideIX.step<0){
+					json->obj[id].slideIX.step*=-1;
+					json->obj[id].slideIX.back=true;
 				}else{
-					obj[id].slideIX.back=false;
+					json->obj[id].slideIX.back=false;
 				}
 			}
-			else if(strcmp(jsonName[i],"slide ix from")==0)obj[id].slideIX.from=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide ix to")==0)obj[id].slideIX.to=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide ix pos")==0)obj[id].slideIX.position=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide ix turnback")==0)obj[id].slideIX.turnBack=jsonValueBool[i];
-			else if(strcmp(jsonName[i],"slide iy step")==0){
-				obj[id].slideIY.step=jsonValueDouble[i];
-				if(obj[id].slideIY.step<0){
-					obj[id].slideIY.step*=-1;
-					obj[id].slideIY.back=true;
+			else if(strcmp(json->name[i],"slide ix from")==0)json->obj[id].slideIX.from=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide ix to")==0)json->obj[id].slideIX.to=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide ix pos")==0)json->obj[id].slideIX.position=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide ix turnback")==0)json->obj[id].slideIX.turnBack=json->valueBool[i];
+			else if(strcmp(json->name[i],"slide iy step")==0){
+				json->obj[id].slideIY.step=json->valueDouble[i];
+				if(json->obj[id].slideIY.step<0){
+					json->obj[id].slideIY.step*=-1;
+					json->obj[id].slideIY.back=true;
 				}else{
-					obj[id].slideIY.back=false;
+					json->obj[id].slideIY.back=false;
 				}
 			}
-			else if(strcmp(jsonName[i],"slide iy from")==0)obj[id].slideIY.from=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide iy to")==0)obj[id].slideIY.to=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide iy pos")==0)obj[id].slideIY.position=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide iy turnback")==0)obj[id].slideIY.turnBack=jsonValueBool[i];
-			else if(strcmp(jsonName[i],"slide a step")==0){
-				obj[id].slideAlpha.step=jsonValueDouble[i];
-				if(obj[id].slideAlpha.step<0){
-					obj[id].slideAlpha.step*=-1;
-					obj[id].slideAlpha.back=true;
+			else if(strcmp(json->name[i],"slide iy from")==0)json->obj[id].slideIY.from=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide iy to")==0)json->obj[id].slideIY.to=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide iy pos")==0)json->obj[id].slideIY.position=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide iy turnback")==0)json->obj[id].slideIY.turnBack=json->valueBool[i];
+			else if(strcmp(json->name[i],"slide a step")==0){
+				json->obj[id].slideAlpha.step=json->valueDouble[i];
+				if(json->obj[id].slideAlpha.step<0){
+					json->obj[id].slideAlpha.step*=-1;
+					json->obj[id].slideAlpha.back=true;
 				}else{
-					obj[id].slideAlpha.back=false;
+					json->obj[id].slideAlpha.back=false;
 				}
 			}
-			else if(strcmp(jsonName[i],"slide a from")==0)obj[id].slideAlpha.from=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide a to")==0)obj[id].slideAlpha.to=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide a pos")==0)obj[id].slideAlpha.position=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide a turnback")==0)obj[id].slideAlpha.turnBack=jsonValueBool[i];
-			else if(strcmp(jsonName[i],"slide mag step")==0){
-				obj[id].slideMag.step=jsonValueDouble[i];
-				if(obj[id].slideMag.step<0){
-					obj[id].slideMag.step*=-1;
-					obj[id].slideMag.back=true;
+			else if(strcmp(json->name[i],"slide a from")==0)json->obj[id].slideAlpha.from=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide a to")==0)json->obj[id].slideAlpha.to=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide a pos")==0)json->obj[id].slideAlpha.position=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide a turnback")==0)json->obj[id].slideAlpha.turnBack=json->valueBool[i];
+			else if(strcmp(json->name[i],"slide mag step")==0){
+				json->obj[id].slideMag.step=json->valueDouble[i];
+				if(json->obj[id].slideMag.step<0){
+					json->obj[id].slideMag.step*=-1;
+					json->obj[id].slideMag.back=true;
 				}else{
-					obj[id].slideMag.back=false;
+					json->obj[id].slideMag.back=false;
 				}
 			}
-			else if(strcmp(jsonName[i],"slide mag from")==0)obj[id].slideMag.from=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide mag to")==0)obj[id].slideMag.to=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide mag pos")==0)obj[id].slideMag.position=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"slide mag turnback")==0)obj[id].slideMag.turnBack=jsonValueBool[i];
-			else if(strcmp(jsonName[i],"jump g")==0)obj[id].jumpG=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"jump y")==0)obj[id].jumpY=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"ix")==0)obj[id].move.ix=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"iy")==0)obj[id].move.iy=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"w")==0)obj[id].move.w=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"h")==0)obj[id].move.h=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"shake")==0)obj[id].move.shake=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"flip in")==0){
-				obj[id].flip.interval=jsonValueDouble[i];
-				obj[id].flip.count=0;
+			else if(strcmp(json->name[i],"slide mag from")==0)json->obj[id].slideMag.from=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide mag to")==0)json->obj[id].slideMag.to=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide mag pos")==0)json->obj[id].slideMag.position=json->valueDouble[i];
+			else if(strcmp(json->name[i],"slide mag turnback")==0)json->obj[id].slideMag.turnBack=json->valueBool[i];
+			else if(strcmp(json->name[i],"jump g")==0)json->obj[id].jumpG=json->valueDouble[i];
+			else if(strcmp(json->name[i],"jump y")==0)json->obj[id].jumpY=json->valueDouble[i];
+			else if(strcmp(json->name[i],"ix")==0)json->obj[id].move.ix=json->valueDouble[i];
+			else if(strcmp(json->name[i],"iy")==0)json->obj[id].move.iy=json->valueDouble[i];
+			else if(strcmp(json->name[i],"w")==0)json->obj[id].move.w=json->valueDouble[i];
+			else if(strcmp(json->name[i],"h")==0)json->obj[id].move.h=json->valueDouble[i];
+			else if(strcmp(json->name[i],"shake")==0)json->obj[id].move.shake=json->valueDouble[i];
+			else if(strcmp(json->name[i],"flip in")==0){
+				json->obj[id].flip.interval=json->valueDouble[i];
+				json->obj[id].flip.count=0;
 			}
-			else if(strcmp(jsonName[i],"flip ix")==0){
-				obj[id].flip.ix=jsonValueDouble[i];
-				obj[id].flip.count=0;
+			else if(strcmp(json->name[i],"flip ix")==0){
+				json->obj[id].flip.ix=json->valueDouble[i];
+				json->obj[id].flip.count=0;
 			}
-			else if(strcmp(jsonName[i],"flip iy")==0){
-				obj[id].flip.iy=jsonValueDouble[i];
-				obj[id].flip.count=0;
+			else if(strcmp(json->name[i],"flip iy")==0){
+				json->obj[id].flip.iy=json->valueDouble[i];
+				json->obj[id].flip.count=0;
 			}
-			else if(strcmp(jsonName[i],"flip n")==0){
-				obj[id].flip.num=jsonValueDouble[i];
-				obj[id].flip.count=0;
+			else if(strcmp(json->name[i],"flip n")==0){
+				json->obj[id].flip.num=json->valueDouble[i];
+				json->obj[id].flip.count=0;
 			}
-			else if(strcmp(jsonName[i],"flip turnback")==0){
-				obj[id].flip.turnBack=jsonValueDouble[i];
-				obj[id].flip.count=0;
+			else if(strcmp(json->name[i],"flip turnback")==0){
+				json->obj[id].flip.turnBack=json->valueDouble[i];
+				json->obj[id].flip.count=0;
 			}
-			else if(strcmp(jsonName[i],"col_grad_y from col_r")==0)obj[id].move.gradRfrom=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"col_grad_y from col_g")==0)obj[id].move.gradGfrom=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"col_grad_y from col_b")==0)obj[id].move.gradBfrom=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"col_grad_y to col_r")==0)obj[id].move.gradRto=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"col_grad_y to col_g")==0)obj[id].move.gradGto=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"col_grad_y to col_b")==0)obj[id].move.gradBto=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"col_r")==0)obj[id].move.R=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"col_g")==0)obj[id].move.G=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"col_b")==0)obj[id].move.B=jsonValueDouble[i];
+			else if(strcmp(json->name[i],"col_grad_y from col_r")==0)json->obj[id].move.gradRfrom=json->valueDouble[i];
+			else if(strcmp(json->name[i],"col_grad_y from col_g")==0)json->obj[id].move.gradGfrom=json->valueDouble[i];
+			else if(strcmp(json->name[i],"col_grad_y from col_b")==0)json->obj[id].move.gradBfrom=json->valueDouble[i];
+			else if(strcmp(json->name[i],"col_grad_y to col_r")==0)json->obj[id].move.gradRto=json->valueDouble[i];
+			else if(strcmp(json->name[i],"col_grad_y to col_g")==0)json->obj[id].move.gradGto=json->valueDouble[i];
+			else if(strcmp(json->name[i],"col_grad_y to col_b")==0)json->obj[id].move.gradBto=json->valueDouble[i];
+			else if(strcmp(json->name[i],"col_r")==0)json->obj[id].move.R=json->valueDouble[i];
+			else if(strcmp(json->name[i],"col_g")==0)json->obj[id].move.G=json->valueDouble[i];
+			else if(strcmp(json->name[i],"col_b")==0)json->obj[id].move.B=json->valueDouble[i];
 		}
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"slide x fade")==0){
-				if(obj[id].slideX.to!=obj[id].slideX.from){
-					obj[id].slideX.fadeRate=jsonValueDouble[i]/(obj[id].slideX.to-obj[id].slideX.from);
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"slide x fade")==0){
+				if(json->obj[id].slideX.to!=json->obj[id].slideX.from){
+					json->obj[id].slideX.fadeRate=json->valueDouble[i]/(json->obj[id].slideX.to-json->obj[id].slideX.from);
 				}
 			}
-			else if(strcmp(jsonName[i],"slide y fade")==0){
-				if(obj[id].slideY.to!=obj[id].slideY.from){
-					obj[id].slideY.fadeRate=jsonValueDouble[i]/(obj[id].slideY.to-obj[id].slideY.from);
+			else if(strcmp(json->name[i],"slide y fade")==0){
+				if(json->obj[id].slideY.to!=json->obj[id].slideY.from){
+					json->obj[id].slideY.fadeRate=json->valueDouble[i]/(json->obj[id].slideY.to-json->obj[id].slideY.from);
 				}
 			}
-			else if(strcmp(jsonName[i],"slide ix fade")==0){
-				if(obj[id].slideIX.to!=obj[id].slideIX.from){
-					obj[id].slideIX.fadeRate=jsonValueDouble[i]/(obj[id].slideIX.to-obj[id].slideIX.from);
+			else if(strcmp(json->name[i],"slide ix fade")==0){
+				if(json->obj[id].slideIX.to!=json->obj[id].slideIX.from){
+					json->obj[id].slideIX.fadeRate=json->valueDouble[i]/(json->obj[id].slideIX.to-json->obj[id].slideIX.from);
 				}
 			}
-			else if(strcmp(jsonName[i],"slide iy fade")==0){
-				if(obj[id].slideIY.to!=obj[id].slideIY.from){
-					obj[id].slideIY.fadeRate=jsonValueDouble[i]/(obj[id].slideIY.to-obj[id].slideIY.from);
+			else if(strcmp(json->name[i],"slide iy fade")==0){
+				if(json->obj[id].slideIY.to!=json->obj[id].slideIY.from){
+					json->obj[id].slideIY.fadeRate=json->valueDouble[i]/(json->obj[id].slideIY.to-json->obj[id].slideIY.from);
 				}
 			}
-			else if(strcmp(jsonName[i],"slide a fade")==0){
-				if(obj[id].slideAlpha.to!=obj[id].slideAlpha.from){
-					obj[id].slideAlpha.fadeRate=jsonValueDouble[i]/(obj[id].slideAlpha.to-obj[id].slideAlpha.from);
+			else if(strcmp(json->name[i],"slide a fade")==0){
+				if(json->obj[id].slideAlpha.to!=json->obj[id].slideAlpha.from){
+					json->obj[id].slideAlpha.fadeRate=json->valueDouble[i]/(json->obj[id].slideAlpha.to-json->obj[id].slideAlpha.from);
 				}
 			}
-			else if(strcmp(jsonName[i],"slide mag fade")==0){
-				if(obj[id].slideMag.to!=obj[id].slideMag.from){
-					obj[id].slideMag.fadeRate=jsonValueDouble[i]/(obj[id].slideMag.to-obj[id].slideMag.from);
+			else if(strcmp(json->name[i],"slide mag fade")==0){
+				if(json->obj[id].slideMag.to!=json->obj[id].slideMag.from){
+					json->obj[id].slideMag.fadeRate=json->valueDouble[i]/(json->obj[id].slideMag.to-json->obj[id].slideMag.from);
 				}
 			}
 		}
@@ -698,11 +667,11 @@ void applyJsonData(char *json, char *name){
 		int id=0,w=0,h=0;
 		char file[100];
 		file[0]=0;
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"file")==0)strcpy_s(file,jsonValueString[i]);
-			else if(strcmp(jsonName[i],"w")==0)w=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"h")==0)h=jsonValueDouble[i];
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"id")==0)id=json->valueDouble[i];
+			else if(strcmp(json->name[i],"file")==0)strcpy_s(file,json->valueString[i]);
+			else if(strcmp(json->name[i],"w")==0)w=json->valueDouble[i];
+			else if(strcmp(json->name[i],"h")==0)h=json->valueDouble[i];
 		}
 		freeImage(img.bg[id]);
 		if(file[0]){
@@ -715,32 +684,32 @@ void applyJsonData(char *json, char *name){
 	else if(strcmp(name,"load-sound")==0){
 		int id=0;
 		char file[100];
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"file")==0)strcpy_s(file,jsonValueString[i]);
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"id")==0)id=json->valueDouble[i];
+			else if(strcmp(json->name[i],"file")==0)strcpy_s(file,json->valueString[i]);
 		}
 		freeSound(sf.sound[id]);
 		sf.sound[id]=Mix_LoadWAV(file);
 	}
 	else if(strcmp(name,"sound")==0){
 		int id=0,ch=0,repeat=0;
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"id")==0)id=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"ch")==0)ch=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"repeat")==0)repeat=jsonValueDouble[i];
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"id")==0)id=json->valueDouble[i];
+			else if(strcmp(json->name[i],"ch")==0)ch=json->valueDouble[i];
+			else if(strcmp(json->name[i],"repeat")==0)repeat=json->valueDouble[i];
 		}
 		Mix_PlayChannel(ch, sf.sound[id], repeat);
 	}
 	else if(strcmp(name,"bgm")==0){
 		int repeat=-1;
 		char file[100];
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"file")==0)strcpy_s(file,jsonValueString[i]);
-			else if(strcmp(jsonName[i],"repeat")==0)repeat=jsonValueDouble[i];
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"file")==0)strcpy_s(file,json->valueString[i]);
+			else if(strcmp(json->name[i],"repeat")==0)repeat=json->valueDouble[i];
 		}
-		if(strcmp(cartoonBgmName,str)!=0){
+		if(strcmp(json->cartoonBgmName,str)!=0){
 			freeMusic();
-			strcpy_s(cartoonBgmName,file);
+			strcpy_s(json->cartoonBgmName,file);
 			bgm=Mix_LoadMUS(file);
 			Mix_PlayMusic(bgm, repeat);
 		}
@@ -749,9 +718,9 @@ void applyJsonData(char *json, char *name){
 		int which_lang=0;
 		char file[100], lang[20];
 		file[0]=0;
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"file")==0)strcpy_s(file,jsonValueString[i]);
-			else if(strcmp(jsonName[i],"lang")==0)strcpy_s(lang,jsonValueString[i]);
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"file")==0)strcpy_s(file,json->valueString[i]);
+			else if(strcmp(json->name[i],"lang")==0)strcpy_s(lang,json->valueString[i]);
 		}
 		if(strcmp(lang, "jp")==0) {
 			which_lang=0;
@@ -777,10 +746,10 @@ void applyJsonData(char *json, char *name){
 	}
 	else if(strcmp(name,"talk")==0){
 		int face=0,text=0,shake=0;
-		for(int i=0 ; i<jsonValueNum ; i++){
-			if(strcmp(jsonName[i],"face")==0)face=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"text")==0)text=jsonValueDouble[i];
-			else if(strcmp(jsonName[i],"shake")==0)shake=jsonValueBool[i];
+		for(int i=0 ; i<json->valueNum ; i++){
+			if(strcmp(json->name[i],"face")==0)face=json->valueDouble[i];
+			else if(strcmp(json->name[i],"text")==0)text=json->valueDouble[i];
+			else if(strcmp(json->name[i],"shake")==0)shake=json->valueBool[i];
 		}
 		gd.face_count=face;
 		gd.talk_count=text;
@@ -791,23 +760,23 @@ void applyJsonData(char *json, char *name){
 	}
 }
 
-void readJsonArray(char *json, char *name){
+void readJsonArray(JsonData *json, char *name){
 	int mode=JSON_ARRAY_START;
 
-	if(talkmode) {
+	if(json->talkmode) {
 		mode=JSON_NEXTDATA;
 	}
 
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
+	while(json->text[json->pointer]) {
+		char *c = &json->text[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
+			json->pointer++;
 			continue;
 		}
 		if(mode==JSON_ARRAY_START) {
 			if(*c=='[') {
 				readJsonObject(json,name);
-				if(talkmode){
+				if(json->talkmode){
 					break;
 				}
 				mode=JSON_NEXTDATA;
@@ -815,40 +784,40 @@ void readJsonArray(char *json, char *name){
 		}
 		else if(mode==JSON_NEXTDATA) {
 			if(*c==',') {
-				cartoonPointer++;
+				json->pointer++;
 				readJsonObject(json,name);
-				if(talkmode){
+				if(json->talkmode){
 					break;
 				}
 			}
 			else if(*c==']') {
 				if(strcmp(name,"talk")==0){
-					talkmode=false;
-					playtime=0;
+					json->talkmode=false;
+					json->playtime=0;
 				}
 				break;
 			}
 		}
-		cartoonPointer++;
+		json->pointer++;
 	}
 }
 
-void readJsonObject(char *json, char *name){
+void readJsonObject(JsonData *json, char *name){
 	int mode=JSON_DATA_START;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
+	while(json->text[json->pointer]) {
+		char *c = &json->text[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
+			json->pointer++;
 			continue;
 		}
 		if(mode==JSON_DATA_START) {
 			if(*c=='{') {
-				jsonValueNum=0;
+				json->valueNum=0;
 				mode=JSON_GETNAME;
 			}
 		}
 		else if(mode==JSON_GETNAME) {
-			fetchString(c,jsonName[jsonValueNum]);
+			json->pointer+=fetchString(c,'"',json->name[json->valueNum])-1;
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_COLON) {
@@ -858,23 +827,25 @@ void readJsonObject(char *json, char *name){
 		}
 		else if(mode==JSON_GETVALUE) {
 			if(*c=='"'){
-				fetchString(c,jsonValueString[jsonValueNum]);
+				json->pointer+=fetchString(c,'"',json->valueString[json->valueNum])-1;
 			}
 			else if((*c>='0' && *c<='9') || *c=='-'){
-				jsonValueDouble[jsonValueNum]=fetchDouble(c);
+				json->pointer+=fetchDouble(c,&json->valueDouble[json->valueNum])-1;
 			}
 			else if(*c=='{'){
 				char basename[20];
-				strcpy_s(basename,jsonName[jsonValueNum]);
+				strcpy_s(basename,json->name[json->valueNum]);
 				readJsonSubObject(json,name,basename);
 			}
 			else if(startsWith(c,"true")){
-				jsonValueBool[jsonValueNum]=true;
+				json->pointer+=3;
+				json->valueBool[json->valueNum]=true;
 			}
 			else if(startsWith(c,"false")){
-				jsonValueBool[jsonValueNum]=false;
+				json->pointer+=4;
+				json->valueBool[json->valueNum]=false;
 			}
-			jsonValueNum++;
+			json->valueNum++;
 			mode=JSON_NEXTDATA;
 		}
 		else if(mode==JSON_NEXTDATA) {
@@ -884,22 +855,22 @@ void readJsonObject(char *json, char *name){
 			else if(*c=='}') {
 				applyJsonData(json,name);
 				if(strcmp(name,"talk")==0){
-					if(!skipThisTime)talkmode=true;
+					if(!json->skipThisTime)json->talkmode=true;
 					gd.text_count=0;
 				}
 				break;
 			}
 		}
-		cartoonPointer++;
+		json->pointer++;
 	}
 }
 
-void readJsonSubObject(char *json, char *name1, char *name2){
+void readJsonSubObject(JsonData *json, char *name1, char *name2){
 	int mode=JSON_DATA_START;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
+	while(json->text[json->pointer]) {
+		char *c = &json->text[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
+			json->pointer++;
 			continue;
 		}
 		if(mode==JSON_DATA_START) {
@@ -908,8 +879,8 @@ void readJsonSubObject(char *json, char *name1, char *name2){
 			}
 		}
 		else if(mode==JSON_GETNAME) {
-			fetchString(c,str);
-			sprintf_s(jsonName[jsonValueNum],"%s %s",name2,str);
+			json->pointer+=fetchString(c,'"',str)-1;
+			sprintf_s(json->name[json->valueNum],"%s %s",name2,str);
 			mode=JSON_COLON;
 		}
 		else if(mode==JSON_COLON) {
@@ -919,23 +890,25 @@ void readJsonSubObject(char *json, char *name1, char *name2){
 		}
 		else if(mode==JSON_GETVALUE) {
 			if(*c=='"'){
-				fetchString(c,jsonValueString[jsonValueNum]);
+				json->pointer+=fetchString(c,'"',json->valueString[json->valueNum])-1;
 			}
 			else if((*c>='0' && *c<='9') || *c=='-'){
-				jsonValueDouble[jsonValueNum]=fetchDouble(c);
+				json->pointer+=fetchDouble(c,&json->valueDouble[json->valueNum])-1;
 			}
 			else if(*c=='{'){
 				char basename[20];
-				strcpy_s(basename,jsonName[jsonValueNum]);
+				strcpy_s(basename,json->name[json->valueNum]);
 				readJsonSubObject(json,name2,basename);
 			}
 			else if(startsWith(c,"true")){
-				jsonValueBool[jsonValueNum]=true;
+				json->pointer+=3;
+				json->valueBool[json->valueNum]=true;
 			}
 			else if(startsWith(c,"false")){
-				jsonValueBool[jsonValueNum]=false;
+				json->pointer+=4;
+				json->valueBool[json->valueNum]=false;
 			}
-			jsonValueNum++;
+			json->valueNum++;
 			mode=JSON_NEXTDATA;
 		}
 		else if(mode==JSON_NEXTDATA) {
@@ -943,20 +916,20 @@ void readJsonSubObject(char *json, char *name1, char *name2){
 				mode=JSON_GETNAME;
 			}
 			else if(*c=='}') {
-				jsonValueNum--;
+				json->valueNum--;
 				break;
 			}
 		}
-		cartoonPointer++;
+		json->pointer++;
 	}
 }
 
-void resetObject(char *json){
+void resetObject(JsonData *json){
 	int mode=JSON_ARRAY_START;
-	while(json[cartoonPointer]) {
-		char *c = &json[cartoonPointer];
+	while(json->text[json->pointer]) {
+		char *c = &json->text[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
-			cartoonPointer++;
+			json->pointer++;
 			continue;
 		}
 		if(mode==JSON_ARRAY_START) {
@@ -968,7 +941,9 @@ void resetObject(char *json){
 			if(*c==']') {
 				return;
 			}else{
-				resetObject(fetchInt(c));
+				int n=0;
+				json->pointer+=fetchInt(c,&n)-1;
+				resetObject(json->obj[n]);
 				mode=JSON_NEXTDATA;
 			}
 		}
@@ -980,199 +955,199 @@ void resetObject(char *json){
 				return;
 			}
 		}
-		cartoonPointer++;
+		json->pointer++;
 	}
 }
 
-void _moveObject(){
-	for(int i=0 ; i<=max_obj ; i++){
-		obj[i].set.x+=obj[i].move.x;
-		obj[i].set.y+=obj[i].move.y;
-		obj[i].set.ix+=obj[i].move.ix;
-		obj[i].set.iy+=obj[i].move.iy;
-		obj[i].set.w+=obj[i].move.w;
-		obj[i].set.h+=obj[i].move.h;
-		obj[i].set.mag+=obj[i].move.mag;
-		obj[i].set.alpha+=obj[i].move.alpha;
-		obj[i].set.shake+=obj[i].move.shake;
-		obj[i].set.R+=obj[i].move.R;
-		obj[i].set.G+=obj[i].move.G;
-		obj[i].set.B+=obj[i].move.B;
-		obj[i].set.gradRfrom+=obj[i].move.gradRfrom;
-		obj[i].set.gradGfrom+=obj[i].move.gradGfrom;
-		obj[i].set.gradBfrom+=obj[i].move.gradBfrom;
-		obj[i].set.gradRto+=obj[i].move.gradRto;
-		obj[i].set.gradGto+=obj[i].move.gradGto;
-		obj[i].set.gradBto+=obj[i].move.gradBto;
+void _moveObject(JsonData *json){
+	for(int i=0 ; i<=json->max_obj ; i++){
+		json->obj[i].set.x+=json->obj[i].move.x;
+		json->obj[i].set.y+=json->obj[i].move.y;
+		json->obj[i].set.ix+=json->obj[i].move.ix;
+		json->obj[i].set.iy+=json->obj[i].move.iy;
+		json->obj[i].set.w+=json->obj[i].move.w;
+		json->obj[i].set.h+=json->obj[i].move.h;
+		json->obj[i].set.mag+=json->obj[i].move.mag;
+		json->obj[i].set.alpha+=json->obj[i].move.alpha;
+		json->obj[i].set.shake+=json->obj[i].move.shake;
+		json->obj[i].set.R+=json->obj[i].move.R;
+		json->obj[i].set.G+=json->obj[i].move.G;
+		json->obj[i].set.B+=json->obj[i].move.B;
+		json->obj[i].set.gradRfrom+=json->obj[i].move.gradRfrom;
+		json->obj[i].set.gradGfrom+=json->obj[i].move.gradGfrom;
+		json->obj[i].set.gradBfrom+=json->obj[i].move.gradBfrom;
+		json->obj[i].set.gradRto+=json->obj[i].move.gradRto;
+		json->obj[i].set.gradGto+=json->obj[i].move.gradGto;
+		json->obj[i].set.gradBto+=json->obj[i].move.gradBto;
 
-		obj[i].flip.count++;
-		if(obj[i].flip.num!=0){
-			if(obj[i].flip.turnBack){
-				if(obj[i].flip.count%obj[i].flip.interval==0){
-					if(obj[i].flip.count<obj[i].flip.interval*obj[i].flip.num){
-						obj[i].set.ix+=obj[i].flip.ix;
-						obj[i].set.iy+=obj[i].flip.iy;
+		json->obj[i].flip.count++;
+		if(json->obj[i].flip.num!=0){
+			if(json->obj[i].flip.turnBack){
+				if(json->obj[i].flip.count%json->obj[i].flip.interval==0){
+					if(json->obj[i].flip.count<json->obj[i].flip.interval*json->obj[i].flip.num){
+						json->obj[i].set.ix+=json->obj[i].flip.ix;
+						json->obj[i].set.iy+=json->obj[i].flip.iy;
 					}else{
-						obj[i].set.ix-=obj[i].flip.ix;
-						obj[i].set.iy-=obj[i].flip.iy;
+						json->obj[i].set.ix-=json->obj[i].flip.ix;
+						json->obj[i].set.iy-=json->obj[i].flip.iy;
 					}
-					if(obj[i].flip.count==obj[i].flip.interval*(obj[i].flip.num-1)*2){
-						obj[i].flip.count=0;
+					if(json->obj[i].flip.count==json->obj[i].flip.interval*(json->obj[i].flip.num-1)*2){
+						json->obj[i].flip.count=0;
 					}
 				}
 			}else{
-				if(obj[i].flip.count%obj[i].flip.interval==0){
-					obj[i].set.ix+=obj[i].flip.ix;
-					obj[i].set.iy+=obj[i].flip.iy;
+				if(json->obj[i].flip.count%json->obj[i].flip.interval==0){
+					json->obj[i].set.ix+=json->obj[i].flip.ix;
+					json->obj[i].set.iy+=json->obj[i].flip.iy;
 				}
-				if(obj[i].flip.count==obj[i].flip.interval*obj[i].flip.num){
-					obj[i].set.ix-=obj[i].flip.ix*obj[i].flip.num;
-					obj[i].set.iy-=obj[i].flip.iy*obj[i].flip.num;
-					obj[i].flip.count=0;
+				if(json->obj[i].flip.count==json->obj[i].flip.interval*json->obj[i].flip.num){
+					json->obj[i].set.ix-=json->obj[i].flip.ix*json->obj[i].flip.num;
+					json->obj[i].set.iy-=json->obj[i].flip.iy*json->obj[i].flip.num;
+					json->obj[i].flip.count=0;
 				}
 			}
 		}
 
-		if(obj[i].slideAlpha.step!=0){
-			if(obj[i].slideAlpha.back){
-				obj[i].slideAlpha.position-=obj[i].slideAlpha.step;
+		if(json->obj[i].slideAlpha.step!=0){
+			if(json->obj[i].slideAlpha.back){
+				json->obj[i].slideAlpha.position-=json->obj[i].slideAlpha.step;
 			}else{
-				obj[i].slideAlpha.position+=obj[i].slideAlpha.step;
+				json->obj[i].slideAlpha.position+=json->obj[i].slideAlpha.step;
 			}
-			if(obj[i].slideAlpha.position>=obj[i].slideAlpha.to){
-				if(obj[i].slideAlpha.turnBack){
-					obj[i].slideAlpha.position=obj[i].slideAlpha.to;
-					obj[i].slideAlpha.back=true;
+			if(json->obj[i].slideAlpha.position>=json->obj[i].slideAlpha.to){
+				if(json->obj[i].slideAlpha.turnBack){
+					json->obj[i].slideAlpha.position=json->obj[i].slideAlpha.to;
+					json->obj[i].slideAlpha.back=true;
 				}else{
-					obj[i].slideAlpha.position=obj[i].slideAlpha.from;
+					json->obj[i].slideAlpha.position=json->obj[i].slideAlpha.from;
 				}
 			}
-			else if(obj[i].slideAlpha.position<=obj[i].slideAlpha.from){
-				obj[i].slideAlpha.position=obj[i].slideAlpha.from;
-				obj[i].slideAlpha.back=false;
+			else if(json->obj[i].slideAlpha.position<=json->obj[i].slideAlpha.from){
+				json->obj[i].slideAlpha.position=json->obj[i].slideAlpha.from;
+				json->obj[i].slideAlpha.back=false;
 			}
 		}
-		if(obj[i].slideX.step!=0){
-			if(obj[i].slideX.back){
-				obj[i].slideX.position-=obj[i].slideX.step;
+		if(json->obj[i].slideX.step!=0){
+			if(json->obj[i].slideX.back){
+				json->obj[i].slideX.position-=json->obj[i].slideX.step;
 			}else{
-				obj[i].slideX.position+=obj[i].slideX.step;
+				json->obj[i].slideX.position+=json->obj[i].slideX.step;
 			}
-			if(obj[i].slideX.position>=obj[i].slideX.to){
-				if(obj[i].slideX.turnBack){
-					obj[i].slideX.position=obj[i].slideX.to;
-					obj[i].slideX.back=true;
+			if(json->obj[i].slideX.position>=json->obj[i].slideX.to){
+				if(json->obj[i].slideX.turnBack){
+					json->obj[i].slideX.position=json->obj[i].slideX.to;
+					json->obj[i].slideX.back=true;
 				}else{
-					obj[i].slideX.position=obj[i].slideX.from;
+					json->obj[i].slideX.position=json->obj[i].slideX.from;
 				}
 			}
-			else if(obj[i].slideX.position<=obj[i].slideX.from){
-				if(obj[i].slideX.turnBack){
-					obj[i].slideX.position=obj[i].slideX.from;
-					obj[i].slideX.back=false;
+			else if(json->obj[i].slideX.position<=json->obj[i].slideX.from){
+				if(json->obj[i].slideX.turnBack){
+					json->obj[i].slideX.position=json->obj[i].slideX.from;
+					json->obj[i].slideX.back=false;
 				}else{
-					obj[i].slideX.position=obj[i].slideX.to;
+					json->obj[i].slideX.position=json->obj[i].slideX.to;
 				}
 			}
 		}
-		if(obj[i].slideY.step!=0){
-			if(obj[i].slideY.back){
-				obj[i].slideY.position-=obj[i].slideY.step;
+		if(json->obj[i].slideY.step!=0){
+			if(json->obj[i].slideY.back){
+				json->obj[i].slideY.position-=json->obj[i].slideY.step;
 			}else{
-				obj[i].slideY.position+=obj[i].slideY.step;
+				json->obj[i].slideY.position+=json->obj[i].slideY.step;
 			}
-			if(obj[i].slideY.position>=obj[i].slideY.to){
-				if(obj[i].slideY.turnBack){
-					obj[i].slideY.position=obj[i].slideY.to;
-					obj[i].slideY.back=true;
+			if(json->obj[i].slideY.position>=json->obj[i].slideY.to){
+				if(json->obj[i].slideY.turnBack){
+					json->obj[i].slideY.position=json->obj[i].slideY.to;
+					json->obj[i].slideY.back=true;
 				}else{
-					obj[i].slideY.position=obj[i].slideY.from;
+					json->obj[i].slideY.position=json->obj[i].slideY.from;
 				}
-				obj[i].slideY.back=true;
+				json->obj[i].slideY.back=true;
 			}
-			else if(obj[i].slideY.position<=obj[i].slideY.from){
-				obj[i].slideY.position=obj[i].slideY.from;
-				obj[i].slideY.back=false;
+			else if(json->obj[i].slideY.position<=json->obj[i].slideY.from){
+				json->obj[i].slideY.position=json->obj[i].slideY.from;
+				json->obj[i].slideY.back=false;
 			}
 		}
-		if(obj[i].slideIX.step!=0){
-			if(obj[i].slideIX.back){
-				obj[i].slideIX.position-=obj[i].slideIX.step;
+		if(json->obj[i].slideIX.step!=0){
+			if(json->obj[i].slideIX.back){
+				json->obj[i].slideIX.position-=json->obj[i].slideIX.step;
 			}else{
-				obj[i].slideIX.position+=obj[i].slideIX.step;
+				json->obj[i].slideIX.position+=json->obj[i].slideIX.step;
 			}
-			if(obj[i].slideIX.position>=obj[i].slideIX.to){
-				if(obj[i].slideIX.turnBack){
-					obj[i].slideIX.position=obj[i].slideIX.to;
-					obj[i].slideIX.back=true;
+			if(json->obj[i].slideIX.position>=json->obj[i].slideIX.to){
+				if(json->obj[i].slideIX.turnBack){
+					json->obj[i].slideIX.position=json->obj[i].slideIX.to;
+					json->obj[i].slideIX.back=true;
 				}else{
-					obj[i].slideIX.position=obj[i].slideIX.from;
+					json->obj[i].slideIX.position=json->obj[i].slideIX.from;
 				}
-				obj[i].slideIX.back=true;
+				json->obj[i].slideIX.back=true;
 			}
-			else if(obj[i].slideIX.position<=obj[i].slideIX.from){
-				obj[i].slideIX.position=obj[i].slideIX.from;
-				obj[i].slideIX.back=false;
+			else if(json->obj[i].slideIX.position<=json->obj[i].slideIX.from){
+				json->obj[i].slideIX.position=json->obj[i].slideIX.from;
+				json->obj[i].slideIX.back=false;
 			}
 		}
-		if(obj[i].slideIY.step!=0){
-			if(obj[i].slideIY.back){
-				obj[i].slideIY.position-=obj[i].slideIY.step;
+		if(json->obj[i].slideIY.step!=0){
+			if(json->obj[i].slideIY.back){
+				json->obj[i].slideIY.position-=json->obj[i].slideIY.step;
 			}else{
-				obj[i].slideIY.position+=obj[i].slideIY.step;
+				json->obj[i].slideIY.position+=json->obj[i].slideIY.step;
 			}
-			if(obj[i].slideIY.position>=obj[i].slideIY.to){
-				if(obj[i].slideIY.turnBack){
-					obj[i].slideIY.position=obj[i].slideIY.to;
-					obj[i].slideIY.back=true;
+			if(json->obj[i].slideIY.position>=json->obj[i].slideIY.to){
+				if(json->obj[i].slideIY.turnBack){
+					json->obj[i].slideIY.position=json->obj[i].slideIY.to;
+					json->obj[i].slideIY.back=true;
 				}else{
-					obj[i].slideIY.position=obj[i].slideIY.from;
+					json->obj[i].slideIY.position=json->obj[i].slideIY.from;
 				}
-				obj[i].slideIY.back=true;
+				json->obj[i].slideIY.back=true;
 			}
-			else if(obj[i].slideIY.position<=obj[i].slideIY.from){
-				obj[i].slideIY.position=obj[i].slideIY.from;
-				obj[i].slideIY.back=false;
+			else if(json->obj[i].slideIY.position<=json->obj[i].slideIY.from){
+				json->obj[i].slideIY.position=json->obj[i].slideIY.from;
+				json->obj[i].slideIY.back=false;
 			}
 		}
-		if(obj[i].slideMag.step!=0){
-			if(obj[i].slideMag.back){
-				obj[i].slideMag.position-=obj[i].slideMag.step;
+		if(json->obj[i].slideMag.step!=0){
+			if(json->obj[i].slideMag.back){
+				json->obj[i].slideMag.position-=json->obj[i].slideMag.step;
 			}else{
-				obj[i].slideMag.position+=obj[i].slideMag.step;
+				json->obj[i].slideMag.position+=json->obj[i].slideMag.step;
 			}
-			if(obj[i].slideMag.position>=obj[i].slideMag.to){
-				if(obj[i].slideMag.turnBack){
-					obj[i].slideMag.position=obj[i].slideMag.to;
-					obj[i].slideMag.back=true;
+			if(json->obj[i].slideMag.position>=json->obj[i].slideMag.to){
+				if(json->obj[i].slideMag.turnBack){
+					json->obj[i].slideMag.position=json->obj[i].slideMag.to;
+					json->obj[i].slideMag.back=true;
 				}else{
-					obj[i].slideMag.position=obj[i].slideMag.from;
+					json->obj[i].slideMag.position=json->obj[i].slideMag.from;
 				}
 			}
-			else if(obj[i].slideMag.position<=obj[i].slideMag.from){
-				obj[i].slideMag.position=obj[i].slideMag.from;
-				obj[i].slideMag.back=false;
+			else if(json->obj[i].slideMag.position<=json->obj[i].slideMag.from){
+				json->obj[i].slideMag.position=json->obj[i].slideMag.from;
+				json->obj[i].slideMag.back=false;
 			}
 		}
-		if(obj[i].jumpG!=0){
-			obj[i].set.y-=obj[i].jumpY;
-			obj[i].jumpY-=obj[i].jumpG;
+		if(json->obj[i].jumpG!=0){
+			json->obj[i].set.y-=json->obj[i].jumpY;
+			json->obj[i].jumpY-=json->obj[i].jumpG;
 		}
-		if(obj[i].slideAlpha.fadeRate!=0){
-			obj[i].slideAlpha.fade+=obj[i].slideAlpha.fadeRate;
+		if(json->obj[i].slideAlpha.fadeRate!=0){
+			json->obj[i].slideAlpha.fade+=json->obj[i].slideAlpha.fadeRate;
 		}
 	}
 }
 
-bool _nextCut(){
-	_moveObject();
-	if(!talkmode){
+bool _nextCut(JsonData *json){
+	_moveObject(json);
+	if(!json->talkmode){
 		bool end=false;
-		if(playtime==cartoonNextTime ||
-		   (gd.week==call_week && gd.hour==call_hour && gd.minute==call_minute)){
-			end=readCartoon(cartoonJson);
+		if(json->playtime==json->nextTime ||
+		   (gd.week==json->call_week && gd.hour==json->call_hour && gd.minute==json->call_minute)){
+			end=readCartoon(json);
 		}
-		playtime++;
+		json->playtime++;
 		if(end)return true;
 	}else{
 		gd.text_count++;
@@ -1185,127 +1160,127 @@ bool _nextCut(){
 	return false;
 }
 
-bool nextCut(){
+bool nextCut(JsonData *json){
 	bool end=false;
 	int t=1;
-	if(cartoonSync){
-		t=(int)((SDL_GetTicks()-timestamp)/16)-playtime;
+	if(json->cartoonSync){
+		t=(int)((SDL_GetTicks()-json->timestamp)/16)-json->playtime;
 	}
 	for(int i=0 ; i<t ; i++){
-		end=_nextCut();
+		end=_nextCut(json);
 		if(end)break;
 	}
 	return end;
 }
 
-bool nextTalk(){
-	if(talkmode){
+bool nextTalk(JsonData *json){
+	if(json->talkmode){
 		bool end=false;
 		if(gd.text_count<(int)strlen(talk[gd.talk_count].str[CHAR_CODE])){
 			gd.text_count=90;
 		}else{
-			end=readCartoon(cartoonJson);
+			end=readCartoon(json);
 		}
 		if(end)return true;
 	}
 	return false;
 }
 
-void drawAnimationCut(SDL_Surface* scr){
-	for(int i=0 ; i<=max_obj ; i++){
-		if(obj[i].set.lang!=-1 && obj[i].set.lang!=CHAR_CODE){
+void drawAnimationCut(JsonData *json, SDL_Surface* scr){
+	for(int i=0 ; i<=json->max_obj ; i++){
+		if(json->obj[i].set.lang!=-1 && json->obj[i].set.lang!=CHAR_CODE){
 			continue;
 		}
 
 		int dx=0,dy=0;
 		double fade=1;
-		if(obj[i].set.shake!=0){
-			dx=(int)(cos(count*0.3)*obj[i].set.shake);
-			dy=(int)(sin(count*0.3)*obj[i].set.shake);
+		if(json->obj[i].set.shake!=0){
+			dx=(int)(cos(count*0.3)*json->obj[i].set.shake);
+			dy=(int)(sin(count*0.3)*json->obj[i].set.shake);
 		}
-		if(obj[i].slideAlpha.fadeRate!=0){
-			fade=obj[i].slideAlpha.fade;
+		if(json->obj[i].slideAlpha.fadeRate!=0){
+			fade=json->obj[i].slideAlpha.fade;
 		}
 
-		int x=(int)(obj[i].set.x+obj[i].slideX.position+dx);
-		int y=(int)(obj[i].set.y+obj[i].slideY.position+dy);
-		int ix=(int)(obj[i].set.ix+obj[i].slideIX.position);
-		int iy=(int)(obj[i].set.iy+obj[i].slideIY.position);
-		int w=(int)obj[i].set.w;
-		int h=(int)obj[i].set.h;
-		int a=(int)((obj[i].set.alpha+obj[i].slideAlpha.position)*fade);
-		double mag=obj[i].set.mag+obj[i].slideMag.position;
-		if(obj[i].set.drawTo!=-1){
-			if(obj[i].set.type==CARTOON_DRAWIMAGE){
+		int x=(int)(json->obj[i].set.x+json->obj[i].slideX.position+dx);
+		int y=(int)(json->obj[i].set.y+json->obj[i].slideY.position+dy);
+		int ix=(int)(json->obj[i].set.ix+json->obj[i].slideIX.position);
+		int iy=(int)(json->obj[i].set.iy+json->obj[i].slideIY.position);
+		int w=(int)json->obj[i].set.w;
+		int h=(int)json->obj[i].set.h;
+		int a=(int)((json->obj[i].set.alpha+json->obj[i].slideAlpha.position)*fade);
+		double mag=json->obj[i].set.mag+json->obj[i].slideMag.position;
+		if(json->obj[i].set.drawTo!=-1){
+			if(json->obj[i].set.type==CARTOON_DRAWIMAGE){
 				if(mag==1){
-					drawImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					drawImage(img.bg[json->obj[i].set.drawTo],img.bg[json->obj[i].set.img_id],x,y,ix,iy,w,h,a);
 				}else{
-					drawImage_x(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					drawImage_x(img.bg[json->obj[i].set.drawTo],img.bg[json->obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
 				}
 			}
-			if(obj[i].set.type==CARTOON_ILLUMINATE){
+			if(json->obj[i].set.type==CARTOON_ILLUMINATE){
 				if(mag==1){
-					illuminateImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					illuminateImage(img.bg[json->obj[i].set.drawTo],img.bg[json->obj[i].set.img_id],x,y,ix,iy,w,h,a);
 				}else{
-					illuminateImage_x(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					illuminateImage_x(img.bg[json->obj[i].set.drawTo],img.bg[json->obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
 				}
 			}
-			else if(obj[i].set.type==CARTOON_FILLRECT){
-				fillRect(img.bg[obj[i].set.drawTo],x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+			else if(json->obj[i].set.type==CARTOON_FILLRECT){
+				fillRect(img.bg[json->obj[i].set.drawTo],x,y,w,h,(int)json->obj[i].set.R,(int)json->obj[i].set.G,(int)json->obj[i].set.B,a);
 			}
-			else if(obj[i].set.type==CARTOON_CARLIGHT){
-				drawLightBall(img.bg[obj[i].set.drawTo],x,y,w,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B);
+			else if(json->obj[i].set.type==CARTOON_CARLIGHT){
+				drawLightBall(img.bg[json->obj[i].set.drawTo],x,y,w,(int)json->obj[i].set.R,(int)json->obj[i].set.G,(int)json->obj[i].set.B);
 			}
-			else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
+			else if(json->obj[i].set.type==CARTOON_FILLRECT_GRAD){
 				for(int j=0 ; j<h ; j++){
-					int R=(int)(obj[i].set.gradRfrom+(obj[i].set.gradRto-obj[i].set.gradRfrom)*j/h);
-					int G=(int)(obj[i].set.gradGfrom+(obj[i].set.gradGto-obj[i].set.gradGfrom)*j/h);
-					int B=(int)(obj[i].set.gradBfrom+(obj[i].set.gradBto-obj[i].set.gradBfrom)*j/h);
-					fillRect(img.bg[obj[i].set.drawTo],x,y+j,w,1,R,G,B,a);
+					int R=(int)(json->obj[i].set.gradRfrom+(json->obj[i].set.gradRto-json->obj[i].set.gradRfrom)*j/h);
+					int G=(int)(json->obj[i].set.gradGfrom+(json->obj[i].set.gradGto-json->obj[i].set.gradGfrom)*j/h);
+					int B=(int)(json->obj[i].set.gradBfrom+(json->obj[i].set.gradBto-json->obj[i].set.gradBfrom)*j/h);
+					fillRect(img.bg[json->obj[i].set.drawTo],x,y+j,w,1,R,G,B,a);
 				}
 			}
-			else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
+			else if(json->obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
 				for(int j=0 ; j<h ; j++){
-					drawImage(img.bg[obj[i].set.drawTo],img.bg[obj[i].set.img_id],x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
+					drawImage(img.bg[json->obj[i].set.drawTo],img.bg[json->obj[i].set.img_id],x+(int)(sin((count+j)*json->obj[i].waveSIN)*json->obj[i].waveRange),y+j,ix,iy+j,w,1,a);
 				}
 			}
 		}else{
-			if(obj[i].set.type==CARTOON_DRAWIMAGE){
+			if(json->obj[i].set.type==CARTOON_DRAWIMAGE){
 				if(mag==1){
-					drawImage(scr,img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					drawImage(scr,img.bg[json->obj[i].set.img_id],x,y,ix,iy,w,h,a);
 				}else{
-					drawImage_x(scr,img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					drawImage_x(scr,img.bg[json->obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
 				}
 			}
-			if(obj[i].set.type==CARTOON_ILLUMINATE){
+			if(json->obj[i].set.type==CARTOON_ILLUMINATE){
 				if(mag==1){
-					illuminateImage(scr,img.bg[obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					illuminateImage(scr,img.bg[json->obj[i].set.img_id],x,y,ix,iy,w,h,a);
 				}else{
-					illuminateImage_x(scr,img.bg[obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					illuminateImage_x(scr,img.bg[json->obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
 				}
 			}
-			else if(obj[i].set.type==CARTOON_FILLRECT){
-				fillRect(scr,x,y,w,h,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B,a);
+			else if(json->obj[i].set.type==CARTOON_FILLRECT){
+				fillRect(scr,x,y,w,h,(int)json->obj[i].set.R,(int)json->obj[i].set.G,(int)json->obj[i].set.B,a);
 			}
-			else if(obj[i].set.type==CARTOON_CARLIGHT){
-				drawLightBall(scr,x,y,w,(int)obj[i].set.R,(int)obj[i].set.G,(int)obj[i].set.B);
+			else if(json->obj[i].set.type==CARTOON_CARLIGHT){
+				drawLightBall(scr,x,y,w,(int)json->obj[i].set.R,(int)json->obj[i].set.G,(int)json->obj[i].set.B);
 			}
-			else if(obj[i].set.type==CARTOON_FILLRECT_GRAD){
+			else if(json->obj[i].set.type==CARTOON_FILLRECT_GRAD){
 				for(int j=0 ; j<h ; j++){
-					int R=(int)(obj[i].set.gradRfrom+(obj[i].set.gradRto-obj[i].set.gradRfrom)*j/h);
-					int G=(int)(obj[i].set.gradGfrom+(obj[i].set.gradGto-obj[i].set.gradGfrom)*j/h);
-					int B=(int)(obj[i].set.gradBfrom+(obj[i].set.gradBto-obj[i].set.gradBfrom)*j/h);
+					int R=(int)(json->obj[i].set.gradRfrom+(json->obj[i].set.gradRto-json->obj[i].set.gradRfrom)*j/h);
+					int G=(int)(json->obj[i].set.gradGfrom+(json->obj[i].set.gradGto-json->obj[i].set.gradGfrom)*j/h);
+					int B=(int)(json->obj[i].set.gradBfrom+(json->obj[i].set.gradBto-json->obj[i].set.gradBfrom)*j/h);
 					fillRect(scr,x,y+j,w,1,R,G,B,a);
 				}
 			}
-			else if(obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
+			else if(json->obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
 				for(int j=0 ; j<h ; j++){
-					drawImage(scr,img.bg[obj[i].set.img_id],x+(int)(sin((count+j)*obj[i].waveSIN)*obj[i].waveRange),y+j,ix,iy+j,w,1,a);
+					drawImage(scr,img.bg[json->obj[i].set.img_id],x+(int)(sin((count+j)*json->obj[i].waveSIN)*json->obj[i].waveRange),y+j,ix,iy+j,w,1,a);
 				}
 			}
 		}
 	}
-	if(talkmode){
+	if(json->talkmode){
 		drawTalking(scr,gd.face_count,talk[gd.talk_count]);
 	}
 }

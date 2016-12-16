@@ -7,7 +7,7 @@ void initEnding(){
 	count=0;
 	phase=LEAVE_SHORE;
 	getImage(img.back,"file/img/shore.png",0,0,255);
-	playtime=0;
+	cartoonJson.playtime=0;
 }
 
 void initMedalAward(int n){
@@ -15,7 +15,7 @@ void initMedalAward(int n){
 	which_medal=n;
 	phase=GET_MEDAL;
 	sprintf_s(str,"file/data/cartoon/medal%d.json",which_medal+1);
-	loadCartoon(str);
+	loadCartoon(&cartoonJson, str);
 }
 
 void initEndingAnime(){
@@ -23,7 +23,7 @@ void initEndingAnime(){
 	mode=ENDING;
 	phase=ENDING_ANIME;
 	count=0;
-	loadCartoon("file/data/cartoon/ending.json");
+	loadCartoon(&cartoonJson, "file/data/cartoon/ending.json");
 }
 
 void endEnding(){
@@ -69,7 +69,7 @@ void keyWarning(){
 void keyEnding(){
 	if(phase==LEAVE_SHORE || phase==GET_MEDAL){
 		if(key.z && !key_stop(key.z)){
-			if(nextTalk()){
+			if(nextTalk(&cartoonJson)){
 			}
 		}
 	}
@@ -78,7 +78,7 @@ void keyEnding(){
 }
 
 void timerLeaveShore(){
-	if(nextCut()){
+	if(nextCut(&cartoonJson)){
 		int a=100*gd.crops/works;
 		if(a>=100)initMedalAward(3);
 		else if(a>=80)initMedalAward(2);
@@ -88,8 +88,8 @@ void timerLeaveShore(){
 }
 
 void timerGetMedal(){
-	if(nextCut()){
-		freeCartoon();
+	if(nextCut(&cartoonJson)){
+		freeCartoon(&cartoonJson);
 		if(movie_test){
 			endEnding();
 			initMiyazaki();
@@ -115,7 +115,7 @@ void timerGetMedal(){
 
 void timerEndingAnime(){
 	if(phase==ENDING_ANIME){
-		if(nextCut()){
+		if(nextCut(&cartoonJson)){
 			if(movie_test){
 				endEnding();
 				initMiyazaki();
@@ -137,7 +137,7 @@ void timerEndingAnime(){
 					initGameMenu();
 				}
 			}
-			freeCartoon();
+			freeCartoon(&cartoonJson);
 		}
 	}
 }
@@ -167,7 +167,7 @@ void drawEndingExplain(SDL_Surface* scr){
 
 void drawEnding(SDL_Surface* scr){
 	if(phase==ENDING_ANIME){
-		drawAnimationCut(scr);
+		drawAnimationCut(&cartoonJson,scr);
 	}
 	else if(phase==WARNING){
 		fillRect(scr,0,0,640,480,0,0,64,255);
@@ -183,7 +183,7 @@ void drawEnding(SDL_Surface* scr){
 			drawText(scr,280,400,text[EPILOGUE+7]);
 		}
 	}
-	else drawAnimationCut(scr);
+	else drawAnimationCut(&cartoonJson,scr);
 
 	if(phase==GET_MEDAL){
 		if(which_medal!=0)drawText(scr,200,0,text[EPILOGUE+3]);

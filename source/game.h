@@ -77,6 +77,7 @@ struct GameData{
 	int text_count,talk_count,face_count,talk_open_count,scene_count,shake_count,ta_count,town_count;
 	int talk_kulisap,face_kulisap,kirby_count,kirby_count2,timeslot_count,timeslot_type;
 	int summerX_start,summerY_start,summerX,summerY,memmaX,memmaY,memma_count;
+	int bgm_timestamp;
 	double dotX,dotY;
 	Uint8 week,minute,hour,sunset_hour,sunrise_hour,game_mode;
 	Uint8 menu_selected,antenna_selected,option_selected,mainmenu_selected;

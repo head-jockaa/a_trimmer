@@ -8,7 +8,7 @@ void initOpening(){
 	getImage(img.back,"file/img/testcard.png",0,0,255);
 }
 void endOpening(){
-	freeCartoon();
+	freeCartoon(&cartoonJson);
 	freeImage(img.back);
 	freeMusic();
 }
@@ -18,7 +18,7 @@ void drawOpening(SDL_Surface* scr){
 		drawImage(scr,img.back,0,0,0,0,640,480,255);
 	}
 	else if(phase==1){
-		drawAnimationCut(scr);
+		drawAnimationCut(&cartoonJson,scr);
 	}
 	if(EXPLAIN){
 		drawKeyboard(scr,key.zC,0,460);
@@ -50,7 +50,7 @@ void keyOpening(){
 
 void timerOpening(){
 	if(phase==1){
-		if(nextCut()){
+		if(nextCut(&cartoonJson)){
 			if(movie_test){
 				endOpening();
 				initMiyazaki();
@@ -70,7 +70,7 @@ void timerOpening(){
 void initOpeningAnime(){
 	mode=OPENING;
 	count=0;phase=1;
-	loadCartoon("file/data/cartoon/opening.json");
+	loadCartoon(&cartoonJson, "file/data/cartoon/opening.json");
 }
 
 void initTitle2(){
@@ -81,20 +81,20 @@ void initTitle2(){
 	menu[0].stack(text[TITLETEXT+2]);
 	menu[0].setBG(192);
 	phase=0;
-	loadCartoon("file/data/cartoon/title.json");
+	loadCartoon(&cartoonJson, "file/data/cartoon/title.json");
 }
 
 void endTitle(){
 	menu[0].setViewMode(HIDE);
 	freeImage(img.back);
 	freeMusic();
-	freeCartoon();
+	freeCartoon(&cartoonJson);
 	freeSound(sf.gaze);
 	kick_count=1;
 }
 
 void timerTitle(){
-	if(nextCut()){
+	if(nextCut(&cartoonJson)){
 		menu[0].setViewMode(VISIBLE);
 		phase=1;
 	}
@@ -120,7 +120,7 @@ void keyTitle(){
 }
 
 void drawTitle(SDL_Surface* scr){
-	drawAnimationCut(scr);
+	drawAnimationCut(&cartoonJson,scr);
 	if(phase==1){
 		menu[0].drawMenu(scr);
 	}
