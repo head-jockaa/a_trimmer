@@ -139,11 +139,11 @@ int fetchString(char *s, char brace, char *value) {
 			}
 			else if(*s=='\\' && *(s+1)==brace) {
 				value[pointer]=brace;
-				pointer+=2;
+				s++;
 			}else{
 				value[pointer]=*s;
-				pointer++;
 			}
+			pointer++;
 		}
 		else if(*s==brace) {
 			start=true;

@@ -105,8 +105,8 @@ void getRGB(Uint32 px, Uint8 *r, Uint8 *g, Uint8 *b);
 
 extern SDL_Rect scr;
 extern bool run,setSMR,map_loaded,*animebook,ABGR;
-extern Uint8 mode,mode2,dataNo,phase,kick_count,pauseGame;
-extern int stas,works,prgs,animedex_num,collection,areas,towers,mounts,towns,index_num,clear_num,mapW,mapH;
+extern Uint8 mode,mode2,which_season,phase,kick_count,pauseGame;
+extern int stas,entries,prgs,animedex_num,collection,areas,towers,mounts,towns,season_num,clear_num,mapW,mapH;
 extern int count,bg_count,face[1000],start;
 extern int talk_kulisap,face_kulisap,ant_dir;
 extern bool SHOW_TOWER, EXPLAIN, NHK_REMOVE;
@@ -139,12 +139,12 @@ void drawText2_lang(SDL_Surface* scr, int x, int y, String st, int l, Uint8 a, i
 void putHeadMark(String &s);
 String jummingText(String s, int strl, int rcv, int mg_rcv);
 
-struct Index{
+struct Season{
 	String name;
 	Uint8 rate;
 	int id,hiscore;
 };
-extern Index *indexName;
+extern Season *season;
 
 struct Mhz{
 	int mhz,dis;
@@ -198,16 +198,16 @@ struct Station{
 	int id,ontv;
 };
 
-struct Prg{
+struct Program{
 	Uint8 week,hour,minute;
-	int id,season_id,station,time,work;
+	int id,season_index,station_index,time,cartoon_index;
 };
 
-struct Work{
+struct Entry{
 	String title;
 	char query[600];
-	int mark,prg_num,cartoon_id;
-	Prg *prg;
+	int mark,prg_num,cartoon_id,cartoon_index;
+	Program *prg;
 	Uint8 r,g,b;
 	bool exist;
 };
@@ -215,7 +215,7 @@ struct Work{
 struct Town{
 	String name;
 	Uint16 x,y;
-	int id,area_id;
+	int id,area_index;
 };
 
 struct Tower{
@@ -223,9 +223,9 @@ struct Tower{
 	Uint8 ch[10], onair_num, colorlight_size, bias, r_num;
 	double kw, erp;
 	int rcv[10];
-	int id,area_id;
+	int id,area_index;
 	short r_h[20];
-	Uint16 x, y, h, x_3d, y_3d, work[10], r_dis[20],r_m[20];
+	Uint16 x, y, h, x_3d, y_3d, r_dis[20],r_m[20];
 	float power[10];
 	float dir;
 	bool remove, v;
@@ -256,13 +256,13 @@ struct Areacode{
 extern Areacode *areacode;
 
 struct Timeslot{
-	int id, season_id;
+	int id, season_index;
 	Uint8 week,hour,minute,type;
 };
 extern Timeslot *timeslot;
 
 extern int areacode_num, allofworks_num, timeslot_num;
-extern Work *allofworks;
+extern Entry *allofworks;
 
 struct Key{
 	Uint8 left,right,up,down,z,x,c,a,F1,F4,F5,F10;
@@ -374,8 +374,8 @@ void strcpy_s(char *s1, long n, char *s2);
 
 extern Key key;
 extern Station *sta;
-extern Prg *prg;
-extern Work *work;
+extern Program *prg;
+extern Entry *entry;
 extern Area *area;
 extern Tower *tower;
 extern Mount *mount;

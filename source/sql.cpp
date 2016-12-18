@@ -19,6 +19,34 @@ int column_num;
 void initVariableArray(char *tname, int data_size);
 void getSqlValue(char *c, char *tname, char *cname, int index, bool get);
 
+int getAreaById(int id){
+	for(int i=0 ; i<areas ; i++) {
+		if(area[i].id==id)return i;
+	}
+	return 0;
+}
+
+int getStationById(int id){
+	for(int i=0 ; i<stas ; i++) {
+		if(sta[i].id==id)return i;
+	}
+	return 0;
+}
+
+int getSeasonById(int id){
+	for(int i=0 ; i<season_num ; i++) {
+		if(season[i].id==id)return i;
+	}
+	return 0;
+}
+
+int getCartoonById(int id, Entry *wk, int wk_num){
+	for(int i=0 ; i<wk_num ; i++) {
+		if(wk[i].cartoon_id==id)return i;
+	}
+	return 0;
+}
+
 int fetchSqlString(char *&s, char *value) {
 	int n=0;
 	n=fetchString(s,'\'',value);
@@ -164,7 +192,7 @@ void initVariableArray(char *tname, int data_size) {
 			delete [] allofworks;
 		}
 		allofworks_num=data_size;
-		allofworks=new Work[allofworks_num];
+		allofworks=new Entry[allofworks_num];
 		for(int i=0 ; i<allofworks_num ; i++) {
 			allofworks[i].prg_num=0;
 			allofworks[i].exist=false;
@@ -178,11 +206,11 @@ void initVariableArray(char *tname, int data_size) {
 		mount=new Mount[mounts];
 	}
 	else if(strcmp(tname,"season")==0) {
-		if(index_num) {
-			delete [] indexName;
+		if(season_num) {
+			delete [] season;
 		}
-		index_num=data_size;
-		indexName=new Index[index_num];
+		season_num=data_size;
+		season=new Season[season_num];
 	}
 	else if(strcmp(tname,"station")==0) {
 		if(stas) {
@@ -203,7 +231,7 @@ void initVariableArray(char *tname, int data_size) {
 			delete [] prg;
 		}
 		prgs=data_size;
-		prg=new Prg[prgs];
+		prg=new Program[prgs];
 	}
 	else if(strcmp(tname,"tower")==0) {
 		if(towers) {
@@ -309,43 +337,43 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"tv1")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[0]=intValue-1;
+			if(get)area[index].station[0]=getStationById(intValue);
 		}
 		else if(strcmp(cname,"tv2")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[1]=intValue-1;
+			if(get)area[index].station[1]=getStationById(intValue);
 		}
 		else if(strcmp(cname,"tv3")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[2]=intValue-1;
+			if(get)area[index].station[2]=getStationById(intValue);
 		}
 		else if(strcmp(cname,"tv4")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[3]=intValue-1;
+			if(get)area[index].station[3]=getStationById(intValue);
 		}
 		else if(strcmp(cname,"tv5")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[4]=intValue-1;
+			if(get)area[index].station[4]=getStationById(intValue);
 		}
 		else if(strcmp(cname,"tv6")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[5]=intValue-1;
+			if(get)area[index].station[5]=getStationById(intValue);
 		}
 		else if(strcmp(cname,"tv7")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[6]=intValue-1;
+			if(get)area[index].station[6]=getStationById(intValue);
 		}
 		else if(strcmp(cname,"tv8")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[7]=intValue-1;
+			if(get)area[index].station[7]=getStationById(intValue);
 		}
 		else if(strcmp(cname,"tv9")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[8]=intValue-1;
+			if(get)area[index].station[8]=getStationById(intValue);
 		}
 		else if(strcmp(cname,"tv10")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)area[index].station[9]=intValue-1;
+			if(get)area[index].station[9]=getStationById(intValue);
 		}
 	}
 	else if(strcmp(tname,"areacode")==0) {
@@ -413,7 +441,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 	else if(strcmp(tname,"cartoon")==0) {
 		if(strcmp(cname,"id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)allofworks[index].cartoon_id=intValue;
+			if(get){
+				allofworks[index].cartoon_id=intValue;
+				allofworks[index].cartoon_index=intValue-1;
+			}
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
@@ -481,21 +512,21 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"station_id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)BSstation[index]=intValue-1;
+			if(get)BSstation[index]=getStationById(intValue);
 		}
 	}
 	else if(strcmp(tname,"season")==0) {
 		if(strcmp(cname,"id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)indexName[index].id=intValue;
+			if(get)season[index].id=intValue;
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(indexName[index].name.str[0],str);
+			if(get)strcpy_s(season[index].name.str[0],str);
 		}
 		else if(strcmp(cname,"name_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(indexName[index].name.str[1],str);
+			if(get)strcpy_s(season[index].name.str[1],str);
 		}
 	}
 	else if(strcmp(tname,"station")==0) {
@@ -531,7 +562,7 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"season_id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)timeslot[index].season_id=intValue;
+			if(get)timeslot[index].season_index=getSeasonById(intValue);
 		}
 		else if(strcmp(cname,"week")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
@@ -557,15 +588,15 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"season_id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)prg[index].season_id=intValue;
+			if(get)prg[index].season_index=getSeasonById(intValue);
 		}
 		else if(strcmp(cname,"anime_id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)prg[index].work=intValue;
+			if(get)prg[index].cartoon_index=getCartoonById(intValue,allofworks,allofworks_num);
 		}
 		else if(strcmp(cname,"station_id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)prg[index].station=intValue;
+			if(get)prg[index].station_index=getStationById(intValue);
 		}
 		else if(strcmp(cname,"week")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
@@ -591,7 +622,7 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"area_id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)tower[index].area_id=intValue;
+			if(get)tower[index].area_index=getAreaById(intValue);
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
@@ -677,7 +708,7 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"area_id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
-			if(get)town[index].area_id=intValue;
+			if(get)town[index].area_index=getAreaById(intValue);
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);

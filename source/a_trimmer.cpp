@@ -264,7 +264,7 @@ void initAll(){
 	fishbox.initAll();
 	load_parameter();
 	load_text();
-	load_index();
+	load_season();
 	initOpening();
 	gd.option_selected=0;
 	gd.antenna_selected=0;
@@ -275,14 +275,14 @@ void initAll(){
 void endAll(){
 	for(int i=0 ; i<4 ; i++)freeImage(img.buffer[i]);
 	if(fsize)delete [] fstr;
-	if(index_num)delete [] indexName;
+	if(season_num)delete [] season;
 	if(stas)delete [] sta;
 	if(animedex_num)delete [] animebook;
-	if(works){
-		for(int i=0 ; i<works ; i++){
-			if(work[i].prg_num)delete [] work[i].prg;
+	if(entries){
+		for(int i=0 ; i<entries ; i++){
+			if(entry[i].prg_num)delete [] entry[i].prg;
 		}
-		delete [] work;
+		delete [] entry;
 	}
 	if(areas){
 		for(int i=0 ; i<areas ; i++){

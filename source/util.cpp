@@ -1,10 +1,10 @@
 #include "util.h"
 
 Key key;
-Index *indexName;
+Season *season;
 Station *sta;
-Prg *prg;
-Work *work;
+Program *prg;
+Entry *entry;
 Area *area;
 Tower *tower;
 Mount *mount;
@@ -23,9 +23,9 @@ size_t fsize=0;
 String text[1000],talk[1000];
 bool run,setSMR,map_loaded=false, *animebook, ABGR;
 double test=0;
-int stas=0,works=0,prgs=0,animedex_num=0,collection=0,areas=0,towers=0,mounts=0,towns=0,index_num=0,clear_num=0;
+int stas=0,entries=0,prgs=0,animedex_num=0,collection=0,areas=0,towers=0,mounts=0,towns=0,season_num=0,clear_num=0;
 int count=0,bg_count=0,face[1000],start=0;
-Uint8 mode=0,phase=0,dataNo=1,kick_count=0,pauseGame;
+Uint8 mode=0,phase=0,which_season=1,kick_count=0,pauseGame;
 bool SHOW_TOWER, EXPLAIN, NHK_REMOVE;
 Uint8 CHAR_CODE,AIR_IMG,WALKING_TYPE,ROD_TYPE,ADJ_DIR,MAP3D;
 Uint8 CHANNELS,FULLSCR,SCRSIZE=1,BGM_VOLUME,SE_VOLUME;
@@ -38,7 +38,7 @@ Mhz *mhz;
 Areacode *areacode;
 Timeslot *timeslot;
 int areacode_num, allofworks_num, timeslot_num;
-Work *allofworks;
+Entry *allofworks;
 
 void Menu::setMenu(int X, int Y, int w, int r, int n){
 	reset();
@@ -312,8 +312,8 @@ void FishBox::drawFishBox(SDL_Surface* scr){
 	panelColor(n);
 	drawImage(scr,img.menuback,40,60,0,0,560,240,128);
 	for(int i=0 ; i<14 ; i++)for(int j=0 ; j<6 ; j++){
-		if((j+offset)*14+i>=max || !work[(j+offset)*14+i].exist)drawImage(scr,img.symbol,i*40+40,j*40+60,476,0,34,34,255);
-		else if(fish[(j+offset)*14+i].score!=0)drawImage(scr,img.symbol,i*40+40,j*40+60,(work[(j+offset)*14+i].mark%16)*34,(work[(j+offset)*14+i].mark/16)*34,34,34,255);
+		if((j+offset)*14+i>=max || !entry[(j+offset)*14+i].exist)drawImage(scr,img.symbol,i*40+40,j*40+60,476,0,34,34,255);
+		else if(fish[(j+offset)*14+i].score!=0)drawImage(scr,img.symbol,i*40+40,j*40+60,(entry[(j+offset)*14+i].mark%16)*34,(entry[(j+offset)*14+i].mark/16)*34,34,34,255);
 	}
 	if(count%40<20)drawImage(scr,img.chr,cx*40+40,cy*40+60,566,0,40,40,255);
 	if(fish[n].score!=0)drawTable(scr,fish[n]);
@@ -321,9 +321,9 @@ void FishBox::drawFishBox(SDL_Surface* scr){
 void FishBox::drawTable(SDL_Surface* scr, Fish f){
 	if(max==0)return;
 	drawImage(scr,panel,20,300,0,400,600,180,255);
-	drawImage(scr,img.symbol,30,362,(work[f.which_work].mark%16)*34,(work[f.which_work].mark/16)*34,34,34,255);
-	drawText2_lang(scr, 64, 362, jummingText(work[f.which_work].title,60,f.rcv,f.mg_rcv), text_count, 255, JAPANESE);
-	int tc=text_count-(int)strlen(work[f.which_work].title.str[0]);
+	drawImage(scr,img.symbol,30,362,(entry[f.which_work].mark%16)*34,(entry[f.which_work].mark/16)*34,34,34,255);
+	drawText2_lang(scr, 64, 362, jummingText(entry[f.which_work].title,60,f.rcv,f.mg_rcv), text_count, 255, JAPANESE);
+	int tc=text_count-(int)strlen(entry[f.which_work].title.str[0]);
 	if(tc>=0){
 		drawImage(scr,img.symbol,30,402,(sta[f.sta].mark%16)*34,(sta[f.sta].mark/16)*34,34,34,255);
 		if(f.bs)sprintf_s(str,"%s",toChar(sta[f.sta].name));
@@ -371,7 +371,7 @@ void FishBox::panelColor(int r, int g, int b){
 }
 void FishBox::panelColor(int N){
 	if(max==0)return;
-	panelColor(work[N].r,work[N].g,work[N].b);
+	panelColor(entry[N].r,entry[N].g,entry[N].b);
 }
 void FishBox::cursorUp(){
 	if(cy+offset!=0)Mix_PlayChannel(2, sf.cursor_move, 0);

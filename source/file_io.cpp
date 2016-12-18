@@ -41,16 +41,17 @@ void load_haziashop(){
 	}
 }
 
-void load_index(){
+void load_season(){
+	if(season_num)return;
 	load_haziashop();
 	size_t fc=0;
 	gd.hazia=0;
 	readSQL("file/data/sql/season.sql");
 	if(!loadFile("save/clear.dat")){
 		for(int i=0 ; i<SHOP_ITEMS ; i++)gd.bought[i]=false;
-		for(int i=0 ; i<index_num ; i++){
-			indexName[i].rate=0;
-			indexName[i].hiscore=0;
+		for(int i=0 ; i<season_num ; i++){
+			season[i].rate=0;
+			season[i].hiscore=0;
 		}
 		clear_num=1;
 	}else{
@@ -58,22 +59,28 @@ void load_index(){
 			gd.bought[i]=toBool(fstr[fc]);fc++;
 			if(gd.bought[i])gd.hazia-=price[i];
 		}
-		for(int i=0 ; i<index_num ; i++){
-			indexName[i].rate=to8int(fstr[fc]);fc++;
-			indexName[i].hiscore=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
-			gd.hazia+=indexName[i].hiscore;
+		for(int i=0 ; i<season_num ; i++){
+			season[i].rate=to8int(fstr[fc]);fc++;
+			season[i].hiscore=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+			gd.hazia+=season[i].hiscore;
 		}
 		clear_num=1;
-		for(int i=0 ; i<index_num-1 ; i++){//最終ボス面は保留
-			if(indexName[i].rate<60)break;
+		for(int i=0 ; i<season_num-1 ; i++){//最終ボス面は保留
+			if(season[i].rate<60)break;
 			clear_num++;
 		}
 	}
 }
 
+void load_areas(){
+	if(areas)return;
+	load_station();
+}
+
 void load_station(){
 	if(stas)return;
 	readSQL("file/data/sql/station.sql");
+	readSQL("file/data/sql/area.sql");
 	readSQL("file/data/sql/satellite.sql");
 	for(int i=0 ; i<stas ; i++)putHeadMark(sta[i].talk);
 }
@@ -159,44 +166,46 @@ void save_animebook(){
 	fclose(hFile);
 }
 
-void load_works(int n){
+void load_entries(int n){
 	load_station();
 	load_animebook();
+	load_season();
 
 	readSQL("file/data/sql/cartoon.sql");
 	sprintf_s(str,"file/data/sql/timetable%d.sql",n);
 	readSQL(str);
 	for(int i=0 ; i<prgs ; i++){
-		allofworks[prg[i].work-1].exist=true;
+		allofworks[prg[i].cartoon_index].exist=true;
 	}
-	if(works){
-		for(int i=0 ; i<works ; i++){
-			if(work[i].prg_num){
-				delete [] work[i].prg;
+	if(entries){
+		for(int i=0 ; i<entries ; i++){
+			if(entry[i].prg_num){
+				delete [] entry[i].prg;
 			}
 		}
-		delete [] work;
+		delete [] entry;
 	}
-	works=0;
+	entries=0;
 	for(int i=0 ; i<allofworks_num ; i++){
 		if(allofworks[i].exist){
-			works++;
+			entries++;
 		}
 	}
-	work=new Work[works];
-	works=0;
+	entry=new Entry[entries];
+	entries=0;
 	for(int i=0 ; i<allofworks_num ; i++){
 		if(allofworks[i].exist){
-			strcpy_s(work[works].title.str[0],allofworks[i].title.str[0]);
-			strcpy_s(work[works].title.str[1],allofworks[i].title.str[1]);
-			work[works].mark=allofworks[i].mark;
-			work[works].r=allofworks[i].r;
-			work[works].g=allofworks[i].g;
-			work[works].b=allofworks[i].b;
-			work[works].exist=true;
-			work[works].prg_num=0;
-			work[works].cartoon_id=allofworks[i].cartoon_id;
-			works++;
+			strcpy_s(entry[entries].title.str[0],allofworks[i].title.str[0]);
+			strcpy_s(entry[entries].title.str[1],allofworks[i].title.str[1]);
+			entry[entries].mark=allofworks[i].mark;
+			entry[entries].r=allofworks[i].r;
+			entry[entries].g=allofworks[i].g;
+			entry[entries].b=allofworks[i].b;
+			entry[entries].exist=true;
+			entry[entries].prg_num=0;
+			entry[entries].cartoon_id=allofworks[i].cartoon_id;
+			entry[entries].cartoon_index=allofworks[i].cartoon_index;
+			entries++;
 		}
 	}
 	int *prg_count=new int[allofworks_num];
@@ -204,24 +213,24 @@ void load_works(int n){
 		prg_count[i]=0;
 	}
 	for(int i=0 ; i<prgs ; i++){
-		prg_count[prg[i].work-1]++;
+		prg_count[prg[i].cartoon_index]++;
 	}
-	for(int i=0 ; i<works ; i++){
-		if(prg_count[work[i].cartoon_id-1]){
-			work[i].prg = new Prg[prg_count[work[i].cartoon_id-1]];
+	for(int i=0 ; i<entries ; i++){
+		if(prg_count[entry[i].cartoon_index]){
+			entry[i].prg = new Program[prg_count[entry[i].cartoon_index]];
 		}
 	}
-	for(int i=0 ; i<works ; i++){
-		work[i].prg_num=0;
+	for(int i=0 ; i<entries ; i++){
+		entry[i].prg_num=0;
 		for(int j=0 ; j<prgs ; j++){
-			if(prg[j].work==work[i].cartoon_id){
-				int n2=work[i].prg_num;
-				work[i].prg[n2].week=prg[j].week;
-				work[i].prg[n2].hour=prg[j].hour;
-				work[i].prg[n2].minute=prg[j].minute;
-				work[i].prg[n2].time=prg[j].time;
-				work[i].prg[n2].station=prg[j].station-1;
-				work[i].prg_num++;
+			if(prg[j].cartoon_index==entry[i].cartoon_index){
+				int n2=entry[i].prg_num;
+				entry[i].prg[n2].week=prg[j].week;
+				entry[i].prg[n2].hour=prg[j].hour;
+				entry[i].prg[n2].minute=prg[j].minute;
+				entry[i].prg[n2].time=prg[j].time;
+				entry[i].prg[n2].station_index=prg[j].station_index;
+				entry[i].prg_num++;
 			}
 		}
 	}
@@ -233,7 +242,7 @@ void load_works(int n){
 	readSQL("file/data/sql/timeslot.sql");
 }
 
-void load_searchQueries(Work *wk, int wk_num){
+void load_searchQueries(Entry *wk, int wk_num){
 	loadFile("file/data/work/search_query.dat");
 	int query_num = 0;
 	int j = 0;
@@ -261,7 +270,8 @@ void load_searchQueries(Work *wk, int wk_num){
 	int value, w;
 	for(int i=0 ; i<wk_num ; i++){
 		j = 0;
-		w = wk[i].cartoon_id-1;
+//		w = getCartoonById(wk[i].cartoon_id,wk,wk_num);
+		w = wk[i].cartoon_index;
 		for(int k=0 ; k<200 ; k++){
 			if(query[w].str[0][k] == 0){
 				wk[i].query[j] = 0;
@@ -313,18 +323,16 @@ void load_searchQueries(Work *wk, int wk_num){
 
 void load_towers(){
 	if(towers)return;
-	if(!areas){
-		readSQL("file/data/sql/area.sql");
-	}
+	load_areas();
 	readSQL("file/data/sql/tower.sql");
 	for(int i=0 ; i<towers ; i++){
-		area[tower[i].area_id-1].tower_num++;
+		area[tower[i].area_index].tower_num++;
 	}
 	for(int i=0 ; i<areas ; i++){
 		area[i].tower=new Tower[area[i].tower_num];
 		area[i].tower_num=0;
 		for(int j=0 ; j<towers ; j++){
-			if(tower[j].area_id-1==i){
+			if(tower[j].area_index==i){
 				int n=area[i].tower_num;
 				strcpy_s(area[i].tower[n].name.str[0], tower[j].name.str[0]);
 				strcpy_s(area[i].tower[n].name.str[1], tower[j].name.str[1]);
@@ -351,18 +359,16 @@ void load_mounts(){
 
 void load_towns(){
 	if(towns)return;
-	if(!areas){
-		readSQL("file/data/sql/area.sql");
-	}
+	load_areas();
 	readSQL("file/data/sql/town.sql");
 	for(int i=0 ; i<towns ; i++){
-		area[town[i].area_id-1].town_num++;
+		area[town[i].area_index].town_num++;
 	}
 	for(int i=0 ; i<areas ; i++){
 		area[i].town=new Town[area[i].town_num];
 		area[i].town_num=0;
 		for(int j=0 ; j<towns ; j++){
-			if(town[j].area_id-1==i){
+			if(town[j].area_index==i){
 				int n=area[i].town_num;
 				area[i].town[n].x=town[j].x;
 				area[i].town[n].y=town[j].y;
@@ -633,7 +639,7 @@ void load_option(){
 
 void save_index(){
 	if(fsize)delete [] fstr;
-	fsize=index_num*5;
+	fsize=season_num*5;
 	fstr=new char[fsize+SHOP_ITEMS];
 	FILE* hFile;
 	size_t fc=0;
@@ -641,12 +647,12 @@ void save_index(){
 	for(int i=0 ; i<SHOP_ITEMS ; i++){
 		fstr[fc]=gd.bought[i];fc++;
 	}
-	for(int i=0 ; i<index_num ; i++){
-		fstr[fc]=indexName[i].rate;fc++;
-		fstr[fc]=indexName[i].hiscore%256;fc++;
-		fstr[fc]=(indexName[i].hiscore/256)%256;fc++;
-		fstr[fc]=(indexName[i].hiscore/65536)%256;fc++;
-		fstr[fc]=indexName[i].hiscore/16777216;fc++;
+	for(int i=0 ; i<season_num ; i++){
+		fstr[fc]=season[i].rate;fc++;
+		fstr[fc]=season[i].hiscore%256;fc++;
+		fstr[fc]=(season[i].hiscore/256)%256;fc++;
+		fstr[fc]=(season[i].hiscore/65536)%256;fc++;
+		fstr[fc]=season[i].hiscore/16777216;fc++;
 	}
 
 	sprintf_s(str,"save/clear.dat");
@@ -657,13 +663,13 @@ void save_index(){
 
 void save_record(int n){
 	if(fsize)delete [] fstr;
-	fsize=works*19+1;
+	fsize=entries*19+1;
 	fstr=new char[fsize];
 	FILE* hFile;
 	size_t fc=0;
 
-	fstr[fc]=dataNo-1;fc++;
-	for(int i=0 ; i<works ; i++){
+	fstr[fc]=which_season;fc++;
+	for(int i=0 ; i<entries ; i++){
 		fstr[fc]=fishbox.getData(i,0)%256;fc++;
 		fstr[fc]=fishbox.getData(i,0)/256;fc++;
 		fstr[fc]=fishbox.getData(i,1)%256;fc++;
@@ -695,14 +701,14 @@ void load_record(int n){
 	size_t fc=0;
 	sprintf_s(str,"save/record%d.dat",n);
 	loadFile(str);
-	dataNo=fstr[fc]+1;fc++;
-	load_works(dataNo);
-	fishbox.initFishBox(works);
+	which_season=fstr[fc];fc++;
+	load_entries(which_season);
+	fishbox.initFishBox(entries);
 	sprintf_s(str,"save/record%d.dat",n);
 	loadFile(str);
 	gd.score=0;
 	fc=1;
-	for(int i=0 ; i<works ; i++){
+	for(int i=0 ; i<entries ; i++){
 		if(fc>=fsize)break;
 		fishbox.setData(i,0,to16int(fstr[fc],fstr[fc+1]));fc+=2;
 		fishbox.setData(i,1,to16int(fstr[fc],fstr[fc+1]));fc+=2;
@@ -726,19 +732,19 @@ void load_record(int n){
 
 void save_game(int n){
 	if(fsize)delete [] fstr;
-	fsize=works*43+19;
+	fsize=entries*43+19;
 	fstr=new char[fsize];
 	FILE* hFile;
 	size_t fc=0;
 	int today_num=0;
 
-	fstr[fc]=dataNo-1;fc++;
-	fstr[fc]=works%256;fc++;
-	fstr[fc]=works/256;fc++;
+	fstr[fc]=which_season;fc++;
+	fstr[fc]=entries%256;fc++;
+	fstr[fc]=entries/256;fc++;
 	fstr[fc]=gd.week;fc++;
 	fstr[fc]=gd.hour;fc++;
 	fstr[fc]=gd.minute;fc++;
-	for(int i=0 ; i<works ; i++){
+	for(int i=0 ; i<entries ; i++){
 		if(fishbox.today[i]==EOF)break;
 		today_num++;
 	}
@@ -755,7 +761,7 @@ void save_game(int n){
 	fstr[fc]=(int)md.manekiX/256;fc++;
 	fstr[fc]=(int)md.manekiY%256;fc++;
 	fstr[fc]=(int)md.manekiY/256;fc++;
-	for(int i=0 ; i<works ; i++){
+	for(int i=0 ; i<entries ; i++){
 		fstr[fc]=fishbox.getData(i,0)%256;fc++;
 		fstr[fc]=fishbox.getData(i,0)/256;fc++;
 		fstr[fc]=fishbox.getData(i,1)%256;fc++;
@@ -819,7 +825,7 @@ void load_game(int n){
 
 	sprintf_s(str,"save/save%d.dat",n);
 	if(!loadFile(str))return;
-	dataNo=fstr[fc]+1;fc++;
+	which_season=fstr[fc];fc++;
 	a=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 	gd.week=fstr[fc];fc++;
 	gd.hour=fstr[fc];fc++;

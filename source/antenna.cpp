@@ -83,14 +83,14 @@ void Antenna::catching(){
 					phase=FISHUP;
 					start=150;
 					gd.get_score+=tmp_fish.score;
-					for(int i=0 ; i<works ; i++)if(fishbox.today[i]==EOF){
+					for(int i=0 ; i<entries ; i++)if(fishbox.today[i]==EOF){
 						fishbox.today[i]=tmp_fish.which_work;
 						break;
 					}
 				}else{
 					phase=GRADEUP;
 					start=67;
-					fishbox.text_count=(int)strlen(work[tmp_fish.which_work].title.str[0]);
+					fishbox.text_count=(int)strlen(entry[tmp_fish.which_work].title.str[0]);
 					gd.gradeup = tmp_fish.score-fishbox.getSC(tmp_fish.which_work);
 					gd.get_score+=gd.gradeup;
 					Mix_PlayChannel(1, sf.decide, 0);
@@ -606,13 +606,15 @@ void ButtonRod::drawAntenna(SDL_Surface* scr){
 	else if(set>=5)auto_set();
 
 	if(set!=0){
-		drawImage(scr,img.menuback,120,120,0,0,340,240,128);
+		drawImage(scr,img.menuback,120,120,0,0,340,240,192);
 		for(int i=0 ; i<12 ; i++){
-			sprintf_s(str,"%2d",i+1);
-			drawText2(scr,(i/6)*200+120,(i%6)*40+120,str,2);
-			if(button[i]==0)sprintf_s(str,"-");
-			else sprintf_s(str,"%2d",button[i]);
-			drawText2(scr,(i/6)*200+200,(i%6)*40+120,str,2);
+			drawImage(scr,img.rod,(i/6)*200+120,(i%6)*40+120,(i%3)*40+2,(i/3)*40+4,36,32,255);
+			if(button[i]==0){
+				drawText2(scr,(i/6)*200+200,(i%6)*40+120,"-",2,128);
+			}else{
+				sprintf_s(str,"%2d",button[i]);
+				drawText2(scr,(i/6)*200+200,(i%6)*40+120,str,2);
+			}
 		}
 	}
 }

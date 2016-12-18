@@ -38,8 +38,8 @@ void initMiyazaki(){
 	menu[DELETE_YN].setMenu(320,60,12,2,2);
 	menu[DELETE_YN].stack(text[MIYAZAKITEXT+29]);
 	menu[DELETE_YN].stack(text[MIYAZAKITEXT+28]);
-	menu[GUIDE_SEASON].setMenu(100,80,10,8,index_num);
-	for(int i=0 ; i<index_num ; i++)menu[GUIDE_SEASON].stack(indexName[i].name);
+	menu[GUIDE_SEASON].setMenu(100,80,10,8,season_num);
+	for(int i=0 ; i<season_num ; i++)menu[GUIDE_SEASON].stack(season[i].name);
 	menu[BGM_TEST].setMenu(40,120,25,7,37);
 	for(int i=1 ; i<=NUM_OF_BGM ; i++){
 		sprintf_s(str,"Music No.%2d",i);
@@ -331,30 +331,30 @@ void keyGuideAll(){
 	if(key.z && !key_stop(key.z)){
 		int n=menu[GUIDE_ALL].selected();
 		if(animebook[n]){
-			menu[GUIDE_STALIST].setMenu(10,30,30,9,allofworks[n].prg_num+index_num*2);
+			menu[GUIDE_STALIST].setMenu(10,30,30,9,allofworks[n].prg_num+season_num*2);
 			int line_num=0;
 			String s;
-			bool *on_air=new bool[index_num];
-			for(int i=0; i<index_num ; i++){
+			bool *on_air=new bool[season_num];
+			for(int i=0; i<season_num ; i++){
 				on_air[i]=false;
 				for(int j=0; j<allofworks[n].prg_num ; j++){
-					if(allofworks[n].prg[j].season_id-1==i){
+					if(allofworks[n].prg[j].season_index==i){
 						on_air[i]=true;
 						break;
 					}
 				}
 			}
-			for(int i=0; i<index_num ; i++){
+			for(int i=0; i<season_num ; i++){
 				if(!on_air[i])continue;
-				sprintf_s(s.str[0],"=== %s ===",indexName[i].name.str[0]);
-				sprintf_s(s.str[1],"=== %s ===",indexName[i].name.str[1]);
+				sprintf_s(s.str[0],"=== %s ===",season[i].name.str[0]);
+				sprintf_s(s.str[1],"=== %s ===",season[i].name.str[1]);
 				menu[GUIDE_STALIST].stack(s);
 				for(int j=0; j<allofworks[n].prg_num ; j++){
-					if(allofworks[n].prg[j].season_id-1!=i)continue;
-					sprintf_s(s.str[0],"%2d:%2d(%s)%s",allofworks[n].prg[j].hour,allofworks[n].prg[j].minute,weekChar[allofworks[n].prg[j].week][0],sta[allofworks[n].prg[j].station].name.str[0]);
-					sprintf_s(s.str[1],"%2d:%2d(%s)%s",allofworks[n].prg[j].hour,allofworks[n].prg[j].minute,weekChar[allofworks[n].prg[j].week][1],sta[allofworks[n].prg[j].station].name.str[1]);
+					if(allofworks[n].prg[j].season_index!=i)continue;
+					sprintf_s(s.str[0],"%2d:%2d(%s)%s",allofworks[n].prg[j].hour,allofworks[n].prg[j].minute,weekChar[allofworks[n].prg[j].week][0],sta[allofworks[n].prg[j].station_index].name.str[0]);
+					sprintf_s(s.str[1],"%2d:%2d(%s)%s",allofworks[n].prg[j].hour,allofworks[n].prg[j].minute,weekChar[allofworks[n].prg[j].week][1],sta[allofworks[n].prg[j].station_index].name.str[1]);
 					menu[GUIDE_STALIST].stack(s);
-					menu[GUIDE_STALIST].inputMark(line_num,sta[allofworks[n].prg[j].station].mark);
+					menu[GUIDE_STALIST].inputMark(line_num,sta[allofworks[n].prg[j].station_index].mark);
 				}
 				menu[GUIDE_STALIST].stack("");
 			}
@@ -389,16 +389,16 @@ void keyGuideAll(){
 
 void keyGuideSeason(){
 	if(key.z && !key_stop(key.z)){
-		dataNo=menu[GUIDE_SEASON].selected()+1;
-		load_works(dataNo);
+		which_season=season[menu[GUIDE_SEASON].selected()].id;
+		load_entries(which_season);
 		if(menu[GUIDE_TOP].selected()==1){
-			menu[GUIDE_ANIME].setMenu(0,20,40,10,works);
+			menu[GUIDE_ANIME].setMenu(0,20,40,10,entries);
 			menu[GUIDE_ANIME].lang=JAPANESE;
-			for(int i=0 ; i<works ; i++){
-				if(animebook[work[i].cartoon_id]){
-					menu[GUIDE_ANIME].stack(work[i].title);
-					menu[GUIDE_ANIME].inputMark(i,work[i].mark);
-					menu[GUIDE_ANIME].inputColor(i,work[i].r,work[i].g,work[i].b);
+			for(int i=0 ; i<entries ; i++){
+				if(animebook[entry[i].cartoon_index]){
+					menu[GUIDE_ANIME].stack(entry[i].title);
+					menu[GUIDE_ANIME].inputMark(i,entry[i].mark);
+					menu[GUIDE_ANIME].inputColor(i,entry[i].r,entry[i].g,entry[i].b);
 				}else{
 					menu[GUIDE_ANIME].stack("----------");
 				}
@@ -420,24 +420,24 @@ void keyGuideSeason(){
 		}
 		if(menu[GUIDE_TOP].selected()==3){
 			int line_num=0;
-			for(int i=0 ; i<works ; i++){
-				line_num+=work[i].prg_num;
+			for(int i=0 ; i<entries ; i++){
+				line_num+=entry[i].prg_num;
 			}
 			menu[GUIDE_TIME].setMenu(0,20,40,10,line_num*2);
 			menu[GUIDE_TIME].setCombo(2);
 			menu[GUIDE_TIME].lang=JAPANESE;
 			String s;
 			for(int w=0 ; w<7 ; w++)for(int h=4 ; h<=27 ; h++)for(int m=0 ; m<60 ; m++){
-				for(int i=0 ; i<works ; i++)for(int j=0 ; j<work[i].prg_num ; j++){
-					if(work[i].prg[j].week==w && work[i].prg[j].hour==h && work[i].prg[j].minute==m){
-						if(animebook[work[i].cartoon_id]){
-							for(int k=0 ; k<2 ; k++)sprintf_s(s.str[k],"%s",work[i].title.str[k]);
+				for(int i=0 ; i<entries ; i++)for(int j=0 ; j<entry[i].prg_num ; j++){
+					if(entry[i].prg[j].week==w && entry[i].prg[j].hour==h && entry[i].prg[j].minute==m){
+						if(animebook[entry[i].cartoon_index]){
+							for(int k=0 ; k<2 ; k++)sprintf_s(s.str[k],"%s",entry[i].title.str[k]);
 							menu[GUIDE_TIME].stack(s);
 						}else{
 							menu[GUIDE_TIME].stack("----------");
 						}
 						for(int k=0 ; k<2 ; k++){
-							sprintf_s(s.str[k],"    (%s)%2d:%2d %s",weekChar[work[i].prg[j].week][k],h,m,sta[work[i].prg[j].station].name.str[k]);
+							sprintf_s(s.str[k],"    (%s)%2d:%2d %s",weekChar[entry[i].prg[j].week][k],h,m,sta[entry[i].prg[j].station_index].name.str[k]);
 						}
 						menu[GUIDE_TIME].stack(s);
 					}
@@ -459,10 +459,11 @@ void keyGuideSeason(){
 
 void keyPrefList(){
 	if(key.z && !key_stop(key.z)){
-		menu[GUIDE_STA].setMenu(0,20,40,10,area[menu[PREF_LIST_MIYAZAKI].selected()].st_num);
-		for(int i=0 ; i<area[menu[PREF_LIST_MIYAZAKI].selected()].st_num ; i++){
-			menu[GUIDE_STA].stack(sta[area[menu[PREF_LIST_MIYAZAKI].selected()].station[i]].name);
-			menu[GUIDE_STA].inputMark(i,sta[area[menu[PREF_LIST_MIYAZAKI].selected()].station[i]].mark);
+		int n=menu[PREF_LIST_MIYAZAKI].selected();
+		menu[GUIDE_STA].setMenu(0,20,40,10,area[n].st_num);
+		for(int i=0 ; i<area[n].st_num ; i++){
+			menu[GUIDE_STA].stack(sta[area[n].station[i]].name);
+			menu[GUIDE_STA].inputMark(i,sta[area[n].station[i]].mark);
 		}
 		phase=GUIDE_STA;
 		menu[PREF_LIST_MIYAZAKI].setViewMode(GRAY);
@@ -482,17 +483,17 @@ void keyPrefList(){
 void keyGuideAnime(){
 	if(key.z && !key_stop(key.z)){
 		int n=menu[GUIDE_ANIME].selected();
-		if(animebook[work[n].cartoon_id]){
+		if(animebook[entry[n].cartoon_index]){
 			String s;
-			menu[GUIDE_STALIST].setMenu(20,60,30,9,work[n].prg_num);
-			for(int i=0; i<work[n].prg_num ; i++){
-				sprintf_s(s.str[0],"%2d:%2d(%s)%s",work[n].prg[i].hour,work[n].prg[i].minute,weekChar[work[n].prg[i].week][0],sta[work[n].prg[i].station].name.str[0]);
-				sprintf_s(s.str[1],"%2d:%2d(%s)%s",work[n].prg[i].hour,work[n].prg[i].minute,weekChar[work[n].prg[i].week][1],sta[work[n].prg[i].station].name.str[1]);
+			menu[GUIDE_STALIST].setMenu(20,60,30,9,entry[n].prg_num);
+			for(int i=0; i<entry[n].prg_num ; i++){
+				sprintf_s(s.str[0],"%2d:%2d(%s)%s",entry[n].prg[i].hour,entry[n].prg[i].minute,weekChar[entry[n].prg[i].week][0],sta[entry[n].prg[i].station_index].name.str[0]);
+				sprintf_s(s.str[1],"%2d:%2d(%s)%s",entry[n].prg[i].hour,entry[n].prg[i].minute,weekChar[entry[n].prg[i].week][1],sta[entry[n].prg[i].station_index].name.str[1]);
 				menu[GUIDE_STALIST].stack(s);
-				menu[GUIDE_STALIST].inputMark(i,sta[work[n].prg[i].station].mark);
+				menu[GUIDE_STALIST].inputMark(i,sta[entry[n].prg[i].station_index].mark);
 			}
 			menu[GUIDE_STALIST].setBG(0);
-			fishbox.panelColor(work[n].r,work[n].g,work[n].b);
+			fishbox.panelColor(entry[n].r,entry[n].g,entry[n].b);
 			phase=GUIDE_STALIST;
 			menu[GUIDE_STALIST].setViewMode(VISIBLE);
 			menu[GUIDE_ANIME].setViewMode(HIDE);
@@ -531,9 +532,9 @@ void keyGuideSta(){
 		int n=area[menu[PREF_LIST_MIYAZAKI].selected()].station[menu[GUIDE_STA].selected()];
 		int cartoon_num=0;
 		String s;
-		for(int i=0; i<works ; i++){
-			for(int j=0; j<work[i].prg_num ; j++){
-				if(work[i].prg[j].station==n)cartoon_num++;
+		for(int i=0; i<entries ; i++){
+			for(int j=0; j<entry[i].prg_num ; j++){
+				if(entry[i].prg[j].station_index==n)cartoon_num++;
 			}
 		}
 		int *work_idx=new int[cartoon_num];
@@ -541,9 +542,9 @@ void keyGuideSta(){
 		menu[GUIDE_PRGLIST].setMenu(20,60,30,9,cartoon_num);
 		menu[GUIDE_PRGLIST].lang=JAPANESE;
 		cartoon_num=0;
-		for(int i=0; i<works ; i++){
-			for(int j=0; j<work[i].prg_num ; j++){
-				if(work[i].prg[j].station==n){
+		for(int i=0; i<entries ; i++){
+			for(int j=0; j<entry[i].prg_num ; j++){
+				if(entry[i].prg[j].station_index==n){
 					work_idx[cartoon_num]=i;
 					prg_idx[cartoon_num]=j;
 					cartoon_num++;
@@ -556,9 +557,9 @@ void keyGuideSta(){
 			int b1=prg_idx[i];
 			int a2=work_idx[j];
 			int b2=prg_idx[j];
-			if(work[a1].prg[b1].week>work[a2].prg[b2].week ||
-			   (work[a1].prg[b1].week==work[a2].prg[b2].week && work[a1].prg[b1].hour>work[a2].prg[b2].hour) ||
-			   (work[a1].prg[b1].week==work[a2].prg[b2].week && work[a1].prg[b1].hour==work[a2].prg[b2].hour && work[a1].prg[b1].minute>work[a2].prg[b2].minute)
+			if(entry[a1].prg[b1].week>entry[a2].prg[b2].week ||
+			   (entry[a1].prg[b1].week==entry[a2].prg[b2].week && entry[a1].prg[b1].hour>entry[a2].prg[b2].hour) ||
+			   (entry[a1].prg[b1].week==entry[a2].prg[b2].week && entry[a1].prg[b1].hour==entry[a2].prg[b2].hour && entry[a1].prg[b1].minute>entry[a2].prg[b2].minute)
 			  ){
 				int c=work_idx[i];
 				work_idx[i]=work_idx[j];
@@ -572,12 +573,12 @@ void keyGuideSta(){
 		for(int i=0 ; i<cartoon_num ; i++){
 			int a=work_idx[i];
 			int b=prg_idx[i];
-			if(animebook[work[a].cartoon_id]){
-				sprintf_s(s.str[0],"%2d:%2d(%s)%s",work[a].prg[b].hour,work[a].prg[b].minute,weekChar[work[a].prg[b].week][0],work[a].title.str[0]);
-				sprintf_s(s.str[1],"%2d:%2d(%s)%s",work[a].prg[b].hour,work[a].prg[b].minute,weekChar[work[a].prg[b].week][1],work[a].title.str[1]);
+			if(animebook[entry[a].cartoon_index]){
+				sprintf_s(s.str[0],"%2d:%2d(%s)%s",entry[a].prg[b].hour,entry[a].prg[b].minute,weekChar[entry[a].prg[b].week][0],entry[a].title.str[0]);
+				sprintf_s(s.str[1],"%2d:%2d(%s)%s",entry[a].prg[b].hour,entry[a].prg[b].minute,weekChar[entry[a].prg[b].week][1],entry[a].title.str[1]);
 			}else{
-				sprintf_s(s.str[0],"%2d:%2d(%s)----------",work[a].prg[b].hour,work[a].prg[b].minute,weekChar[work[a].prg[b].week][0]);
-				sprintf_s(s.str[1],"%2d:%2d(%s)----------",work[a].prg[b].hour,work[a].prg[b].minute,weekChar[work[a].prg[b].week][1]);
+				sprintf_s(s.str[0],"%2d:%2d(%s)----------",entry[a].prg[b].hour,entry[a].prg[b].minute,weekChar[entry[a].prg[b].week][0]);
+				sprintf_s(s.str[1],"%2d:%2d(%s)----------",entry[a].prg[b].hour,entry[a].prg[b].minute,weekChar[entry[a].prg[b].week][1]);
 			}
 			menu[GUIDE_PRGLIST].stack(s);
 		}
@@ -977,7 +978,7 @@ void keyDeleteYN(){
 			else{
 				fclose(hf);
 				remove("save/clear.dat");
-				load_index();
+				load_season();
 				phase=DELETE_MENU;
 				menu[DELETE_MENU].setViewMode(VISIBLE);
 			}
@@ -1269,7 +1270,7 @@ void drawMiyazakiMuseum(SDL_Surface* scr){
 	}
 	drawImage(scr,img.back,0,start,0,0,640,480,255-start*255/200);
 	if(start>0){
-		int a=0;
+		int a=255;
 		if(start>180)a=(200-start)*13;
 		if(start<20)a=start*13;
 		drawText2(scr,start/3,120,text[MIYAZAKITEXT+71],100,a);
@@ -1465,32 +1466,32 @@ void makeGuideBook(){
 	if(prgs_of_each_season){
 		delete [] prgs_of_each_season;
 	}
-	prgs_of_each_season=new int[index_num];
+	prgs_of_each_season=new int[season_num];
 	load_searchQueries(allofworks,(int)allofworks_num);
-	for(int i=0 ; i<index_num ; i++){
-		sprintf_s(str,"file/data/sql/timetable%d.sql",i+1);
+	for(int i=0 ; i<season_num ; i++){
+		sprintf_s(str,"file/data/sql/timetable%d.sql",season[i].id);
 		readSQL(str);
 		prgs_of_each_season[i]=prgs;
 		for(int j=0 ; j<prgs ; j++){
-			allofworks[prg[j].work-1].prg_num++;
+			allofworks[prg[j].cartoon_index].prg_num++;
 		}
 	}
 	for(int i=0 ; i<allofworks_num ; i++){
-		allofworks[i].prg=new Prg[allofworks[i].prg_num];
+		allofworks[i].prg=new Program[allofworks[i].prg_num];
 		allofworks[i].prg_num=0;
 	}
-	for(int i=0 ; i<index_num ; i++){
-		sprintf_s(str,"file/data/sql/timetable%d.sql",i+1);
+	for(int i=0 ; i<season_num ; i++){
+		sprintf_s(str,"file/data/sql/timetable%d.sql",season[i].id);
 		readSQL(str);
 		for(int j=0 ; j<prgs ; j++){
-			int n=allofworks[prg[j].work-1].prg_num;
-			allofworks[prg[j].work-1].prg[n].season_id=prg[j].season_id;
-			allofworks[prg[j].work-1].prg[n].station=prg[j].station-1;
-			allofworks[prg[j].work-1].prg[n].week=prg[j].week;
-			allofworks[prg[j].work-1].prg[n].hour=prg[j].hour;
-			allofworks[prg[j].work-1].prg[n].minute=prg[j].minute;
-			allofworks[prg[j].work-1].prg[n].time=prg[j].time;
-			allofworks[prg[j].work-1].prg_num++;
+			int n=allofworks[prg[j].cartoon_index].prg_num;
+			allofworks[prg[j].cartoon_index].prg[n].season_index=prg[j].season_index;
+			allofworks[prg[j].cartoon_index].prg[n].station_index=prg[j].station_index;
+			allofworks[prg[j].cartoon_index].prg[n].week=prg[j].week;
+			allofworks[prg[j].cartoon_index].prg[n].hour=prg[j].hour;
+			allofworks[prg[j].cartoon_index].prg[n].minute=prg[j].minute;
+			allofworks[prg[j].cartoon_index].prg[n].time=prg[j].time;
+			allofworks[prg[j].cartoon_index].prg_num++;
 		}
 	}
 }

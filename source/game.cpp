@@ -154,10 +154,10 @@ void initGame2(){
 	else createMap_color(1000);
 	createMap_tower();
 	if(gd.game_mode==STORYMODE){
-		load_works(dataNo);
-		load_searchQueries(work,works);
-		if(!fishbox.loaded())fishbox.initFishBox(works);
-		for(int i=0 ; i<works ; i++){
+		load_entries(which_season);
+		load_searchQueries(entry,entries);
+		if(!fishbox.loaded())fishbox.initFishBox(entries);
+		for(int i=0 ; i<entries ; i++){
 			gd.score+=fishbox.getSC(i);
 		}
 		estimate_rural();
@@ -249,7 +249,7 @@ void keyGameStart(){
 			if(gd.week==0)phase=READY;
 			else phase=PLAYING;
 			count=2;
-			sprintf_s(str,"file/data/cartoon/talk%d.json",dataNo);
+			sprintf_s(str,"file/data/cartoon/talk%d.json",which_season);
 			loadCartoon(&talkingJson,str);
 		}
 	}
@@ -282,7 +282,7 @@ void keyFishup(){
 					phase=BS_CH;
 					n=sta[BSstation[gd.bs_ch]].ontv;
 				}
-				n=work[n].cartoon_id-1;
+				n=entry[n].cartoon_index;
 				if(!animebook[n]){
 					animebook[n]=true;
 					collection++;
@@ -299,7 +299,7 @@ void keyBSAttack(){
 			if(start==0){
 				phase=BS_CH;
 				int n=sta[BSstation[gd.bs_ch]].ontv;
-				n=work[n].cartoon_id-1;
+				n=entry[n].cartoon_index;
 				if(!animebook[n]){
 					animebook[n]=true;
 					collection++;
@@ -313,11 +313,11 @@ void keyBSAttack(){
 void keyFinish(){
 	if(key.z && !key_stop(key.z)){
 		gd.score=0;gd.crops=0;gd.get_score=0;
-		for(int i=0 ; i<works ; i++){
+		for(int i=0 ; i<entries ; i++){
 			gd.score+=fishbox.getSC(i);
 			if(fishbox.getSC(i)!=0)gd.crops++;
 		}
-		for(int i=0 ; i<works ; i++){
+		for(int i=0 ; i<entries ; i++){
 			if(fishbox.today[i]==EOF)break;
 			gd.crops--;
 		}
@@ -335,7 +335,7 @@ void keyGetHazia(){
 		if(nextTalk(&cartoonJson)){
 			if(gd.scene_count==0){
 				start=300;count=2;
-				gd.hazia2=gd.score-indexName[dataNo-1].hiscore;
+				gd.hazia2=gd.score-season[getSeasonById(which_season)].hiscore;
 				if(gd.hazia2<0)gd.hazia2=0;
 				freeMusic();
 				bgm=Mix_LoadMUS("file/bgm/13.ogg");
@@ -362,7 +362,7 @@ void keyResult(){
 			if(gd.game_mode==STORYMODE){
 				if(gd.week==6){
 					phase=GET_HAZIA;
-					sprintf_s(str,"file/data/cartoon/end%d.json",dataNo);
+					sprintf_s(str,"file/data/cartoon/end%d.json",which_season);
 					loadCartoon(&cartoonJson,str);
 					gd.scene_count=0;
 				}else{
@@ -379,7 +379,7 @@ void keyResult(){
 					loadCartoon(&cartoonJson,str);
 					sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
 					bgm=Mix_LoadMUS(str);
-					for(int i=0 ; i<works ; i++)fishbox.today[i]=EOF;
+					for(int i=0 ; i<entries ; i++)fishbox.today[i]=EOF;
 					gd.ta_count=0;start=75;count=-1;
 					Mix_PlayChannel(1, sf.decide, 0);
 					kick_count=1;
@@ -1276,7 +1276,7 @@ void receiveBS(){
 		if(fishbox.getSC(tmp_fish.which_work)==0){
 			fishbox.text_count=1;
 			fishbox.setFish(tmp_fish);
-			for(int i=0 ; i<works ; i++)if(fishbox.today[i]==EOF){
+			for(int i=0 ; i<entries ; i++)if(fishbox.today[i]==EOF){
 				fishbox.today[i]=tmp_fish.which_work;
 				break;
 			}
@@ -1324,21 +1324,21 @@ int getScore(int n, double pw, int x, int y){
 	int a=map.rural[x/map.rural_size][y/map.rural_size];
 	if(a==EOF)return 0;
 	if(n==-1)sc=(int)( sqrt(10000.0/pw) * map.rural_rate[a] );
-	else sc=(int)( sqrt(10000.0/pw) * map.rural_rate[a] * 25/sqrt(1.0*work[n].prg_num) );
+	else sc=(int)( sqrt(10000.0/pw) * map.rural_rate[a] * 25/sqrt(1.0*entry[n].prg_num) );
 	return sc;
 }
 
 int getMissing(){
 	int a=0;
 	bool hit=false;
-	for(int i=0 ; i<works ; i++){
+	for(int i=0 ; i<entries ; i++){
 		if(fishbox.getSC(i)==0){
 			hit=false;
-			for(int j=0 ; j<work[i].prg_num ; j++){
-				if(work[i].prg[j].week>gd.week ||
-				   (work[i].prg[j].week==gd.week && work[i].prg[j].hour*100+work[i].prg[j].minute>=gd.hour*100+gd.minute)
+			for(int j=0 ; j<entry[i].prg_num ; j++){
+				if(entry[i].prg[j].week>gd.week ||
+				   (entry[i].prg[j].week==gd.week && entry[i].prg[j].hour*100+entry[i].prg[j].minute>=gd.hour*100+gd.minute)
 				  )hit=true;
-				if(in_time(work[i].prg[j].week,work[i].prg[j].hour,work[i].prg[j].minute,work[i].prg[j].time))hit=true;
+				if(in_time(entry[i].prg[j].week,entry[i].prg[j].hour,entry[i].prg[j].minute,entry[i].prg[j].time))hit=true;
 			}
 			if(!hit)a++;
 		}
@@ -1370,9 +1370,9 @@ void televise(){
 		pre[i]=sta[i].ontv;
 		sta[i].ontv=EOF;
 	}
-	for(int i=0 ; i<works ; i++)for(int j=0 ; j<work[i].prg_num ; j++){
-		if( in_time(work[i].prg[j].week, work[i].prg[j].hour, work[i].prg[j].minute, work[i].prg[j].time) ){
-			sta[ work[i].prg[j].station ].ontv=i;
+	for(int i=0 ; i<entries ; i++)for(int j=0 ; j<entry[i].prg_num ; j++){
+		if( in_time(entry[i].prg[j].week, entry[i].prg[j].hour, entry[i].prg[j].minute, entry[i].prg[j].time) ){
+			sta[ entry[i].prg[j].station_index ].ontv=i;
 		}
 	}
 	for(int i=0 ; i<areas ; i++){
@@ -1467,7 +1467,7 @@ void drawResult(SDL_Surface* scr){
 	drawImage(scr,img.back,60,160,520,400,240,280,255);
 
 	drawText2(scr,200,120,text[GAMETEXT+2]);
-	sprintf_s(str,"%3d/%3d",gd.crops,works);
+	sprintf_s(str,"%3d/%3d",gd.crops,entries);
 	if(phase==TODAYS_CROP){
 		drawImage(scr,img.menuback,20,160,0,0,200,40,128);
 		drawText2(scr,100,160,str);
@@ -1487,11 +1487,11 @@ void drawResult(SDL_Surface* scr){
 		drawImage(scr,img.menuback,100,200,0,0,520,200,128);
 		for(int i=0 ; i<5 ; i++){
 			n=count/10+i;
-			if(n==works)break;
+			if(n==entries)break;
 			if(fishbox.today[n]==EOF)break;
 			if(n<0)continue;
-			drawImage(scr,img.symbol,110,200+i*40,(work[fishbox.today[n]].mark%16)*34,(work[fishbox.today[n]].mark/16)*34,34,34,255);
-			drawText2_lang(scr,140,200+i*40,work[fishbox.today[n]].title,60,255,JAPANESE);
+			drawImage(scr,img.symbol,110,200+i*40,(entry[fishbox.today[n]].mark%16)*34,(entry[fishbox.today[n]].mark/16)*34,34,34,255);
+			drawText2_lang(scr,140,200+i*40,entry[fishbox.today[n]].title,60,255,JAPANESE);
 		}
 	}
 	if(phase==RESULT){
@@ -1508,7 +1508,7 @@ void drawResult(SDL_Surface* scr){
 		}
 		drawText2(scr,200+start*16,320,text[GAMETEXT+5]);
 		drawImage(scr,img.menuback,300+start*16,360,0,0,200,40,128);
-		sprintf_s(str,"%3d%c",100*gd.crops/works,37);
+		sprintf_s(str,"%3d%c",100*gd.crops/entries,37);
 		drawText2(scr,406+start*16,360,str);
 	}
 }
@@ -1516,14 +1516,14 @@ void drawResult(SDL_Surface* scr){
 void drawGetHazia(SDL_Surface *scr){
 	drawAnimationCut(&cartoonJson,scr);
 	if(gd.scene_count==1){
-		int inc=gd.score-indexName[dataNo-1].hiscore;
+		int inc=gd.score-season[getSeasonById(which_season)].hiscore;
 		if(inc<0)inc=0;
 
 		fillRect(scr,0,0,640,40,0,0,0,255);
 		fillRect(scr,0,440,640,40,0,0,0,255);
 		drawText2(scr,240,40,text[EPILOGUE+2]);
 
-		sprintf_s(str,"%10d",indexName[dataNo-1].hiscore);
+		sprintf_s(str,"%10d",season[getSeasonById(which_season)].hiscore);
 		if(start>250){
 			drawText2(scr,200+(start-250)*10,80,text[GAMETEXT+7]);
 			drawImage(scr,img.menuback,340+(start-250)*10,120,0,0,200,40,128);
@@ -1612,7 +1612,7 @@ void drawFishup(SDL_Surface* scr){
 	if(phase==BS_ATTACK){
 		if(start>0)drawImage(scr,img.fishup,20,40-abs(start%10-5)*10,0,300,320,320,255);
 		else drawImage(scr,img.fishup,20,40,0,300,320,320,255);
-		if(!animebook[ work[sta[BSstation[gd.bs_ch]].ontv].cartoon_id-1 ]){
+		if(!animebook[ entry[sta[BSstation[gd.bs_ch]].ontv].cartoon_index ]){
 			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 			sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
 			drawText2(scr,380,220,str);
@@ -1640,8 +1640,8 @@ void drawFishup(SDL_Surface* scr){
 		if(start>40)drawImage(scr,img.fishup,(start-40)*20,40,320,300,320,320,255);
 		else drawImage(scr,img.fishup,0,40,320,300,320,320,255);
 		int n;
-		if(phase==FISHUP)n=work[sta[ant->station].ontv].cartoon_id-1;
-		else n=work[md.fish[0].which_work].cartoon_id-1;
+		if(phase==FISHUP)n=entry[sta[ant->station].ontv].cartoon_index;
+		else n=entry[md.fish[0].which_work].cartoon_index;
 		if(start<70 && !animebook[n]){
 			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 			sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
@@ -2216,11 +2216,11 @@ void timerCalling(){
 
 void timerTodaysCrop(){
 	if(count>=0){
-		if(count%10==0 && count/10<works && fishbox.today[count/10]!=EOF){
+		if(count%10==0 && count/10<entries && fishbox.today[count/10]!=EOF){
 			Mix_PlayChannel(0, sf.knob, 0);
 			gd.crops++;
 		}
-		if(count/10==works || fishbox.today[count/10]==EOF){
+		if(count/10==entries || fishbox.today[count/10]==EOF){
 			Mix_PlayChannel(0, sf.coin, 0);
 			phase=RESULT;
 			start=50;
@@ -2245,12 +2245,12 @@ void timerGetHazia(){
 		if(gd.scene_count==2){
 			gd.text_count=0;
 			phase=END_YN;
-			if(indexName[dataNo-1].rate<100*gd.crops/works)indexName[dataNo-1].rate=100*gd.crops/works;
-			if(indexName[dataNo-1].rate>100)indexName[dataNo-1].rate=100;
-			if(indexName[dataNo-1].hiscore<gd.score)indexName[dataNo-1].hiscore=gd.score;
+			if(season[getSeasonById(which_season)].rate<100*gd.crops/entries)season[getSeasonById(which_season)].rate=100*gd.crops/entries;
+			if(season[getSeasonById(which_season)].rate>100)season[getSeasonById(which_season)].rate=100;
+			if(season[getSeasonById(which_season)].hiscore<gd.score)season[getSeasonById(which_season)].hiscore=gd.score;
 			clear_num=1;
-			for(int i=0 ; i<index_num-1 ; i++){
-				if(indexName[i].rate<60)break;
+			for(int i=0 ; i<season_num-1 ; i++){
+				if(season[i].rate<60)break;
 				clear_num++;
 			}
 			save_index();
@@ -2262,7 +2262,7 @@ void timerGetHazia(){
 void timerSavingGame(){
 	String s;
 	for(int k=0 ; k<2 ; k++){
-		sprintf_s(s.str[k],"%s (%s) %2d:",indexName[dataNo-1].name.str[k],weekChar[gd.week][k],gd.hour);
+		sprintf_s(s.str[k],"%s (%s) %2d:",season[getSeasonById(which_season)].name.str[k],weekChar[gd.week][k],gd.hour);
 		if(gd.minute<10)sprintf_s(s.str[k],"%s0%d",s.str[k],gd.minute);
 		else sprintf_s(s.str[k],"%s%2d",s.str[k],gd.minute);
 	}
@@ -2284,8 +2284,8 @@ void timerSavingGame(){
 
 void timerSavingRecord(){
 	String s;
-	sprintf_s(s.str[0],"%s %10d",indexName[dataNo-1].name.str[0],gd.score);
-	sprintf_s(s.str[1],"%s %10d",indexName[dataNo-1].name.str[1],gd.score);
+	sprintf_s(s.str[0],"%s %10d",season[getSeasonById(which_season)].name.str[0],gd.score);
+	sprintf_s(s.str[1],"%s %10d",season[getSeasonById(which_season)].name.str[1],gd.score);
 	putHeadMark(s);
 	if(count==(int)strlen(s.str[CHAR_CODE])*5){
 		menu[1].input(menu[1].selected(),s);
@@ -2361,8 +2361,9 @@ void timerSunMovement(){
 			}
 		}
 		if(gd.game_mode==STORYMODE){
+			int n=getSeasonById(which_season);
 			for(int i=0 ; i<timeslot_num ; i++){
-				if(timeslot[i].season_id==dataNo && timeslot[i].week==gd.week && timeslot[i].hour==gd.hour && timeslot[i].minute==gd.minute){
+				if(timeslot[i].season_index==n && timeslot[i].week==gd.week && timeslot[i].hour==gd.hour && timeslot[i].minute==gd.minute){
 					Mix_PlayChannel(0, sf.gaze, 0);
 					gd.timeslot_type=timeslot[i].type-1;
 					gd.timeslot_count++;
@@ -2422,7 +2423,7 @@ void timerFishUp(){
 		int n;
 		if(phase==FISHUP)n=sta[ant->station].ontv;
 		else n=md.fish[0].which_work;
-		startThread(work[n].cartoon_id, work[n].query);
+		startThread(entry[n].cartoon_index, entry[n].query);
 	}
 	if(start==72){
 		Mix_PlayChannel(0, sf.get, 0);
@@ -2457,7 +2458,7 @@ void timerBSAttack(){
 	if(start==49){
 		fishbox.text_count=1;
 		int n=sta[ BSstation[gd.bs_ch] ].ontv;
-		startThread(work[n].cartoon_id, work[n].query);
+		startThread(entry[n].cartoon_index, entry[n].query);
 	}
 	if(start==0 && tm.finish && !tm.failure){
 		createSearchImage(tm.selected);
@@ -2612,9 +2613,9 @@ void estimate_rural(){
 	}
 	for(int i=0 ; i<areas ; i++){
 		for(int j=0 ; j<area[i].st_num ; j++){
-			for(int k=0 ; k<works ; k++){
-				for(int n=0 ; n<work[k].prg_num ; n++){
-					if(work[k].prg[n].station==area[i].station[j]){
+			for(int k=0 ; k<entries ; k++){
+				for(int n=0 ; n<entry[k].prg_num ; n++){
+					if(entry[k].prg[n].station_index==area[i].station[j]){
 						t[i]++;
 						break;
 					}
@@ -2687,7 +2688,7 @@ void setTmpFish_maneki(int n){
 }
 
 void setFish_maneki(Fish f){
-	if(f.which_work<0 || f.which_work>=works)return;
+	if(f.which_work<0 || f.which_work>=entries)return;
 	if(md.fish_num>=300)return;
 	md.fish[md.fish_num].which_work=f.which_work;
 	md.fish[md.fish_num].x=f.x;md.fish[md.fish_num].y=f.y;
@@ -2825,13 +2826,13 @@ void ManekiTV_catch(){
 		phase=MANEKI_FISHUP;
 		gd.get_score+=md.fish[0].score;
 		Mix_PlayChannel(0, sf.get, 0);
-		for(int i=0 ; i<works ; i++)if(fishbox.today[i]==EOF){
+		for(int i=0 ; i<entries ; i++)if(fishbox.today[i]==EOF){
 			fishbox.today[i]=md.fish[0].which_work;
 			break;
 		}
 	}else{
 		phase=MANEKI_GRADEUP;
-		fishbox.text_count=(int)strlen(work[md.fish[0].which_work].title.str[0]);
+		fishbox.text_count=(int)strlen(entry[md.fish[0].which_work].title.str[0]);
 		gd.gradeup = md.fish[0].score-fishbox.getSC(md.fish[0].which_work);
 		gd.get_score+=gd.gradeup;
 		Mix_PlayChannel(1, sf.decide, 0);

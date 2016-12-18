@@ -31,9 +31,7 @@ void initGameMenu(){
 void endGameMenu(){
 	if(phase==RECORD)fishbox.endFishBox();
 	freeImage(img.back);
-	if(phase!=GOTO_GAME || dataNo!=index_num+1){
-		freeMusic();
-	}
+	freeMusic();
 	freeSound(sf.thunder);
 	freeSound(sf.swish);
 	for(int i=0 ; i<15 ; i++)menu[i].reset();
@@ -60,12 +58,12 @@ void gotoGame(){
 		load_game(n);
 		phase=READY;
 	}
-	if((dataNo-1)%4==1){gd.sunrise_hour=5;gd.sunset_hour=19;}
-	else if((dataNo-1)%4==3){gd.sunrise_hour=7;gd.sunset_hour=17;}
+	if((which_season-1)%4==1){gd.sunrise_hour=5;gd.sunset_hour=19;}
+	else if((which_season-1)%4==3){gd.sunrise_hour=7;gd.sunset_hour=17;}
 	else {gd.sunrise_hour=6;gd.sunset_hour=18;}
 	initGame2();
 	if(c){
-		sprintf_s(str,"file/data/cartoon/talk%d.json",dataNo);
+		sprintf_s(str,"file/data/cartoon/talk%d.json",which_season);
 		loadCartoon(&talkingJson, str);
 	}
 	gd.talk_count=EOF;
@@ -165,8 +163,8 @@ void keyGameSeason(){
 	if(start!=0)return;
 	if(key.z && !key_stop(key.z)){
 		count=0;
-		dataNo=gd.scrX*4+gd.scrY+1;
-		sprintf_s(str,"file/data/cartoon/story%d.json",dataNo);
+		which_season=season[gd.scrX*4+gd.scrY].id;
+		sprintf_s(str,"file/data/cartoon/story%d.json",which_season);
 		loadCartoon(&cartoonJson, str);
 		phase=PROLOGUE;
 		kick_count++;
@@ -361,17 +359,17 @@ void drawGameMenu(SDL_Surface* scr){
 				drawImage(scr,img.chr,140+k*640+start*20,120+gd.scrY*80,280,240,40,40,255);
 				for(int i=0 ; i<4 ; i++){
 					if((gd.scrX+k)*4+i>=clear_num)break;
-					if((gd.scrX+k)*4+i==index_num){
+					if((gd.scrX+k)*4+i==season_num){
 						drawText2(scr,180+k*640+start*20,120+i*80,text[MENUTEXT+19]);
 					}else{
-						drawText2(scr,180+k*640+start*20,120+i*80,indexName[(gd.scrX+k)*4+i].name);
-						sprintf_s(str,"%3d%c",indexName[(gd.scrX+k)*4+i].rate,37);
+						drawText2(scr,180+k*640+start*20,120+i*80,season[(gd.scrX+k)*4+i].name);
+						sprintf_s(str,"%3d%c",season[(gd.scrX+k)*4+i].rate,37);
 						drawText2(scr,360+k*640+start*20,120+i*80,str);
-						sprintf_s(str,"%10d",indexName[(gd.scrX+k)*4+i].hiscore);
+						sprintf_s(str,"%10d",season[(gd.scrX+k)*4+i].hiscore);
 						drawText2(scr,266+k*640+start*20,154+i*80,str);
-						if(indexName[(gd.scrX+k)*4+i].rate==100)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,102,0,34,34,255);
-						else if(indexName[(gd.scrX+k)*4+i].rate>=80)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,68,0,34,34,255);
-						else if(indexName[(gd.scrX+k)*4+i].rate>=60)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,34,0,34,34,255);
+						if(season[(gd.scrX+k)*4+i].rate==100)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,102,0,34,34,255);
+						else if(season[(gd.scrX+k)*4+i].rate>=80)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,68,0,34,34,255);
+						else if(season[(gd.scrX+k)*4+i].rate>=60)drawImage(scr,img.symbol,440+k*640+start*20,120+i*80,34,0,34,34,255);
 					}
 				}
 			}
@@ -407,7 +405,7 @@ bool makeSaveMenu(int n){
 		sprintf_s(str,"save/save%d.dat",i);
 		if(!loadFile(str))break;
 		for(int k=0 ; k<2 ; k++){
-			sprintf_s(s.str[k],"%s (%s) %2d:",indexName[fstr[0]].name.str[k],weekChar[fstr[3]][k],fstr[4]);
+			sprintf_s(s.str[k],"%s (%s) %2d:",season[getSeasonById(fstr[0])].name.str[k],weekChar[fstr[3]][k],fstr[4]);
 			if(fstr[5]<10)sprintf_s(s.str[k],"%s0%d",s.str[k],fstr[5]);
 			else sprintf_s(s.str[k],"%s%2d",s.str[k],fstr[5]);
 		}
@@ -437,8 +435,8 @@ bool makeRecordMenu(int n){
 		for(int i=18 ; i<(int)fsize ; i+=19){
 			sc+=to16int(fstr[i],fstr[i+1]);
 		}
-		sprintf_s(s.str[0],"%s %10d",indexName[fstr[0]].name.str[0],sc);
-		sprintf_s(s.str[1],"%s %10d",indexName[fstr[0]].name.str[1],sc);
+		sprintf_s(s.str[0],"%s %10d",season[getSeasonById(fstr[0])].name.str[0],sc);
+		sprintf_s(s.str[1],"%s %10d",season[getSeasonById(fstr[0])].name.str[1],sc);
 		menu[n].stack(s);
 	}
 	if(a==0)return false;

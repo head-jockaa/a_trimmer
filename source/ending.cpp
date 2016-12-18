@@ -79,7 +79,7 @@ void keyEnding(){
 
 void timerLeaveShore(){
 	if(nextCut(&cartoonJson)){
-		int a=100*gd.crops/works;
+		int a=100*gd.crops/entries;
 		if(a>=100)initMedalAward(3);
 		else if(a>=80)initMedalAward(2);
 		else if(a>=60)initMedalAward(1);
@@ -125,7 +125,7 @@ void timerEndingAnime(){
 				start=0;
 				for(int i=0 ; i<35 ; i++)menu[BGM_TEST].cursorDown();
 			}else{
-				if(which_medal!=0 && dataNo!=index_num){//最終ボス面は保留
+				if(which_medal!=0 && which_season!=season_num){//最終ボス面は保留
 					freeImage(img.back);
 					Mix_HaltMusic();
 					getImage(img.back,"file/img/warning.gif",0,0,255);
@@ -175,7 +175,7 @@ void drawEnding(SDL_Surface* scr){
 		for(int i=0 ; i<12 ; i++)fillRect(scr,0,i*40,640,1,0,128,0,255);
 		drawImage(scr,img.back,0,70,((count/5)%8)*110,(((count/5)/8)%2)*205,110,205,255);
 		drawImage(scr,img.back,320,160,880,0,80,80,abs(128-count%255)*2);
-		if(dataNo==index_num){
+		if(which_season==season_num){
 			drawText(scr,280,360,text[EPILOGUE+8]);
 			drawText(scr,280,400,text[EPILOGUE+9]);
 		}else{
