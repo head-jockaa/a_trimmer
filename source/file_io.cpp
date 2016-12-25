@@ -270,7 +270,6 @@ void load_searchQueries(Entry *wk, int wk_num){
 	int value, w;
 	for(int i=0 ; i<wk_num ; i++){
 		j = 0;
-//		w = getCartoonById(wk[i].cartoon_id,wk,wk_num);
 		w = wk[i].cartoon_index;
 		for(int k=0 ; k<200 ; k++){
 			if(query[w].str[0][k] == 0){

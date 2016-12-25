@@ -33,20 +33,37 @@ struct CartoonObject{
 	double waveSIN,waveRange;
 };
 
+struct JsonDataReader{
+	int valueNum,maxValueNum,arraySize;
+	char **name, **valueString;
+	double *valueDouble;
+	bool *valueBool;
+	void free();
+	void init(int size);
+};
+
+struct JsonReader{
+	JsonDataReader set,move,talk,image,bgm,loadText,sound,loadSound;
+	char basename[100];
+	JsonDataReader *which;
+	bool sync,hasSync,hasResetTimer;
+	int resetTimer,resetNum,*reset;
+	int talkPointer;
+};
+
 struct JsonData{
 	char cartoonBgmName[200];
 	char *text;
 	size_t size, pointer;
-	char name[100][100], valueString[100][1000];
-	int valueNum;
-	double valueDouble[100];
-	bool valueBool[100];
 	int playtime, nextTime;
 	int timestamp, pausetime;
-	int max_obj;
+	int max_obj,max_sound,max_image;
 	int call_week, call_hour, call_minute;
-	bool talkmode, skipThisTime, cartoonSync;
-	CartoonObject obj[1000];
+	bool initializedObjArray, initializedReaderArray, talkmode, cartoonSync, end;
+	CartoonObject *obj;
+	Mix_Chunk **sound;
+	Image **bg;
+	JsonReader jr;
 };
 extern JsonData cartoonJson, talkingJson;
 

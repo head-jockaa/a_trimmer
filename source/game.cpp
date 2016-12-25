@@ -1380,8 +1380,12 @@ void televise(){
 			area[i].tower[j].onair_num=0;
 			area[i].tower[j].colorlight_size=0;
 			for(int k=0 ; k<10 ; k++){
-				if(area[i].tower[j].ch[k]>=1 && area[i].tower[j].ch[k]<=CHANNELS && sta[ area[i].station[k] ].ontv!=EOF){
+				if(area[i].tower[j].ch[k]>=1 && area[i].tower[j].ch[k]<=CHANNELS+1 && sta[ area[i].station[k] ].ontv!=EOF){
 					if(area[i].tower[j].onair_num<3)area[i].tower[j].onair_num++;
+				}
+			}
+			for(int k=0 ; k<10 ; k++){
+				if(area[i].tower[j].ch[k]>=1 && area[i].tower[j].ch[k]<=CHANNELS && sta[ area[i].station[k] ].ontv!=EOF){
 					int n=0;
 					if(area[i].tower[j].kw>=30)n=7;
 					else if(area[i].tower[j].kw>=20)n=6;

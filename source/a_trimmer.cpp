@@ -247,10 +247,6 @@ int main(int argc, char *argv[]) {
 void initAll(){
 	img.pre_scr=new Image(640,480);
 	for(int i=0 ; i<4 ; i++)img.buffer[i]=new Image(640,480);
-	for(int i=0 ; i<10 ; i++){
-		img.bg[i]=NULL;
-		sf.sound[i]=NULL;
-	}
 	checkEndian();
 	sf.decide=Mix_LoadWAV("file/se/3.wav");
 	sf.decide2=Mix_LoadWAV("file/se/2.wav");
@@ -306,10 +302,6 @@ void endAll(){
 	freeImage(img.facechip);
 	for(int i=0 ; i<4 ; i++){
 		freeImage(img.buffer[i]);
-	}
-	for(int i=0 ; i<10 ; i++){
-		freeImage(img.bg[i]);
-		freeSound(sf.sound[i]=NULL);
 	}
 	freeSound(sf.decide);
 	freeSound(sf.decide2);

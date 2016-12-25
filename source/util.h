@@ -321,7 +321,6 @@ struct SoundFile{
 	Mix_Chunk *decide, *cursor_move, *decide2, *coin, *swish, *get, *lamp, *bubble;
 	Mix_Chunk *snore, *fw_sound, *noon, *sunset, *hold, *drag_s, *calling, *grumble;
 	Mix_Chunk *water, *thunder, *meow, *noize, *bupyo, *knob, *alarm, *tub, *gaze;
-	Mix_Chunk *sound[10];
 };
 extern SoundFile sf;
 
@@ -329,7 +328,7 @@ struct ImageFile{
 	SDL_Surface *iwa, *screen;
 	Image *back, *chr, *menuback, *facechip, *keyboard, *symbol, *pre_scr;
 	Image *rod, *circle, *fishup, *colorlight, *tv_asahi;
-	Image *buffer[4], *bg[10], *photo[14];
+	Image *buffer[4];
 	Image *searchImage;
 	Uint8 alphaR, alphaG, alphaB;
 };
