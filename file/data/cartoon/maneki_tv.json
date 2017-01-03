@@ -1,0 +1,29 @@
+[{"index":0, "act":{
+  "load-text": [
+    {"lang":"jp", "file":"file/data/text_jp.dat"},
+    {"lang":"en", "file":"file/data/text_en.dat"}
+  ]
+}},{"index":1, "act":{
+  "talk":[
+    {"face":1, "text":104},
+    {"face":1, "text":105},
+    {"face":1, "text":106}
+  ],
+  "end":true
+}},{"index":2, "act":{
+  "talk":[
+    {"face":1, "text":111}
+  ],
+  "end":true
+}},{"index":3, "act":{
+  "talk":[
+    {"face":1, "text":112}
+  ],
+  "end":true
+}},{"index":4, "act":{
+  "talk":[
+    {"face":1, "text":109},
+    {"face":1, "text":110}
+  ],
+  "end":true
+}}]
