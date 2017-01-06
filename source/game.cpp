@@ -146,7 +146,6 @@ void initGame(){
 		}
 		createMap_tower();
 	}
-	gd.talk_count=EOF;
 }
 
 void initGame2(){
@@ -178,9 +177,15 @@ void initGame2(){
 		loadCartoon(&cartoonJson,str);
 	}
 	if(gd.game_mode==STORYMODE){
-		sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
+		if(gd.hour>=22){
+			sprintf_s(str,"file/bgm/%d.ogg",20+gd.randomNumber%3);
+		}else{
+			sprintf_s(str,"file/bgm/%d.ogg",gd.week+5);
+		}
 		bgm=Mix_LoadMUS(str);
 	}
+	loadCartoon(&manekitvJson,"file/data/cartoon/maneki_tv.json");
+	readCartoon(&manekitvJson,0);
 
 	if(MAP3D)make3dview(gd.x,gd.y,gd.ant_dir);
 	else{
@@ -219,8 +224,11 @@ void endGame(){
 	freeSound(sf.lamp);
 	freeSound(sf.bubble);
 	freeSound(sf.gaze);
-	gd.ta_count=0;
+	freeCartoon(&cartoonJson);
+	freeCartoon(&talkingJson);
+	freeCartoon(&manekitvJson);
 	freeMusic();
+	gd.ta_count=0;
 	MAGNIFY=pre_magnify;
 	if(gd.game_mode==NO_RELAY){
 		for(int i=0 ; i<areas ; i++){
@@ -324,8 +332,9 @@ void keyFinish(){
 		phase=TODAYS_CROP;
 		freeImage(img.back);
 		getImage(img.back,"file/img/result.png",0,0,255);
-		freeMusic();
-		bgm=Mix_LoadMUS("file/bgm/12.ogg");
+		sprintf_s(str,"file/data/cartoon/end%d.json",which_season);
+		loadCartoon(&cartoonJson,str);
+		readCartoon(&cartoonJson,0);
 		kick_count=1;count=-60;
 	}
 }
@@ -333,24 +342,19 @@ void keyFinish(){
 void keyGetHazia(){
 	if(key.z && !key_stop(key.z)){
 		if(nextTalk(&cartoonJson)){
-			if(gd.scene_count==0){
+			if(phase==HAZIA_DEALER_COMES){
 				start=300;count=2;
 				gd.hazia2=gd.score-season[getSeasonById(which_season)].hiscore;
 				if(gd.hazia2<0)gd.hazia2=0;
-				freeMusic();
-				bgm=Mix_LoadMUS("file/bgm/13.ogg");
-				Mix_PlayMusic(bgm,-1);
-				gd.scene_count++;
+				phase=COUNTING_HAZIA;
+				readCartoon(&cartoonJson,2);
 			}
 		}
-		if(gd.scene_count==1){
+		if(phase==COUNTING_HAZIA){
 			if(start==0 && gd.hazia2==0){
-				gd.text_count=0;
-				freeMusic();
-				bgm=Mix_LoadMUS("file/bgm/12.ogg");
-				Mix_PlayMusic(bgm,-1);
-				gd.scene_count++;
+				phase=FINISH_COUNTING_HAZIA;
 				cartoonJson.playtime=0;
+				readCartoon(&cartoonJson,3);
 			}
 		}
 	}
@@ -361,10 +365,8 @@ void keyResult(){
 		if(start==0){
 			if(gd.game_mode==STORYMODE){
 				if(gd.week==6){
-					phase=GET_HAZIA;
-					sprintf_s(str,"file/data/cartoon/end%d.json",which_season);
-					loadCartoon(&cartoonJson,str);
-					gd.scene_count=0;
+					readCartoon(&cartoonJson,1);
+					phase=HAZIA_DEALER_COMES;
 				}else{
 					freeMusic();
 					freeImage(img.back);
@@ -677,19 +679,12 @@ void keyPlaying(){
 	if(key.z && !key_stop(key.z)){
 		if(md.maneki_mode!=CARRYING && md.manekiX-16<gd.x && gd.x<md.manekiX+16 && md.manekiY-20<gd.y && gd.y<md.manekiY+10){
 			if(md.maneki_mode==0){
+				readCartoon(&manekitvJson,1);
 				phase=MANEKI;
-				gd.scene_count=0;
-				gd.talk_count=0;
-				gd.text_count=0;
-				gd.talk_open_count=1;
 			}
 			else if(md.maneki_mode==PLUGGED_IN){
-				phase=MANEKI_CONFIRM;
-				menu[YNFORM].setViewMode(VISIBLE);
-				gd.talk_count=0;
-				gd.text_count=0;
-				gd.scene_count=1;
-				gd.talk_open_count=1;
+				readCartoon(&manekitvJson,3);
+				phase=MANEKI;
 			}
 		}else{
 			Mix_PlayChannel(1, sf.hold, 0);
@@ -742,12 +737,8 @@ void keyAntenna(){
 	if(key.x && !key_stop(key.x)){
 		ant->lower();
 		if(md.maneki_mode==CARRYING && map.rural[(int)gd.dotX/map.rural_size][(int)gd.dotY/map.rural_size]<254){
-			phase=MANEKI_CONFIRM;
-			menu[YNFORM].setViewMode(VISIBLE);
-			gd.talk_count=0;
-			gd.text_count=0;
-			gd.scene_count=0;
-			gd.talk_open_count=1;
+			readCartoon(&manekitvJson,2);
+			phase=MANEKI;
 		}
 		else phase=PLAYING;
 	}
@@ -812,13 +803,7 @@ void keyMenuWhileInGame(){
 			if(gd.game_mode==STORYMODE){
 				initGameMenu();
 			}else{
-				initMiyazaki();
-				if(MAP3D)gd.x=1000;
-				else if(gd.game_mode==WALKING)gd.x=300;
-				else if(gd.game_mode==NO_RELAY)gd.x=1100;
-				gd.scrX=(int)gd.x-160;
-				phase=MIYAZAKI_MUSEUM;
-				start=0;
+				backToMiyazaki();
 				MAP3D=false;
 			}
 		}
@@ -1092,22 +1077,45 @@ void keyBSCH(){
 }
 
 void keyManekiTalking(){
-	if(gd.scene_count<3){
+	if(md.maneki_mode==0){
 		if(key.z && !key_stop(key.z)){
-			if(gd.text_count<(int)strlen(text[ANTENNATEXT+17+gd.scene_count].str[CHAR_CODE])){
-				gd.text_count=90;
-			}else{
-				gd.text_count=0;
-				gd.scene_count++;
-				if(gd.scene_count==3){
-					menu[MANEKI].setViewMode(VISIBLE);
-					gd.talk_count=EOF;
-					gd.talk_open_count=1;
-				}
+				if(nextTalk(&manekitvJson)){
+				menu[MANEKI].setViewMode(VISIBLE);
+				phase=MANEKI_CONFIRM;
 			}
 		}
 	}
-	else if(gd.scene_count==3){
+	else if(md.maneki_mode==CARRYING){
+		if(key.z && !key_stop(key.z)){
+			if(nextTalk(&manekitvJson)){
+				menu[YNFORM].setViewMode(VISIBLE);
+				phase=MANEKI_CONFIRM;
+			}
+		}
+	}
+	else if(md.maneki_mode==PLUGGED_IN){
+		if(key.z && !key_stop(key.z)){
+			if(nextTalk(&manekitvJson)){
+				menu[YNFORM].setViewMode(VISIBLE);
+				phase=MANEKI_CONFIRM;
+			}
+		}
+	}
+	else if(md.maneki_mode==MISPLACED){
+		if(key.z && !key_stop(key.z)){
+			if(nextTalk(&manekitvJson)){
+				md.manekiX=gd.dotX;md.manekiY=gd.dotY;
+				setManekiData();
+				md.maneki_mode=PLUGGED_IN;
+				phase=PLAYING;
+				Mix_PlayChannel(0,sf.decide,0);
+			}
+		}
+	}
+}
+
+void keyManekiConfirm(){
+	if(md.maneki_mode==0){
 		if(key.z && !key_stop(key.z)){
 			menu[MANEKI].setViewMode(HIDE);
 			phase=PLAYING;
@@ -1119,64 +1127,49 @@ void keyManekiTalking(){
 		if(key.up && !key_wait(key.up))menu[MANEKI].cursorUp();
 		if(key.down && !key_wait(key.down))menu[MANEKI].cursorDown();
 	}
-	else if(gd.scene_count>=5){
+	else if(md.maneki_mode==CARRYING){
 		if(key.z && !key_stop(key.z)){
-			if(gd.text_count<(int)strlen(text[ANTENNATEXT+17+gd.scene_count].str[CHAR_CODE])){
-				gd.text_count=90;
-			}else{
-				gd.text_count=0;
-				gd.scene_count++;
-				if(gd.scene_count==7){
-					gd.talk_count=EOF;
-					gd.talk_open_count=1;
+			menu[YNFORM].setViewMode(HIDE);
+			if(menu[YNFORM].selected()==0){
+				if(!checkManekiTV()){
+					readCartoon(&manekitvJson,4);
+					phase=MANEKI;
+					md.maneki_mode=MISPLACED;
+				}else{
+					md.manekiX=gd.dotX;md.manekiY=gd.dotY;
+					setManekiData();
+					md.maneki_mode=PLUGGED_IN;
 					phase=PLAYING;
+					Mix_PlayChannel(0,sf.decide,0);
 				}
+			}else{
+				phase=PLAYING;
 			}
 		}
+		if(key.up && !key_wait(key.up))menu[YNFORM].cursorUp();
+		if(key.down && !key_wait(key.down))menu[YNFORM].cursorDown();
+	}
+	else if(md.maneki_mode==PLUGGED_IN){
+		if(key.z && !key_stop(key.z)){
+			menu[YNFORM].setViewMode(HIDE);
+			phase=PLAYING;
+			if(menu[YNFORM].selected()==0){
+				md.maneki_mode=CARRYING;
+				Mix_PlayChannel(0,sf.water,0);
+			}
+		 }
+		 if(key.up && !key_wait(key.up))menu[YNFORM].cursorUp();
+		 if(key.down && !key_wait(key.down))menu[YNFORM].cursorDown();
 	}
 }
 
 void keyGameTalking(){
 	if(key.z && !key_stop(key.z) && start==0){
-		if(MAP3D){
-			if(controlTalking()==EOF){
-				phase=PLAYING;
-			}
-		}else{
-			if(nextTalk(&talkingJson)){
-				Mix_PlayChannel(0, sf.noize, 0);
-				phase=PLAYING;
-			}
+		if(nextTalk(&talkingJson)){
+			Mix_PlayChannel(0, sf.noize, 0);
+			phase=PLAYING;
 		}
 	}
-}
-
-void keyManekiConfirm(){
-	if(key.z && !key_stop(key.z)){
-		menu[YNFORM].setViewMode(HIDE);
-		gd.talk_count=EOF;
-		gd.talk_open_count=1;
-		phase=PLAYING;
-		if(menu[YNFORM].selected()==0){
-			if(md.maneki_mode==CARRYING){
-				md.manekiX=gd.dotX;md.manekiY=gd.dotY;
-				setManekiData();
-				md.maneki_mode=PLUGGED_IN;
-				if(!checkManekiTV()){
-					gd.text_count=0;
-					gd.talk_count=0;
-					gd.talk_open_count=1;
-					gd.scene_count=5;
-					phase=MANEKI;
-				}
-			}else{
-				md.maneki_mode=CARRYING;
-			}
-			Mix_PlayChannel(0,sf.decide,0);
-		}
-	}
-	if(key.up && !key_wait(key.up))menu[YNFORM].cursorUp();
-	if(key.down && !key_wait(key.down))menu[YNFORM].cursorDown();
 }
 
 void keyAdjustHeight(){
@@ -1225,7 +1218,10 @@ void keyGame(){
 			keyFishup();break;
 		case FINISH:keyFinish();break;
 		case RESULT:keyResult();break;
-		case GET_HAZIA:keyGetHazia();break;
+		case HAZIA_DEALER_COMES:
+		case COUNTING_HAZIA:
+		case FINISH_COUNTING_HAZIA:
+			keyGetHazia();break;
 		case ANTENNA:keyAntenna();break;
 		case MENU:keyMenuWhileInGame();break;
 		case SAVEMENU:keySaveMenu();break;
@@ -1465,11 +1461,7 @@ void drawScore(SDL_Surface * scr){
 }
 
 void drawResult(SDL_Surface* scr){
-	fillRect(scr,0,0,640,480,0,0,0,255);
-	drawImage(scr,img.back,60,40,0,0,280,400,255);
-	drawImage(scr,img.back,340,40,360,0,240,400,255);
-	drawImage(scr,img.back,60,160,520,400,240,280,255);
-
+	drawAnimationCut(&cartoonJson,scr);
 	drawText2(scr,200,120,text[GAMETEXT+2]);
 	sprintf_s(str,"%3d/%3d",gd.crops,entries);
 	if(phase==TODAYS_CROP){
@@ -1491,9 +1483,9 @@ void drawResult(SDL_Surface* scr){
 		drawImage(scr,img.menuback,100,200,0,0,520,200,128);
 		for(int i=0 ; i<5 ; i++){
 			n=count/10+i;
+			if(n<0)continue;
 			if(n==entries)break;
 			if(fishbox.today[n]==EOF)break;
-			if(n<0)continue;
 			drawImage(scr,img.symbol,110,200+i*40,(entry[fishbox.today[n]].mark%16)*34,(entry[fishbox.today[n]].mark/16)*34,34,34,255);
 			drawText2_lang(scr,140,200+i*40,entry[fishbox.today[n]].title,60,255,JAPANESE);
 		}
@@ -1519,7 +1511,7 @@ void drawResult(SDL_Surface* scr){
 
 void drawGetHazia(SDL_Surface *scr){
 	drawAnimationCut(&cartoonJson,scr);
-	if(gd.scene_count==1){
+	if(phase==COUNTING_HAZIA){
 		int inc=gd.score-season[getSeasonById(which_season)].hiscore;
 		if(inc<0)inc=0;
 
@@ -1772,7 +1764,7 @@ void drawTimeSlot(SDL_Surface* scr){
 
 void drawManekiTV(SDL_Surface *scr){
 	if(md.maneki_mode==0)drawImage(scr,img.chr,(int)(md.manekiX*MAGNIFY)-20-gd.scrX,(int)(md.manekiY*MAGNIFY)-30-gd.scrY,40+((count/20)%2)*40,360,40,40,255);
-	else if(md.maneki_mode==CARRYING)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-14-gd.scrX,(int)(gd.y*MAGNIFY)-76-gd.scrY,0,360,40,40,255);
+	else if(md.maneki_mode==CARRYING || md.maneki_mode==MISPLACED)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-14-gd.scrX,(int)(gd.y*MAGNIFY)-76-gd.scrY,0,360,40,40,255);
 	else if(md.maneki_mode==PLUGGED_IN)drawImage(scr,img.chr,(int)(md.manekiX*MAGNIFY)-20-gd.scrX,(int)(md.manekiY*MAGNIFY)-30-gd.scrY,0,360,40,40,255);
 	for(int i=0 ; i<md.fish_num ; i++){
 		if(md.maneki_count[i]!=0 && md.maneki_count[i]<40){
@@ -1860,7 +1852,7 @@ void drawGame(SDL_Surface* scr){
 		drawMap2(scr,gd.scrX,gd.scrY);
 	}
 	else if(phase==RESULT || phase==TODAYS_CROP)drawResult(scr);
-	else if(phase==GET_HAZIA)drawGetHazia(scr);
+	else if(phase==HAZIA_DEALER_COMES || phase==COUNTING_HAZIA || phase==FINISH_COUNTING_HAZIA)drawGetHazia(scr);
 	else{
 		SDL_Color col=getSkyColor(gd.hour,gd.minute);
 		fillRect(scr,0,0,640,480,col.r,col.g,col.b,255);
@@ -1950,16 +1942,12 @@ void drawGame(SDL_Surface* scr){
 		for(int i=0 ; i<15 ; i++)menu[i].drawMenu(scr);
 		if(phase==SAVING && count>=150)drawText2(scr,160,60,text[GAMETEXT+29]);
 		if(phase==SAVING_RECORD && count>=150)drawText2(scr,160,60,text[EPILOGUE+5]);
-		if(phase==MANEKI)drawTalking(scr,1,text[ANTENNATEXT+17+gd.scene_count]);
-		else if(phase==MANEKI_CONFIRM)drawTalking(scr,1,text[ANTENNATEXT+24+gd.scene_count]);
-		else if(phase==TALKING){
-			if(MAP3D){
-				drawTalking(scr);
-			}else{
-				drawAnimationCut(&talkingJson,scr);
-			}
+		if(phase==MANEKI || phase==MANEKI_CONFIRM || manekitvJson.talk_open_count!=0){
+			drawAnimationCut(&manekitvJson,scr);
 		}
-
+		else if(phase==TALKING || talkingJson.talk_open_count!=0){
+			drawAnimationCut(&talkingJson,scr);
+		}
 		if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)drawThrowPhoto(scr);
 	}
 	drawGameExplain(scr);
@@ -2005,7 +1993,7 @@ void drawGameExplain(SDL_Surface* scr){
 				}
 			}
 		}
-		else if(phase==SAVEMENU || phase==SMR || (phase==MANEKI && gd.scene_count==3)){
+		else if(phase==SAVEMENU || phase==SMR || phase==MANEKI_CONFIRM){
 			if(count%600<200){
 				drawKeyboard(scr,key.zC,80,0);
 				drawText(scr,100,0,text[OPTIONTEXT+1]);
@@ -2139,7 +2127,7 @@ void drawGameExplain(SDL_Surface* scr){
 				drawText(scr,40,460,text[MENUTEXT+15]);
 			}
 		}
-		else if(phase==TALKING || (phase==MANEKI && gd.scene_count<3)){
+		else if(phase==TALKING || phase==MANEKI){
 			drawKeyboard(scr,key.zC,70,0);
 			drawText(scr,90,0,text[EPILOGUE+1]);
 		}
@@ -2205,20 +2193,14 @@ bool createSearchImage(int n){
 
 void timerCalling(){
 	if(count==100){
-		if(face[gd.face_count]==SHAKE){
-			Mix_PlayChannel(0,sf.decide,0);
-			gd.shake_count=50;
-			gd.face_count++;
-		}else{
-			Mix_PlayChannel(0, sf.noize, 0);
-			gd.talk_open_count=1;
-		}
-		gd.text_count=0;
+		Mix_PlayChannel(0, sf.noize, 0);
+		nextCut(&talkingJson);
 		phase=TALKING;
 	}
 }
 
 void timerTodaysCrop(){
+	nextCut(&cartoonJson);
 	if(count>=0){
 		if(count%10==0 && count/10<entries && fishbox.today[count/10]!=EOF){
 			Mix_PlayChannel(0, sf.knob, 0);
@@ -2233,7 +2215,7 @@ void timerTodaysCrop(){
 }
 
 void timerGetHazia(){
-	if(gd.scene_count==1){
+	if(phase==COUNTING_HAZIA){
 		if(start==0 && count%5==0 && gd.hazia2>0){
 			int a=1;
 			for(int i=0 ; i<10 ; i++){
@@ -2246,8 +2228,7 @@ void timerGetHazia(){
 		}
 	}
 	if(nextCut(&cartoonJson)){
-		if(gd.scene_count==2){
-			gd.text_count=0;
+		if(phase==FINISH_COUNTING_HAZIA){
 			phase=END_YN;
 			if(season[getSeasonById(which_season)].rate<100*gd.crops/entries)season[getSeasonById(which_season)].rate=100*gd.crops/entries;
 			if(season[getSeasonById(which_season)].rate>100)season[getSeasonById(which_season)].rate=100;
@@ -2324,7 +2305,6 @@ void timerMemma(){
 void timerCatchPhone(){
 	if(gd.week==talkingJson.call_week && gd.hour==talkingJson.call_hour && gd.minute==talkingJson.call_minute){
 		Mix_PlayChannel(0, sf.calling, 0);
-		nextCut(&talkingJson);
 		phase=CALLING;
 		count=2;
 	}
@@ -2479,10 +2459,12 @@ void timerThrowPhoto(){
 
 void timerGame(){
 	if(gd.game_mode==STORYMODE){
-		if(count==1){
-			Mix_PlayMusic(bgm,0);
-			gd.bgm_timestamp=SDL_GetTicks();
-			gd.secondMusic=false;
+		if(phase==GAMESTART || phase==READY){
+			if(count==1){
+				Mix_PlayMusic(bgm,0);
+				gd.bgm_timestamp=SDL_GetTicks();
+				gd.secondMusic=false;
+			}
 		}
 		if(!gd.secondMusic && gd.hour>=22 && (SDL_GetTicks()-gd.bgm_timestamp)/16>10000){
 			freeMusic();
@@ -2505,8 +2487,7 @@ void timerGame(){
 	else if(phase==PLAYING){
 		if(MAP3D){
 			if(talk_3dtv && count==300){
-				TalkingAt(22);
-				gd.talk_open_count=1;
+				readCartoon(&talkingJson,23);
 				phase=TALKING;
 				talk_3dtv=false;
 			}
@@ -2531,7 +2512,7 @@ void timerGame(){
 	}
 	else if(phase==CALLING)timerCalling();
 	else if(phase==TODAYS_CROP)timerTodaysCrop();
-	else if(phase==GET_HAZIA)timerGetHazia();
+	else if(phase==HAZIA_DEALER_COMES || phase==COUNTING_HAZIA || phase==FINISH_COUNTING_HAZIA)timerGetHazia();
 	else if(phase==SAVING)timerSavingGame();
 	else if(phase==SAVING_RECORD)timerSavingRecord();
 	else if(phase==LEAVE_MAP)timerLeaveMap();
@@ -2539,10 +2520,11 @@ void timerGame(){
 	else if(phase==BS_ATTACK)timerBSAttack();
 	else if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)timerThrowPhoto();
 
-	if(phase==TALKING || (phase==GET_HAZIA && start==0) || phase==MANEKI || phase==MANEKI_CONFIRM){
-		controlTextCount(true);
-	}else{
-		controlTextCount(false);
+	if(phase==TALKING || talkingJson.talk_open_count!=0){
+		nextCut(&talkingJson);
+	}
+	else if(phase==MANEKI || phase==MANEKI_CONFIRM || manekitvJson.talk_open_count!=0){
+		nextCut(&manekitvJson);
 	}
 	timerScore();
 	manageThread();

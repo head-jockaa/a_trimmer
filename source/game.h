@@ -24,7 +24,6 @@
 #define FINISH 29
 #define TODAYS_CROP 30
 #define RESULT 31
-#define GET_HAZIA 32
 #define CROP 33
 #define PREF_LIST_SMR 34
 #define SMR_RESULT 35
@@ -46,6 +45,11 @@
 #define BS_THROW_PHOTO 51
 #define CARRYING 1
 #define PLUGGED_IN 2
+#define MISPLACED 3
+
+#define HAZIA_DEALER_COMES 52
+#define COUNTING_HAZIA 53
+#define FINISH_COUNTING_HAZIA 54
 
 void setAntenna();
 void initGame();
@@ -74,7 +78,7 @@ struct GameData{
 	int scrX,scrY,startX,startY,save_cursor,player_dir,ant_dir,hazia,hazia2;
 	int second,score,get_score,gradeup,crops,m_wave,firework,pre_rural,count_rural;
 	int current_area,current_town;
-	int text_count,talk_count,face_count,talk_open_count,scene_count,shake_count,ta_count,town_count;
+	int ta_count,town_count;
 	int talk_kulisap,face_kulisap,kirby_count,kirby_count2,timeslot_count,timeslot_type;
 	int summerX_start,summerY_start,summerX,summerY,memmaX,memmaY,memma_count;
 	int bgm_timestamp;

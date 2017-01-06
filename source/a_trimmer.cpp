@@ -164,7 +164,6 @@ int main(int argc, char *argv[]) {
 					if(!(mode==OPTION&&phase==OPTION_KEY_SETTING)){
 						if(CHAR_CODE==JAPANESE)CHAR_CODE=EUROPEAN;
 						else CHAR_CODE=JAPANESE;
-						gd.text_count=0;
 					}
 				}
 				if(key.pressed==SDLK_F1 && !key_stop(key.F1)){
@@ -306,7 +305,11 @@ void endAll(){
 	freeSound(sf.decide);
 	freeSound(sf.decide2);
 	freeSound(sf.cursor_move);
+	freeCartoon(&cartoonJson);
+	freeCartoon(&talkingJson);
+	freeCartoon(&manekitvJson);
 }
+
 
 void checkEndian(){
 	fillRect(img.screen,0,0,1,1,1,0,0,255);

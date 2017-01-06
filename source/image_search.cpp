@@ -193,7 +193,7 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 				}
 			}
 			if(result){
-				for(int j=0 ; j<2048 ; j++){
+				for(int j=0 ; j<BUF_LEN ; j++){
 					if(result[j]==10 || result[j]==13){
 						break;
 					}
@@ -708,7 +708,7 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 				}
 			}
 			if(result){
-				for(int j=0 ; j<2048 ; j++){
+				for(int j=0 ; j<BUF_LEN ; j++){
 					if(result[j]==10 || result[j]==13){
 						break;
 					}

@@ -6,6 +6,7 @@
 #define CARTOON_DRAWIMAGE_WAVE 4
 #define CARTOON_CARLIGHT 5
 #define CARTOON_ILLUMINATE 6
+#define CARTOON_DIVISION 7
 #define JSON_ARRAY_START 1
 #define JSON_STARTTIME 2
 #define JSON_DATA_START 3
@@ -22,8 +23,9 @@ void resetObject(JsonData *json, CartoonObject &obj);
 void readJsonObject(JsonData *json, char *basename, char *name);
 void readJsonArray(JsonData *json, char *basename, char *name);
 void applyJsonData(JsonData *json);
+void padSpace(JsonData *json, int n, int k, int x);
 
-JsonData cartoonJson,talkingJson;
+JsonData cartoonJson,talkingJson,manekitvJson;
 
 void JsonDataReader::free(){
 	for(int i=0 ; i<arraySize; i++){
@@ -61,6 +63,7 @@ void resetObjectSetting(ObjectSetting &s){
 	s.R=0;s.G=0;s.B=0;s.img_id=0;
 	s.gradRfrom=0;s.gradGfrom=0;s.gradBfrom=0;
 	s.gradRto=0;s.gradGto=0;s.gradBto=0;
+	s.fixed=false;
 }
 void resetObjectMoving(ObjectMoving &m){
 	m.x=0;m.y=0;m.ix=0;m.iy=0;m.mag=0;m.w=0;m.h=0;m.alpha=0;m.shake=0;
@@ -244,15 +247,31 @@ void resetCartoon(JsonData *json){
 	json->talkmode=false;
 	json->cartoonSync=false;
 	json->end=false;
+	json->scrX=0;json->scrY=0;
 	json->call_week=-1;json->call_hour=-1;json->call_minute=-1;
+	json->jr.set.valueNum=0;
+	json->jr.move.valueNum=0;
+	json->jr.talk.valueNum=0;
+	json->jr.image.valueNum=0;
+	json->jr.bgm.valueNum=0;
+	json->jr.loadText.valueNum=0;
+	json->jr.loadSound.valueNum=0;
+	json->jr.sound.valueNum=0;
 }
 
 void freeCartoon(JsonData *json){
 	resetCartoon(json);
 	json->initializedObjArray=false;
 	json->initializedReaderArray=false;
+	json->toPlayMusic=false;
+	json->playingMusic=false;
+	json->musicRepeat=-1;
+	json->cartoonBgmName[0]=0;
+	json->talk_open_count=0;
+	json->text_count=0;
+	json->shake_count=0;
 	if(json->size){
-		delete [] json->text;
+		delete [] json->jsonText;
 		json->size=0;
 	}
 	if(json->max_obj){
@@ -273,6 +292,10 @@ void freeCartoon(JsonData *json){
 		delete [] json->sound;
 		json->max_sound=0;
 	}
+	if(json->talk_size){
+		delete [] json->talk;
+		json->talk_size=0;
+	}
 	if(json->jr.resetNum){
 		delete [] json->jr.reset;
 		json->jr.resetNum=0;
@@ -292,8 +315,8 @@ void loadCartoon(JsonData *json, const char *filename){
 	loadFile(filename);
 	json->size=fsize;
 	if(fsize){
-		json->text=new char[json->size];
-		strcpy_s(json->text,fstr);
+		json->jsonText=new char[json->size];
+		strcpy_s(json->jsonText,fstr);
 
 		readCartoon(json);
 		resetCartoon(json);
@@ -323,8 +346,18 @@ void loadCartoon(JsonData *json, const char *filename){
 			json->sound[i]=NULL;
 		}
 		json->initializedObjArray=true;
+
+		resetCartoon(json);
 		nextCut(json);
 	}
+}
+
+void readCartoon(JsonData *json, int index){
+	resetCartoon(json);
+	json->targetIndex=index;
+	json->searchingIndex=true;
+	readCartoon(json);
+	json->searchingIndex=false;
 }
 
 void readCartoon(JsonData *json){
@@ -337,7 +370,7 @@ void readCartoon(JsonData *json){
 	}
 
 	while(json->pointer < json->size) {
-		char *c = &json->text[json->pointer];
+		char *c = &json->jsonText[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
 			json->pointer++;
 			continue;
@@ -364,8 +397,10 @@ void readCartoon(JsonData *json){
 		else if(mode==JSON_GETVALUE) {
 			if(strcmp(dataname, "time")==0) {
 				json->pointer+=fetchInt(c,&json->nextTime)-1;
-				if(json->nextTime!=json->playtime || json->talkmode || json->end) {
-					waitForNextTime=true;
+				if(!json->searchingIndex) {
+					if(json->nextTime!=json->playtime || json->talkmode || json->end) {
+						waitForNextTime=true;
+					}
 				}
 			}
 			else if(strcmp(dataname, "date")==0) {
@@ -377,7 +412,18 @@ void readCartoon(JsonData *json){
 					waitForNextTime=true;
 				}
 			}
+			else if(strcmp(dataname, "index")==0) {
+				int n=0;
+				json->pointer+=fetchInt(c,&n)-1;
+				if(json->searchingIndex && json->targetIndex==n) {
+					json->searchingIndex=false;
+				}
+				else if(!json->searchingIndex && json->initializedObjArray) {
+					break;
+				}
+			}
 			else if(strcmp(dataname, "act")==0) {
+				int pre_talk_size=json->jr.talk.valueNum;
 				json->jr.image.valueNum=0;
 				json->jr.loadSound.valueNum=0;
 				json->jr.bgm.valueNum=0;
@@ -390,7 +436,16 @@ void readCartoon(JsonData *json){
 				json->jr.hasSync=false;
 				json->jr.hasResetTimer=false;
 				json->jr.talkPointer=0;
+				json->jr.end=false;
 				readJsonObject(json, NULL, NULL);
+				if(json->initializedObjArray){
+					if(pre_talk_size<=1 && json->jr.talk.valueNum>1){
+						json->talk_open_count=20;
+					}
+					else if(pre_talk_size>1 && json->jr.talk.valueNum<=1){
+						json->talk_open_count=-20;
+					}
+				}
 				if(json->jr.image.maxValueNum < json->jr.image.valueNum) {
 					json->jr.image.maxValueNum=json->jr.image.valueNum;
 				}
@@ -427,7 +482,7 @@ void readCartoon(JsonData *json){
 				}
 			}
 			else if(*c=='}') {
-				if(json->initializedReaderArray){
+				if(json->initializedReaderArray && (!json->initializedObjArray || !json->searchingIndex)){
 					applyJsonData(json);
 				}
 				mode=JSON_ENDDATA;
@@ -454,12 +509,11 @@ void fetchNextTalking(JsonData *json){
 		json->jr.talkPointer++;
 	}
 	json->jr.talkPointer++;
-	gd.face_count=face;
-	gd.talk_count=text;
-	gd.text_count=0;
+	json->face_count=face;
+	json->talk_count=text;
+	json->text_count=0;
 	if(shake){
-		gd.shake_count=50;
-		Mix_PlayChannel(0,sf.decide,0);
+		json->shake_count=50;
 	}
 }
 
@@ -527,6 +581,7 @@ void applyJsonData(JsonData *json){
 			else if(strcmp(json->jr.set.name[j],"type")==0){
 				if(strcmp(json->jr.set.valueString[j],"carlight")==0)json->obj[id].set.type=CARTOON_CARLIGHT;
 				else if(strcmp(json->jr.set.valueString[j],"illuminate")==0)json->obj[id].set.type=CARTOON_ILLUMINATE;
+				else if(strcmp(json->jr.set.valueString[j],"division")==0)json->obj[id].set.type=CARTOON_DIVISION;
 			}
 			else if(strcmp(json->jr.set.name[j],"lang")==0){
 				if(strcmp(json->jr.set.valueString[j],"jp")==0)json->obj[id].set.lang=JAPANESE;
@@ -539,6 +594,9 @@ void applyJsonData(JsonData *json){
 			else if(strcmp(json->jr.set.name[j],"wave range")==0){
 				json->obj[id].waveRange=json->jr.set.valueDouble[j];
 				json->obj[id].set.type=CARTOON_DRAWIMAGE_WAVE;
+			}
+			else if(strcmp(json->jr.set.name[j],"fixed")==0){
+				json->obj[id].set.fixed=json->jr.set.valueBool[j];
 			}
 		}
 		i+=num;
@@ -773,7 +831,8 @@ void applyJsonData(JsonData *json){
 		Mix_PlayChannel(ch, json->sound[id], repeat);
 	}
 
-	repeat=-1;
+	int fadeout=-1;
+	json->musicRepeat=-1;
 	file[0]=0;
 	for(int i=0 ; i<json->jr.bgm.valueNum ; i++){
 		if(!json->initializedObjArray){
@@ -782,14 +841,26 @@ void applyJsonData(JsonData *json){
 		for(int j=i ; j<json->jr.bgm.valueNum ; j++){
 			if(json->jr.bgm.name[j][0]==';')break;
 			if(strcmp(json->jr.bgm.name[j],"file")==0)strcpy_s(file,json->jr.bgm.valueString[j]);
-			else if(strcmp(json->jr.bgm.name[j],"repeat")==0)repeat=json->jr.bgm.valueDouble[j];
+			else if(strcmp(json->jr.bgm.name[j],"repeat")==0)json->musicRepeat=json->jr.bgm.valueDouble[j];
+			else if(strcmp(json->jr.bgm.name[j],"fadeout")==0)fadeout=json->jr.bgm.valueDouble[j];
 			i++;
 		}
-		if(strcmp(json->cartoonBgmName,str)!=0){
+		if(fadeout==0){
+			Mix_HaltMusic();
+			json->playingMusic=false;
+			json->toPlayMusic=false;
+		}
+		else if(fadeout!=-1){
+			Mix_FadeOutMusic(fadeout);
+			json->playingMusic=false;
+			json->toPlayMusic=false;
+		}
+		if(strcmp(json->cartoonBgmName,file)!=0){
 			freeMusic();
 			strcpy_s(json->cartoonBgmName,file);
 			bgm=Mix_LoadMUS(file);
-			Mix_PlayMusic(bgm, repeat);
+			json->playingMusic=false;
+			json->toPlayMusic=true;
 		}
 	}
 
@@ -797,6 +868,19 @@ void applyJsonData(JsonData *json){
 	char lang[20];
 	file[0]=0;
 	lang[0]=0;
+	if(json->initializedObjArray && !json->talk_size){
+		for(int j=0 ; j<json->jr.loadText.valueNum ; j++){
+			int max=0;
+			if(strcmp(json->jr.loadText.name[j],"file")==0){
+				loadFile(json->jr.loadText.valueString[j]);
+				for(size_t k=0 ; k<fsize ; k++){
+					if(fstr[k]==0)max++;
+				}
+				if(json->talk_size<max)json->talk_size=max;
+			}
+		}
+		json->talk=new String[json->talk_size];
+	}
 	for(int i=0 ; i<json->jr.loadText.valueNum ; i++){
 		if(!json->initializedObjArray){
 			break;
@@ -815,18 +899,18 @@ void applyJsonData(JsonData *json){
 		}
 		loadFile(file);
 		size_t fc=0;
-		for(int a=0 ; a<1000 ; a++){
+		for(int a=0 ; a<json->talk_size ; a++){
 			if(fc>=fsize)break;
 			for(int b=0 ; b<200 ; b++){
-				talk[a].str[which_lang][b]=0;
+				json->talk[a].str[which_lang][b]=0;
 			}
 			for(int b=0 ; b<200 ; b++){
-				talk[a].str[which_lang][b]=fstr[fc];fc++;
-				if(talk[a].str[which_lang][b]==0)break;
+				json->talk[a].str[which_lang][b]=fstr[fc];fc++;
+				if(json->talk[a].str[which_lang][b]==0)break;
 			}
 		}
-		for(int a=0 ; a<1000 ; a++){
-			padSpace(a,which_lang,30);
+		for(int a=0 ; a<json->talk_size ; a++){
+			padSpace(json,a,which_lang,30);
 		}
 	}
 
@@ -845,6 +929,8 @@ void applyJsonData(JsonData *json){
 		}
 		json->cartoonSync=json->jr.sync;
 	}
+
+	json->end=json->jr.end;
 }
 
 void changeJsonReaderPointer(JsonData *json, char *basename){
@@ -861,8 +947,8 @@ void changeJsonReaderPointer(JsonData *json, char *basename){
 void readJsonArray(JsonData *json, char *basename, char *name){
 	int mode=JSON_ARRAY_START;
 
-	while(json->text[json->pointer]) {
-		char *c = &json->text[json->pointer];
+	while(json->jsonText[json->pointer]) {
+		char *c = &json->jsonText[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
 			json->pointer++;
 			continue;
@@ -872,14 +958,27 @@ void readJsonArray(JsonData *json, char *basename, char *name){
 				if(basename!=NULL){
 					changeJsonReaderPointer(json,basename);
 				}
+				mode=JSON_GETVALUE;
+			}
+		}
+		else if(mode==JSON_GETVALUE) {
+			if(*c=='{') {
 				readJsonObject(json,basename,NULL);
 				mode=JSON_NEXTDATA;
+			}
+			else if(*c==']') {
+				if(basename!=NULL && name==NULL) {
+					if(json->initializedReaderArray){
+						sprintf_s(json->jr.which->name[json->jr.which->valueNum],";");
+					}
+					json->jr.which->valueNum++;
+				}
+				break;
 			}
 		}
 		else if(mode==JSON_NEXTDATA) {
 			if(*c==',') {
-				json->pointer++;
-				readJsonObject(json,basename,NULL);
+				mode=JSON_GETVALUE;
 			}
 			else if(*c==']') {
 				break;
@@ -891,8 +990,8 @@ void readJsonArray(JsonData *json, char *basename, char *name){
 
 void readJsonObject(JsonData *json, char *basename, char *name){
 	int mode=JSON_DATA_START;
-	while(json->text[json->pointer]) {
-		char *c = &json->text[json->pointer];
+	while(json->jsonText[json->pointer]) {
+		char *c = &json->jsonText[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
 			json->pointer++;
 			continue;
@@ -922,7 +1021,7 @@ void readJsonObject(JsonData *json, char *basename, char *name){
 		}
 		else if(mode==JSON_GETVALUE) {
 			if(strcmp(json->jr.basename,"end")==0){
-				json->end=true;
+				json->jr.end=true;
 			}
 			else if(strcmp(json->jr.basename,"reset")==0){
 				json->jr.resetNum=0;
@@ -1010,8 +1109,8 @@ void readJsonObject(JsonData *json, char *basename, char *name){
 
 void resetObject(JsonData *json){
 	int mode=JSON_ARRAY_START;
-	while(json->text[json->pointer]) {
-		char *c = &json->text[json->pointer];
+	while(json->jsonText[json->pointer]) {
+		char *c = &json->jsonText[json->pointer];
 		if(*c==' ' || *c==10 || *c==13) {
 			json->pointer++;
 			continue;
@@ -1110,8 +1209,12 @@ void _moveObject(JsonData *json){
 				}
 			}
 			else if(json->obj[i].slideAlpha.position<=json->obj[i].slideAlpha.from){
-				json->obj[i].slideAlpha.position=json->obj[i].slideAlpha.from;
-				json->obj[i].slideAlpha.back=false;
+				if(json->obj[i].slideAlpha.turnBack){
+					json->obj[i].slideAlpha.position=json->obj[i].slideAlpha.from;
+					json->obj[i].slideAlpha.back=false;
+				}else{
+					json->obj[i].slideAlpha.position=json->obj[i].slideAlpha.to;
+				}
 			}
 		}
 		if(json->obj[i].slideX.step!=0){
@@ -1150,11 +1253,14 @@ void _moveObject(JsonData *json){
 				}else{
 					json->obj[i].slideY.position=json->obj[i].slideY.from;
 				}
-				json->obj[i].slideY.back=true;
 			}
 			else if(json->obj[i].slideY.position<=json->obj[i].slideY.from){
-				json->obj[i].slideY.position=json->obj[i].slideY.from;
-				json->obj[i].slideY.back=false;
+				if(json->obj[i].slideY.turnBack){
+					json->obj[i].slideY.position=json->obj[i].slideY.from;
+					json->obj[i].slideY.back=false;
+				}else{
+					json->obj[i].slideY.position=json->obj[i].slideY.to;
+				}
 			}
 		}
 		if(json->obj[i].slideIX.step!=0){
@@ -1170,11 +1276,14 @@ void _moveObject(JsonData *json){
 				}else{
 					json->obj[i].slideIX.position=json->obj[i].slideIX.from;
 				}
-				json->obj[i].slideIX.back=true;
 			}
 			else if(json->obj[i].slideIX.position<=json->obj[i].slideIX.from){
-				json->obj[i].slideIX.position=json->obj[i].slideIX.from;
-				json->obj[i].slideIX.back=false;
+				if(json->obj[i].slideIX.turnBack){
+					json->obj[i].slideIX.position=json->obj[i].slideIX.from;
+					json->obj[i].slideIX.back=false;
+				}else{
+					json->obj[i].slideIX.position=json->obj[i].slideIX.to;
+				}
 			}
 		}
 		if(json->obj[i].slideIY.step!=0){
@@ -1190,11 +1299,14 @@ void _moveObject(JsonData *json){
 				}else{
 					json->obj[i].slideIY.position=json->obj[i].slideIY.from;
 				}
-				json->obj[i].slideIY.back=true;
 			}
 			else if(json->obj[i].slideIY.position<=json->obj[i].slideIY.from){
-				json->obj[i].slideIY.position=json->obj[i].slideIY.from;
-				json->obj[i].slideIY.back=false;
+				if(json->obj[i].slideIY.turnBack){
+					json->obj[i].slideIY.position=json->obj[i].slideIY.from;
+					json->obj[i].slideIY.back=false;
+				}else{
+					json->obj[i].slideIY.position=json->obj[i].slideIY.to;
+				}
 			}
 		}
 		if(json->obj[i].slideMag.step!=0){
@@ -1212,8 +1324,12 @@ void _moveObject(JsonData *json){
 				}
 			}
 			else if(json->obj[i].slideMag.position<=json->obj[i].slideMag.from){
-				json->obj[i].slideMag.position=json->obj[i].slideMag.from;
-				json->obj[i].slideMag.back=false;
+				if(json->obj[i].slideMag.turnBack){
+					json->obj[i].slideMag.position=json->obj[i].slideMag.from;
+					json->obj[i].slideMag.back=false;
+				}else{
+					json->obj[i].slideMag.position=json->obj[i].slideMag.to;
+				}
 			}
 		}
 		if(json->obj[i].jumpG!=0){
@@ -1226,21 +1342,42 @@ void _moveObject(JsonData *json){
 	}
 }
 
+void controlTextCount(JsonData *json){
+	if(json->talk_open_count>0){
+		json->talk_open_count--;
+	}
+	else if(json->talk_open_count<0){
+			json->talk_open_count++;
+	}else{
+		while(json->talk[json->talk_count].str[CHAR_CODE][json->text_count]==' ' && json->talk[json->talk_count].str[CHAR_CODE][json->text_count+1]==' '){
+			json->text_count++;
+		}
+		json->text_count++;
+		if(json->shake_count>0){
+			if(json->shake_count==50){
+				Mix_PlayChannel(0,sf.decide,0);
+			}
+			json->shake_count--;
+		}
+	}
+}
+
 void _nextCut(JsonData *json){
 	_moveObject(json);
-	if(!json->talkmode){
+	if(!json->talkmode && !json->end){
 		if(json->playtime==json->nextTime ||
 		   (gd.week==json->call_week && gd.hour==json->call_hour && gd.minute==json->call_minute)){
 			readCartoon(json);
 		}
 		json->playtime++;
+		if(json->talk_open_count<0)json->talk_open_count++;
 	}else{
-		gd.text_count++;
-		if(gd.shake_count>0)gd.shake_count--;
-		if(gd.talk_open_count>0){
-			gd.talk_open_count++;
-			if(gd.talk_open_count==20)gd.talk_open_count=0;
-		}
+		controlTextCount(json);
+	}
+	if(json->toPlayMusic && kick_count==0){
+		Mix_PlayMusic(bgm, json->musicRepeat);
+		json->playingMusic=true;
+		json->toPlayMusic=false;
 	}
 }
 
@@ -1253,18 +1390,19 @@ bool nextCut(JsonData *json){
 		_nextCut(json);
 		if(json->end)break;
 	}
-	return json->end;
+	return !json->talkmode && json->end;
 }
 
 bool nextTalk(JsonData *json){
 	if(json->talkmode){
-		if(gd.text_count<(int)strlen(talk[gd.talk_count].str[CHAR_CODE])){
-			gd.text_count=90;
+		if(json->text_count<(int)strlen(json->talk[json->talk_count].str[CHAR_CODE])){
+			json->text_count=90;
 		}else{
-			if(json->jr.talkPointer==json->jr.talk.valueNum){
+			if(json->jr.talkPointer>=json->jr.talk.valueNum){
 				json->talkmode=false;
 				json->playtime=0;
 				if(json->end){
+					json->talk_open_count=-20;
 					return true;
 				}else{
 					nextCut(json);
@@ -1277,8 +1415,33 @@ bool nextTalk(JsonData *json){
 	return false;
 }
 
-void drawAnimationCut(JsonData *json, SDL_Surface* scr){
-	for(int i=0 ; i<=json->max_obj ; i++){
+void drawTalking(SDL_Surface* scr, JsonData *json, String st, int face, int length, int shake){
+	if(json->talk_open_count>0){
+		int w=600*(20-json->talk_open_count)/20;
+		int h=120*(20-json->talk_open_count)/20;
+		drawRect(scr,20,360,w,h,128,128,255,255);
+	}
+	else if(json->talk_open_count<0){
+		int w=600*(-json->talk_open_count)/20;
+		int h=120*(-json->talk_open_count)/20;
+		drawRect(scr,20,360,w,h,128,128,255,255);
+	}else{
+		int line1=0,line2=0,line3=0,offset=0;
+		if(length<30)line1=length;
+		else if(length<60){line1=30;line2=length-30;}
+		else if(length<90){line1=30;line2=30;line3=length-60;}
+		else{line1=30;line2=30;line3=30;}
+		if(shake>0)offset=(3-abs(6-shake%12))*shake/6;
+		drawImage(scr,img.menuback,20+offset,360,0,0,600,120,192);
+		drawImage(scr,img.facechip,20+offset,370,((face-1)%5)*100,((face-1)/5)*100,100,100,255);
+		if(line1!=0)drawText2(scr,120+offset,360,&(st.str[CHAR_CODE][0]),line1);
+		if(line2!=0)drawText2(scr,120+offset,400,&(st.str[CHAR_CODE][30]),line2);
+		if(line3!=0)drawText2(scr,120+offset,440,&(st.str[CHAR_CODE][60]),line3);
+	}
+}
+
+void _drawAnimationCut(JsonData *json, SDL_Surface* scr, int from, int to){
+	for(int i=from ; i<=to ; i++){
 		if(json->obj[i].set.lang!=-1 && json->obj[i].set.lang!=CHAR_CODE){
 			continue;
 		}
@@ -1301,53 +1464,60 @@ void drawAnimationCut(JsonData *json, SDL_Surface* scr){
 		int h=(int)json->obj[i].set.h;
 		int a=(int)((json->obj[i].set.alpha+json->obj[i].slideAlpha.position)*fade);
 		double mag=json->obj[i].set.mag+json->obj[i].slideMag.position;
+		if(!json->obj[i].set.fixed){
+			x-=json->scrX;
+			x-=json->scrY;
+		}
+		Image *bg=json->bg[json->obj[i].set.img_id];
+
 		if(json->obj[i].set.drawTo!=-1){
+			Image *ima=json->bg[json->obj[i].set.drawTo];
 			if(json->obj[i].set.type==CARTOON_DRAWIMAGE){
 				if(mag==1){
-					drawImage(json->bg[json->obj[i].set.drawTo],json->bg[json->obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					drawImage(ima,bg,x,y,ix,iy,w,h,a);
 				}else{
-					drawImage_x(json->bg[json->obj[i].set.drawTo],json->bg[json->obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					drawImage_x(ima,bg,x,y,mag,ix,iy,w,h,a);
 				}
 			}
 			if(json->obj[i].set.type==CARTOON_ILLUMINATE){
 				if(mag==1){
-					illuminateImage(json->bg[json->obj[i].set.drawTo],json->bg[json->obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					illuminateImage(ima,bg,x,y,ix,iy,w,h,a);
 				}else{
-					illuminateImage_x(json->bg[json->obj[i].set.drawTo],json->bg[json->obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					illuminateImage_x(ima,bg,x,y,mag,ix,iy,w,h,a);
 				}
 			}
 			else if(json->obj[i].set.type==CARTOON_FILLRECT){
-				fillRect(json->bg[json->obj[i].set.drawTo],x,y,w,h,(int)json->obj[i].set.R,(int)json->obj[i].set.G,(int)json->obj[i].set.B,a);
+				fillRect(ima,x,y,w,h,(int)json->obj[i].set.R,(int)json->obj[i].set.G,(int)json->obj[i].set.B,a);
 			}
 			else if(json->obj[i].set.type==CARTOON_CARLIGHT){
-				drawLightBall(json->bg[json->obj[i].set.drawTo],x,y,w,(int)json->obj[i].set.R,(int)json->obj[i].set.G,(int)json->obj[i].set.B);
+				drawLightBall(ima,x,y,w,(int)json->obj[i].set.R,(int)json->obj[i].set.G,(int)json->obj[i].set.B);
 			}
 			else if(json->obj[i].set.type==CARTOON_FILLRECT_GRAD){
 				for(int j=0 ; j<h ; j++){
 					int R=(int)(json->obj[i].set.gradRfrom+(json->obj[i].set.gradRto-json->obj[i].set.gradRfrom)*j/h);
 					int G=(int)(json->obj[i].set.gradGfrom+(json->obj[i].set.gradGto-json->obj[i].set.gradGfrom)*j/h);
 					int B=(int)(json->obj[i].set.gradBfrom+(json->obj[i].set.gradBto-json->obj[i].set.gradBfrom)*j/h);
-					fillRect(json->bg[json->obj[i].set.drawTo],x,y+j,w,1,R,G,B,a);
+					fillRect(ima,x,y+j,w,1,R,G,B,a);
 				}
 			}
 			else if(json->obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
 				for(int j=0 ; j<h ; j++){
-					drawImage(json->bg[json->obj[i].set.drawTo],json->bg[json->obj[i].set.img_id],x+(int)(sin((count+j)*json->obj[i].waveSIN)*json->obj[i].waveRange),y+j,ix,iy+j,w,1,a);
+					drawImage(ima,bg,x+(int)(sin((count+j)*json->obj[i].waveSIN)*json->obj[i].waveRange),y+j,ix,iy+j,w,1,a);
 				}
 			}
 		}else{
 			if(json->obj[i].set.type==CARTOON_DRAWIMAGE){
 				if(mag==1){
-					drawImage(scr,json->bg[json->obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					drawImage(scr,bg,x,y,ix,iy,w,h,a);
 				}else{
-					drawImage_x(scr,json->bg[json->obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					drawImage_x(scr,bg,x,y,mag,ix,iy,w,h,a);
 				}
 			}
 			if(json->obj[i].set.type==CARTOON_ILLUMINATE){
 				if(mag==1){
-					illuminateImage(scr,json->bg[json->obj[i].set.img_id],x,y,ix,iy,w,h,a);
+					illuminateImage(scr,bg,x,y,ix,iy,w,h,a);
 				}else{
-					illuminateImage_x(scr,json->bg[json->obj[i].set.img_id],x,y,mag,ix,iy,w,h,a);
+					illuminateImage_x(scr,bg,x,y,mag,ix,iy,w,h,a);
 				}
 			}
 			else if(json->obj[i].set.type==CARTOON_FILLRECT){
@@ -1366,12 +1536,38 @@ void drawAnimationCut(JsonData *json, SDL_Surface* scr){
 			}
 			else if(json->obj[i].set.type==CARTOON_DRAWIMAGE_WAVE){
 				for(int j=0 ; j<h ; j++){
-					drawImage(scr,json->bg[json->obj[i].set.img_id],x+(int)(sin((count+j)*json->obj[i].waveSIN)*json->obj[i].waveRange),y+j,ix,iy+j,w,1,a);
+					drawImage(scr,bg,x+(int)(sin((count+j)*json->obj[i].waveSIN)*json->obj[i].waveRange),y+j,ix,iy+j,w,1,a);
 				}
 			}
 		}
 	}
-	if(json->talkmode){
-		drawTalking(scr,gd.face_count,talk[gd.talk_count]);
+	if((json->talkmode && json->jr.talk.valueNum>1) || json->talk_open_count!=0){
+		drawTalking(scr,json,json->talk[json->talk_count],json->face_count,json->text_count,json->shake_count);
 	}
+}
+
+void drawAnimationCut(JsonData *json, SDL_Surface* scr){
+	_drawAnimationCut(json,scr,0,json->max_obj);
+}
+
+void drawAnimationCutBeforeDivision(JsonData *json, SDL_Surface* scr){
+	int n=0;
+	for(int i=0 ; i<json->max_obj ; i++){
+		if(json->obj[i].set.type==CARTOON_DIVISION){
+			n=i;
+			break;
+		}
+	}
+	_drawAnimationCut(json,scr,0,n-1);
+}
+
+void drawAnimationCutAfterDivision(JsonData *json, SDL_Surface* scr){
+	int n=0;
+	for(int i=0 ; i<json->max_obj ; i++){
+		if(json->obj[i].set.type==CARTOON_DIVISION){
+			n=i;
+			break;
+		}
+	}
+	_drawAnimationCut(json,scr,n+1,json->max_obj);
 }

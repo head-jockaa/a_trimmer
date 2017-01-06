@@ -33,10 +33,8 @@
 #define SEOI_HA 29
 #define COME_MIYAZAKI 30
 #define LEAVE_MIYAZAKI 31
-#define DEPLOMA_TALK 32
-#define DEPLOMA 33
-#define NODATA1 34
-#define NODATA2 35
+#define NODATA1 32
+#define NODATA2 33
 #define GAMEBOY 1
 #define MONO 2
 

@@ -9,17 +9,16 @@
 #define SHOP_LASTTALK 3
 #define BUYING 4
 #define SELLING 5
-#define MEMMA_TALK 6
+#define SHOP_FLOOR_TALK 6
 #define OHANA_TALK 7
-#define SHOP_CONFIRM_TALK 8
-#define SHOP_CONFIRM 9
-#define THROW_MEMMA 10
+#define OHANA_MENU 8
+#define SHOP_CONFIRM 10
 //#define YNFORM 11
-#define OHANA_MENU 12
-#define NAGANO_APPLE 13
-#define ARANCIA 14
-#define STAY_IN 15
 #define SHOP_ITEMS 18
+
+#define TRYING_TO_PAY_MUCH 12
+#define MERELY_YES 13
+#define NOD_AND_BUY 14
 
 extern int price[SHOP_ITEMS], shop_icon[SHOP_ITEMS];
 

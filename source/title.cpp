@@ -35,11 +35,7 @@ void keyOpening(){
 		else if(phase==1){
 			endOpening();
 			if(movie_test){
-				initMiyazaki();
-				gd.x=1600;
-				gd.scrX=(int)gd.x-320;
-				phase=MIYAZAKI_MUSEUM;
-				start=0;
+				backToMiyazaki();
 				for(int i=0 ; i<33 ; i++)menu[BGM_TEST].cursorDown();
 			}else{
 				initTitle2();
@@ -51,16 +47,11 @@ void keyOpening(){
 void timerOpening(){
 	if(phase==1){
 		if(nextCut(&cartoonJson)){
+			endOpening();
 			if(movie_test){
-				endOpening();
-				initMiyazaki();
-				gd.x=1600;
-				gd.scrX=(int)gd.x-320;
-				phase=MIYAZAKI_MUSEUM;
-				start=0;
+				backToMiyazaki();
 				for(int i=0 ; i<33 ; i++)menu[BGM_TEST].cursorDown();
 			}else{
-				endOpening();
 				initTitle2();
 			}
 		}

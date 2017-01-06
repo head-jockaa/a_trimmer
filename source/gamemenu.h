@@ -15,6 +15,7 @@
 #define NODATA 9
 
 void initGameMenu();
+void backToMiyazaki();
 void endGameMenu();
 void timerGameMenu();
 void keyGameMenu();

@@ -7,38 +7,34 @@ void makeShoppingList();
 void initHaziaShop(){
 	gd.x=80;
 	gd.y=340;
-	gd.talk_count=EOF;
 	mode=HAZIASHOP;
 	phase=SHOP_FLOOR;
-	menu[YNFORM].setMenu(320,300,12,3,3);
+	menu[YNFORM].setMenu(320,200,12,3,3);
+	menu[YNFORM].setBG(255);
 	menu[YNFORM].stack("");
 	menu[YNFORM].stack("");
 	menu[YNFORM].stack("");
-	menu[SHOP_CONFIRM].setMenu(320,300,18,3,3);
+	menu[SHOP_CONFIRM].setMenu(320,200,18,3,3);
+	menu[SHOP_CONFIRM].setBG(255);
 	menu[SHOP_CONFIRM].stack(text[MIYAZAKITEXT+7]);
 	menu[SHOP_CONFIRM].stack(text[MIYAZAKITEXT+13]);
 	menu[SHOP_CONFIRM].stack(text[MIYAZAKITEXT+8]);
 	menu[OHANA_MENU].setMenu(320,200,10,2,2);
 	menu[OHANA_MENU].stack(text[MIYAZAKITEXT+31]);
 	menu[OHANA_MENU].stack(text[EPILOGUE+10]);
-	load_story(0);
 	getImage(img.back,"file/img/haziashop.png",0,0,255);
 	sf.coin=Mix_LoadWAV("file/se/17.wav");
-	sf.swish=Mix_LoadWAV("file/se/25.wav");
-	sf.water=Mix_LoadWAV("file/se/9.wav");
-	sf.grumble=Mix_LoadWAV("file/se/19.wav");
-	bgm=Mix_LoadMUS("file/bgm/4.ogg");
-	Mix_PlayMusic(bgm,-1);
+	loadCartoon(&cartoonJson, "file/data/cartoon/haziashop.json");
+	readCartoon(&cartoonJson,0);
+	readCartoon(&cartoonJson,1);
 }
 
 void endHaziaShop(){
 	kick_count++;
 	freeImage(img.back);
 	freeSound(sf.coin);
-	freeSound(sf.swish);
-	freeSound(sf.water);
-	freeSound(sf.grumble);
 	freeMusic();
+	freeCartoon(&cartoonJson);
 	for(int i=0 ; i<15 ; i++)menu[i].reset();
 }
 
@@ -46,29 +42,24 @@ void keyShopFloor(){
 	if(key.z && !key_stop(key.z)){
 		if(gd.y==140 && gd.x>120 && gd.x<240){
 			phase=SHOP_TALK;
-			TalkingAt(29);
-			gd.talk_open_count=1;
+			readCartoon(&cartoonJson,2);
 		}
 		if(gd.y==140 && gd.x>300 && gd.x<400){
-			phase=NAGANO_APPLE;
-			TalkingAt(35);
-			gd.talk_open_count=1;
+			phase=SHOP_FLOOR_TALK;
+			readCartoon(&cartoonJson,8);
 		}
 		if(gd.y>240 && gd.y<340 && gd.x>400 && gd.x<500){
-			phase=ARANCIA;
-			TalkingAt(36);
-			gd.talk_open_count=1;
+			phase=SHOP_FLOOR_TALK;
+			readCartoon(&cartoonJson,9);
 		}
 		if(gd.y==40 && gd.x>=400){
-			phase=MEMMA_TALK;
-			TalkingAt(37);
-			gd.talk_open_count=1;
+			phase=SHOP_FLOOR_TALK;
+			readCartoon(&cartoonJson,10);
 			count=0;
 		}
 		if(gd.x==560 && gd.y>=120 && gd.y<=200){
 			phase=OHANA_TALK;
-			TalkingAt(38);
-			gd.talk_open_count=1;
+			readCartoon(&cartoonJson,11);
 			count=0;
 		}
 	}
@@ -92,9 +83,7 @@ void keyShopFloor(){
 	if(key.up && gd.x<400 && gd.y>120 && gd.y<140)gd.y=140;
 	if(gd.y==380 && gd.x>160 && gd.x<200){
 		endHaziaShop();
-		initMiyazaki();
-		phase=MIYAZAKI_MUSEUM;
-		gd.x=200;
+		backToMiyazaki();
 	}
 }
 
@@ -113,23 +102,19 @@ void keyShopping(){
 		}
 		menu[YNFORM].setViewMode(VISIBLE);
 		gd.hazia2=0;
-		if(gd.talk_count!=EOF)gd.talk_open_count=1;
-		gd.talk_count=EOF;
 	}
 	if(key.x && !key_stop(key.x)){
-		gd.text_count=0;
 		bool ok=true;
 		for(int i=0 ; i<SHOP_ITEMS ; i++)if(!gd.bought[i]){
 			ok=false;break;
 		}
 		menu[YNFORM].setViewMode(HIDE);
 		menu[SHOPPING].setViewMode(HIDE);
-		gd.talk_open_count=1;
 		phase=SHOP_LASTTALK;
 		if(ok){
-			TalkingAt(34);
+			readCartoon(&cartoonJson,7);
 		}else{
-			TalkingAt(33);
+			readCartoon(&cartoonJson,6);
 		}
 	}
 	if(key.up && !key_wait(key.up)){
@@ -144,9 +129,7 @@ void keySelling(){
 	if(gd.hazia2>0)return;
 	if(key.z && !key_stop(key.z)){
 		if(menu[YNFORM].selected()==0){
-			TalkingAt(60+menu[SHOPPING].selected());
-			gd.talk_open_count=1;
-			gd.text_count=0;
+			readCartoon(&cartoonJson,33+menu[SHOPPING].selected());
 		}
 		if(menu[YNFORM].selected()==1){
 			String s;
@@ -156,8 +139,6 @@ void keySelling(){
 			menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=false;
 			gd.bought[menu[SHOPPING].selected()]=false;
 			gd.hazia2=price[menu[SHOPPING].selected()];
-			if(gd.talk_count!=EOF)gd.talk_open_count=1;
-			gd.talk_count=EOF;
 			save_index();
 			if(menu[SHOPPING].selected()==0 && ROD_TYPE==UVROD)ROD_TYPE=SIMPLEROD;
 			else if(menu[SHOPPING].selected()==1 && ROD_TYPE==MHZROD)ROD_TYPE=SIMPLEROD;
@@ -173,15 +154,11 @@ void keySelling(){
 		}
 		if(menu[YNFORM].selected()==2){
 			menu[YNFORM].setViewMode(HIDE);
-			if(gd.talk_count!=EOF)gd.talk_open_count=1;
-			gd.talk_count=EOF;
 			phase=SHOPPING;
 		}
 	}
 	if(key.x && !key_stop(key.x)){
 		menu[YNFORM].setViewMode(HIDE);
-		if(gd.talk_count!=EOF)gd.talk_open_count=1;
-		gd.talk_count=EOF;
 		phase=SHOPPING;
 	}
 	if(key.up && !key_wait(key.up))menu[YNFORM].cursorUp();
@@ -192,41 +169,30 @@ void keyBuying(){
 	if(gd.hazia2>0)return;
 	if(key.z && !key_stop(key.z)){
 		if(menu[YNFORM].selected()==0){
-			TalkingAt(42+menu[SHOPPING].selected());
-			gd.talk_open_count=1;
-			gd.text_count=0;
+			readCartoon(&cartoonJson,15+menu[SHOPPING].selected());
 		}
 		if(menu[YNFORM].selected()==1){
 			if(gd.hazia>price[menu[SHOPPING].selected()]){
 				if(menu[SHOPPING].selected()>=13){
-					TalkingAt(30);
-					phase=SHOP_CONFIRM_TALK;
+					readCartoon(&cartoonJson,3);
+					phase=TRYING_TO_PAY_MUCH;
 					menu[YNFORM].setViewMode(GRAY);
-					gd.talk_open_count=1;
-					gd.text_count=0;
-					gd.scene_count=0;
 				}else{
 					menu[SHOPPING].input(menu[SHOPPING].selected()*2+1,text[MIYAZAKITEXT+12]);
 					menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=true;
 					gd.bought[menu[SHOPPING].selected()]=true;
 					gd.hazia2=price[menu[SHOPPING].selected()];
-					if(gd.talk_count!=EOF)gd.talk_open_count=1;
-					gd.talk_count=EOF;
 					save_index();
 				}
 			}
 		}
 		if(menu[YNFORM].selected()==2){
 			menu[YNFORM].setViewMode(HIDE);
-			if(gd.talk_count!=EOF)gd.talk_open_count=1;
-			gd.talk_count=EOF;
 			phase=SHOPPING;
 		}
 	}
 	if(key.x && !key_stop(key.x)){
 		menu[YNFORM].setViewMode(HIDE);
-		if(gd.talk_count!=EOF)gd.talk_open_count=1;
-		gd.talk_count=EOF;
 		phase=SHOPPING;
 	}
 	if(key.up && !key_wait(key.up))menu[YNFORM].cursorUp();
@@ -235,51 +201,36 @@ void keyBuying(){
 
 void keyHaziaShopTalk(){
 	if(key.z && !key_stop(key.z)){
-		int a=controlTalking();
-		if(a==EOF){
+		if(nextTalk(&cartoonJson)){
 			if(phase==SHOP_TALK){
 				makeShoppingList();
 				menu[SHOPPING].setViewMode(VISIBLE);
 				phase=SHOPPING;
 			}
-			else if(phase==SHOP_CONFIRM_TALK){
-				if(gd.scene_count==0){
-					menu[SHOP_CONFIRM].setViewMode(VISIBLE);
-					menu[YNFORM].setViewMode(HIDE);
-					phase=SHOP_CONFIRM;
-				}
-				else if(gd.scene_count==1){
-					menu[SHOP_CONFIRM].setViewMode(HIDE);
-					phase=SHOPPING;
-				}
-				else if(gd.scene_count==2){
-					phase=BUYING;
-					menu[SHOP_CONFIRM].setViewMode(HIDE);
-					menu[SHOPPING].input(menu[SHOPPING].selected()*2+1,text[MIYAZAKITEXT+12]);
-					menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=true;
-					gd.bought[menu[SHOPPING].selected()]=true;
-					gd.hazia2=price[menu[SHOPPING].selected()];
-					if(gd.talk_count!=EOF)gd.talk_open_count=1;
-					gd.talk_count=EOF;
-					save_index();
-				}
+			else if(phase==TRYING_TO_PAY_MUCH){
+				menu[SHOP_CONFIRM].setViewMode(VISIBLE);
+				menu[YNFORM].setViewMode(HIDE);
+				phase=SHOP_CONFIRM;
 			}
-			else if(phase==MEMMA_TALK){
-				phase=THROW_MEMMA;
-				count=0;
+			else if(phase==MERELY_YES){
+				menu[SHOP_CONFIRM].setViewMode(HIDE);
+				phase=SHOPPING;
+			}
+			else if(phase==NOD_AND_BUY){
+				phase=BUYING;
+				menu[SHOP_CONFIRM].setViewMode(HIDE);
+				menu[SHOPPING].input(menu[SHOPPING].selected()*2+1,text[MIYAZAKITEXT+12]);
+				menu[SHOPPING].gray[menu[SHOPPING].selected()*2+1]=true;
+				gd.bought[menu[SHOPPING].selected()]=true;
+				gd.hazia2=price[menu[SHOPPING].selected()];
+				save_index();
 			}
 			else if(phase==OHANA_TALK){
-				if(gd.scene_count==0){
 					menu[OHANA_MENU].setViewMode(VISIBLE);
 					phase=OHANA_MENU;
-				}
-				else if(gd.scene_count==1){
-					phase=STAY_IN;
-					count=0;
-				}
-				else phase=SHOP_FLOOR;
 			}
 			else{
+				readCartoon(&cartoonJson,1);
 				phase=SHOP_FLOOR;
 			}
 		}
@@ -289,19 +240,13 @@ void keyHaziaShopTalk(){
 void keyShopConfirm(){
 	if(key.z && !key_wait(key.z)){
 		if(menu[SHOP_CONFIRM].selected()==0){
-			TalkingAt(31);
-			gd.scene_count=1;
-			gd.text_count=0;
-			gd.talk_open_count=1;
+			readCartoon(&cartoonJson,4);
+			phase=MERELY_YES;
 			menu[SHOP_CONFIRM].setViewMode(GRAY);
-			phase=SHOP_CONFIRM_TALK;
 		}
 		else if(menu[SHOP_CONFIRM].selected()==1){
-			TalkingAt(32);
-			gd.scene_count=2;
-			gd.text_count=0;
-			gd.talk_open_count=1;
-			phase=SHOP_CONFIRM_TALK;
+			readCartoon(&cartoonJson,5);
+			phase=NOD_AND_BUY;
 		}else{
 			menu[SHOP_CONFIRM].setViewMode(HIDE);
 			phase=SHOPPING;
@@ -318,17 +263,13 @@ void keyShopConfirm(){
 void keyOhanaMenu(){
 	if(key.z && !key_wait(key.z)){
 		if(menu[OHANA_MENU].selected()==0){
-			TalkingAt(39);
-			gd.scene_count=1;
+			readCartoon(&cartoonJson,13);
 		}
 		else if(menu[OHANA_MENU].selected()==1){
-			TalkingAt(41);
-			gd.scene_count=3;
+			readCartoon(&cartoonJson,14);
 		}
-		gd.text_count=0;
-		gd.talk_open_count=1;
 		menu[OHANA_MENU].setViewMode(HIDE);
-		phase=OHANA_TALK;
+		phase=SHOP_FLOOR_TALK;
 	}
 	if(key.x && !key_wait(key.x)){
 		menu[OHANA_MENU].setViewMode(HIDE);
@@ -340,13 +281,14 @@ void keyOhanaMenu(){
 
 void keyHaziaShop(){
 	switch(phase){
-		case MEMMA_TALK:
+		case SHOP_FLOOR_TALK:
 		case OHANA_TALK:
-		case ARANCIA:
-		case NAGANO_APPLE:
 		case SHOP_TALK:
-		case SHOP_CONFIRM_TALK:
-		case SHOP_LASTTALK:keyHaziaShopTalk();break;
+		case SHOP_LASTTALK:
+		case TRYING_TO_PAY_MUCH:
+		case MERELY_YES:
+		case NOD_AND_BUY:
+			keyHaziaShopTalk();break;
 		case SHOP_FLOOR:keyShopFloor();break;
 		case SHOPPING:keyShopping();break;
 		case SHOP_CONFIRM:keyShopConfirm();break;
@@ -358,6 +300,12 @@ void keyHaziaShop(){
 }
 
 void timerHaziaShop(){
+	if(nextCut(&cartoonJson)){
+		if(phase==SHOP_FLOOR_TALK){
+			readCartoon(&cartoonJson,1);
+			phase=SHOP_FLOOR;
+		}
+	}
 	if(phase==BUYING || phase==SELLING){
 		if(count%5==0 && gd.hazia2>0){
 			int a=1;
@@ -372,9 +320,7 @@ void timerHaziaShop(){
 					menu[YNFORM].input(0,text[MIYAZAKITEXT+9]);
 					menu[YNFORM].input(1,text[MIYAZAKITEXT+10]);
 					menu[YNFORM].input(2,text[MIYAZAKITEXT+11]);
-					TalkingAt(60+menu[SHOPPING].selected());
-					gd.talk_open_count=1;
-					gd.text_count=0;
+					readCartoon(&cartoonJson,33+menu[SHOPPING].selected());
 				}
 				else if(phase==SELLING){
 					menu[YNFORM].input(0,text[MIYAZAKITEXT]);
@@ -388,31 +334,6 @@ void timerHaziaShop(){
 			}
 			else Mix_PlayChannel(0,sf.cursor_move,0);
 		}
-	}
-	if(phase==THROW_MEMMA){
-		if(count==1)Mix_PlayChannel(0,sf.swish,0);
-		if(count==30){
-			Mix_PlayChannel(0,sf.water,0);
-			phase=SHOP_FLOOR;
-		}
-	}
-	if(phase==STAY_IN){
-		if(count==0)Mix_FadeOutMusic(1000);
-		if(count==100)Mix_PlayChannel(0,sf.grumble,0);
-		if(count==300)Mix_PlayMusic(bgm,-1);
-		if(count==400){
-			TalkingAt(40);
-			gd.scene_count=2;
-			gd.text_count=0;
-			gd.talk_open_count=1;
-			menu[OHANA_MENU].setViewMode(HIDE);
-			phase=OHANA_TALK;
-		}
-	}
-	if(phase==SHOP_TALK || phase==SHOPPING || phase==BUYING || phase==SELLING || phase==SHOP_LASTTALK || phase==MEMMA_TALK || phase==SHOP_CONFIRM_TALK || phase==ARANCIA || phase==NAGANO_APPLE || phase==OHANA_TALK){
-		controlTextCount(true);
-	}else{
-		controlTextCount(false);
 	}
 }
 
@@ -433,11 +354,10 @@ void drawHaziaShopExplain(SDL_Surface* scr){
 				drawText(scr,40,440,text[MIYAZAKITEXT+30]);
 			}
 		}
-		else if(phase==SHOP_TALK || phase==SHOP_LASTTALK || phase==MEMMA_TALK || phase==SHOP_CONFIRM_TALK || phase==OHANA_TALK){
+		else if(phase==SHOP_TALK || phase==SHOP_LASTTALK || phase==SHOP_FLOOR_TALK || phase==TRYING_TO_PAY_MUCH || phase==MERELY_YES || phase==NOD_AND_BUY || phase==OHANA_TALK){
 			drawKeyboard(scr,key.zC,0,0);
 			drawText(scr,20,0,text[EPILOGUE+1]);
-		}
-		else if(phase!=STAY_IN){
+		}else{
 			if(count%600<200){
 				drawKeyboard(scr,key.upC,0,0);
 				drawKeyboard(scr,key.downC,20,0);
@@ -454,74 +374,46 @@ void drawHaziaShopExplain(SDL_Surface* scr){
 	}
 }
 
+void drawPlayerInHaziaShop(SDL_Surface* scr){
+	drawImage(scr,img.chr,(int)gd.x,(int)gd.y,gd.player_dir*30,0,30,60,255);
+	if(key.up||key.down||key.left||key.right){
+		drawImage(scr,img.chr,(int)gd.x-20,(int)gd.y+20,((count/5)%2)*60,110,60,60,255);
+	}
+	if((gd.y==140 && gd.x>120 && gd.x<240)
+	   ||(gd.y==140 && gd.x>300 && gd.x<400)
+	   ||(gd.y==40 && gd.x>=400)
+	   ||(gd.y>240 && gd.y<340 && gd.x>400 && gd.x<500)
+	   ||(gd.x==560 && gd.y>=120 && gd.y<=200))
+	{
+		drawImage(scr,img.back,(int)gd.x-40,(int)gd.y-40,640,820,40,40,255);
+	}
+}
+
+void drawHaziasInYourPocket(SDL_Surface* scr){
+	if(phase==SHOPPING || phase==BUYING || phase==SELLING){
+		drawText2(scr,230,400,text[MIYAZAKITEXT+6]);
+		int a=1;
+		for(int i=0 ; i<10 ; i++){
+			if((gd.hazia/a==0 && gd.hazia>0) || (gd.hazia==0 && i>0))continue;
+			drawImage(scr,img.chr,600-i*30,400,((gd.hazia/a)%10)*20,520,20,40,255);
+			a*=10;
+		}
+	}
+}
+
 void drawHaziaShop(SDL_Surface* scr){
-	if(phase==NAGANO_APPLE){
-		drawImage(scr,img.back,0,0,0,960,640,360,255);
-		fillRect(scr,0,360,640,120,0,0,0,255);
-	}
-	else if(phase==ARANCIA){
-		drawImage(scr,img.back,0,0,0,1320,640,360,255);
-		fillRect(scr,0,360,640,120,0,0,0,255);
-	}
-	else if(phase==SHOP_FLOOR || phase==OHANA_TALK || phase==OHANA_MENU || phase==MEMMA_TALK || phase==THROW_MEMMA || (phase==STAY_IN && count<30)){
-		drawImage(scr,img.back,0,0,0,0,640,480,255);
-		drawImage(scr,img.back,160,80,640+((count/5)%2)*50,0,50,40,255);
-		if(phase==MEMMA_TALK && count<20)drawImage(scr,img.back,480,0,700,40,60,60,255);
-		else if(phase==MEMMA_TALK)drawImage(scr,img.back,480,0,760,40,60,60,255);
-		else drawImage(scr,img.back,480,0,640,40,60,60,255);
-		drawImage(scr,img.chr,(int)gd.x,(int)gd.y,gd.player_dir*30,0,30,60,255);
-		if(key.up||key.down||key.left||key.right){
-			drawImage(scr,img.chr,(int)gd.x-20,(int)gd.y+20,((count/5)%2)*60,110,60,60,255);
-		}
-		if((gd.y==140 && gd.x>120 && gd.x<240)
-		   ||(gd.y==140 && gd.x>300 && gd.x<400)
-		   ||(gd.y==40 && gd.x>=400)
-		   ||(gd.y>240 && gd.y<340 && gd.x>400 && gd.x<500)
-		   ||(gd.x==560 && gd.y>=120 && gd.y<=200))
-		{
-			drawImage(scr,img.back,(int)gd.x-40,(int)gd.y-40,640,820,40,40,255);
-		}
-		if(phase==THROW_MEMMA){
-			drawImage(scr,img.back,180+count*10,80-count*2,790,0,30,30,255);
-		}
-		drawImage(scr,img.back,480-(count%100),count%100,740,0,50,40,500-5*(count%100));
-	}else{
-		drawImage(scr,img.back,0,0,0,480,640,480,255);
-		if(CHAR_CODE==JAPANESE)drawImage(scr,img.back,80,170,640,660,160,80,255);
-		else drawImage(scr,img.back,80,170,640,740,160,80,255);
-		drawImage(scr,img.back,360,80,640,100+((count/5)%2)*280,160,280,255);
-		if(phase==SHOPPING || phase==BUYING || phase==SELLING){
-			drawText2(scr,230,400,text[MIYAZAKITEXT+6]);
-			int a=1;
-			for(int i=0 ; i<10 ; i++){
-				if((gd.hazia/a==0 && gd.hazia>0) || (gd.hazia==0 && i>0))continue;
-				drawImage(scr,img.chr,600-i*30,400,((gd.hazia/a)%10)*20,520,20,40,255);
-				a*=10;
-			}
-		}
-	}
-	if(phase==STAY_IN){
-		if(count<30)fillRect(scr,0,0,640,480,0,0,0,255-(30-count)*8);
-		else if(count<300){
-			fillRect(scr,0,0,640,480,0,0,0,255);
-			if(CHAR_CODE==JAPANESE){
-				if(count>100)drawImage(scr,img.back,80,120,0,1680,480,100,255);
-				if(count>200)drawImage(scr,img.back,80,260,0,1780,480,60,(count-200)*6);
-			}else{
-				if(count>100)drawImage(scr,img.back,60,120,0,1840,520,150,255);
-				if(count>200)drawImage(scr,img.back,30,300,0,1990,580,50,(count-200)*6);
-			}
-		}
-	}
-	drawHaziaShopExplain(scr);
+	drawAnimationCutBeforeDivision(&cartoonJson,scr);
+	drawPlayerInHaziaShop(scr);
+	drawAnimationCutAfterDivision(&cartoonJson,scr);
+	drawHaziasInYourPocket(scr);
 	for(int i=0 ; i<15 ; i++)menu[i].drawMenu(scr);
-	drawTalking(scr);
+	drawHaziaShopExplain(scr);
 }
 
 void makeShoppingList(){
 	menu[SHOPPING].setMenu(0,40,40,8,36);
 	menu[SHOPPING].setCombo(2);
-	menu[SHOPPING].setBG(192);
+	menu[SHOPPING].setBG(128);
 	for(int i=0 ; i<SHOP_ITEMS ; i++){
 		menu[SHOPPING].stack(text[MIYAZAKITEXT+34+i]);
 		if(gd.bought[i]){

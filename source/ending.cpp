@@ -6,8 +6,10 @@ void initEnding(){
 	mode=ENDING;
 	count=0;
 	phase=LEAVE_SHORE;
-	getImage(img.back,"file/img/shore.png",0,0,255);
-	cartoonJson.playtime=0;
+	sprintf_s(str,"file/data/cartoon/end%d.json",which_season);
+	loadCartoon(&cartoonJson,str);
+	readCartoon(&cartoonJson,0);
+	readCartoon(&cartoonJson,4);
 }
 
 void initMedalAward(int n){
@@ -27,6 +29,7 @@ void initEndingAnime(){
 }
 
 void endEnding(){
+	freeCartoon(&cartoonJson);
 	freeImage(img.back);
 	freeSound(sf.alarm);
 	freeMusic();
@@ -37,11 +40,7 @@ void keyEndingAnime(){
 	if(key.z && !key_stop(key.z)){
 		if(movie_test){
 			endEnding();
-			initMiyazaki();
-			gd.x=1600;
-			gd.scrX=(int)gd.x-1320;
-			phase=MIYAZAKI_MUSEUM;
-			start=0;
+			backToMiyazaki();
 			for(int i=0 ; i<35 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			if(which_medal!=0){
@@ -89,21 +88,15 @@ void timerLeaveShore(){
 
 void timerGetMedal(){
 	if(nextCut(&cartoonJson)){
-		freeCartoon(&cartoonJson);
 		if(movie_test){
 			endEnding();
-			initMiyazaki();
-			gd.x=1600;
-			gd.scrX=(int)gd.x-320;
-			phase=MIYAZAKI_MUSEUM;
-			start=0;
+			backToMiyazaki();
 			for(int i=0 ; i<29+which_medal ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			endEnding();
 			if(which_medal==0){
 				initGame();
 				initGame2();
-				gd.talk_count=EOF;
 				kick_count=0;
 			}else{
 				kick_count=0;
@@ -118,11 +111,7 @@ void timerEndingAnime(){
 		if(nextCut(&cartoonJson)){
 			if(movie_test){
 				endEnding();
-				initMiyazaki();
-				gd.x=1600;
-				gd.scrX=(int)gd.x-320;
-				phase=MIYAZAKI_MUSEUM;
-				start=0;
+				backToMiyazaki();
 				for(int i=0 ; i<35 ; i++)menu[BGM_TEST].cursorDown();
 			}else{
 				if(which_medal!=0 && which_season!=season_num){//ÅIƒ{ƒX–Ê‚Í•Û—¯
@@ -137,7 +126,6 @@ void timerEndingAnime(){
 					initGameMenu();
 				}
 			}
-			freeCartoon(&cartoonJson);
 		}
 	}
 }

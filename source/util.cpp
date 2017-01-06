@@ -20,7 +20,7 @@ SDL_Event ev;
 SDL_Rect scr;
 char weekChar[7][2][4],str[1000],str3[60],*fstr;
 size_t fsize=0;
-String text[1000],talk[1000];
+String text[1000];
 bool run,setSMR,map_loaded=false, *animebook, ABGR;
 double test=0;
 int stas=0,entries=0,prgs=0,animedex_num=0,collection=0,areas=0,towers=0,mounts=0,towns=0,season_num=0,clear_num=0;
@@ -922,54 +922,6 @@ void fix_XY(){
 	}
 }
 
-void TalkingAt(int n){
-	gd.talk_count=0;
-	gd.face_count=0;
-	gd.scene_count=0;
-	for(int i=0 ; i<n ; i++){
-		while(face[gd.face_count]!=EOF && gd.face_count<1000){
-			if(face[gd.face_count]==HANGUP){
-				gd.face_count+=4;
-				continue;
-			}
-			if(face[gd.face_count]!=COMMA && face[gd.face_count]!=SHAKE){
-				gd.talk_count++;
-			}
-			gd.face_count++;
-		}
-		gd.face_count++;
-	}
-}
-
-void drawTalking(SDL_Surface* scr){
-	drawTalking(scr,face[gd.face_count],talk[gd.talk_count]);
-}
-
-void drawTalking(SDL_Surface* scr, int fc, String st){
-	if(gd.talk_open_count!=0){
-		int w=600*gd.talk_open_count/20;
-		int h=120*gd.talk_open_count/20;
-		if(gd.talk_count==EOF){
-			w=600-w;
-			h=120-h;
-		}
-		drawRect(scr,20,360,w,h,128,128,255,255);
-		return;
-	}
-	if(gd.talk_count==EOF)return;
-	int a=0,b=0,c=0,d=0;
-	if(gd.text_count<30)a=gd.text_count;
-	else if(gd.text_count<60){a=30;b=gd.text_count-30;}
-	else if(gd.text_count<90){a=30;b=30;c=gd.text_count-60;}
-	else{a=30;b=30;c=30;}
-	if(gd.shake_count>0)d=(3-abs(6-gd.shake_count%12))*gd.shake_count/6;
-	drawImage(scr,img.menuback,20+d,360,0,0,600,120,192);
-	drawImage(scr,img.facechip,20+d,370,((fc-1)%5)*100,((fc-1)/5)*100,100,100,255);
-	if(a!=0)drawText2(scr,120+d,360,&(st.str[CHAR_CODE][0]),a);
-	if(b!=0)drawText2(scr,120+d,400,&(st.str[CHAR_CODE][30]),b);
-	if(c!=0)drawText2(scr,120+d,440,&(st.str[CHAR_CODE][60]),c);
-}
-
 void drawRect(Image* scr, int x, int y, int w, int h, int R, int G, int B, int a){
 	fillRect(scr,x,y,w,1,R,G,B,a);
 	fillRect(scr,x,y+h-1,w,1,R,G,B,a);
@@ -1154,28 +1106,28 @@ String jummingText(String s, int array_num, int rcv, int mg_rcv){
 	return s;
 }
 
-void padSpace(int n, int k, int x){
+void padSpace(JsonData *json, int n, int k, int x){
 	int a;
 	a=0;
 	for(int i=0 ; i<100 ; i++){
-		if(talk[n].str[k][i]==0)break;
-		else if(talk[n].str[k][i]==10){
+		if(json->talk[n].str[k][i]==0)break;
+		else if(json->talk[n].str[k][i]==10){
 			if(a==0){
 				for(int ii=i ; ii<99 ; ii++){
-					talk[n].str[k][ii]=talk[n].str[k][ii+1];
-					talk[n].head[k][ii]=talk[n].head[k][ii+1];
+					json->talk[n].str[k][ii]=json->talk[n].str[k][ii+1];
+					json->talk[n].head[k][ii]=json->talk[n].head[k][ii+1];
 				}
 				i--;
 			}else{
 				int sp=x-a;
 				for(int ii=99-sp+1 ; ii>=i ; ii--){
 					if(ii-i!=0){
-						talk[n].str[k][ii+sp-1]=talk[n].str[k][ii];
-						talk[n].head[k][ii+sp-1]=talk[n].head[k][ii];
+						json->talk[n].str[k][ii+sp-1]=json->talk[n].str[k][ii];
+						json->talk[n].head[k][ii+sp-1]=json->talk[n].head[k][ii];
 					}
 					if(ii-i<sp){
-						talk[n].str[k][ii]=' ';
-						talk[n].head[k][ii]=true;
+						json->talk[n].str[k][ii]=' ';
+						json->talk[n].head[k][ii]=true;
 					}
 				}
 				i+=sp-1;
@@ -1217,59 +1169,7 @@ Image::Image(int W, int H){
 	}
 }
 
-int controlTalking(){
-	if(gd.text_count<(int)strlen(talk[gd.talk_count].str[CHAR_CODE])){
-		gd.text_count=90;
-	}else{
-		gd.text_count=0;
-		gd.talk_count++;
-		gd.face_count++;
-		if(face[gd.face_count]==SHAKE){
-			gd.shake_count=50;
-			gd.face_count++;
-		}
-		if(face[gd.face_count]==COMMA){
-			gd.scene_count++;
-			gd.face_count++;
-			if(face[gd.face_count]==SHAKE){
-				gd.shake_count=50;
-				gd.face_count++;
-			}
-			return COMMA;
-		}
-		if(face[gd.face_count]==HANGUP){
-			gd.face_count++;
-			gd.shake_count=0;
-			gd.talk_open_count=1;
-			gd.talk_count=EOF;
-			return HANGUP;
-		}
-		if(face[gd.face_count]==EOF){
-			gd.shake_count=0;
-			gd.talk_open_count=1;
-			gd.talk_count=EOF;
-			return EOF;
-		}
-	}
-	return 0;
-}
-
-void controlTextCount(bool ok){
-	if(gd.talk_open_count>0){
-		gd.talk_open_count++;
-		if(gd.talk_open_count==20)gd.talk_open_count=0;
-	}
-	if(gd.talk_open_count==0 && ok){
-		if(gd.shake_count==49)Mix_PlayChannel(0,sf.decide,0);
-		if(gd.shake_count>0)gd.shake_count--;
-		while(talk[gd.talk_count].str[CHAR_CODE][gd.text_count]==' ' && talk[gd.talk_count].str[CHAR_CODE][gd.text_count+1]==' '){
-			gd.text_count++;
-		}
-		gd.text_count++;
-	}
-}
-
-#ifdef __APPLE__
+#ifndef __WIN32__
 void sprintf_s(char *s, const char *c, ...){
 	va_list c2;
 	va_start(c2, c);

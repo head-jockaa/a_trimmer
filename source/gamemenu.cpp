@@ -34,6 +34,7 @@ void endGameMenu(){
 	freeMusic();
 	freeSound(sf.thunder);
 	freeSound(sf.swish);
+	freeCartoon(&cartoonJson);
 	for(int i=0 ; i<15 ; i++)menu[i].reset();
 }
 
@@ -66,7 +67,6 @@ void gotoGame(){
 		sprintf_s(str,"file/data/cartoon/talk%d.json",which_season);
 		loadCartoon(&talkingJson, str);
 	}
-	gd.talk_count=EOF;
 	kick_count=1;
 }
 
@@ -75,11 +75,7 @@ void timerPrologue(){
 		freeCartoon(&cartoonJson);
 		if(movie_test){
 			endGameMenu();
-			initMiyazaki();
-			gd.x=1600;
-			gd.scrX=(int)gd.x-320;
-			phase=MIYAZAKI_MUSEUM;
-			start=0;
+			backToMiyazaki();
 			for(int i=0 ; i<34 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			phase=GOTO_GAME;
@@ -94,7 +90,6 @@ void timerPrologue(){
 void timerGameMenu(){
 	if(phase==GOTO_GAME && count==1)gotoGame();
 	else if(phase==GOTO_RECORD && count==1)gotoRecord();
-	if(phase!=PROLOGUE)controlTextCount(false);
 	if(phase==PROLOGUE)timerPrologue();
 }
 
@@ -259,11 +254,7 @@ void keyPrologue(){
 		freeCartoon(&cartoonJson);
 		if(movie_test){
 			endGameMenu();
-			initMiyazaki();
-			gd.x=1600;
-			gd.scrX=(int)gd.x-320;
-			phase=MIYAZAKI_MUSEUM;
-			start=0;
+			backToMiyazaki();
 			for(int i=0 ; i<34 ; i++)menu[BGM_TEST].cursorDown();
 		}else{
 			phase=GOTO_GAME;

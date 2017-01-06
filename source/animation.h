@@ -9,6 +9,7 @@ struct ObjectSetting{
 	double R,G,B;
 	double gradRfrom,gradGfrom,gradBfrom;
 	double gradRto,gradGto,gradBto;
+	bool fixed;
 };
 struct ObjectMoving{
 	double x,y,ix,iy,mag,w,h,alpha,shake;
@@ -46,28 +47,34 @@ struct JsonReader{
 	JsonDataReader set,move,talk,image,bgm,loadText,sound,loadSound;
 	char basename[100];
 	JsonDataReader *which;
-	bool sync,hasSync,hasResetTimer;
+	bool sync,hasSync,hasResetTimer,end;
 	int resetTimer,resetNum,*reset;
 	int talkPointer;
 };
 
 struct JsonData{
 	char cartoonBgmName[200];
-	char *text;
+	char *jsonText;
 	size_t size, pointer;
-	int playtime, nextTime;
+	int playtime, nextTime, targetIndex;
 	int timestamp, pausetime;
-	int max_obj,max_sound,max_image;
+	int max_obj,max_sound,max_image,musicRepeat;
 	int call_week, call_hour, call_minute;
-	bool initializedObjArray, initializedReaderArray, talkmode, cartoonSync, end;
+	int scrX, scrY;
+	bool initializedObjArray, initializedReaderArray, searchingIndex, talkmode, cartoonSync, playingMusic, toPlayMusic, end;
 	CartoonObject *obj;
 	Mix_Chunk **sound;
 	Image **bg;
 	JsonReader jr;
+	int talk_size,talk_open_count,talk_count,text_count,face_count,shake_count;
+	String *talk;
 };
-extern JsonData cartoonJson, talkingJson;
+extern JsonData cartoonJson, talkingJson, manekitvJson;
 
+void readCartoon(JsonData *json, int index);
 void drawAnimationCut(JsonData *json, SDL_Surface* scr);
+void drawAnimationCutBeforeDivision(JsonData *json, SDL_Surface* scr);
+void drawAnimationCutAfterDivision(JsonData *json, SDL_Surface* scr);
 bool nextCut(JsonData *json);
 bool nextTalk(JsonData *json);
 void freeCartoon(JsonData *json);

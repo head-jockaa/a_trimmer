@@ -86,7 +86,6 @@ void drawText2(SDL_Surface* scr, int X, int Y, const char* st, int strl);
 void drawText2(SDL_Surface* scr, int X, int Y, const char* st, int strl, Uint8 a);
 void drawText2_lang(SDL_Surface* scr, int x, int y, const char* st, int l, Uint8 a, int lang);
 void getSymbolImage();
-void TalkingAt(int n);
 void drawKeyboard(SDL_Surface* scr, int k, int X, int Y);
 void drawKeyboard2(SDL_Surface* scr, int k, int X, int Y);
 bool loadFile(const char* fn);
@@ -97,9 +96,6 @@ void initFont();
 void endFont();
 void setKick(SDL_Surface* scr);
 void drawKick(SDL_Surface* scr);
-void padSpace(int n, int k, int x);
-int controlTalking();
-void controlTextCount(bool ok);
 Uint32 setRGB(Uint8 r, Uint8 g, Uint8 b);
 void getRGB(Uint32 px, Uint8 *r, Uint8 *g, Uint8 *b);
 
@@ -126,7 +122,7 @@ struct String{
 	char str[2][200];
 	bool head[2][200];
 };
-extern String text[1000],talk[1000];
+extern String text[1000];
 char* toChar(String s);
 void drawText(SDL_Surface* scr, int X, int Y, String st);
 void drawText(SDL_Surface* scr, int x, int y, String str, int strl);
@@ -319,15 +315,15 @@ public:
 
 struct SoundFile{
 	Mix_Chunk *decide, *cursor_move, *decide2, *coin, *swish, *get, *lamp, *bubble;
-	Mix_Chunk *snore, *fw_sound, *noon, *sunset, *hold, *drag_s, *calling, *grumble;
-	Mix_Chunk *water, *thunder, *meow, *noize, *bupyo, *knob, *alarm, *tub, *gaze;
+	Mix_Chunk *snore, *fw_sound, *noon, *sunset, *hold, *drag_s, *calling;
+	Mix_Chunk *water, *thunder, *meow, *noize, *bupyo, *knob, *alarm, *gaze;
 };
 extern SoundFile sf;
 
 struct ImageFile{
 	SDL_Surface *iwa, *screen;
 	Image *back, *chr, *menuback, *facechip, *keyboard, *symbol, *pre_scr;
-	Image *rod, *circle, *fishup, *colorlight, *tv_asahi;
+	Image *rod, *fishup, *colorlight, *tv_asahi;
 	Image *buffer[4];
 	Image *searchImage;
 	Uint8 alphaR, alphaG, alphaB;
@@ -355,15 +351,13 @@ void getImage(Image*& im, char* st);
 void freeImage(Image*& im);
 void freeMusic();
 void freeSound(Mix_Chunk*& s);
-void drawTalking(SDL_Surface* scr);
-void drawTalking(SDL_Surface* scr, int fc, String st);
 void drawRect(SDL_Surface* scr, int x, int y, int w, int h, int R, int G, int B, int a);
 void drawRect(Image* scr, int x, int y, int w, int h, int R, int G, int B, int a);
 void setAlpha(Image* scr, int R,int G,int B);
 void resetAlpha(Image* scr);
 void drawSurface(SDL_Surface* scr, SDL_Surface* img, int x, int y, int x2, int y2, int w2, int h2, int a);
 
-#ifdef __APPLE__
+#ifndef __WIN32__
 void sprintf_s(char *s, const char *c, ...);
 void sprintf_s(char *s, long n, const char *c, ...);
 void fopen_s(FILE **f, const char* c1, const char* c2);

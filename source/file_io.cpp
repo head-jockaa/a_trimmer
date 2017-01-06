@@ -85,40 +85,6 @@ void load_station(){
 	for(int i=0 ; i<stas ; i++)putHeadMark(sta[i].talk);
 }
 
-void load_story(int n){
-	char fn[50];
-	size_t fc=0;
-
-	for(int i=0 ; i<1000 ; i++)for(int j=0 ; j<2 ; j++)for(int k=0 ; k<200 ; k++){
-		talk[i].str[j][k]=0;
-	}
-
-	sprintf_s(fn,"file/data/story/face%d.dat",n);
-	loadFile(fn);
-	for(size_t i=0 ; i<1000 ; i++){
-		if(i>=fsize)break;
-		face[i]=fstr[i];
-	}
-
-	for(int k=0 ; k<2 ; k++){
-		fc=0;
-		if(k==0)sprintf_s(fn,"file/data/story/talk%d_jp.dat",n);
-		else sprintf_s(fn,"file/data/story/talk%d_en.dat",n);
-		loadFile(fn);
-		for(int i=0 ; i<1000 ; i++){
-			if(fc>=fsize)break;
-			for(int j=0 ; j<200 ; j++){
-				talk[i].str[k][j]=fstr[fc];fc++;
-				if(talk[i].str[k][j]==0)break;
-			}
-		}
-	}
-
-	for(int k=0 ; k<2 ; k++)for(int i=0 ; i<1000 ; i++){
-		padSpace(i,k,30);
-	}
-}
-
 void load_animebook(){
 	if(animedex_num)return;
 	if(!allofworks_num){

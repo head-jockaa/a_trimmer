@@ -10,7 +10,6 @@ void load_season();
 void load_haziashop();
 void load_areas();
 void load_station();
-void load_story(int n);
 void load_animebook();
 void save_animebook();
 void load_entries(int n);
