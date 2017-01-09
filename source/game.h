@@ -76,7 +76,7 @@ extern int mwave[68];
 
 struct GameData{
 	int scrX,scrY,startX,startY,save_cursor,player_dir,ant_dir,hazia,hazia2;
-	int second,score,get_score,gradeup,crops,m_wave,firework,pre_rural,count_rural;
+	int second,score,get_score,gradeup,crops,m_wave,firework,this_rural_rate,show_rural_rate,show_rural_area;
 	int current_area,current_town;
 	int ta_count,town_count;
 	int talk_kulisap,face_kulisap,kirby_count,kirby_count2,timeslot_count,timeslot_type;
@@ -88,7 +88,7 @@ struct GameData{
 	int bs_ch;
 	int zoom,height;
 	double x,y,speed,real_speed,speedX,speedY;
-	bool doze,m_waved,kulisaped,memma_type,bought[18];
+	bool doze,m_waved,rural_shown,kulisaped,memma_type,bought[18];
 	bool secondMusic;
 	Uint8 randomNumber;
 };

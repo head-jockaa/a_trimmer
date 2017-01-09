@@ -27,14 +27,6 @@ void Map::set(){
 	getImage(rpg,"file/img/rpgchip.png",0,0,0);
 }
 
-void Map::set2(){
-	rural=new Uint8*[ruralW];
-	for(int i=0 ; i<ruralW ; i++)rural[i]=new Uint8[ruralH];
-	for(int i=0 ; i<ruralW ; i++)for(int j=0 ; j<ruralH ; j++)rural[i][j]=0;
-	rural_rate=new Uint16[areas];
-	rural_loaded=true;
-}
-
 void Map::setRPGchip(int bright){
 	freeImage(rpg);
 	getImage(rpg,"file/img/rpgchip.png",0,0,0);
@@ -45,14 +37,23 @@ void Map::setRPGchip(int bright){
 }
 
 void Map::reset(){
-	for(int i=0 ; i<ruralW ; i++)delete [] rural[i];
+	if(map.rural_num) {
+		for(int i=0 ; i<rural_num ; i++) {
+			delete [] rural_tv[i];
+		}
+		delete [] rural_tv;
+		for(int i=0 ; i<ruralW ; i++) {
+			delete [] rural[i];
+		}
+		delete [] rural;
+		delete [] rural_rate;
+		rural_num=0;
+	}
 	for(int i=0 ; i<mapW; i++){
 		delete [] h[i];
 		delete [] slope[i];
 		delete [] smr[i];
 	}
-	delete [] rural;
-	delete [] rural_rate;
 	freeImage(rgb);
 	delete [] shore;
 	delete [] h;
@@ -66,7 +67,6 @@ void Map::reset(){
 		delete [] volcanoY;
 	}
 	freeImage(rpg);
-	rural_loaded=false;
 }
 
 void createMap(){

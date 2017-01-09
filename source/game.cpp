@@ -90,7 +90,7 @@ void initGame(){
 	}
 	gd.week=0;gd.hour=4;gd.minute=0;gd.second=0;gd.score=0;gd.get_score=0;gd.gradeup=0;gd.crops=0;gd.player_dir=0;
 	gd.ta_count=0;start=75;count=0;gd.speed=0;gd.real_speed=0;gd.town_count=400;
-	gd.pre_rural=0;gd.count_rural=0;gd.kirby_count=0;gd.kirby_count2=0;
+	gd.this_rural_rate=0;gd.show_rural_rate=0;gd.kirby_count=0;gd.kirby_count2=0;gd.rural_shown=false;
 	gd.kulisaped=0;gd.ant_dir=270;gd.memma_count=0;gd.timeslot_count=0;
 	gd.current_area=EOF;gd.current_town=EOF;
 	rd.received=false;
@@ -614,6 +614,10 @@ void walking(){
 			gd.m_wave=70;
 			gd.m_waved=true;
 			getH();
+		}
+		if(!gd.rural_shown){
+			gd.show_rural_area=100;
+			gd.rural_shown=true;
 		}
 	}
 	int preX=gd.scrX, preY=gd.scrY;
@@ -1730,18 +1734,37 @@ void drawAntennaMenuBox(SDL_Surface* scr){
 }
 
 void drawRural(SDL_Surface* scr){
-	int a=map.rural[(int)gd.x/map.rural_size][(int)gd.y/map.rural_size];
-	if(a<0 || a>=areas)return;
 	if(gd.game_mode!=STORYMODE)return;
-	if(gd.pre_rural!=map.rural_rate[a]){
-		gd.pre_rural=map.rural_rate[a];
-		gd.count_rural=100;
+	int a=map.rural[(int)gd.x/map.rural_size][(int)gd.y/map.rural_size];
+	if(a<0 || a>=map.rural_num)return;
+	if(gd.this_rural_rate!=map.rural_rate[a]){
+		gd.this_rural_rate=map.rural_rate[a];
+		gd.show_rural_rate=100;
+		gd.rural_shown=false;
 	}
-	if(gd.count_rural>0){
+	if(gd.show_rural_rate>0){
 		drawImage(scr,img.chr,540,420,360,60,100,60,255);
-		if(gd.pre_rural>=10)drawImage(scr,img.chr,582,444,(gd.pre_rural/10)*20,422,20,24,255);
-		drawImage(scr,img.chr,606,444,(gd.pre_rural%10)*20,422,20,24,255);
-		gd.count_rural--;
+		if(gd.this_rural_rate>=10)drawImage(scr,img.chr,582,444,(gd.this_rural_rate/10)*20,422,20,24,255);
+		drawImage(scr,img.chr,606,444,(gd.this_rural_rate%10)*20,422,20,24,255);
+		gd.show_rural_rate--;
+	}
+	int fromX=gd.scrX/MAGNIFY/map.rural_size;
+	int fromY=gd.scrY/MAGNIFY/map.rural_size;
+	int toX=fromX+640/MAGNIFY/map.rural_size+1;
+	int toY=fromY+480/MAGNIFY/map.rural_size+1;
+	if(fromX<0)fromX=0;
+	if(fromY<0)fromY=0;
+	if(toX>map.ruralW)toX=map.ruralW;
+	if(toY>map.ruralH)toY=map.ruralH;
+	if(gd.show_rural_area>0){
+		for(int j=fromY ; j<toY ; j++){
+			for(int i=fromX ; i<toX ; i++){
+				if(map.rural[i][j]==a){
+					fillRect(scr,i*map.rural_size*MAGNIFY-gd.scrX,j*map.rural_size*MAGNIFY-gd.scrY,10*MAGNIFY,10*MAGNIFY,255,255,255,100-abs(50-gd.show_rural_area)*2);
+				}
+			}
+		}
+		gd.show_rural_area--;
 	}
 }
 
@@ -2461,9 +2484,14 @@ void timerGame(){
 	if(gd.game_mode==STORYMODE){
 		if(phase==GAMESTART || phase==READY){
 			if(count==1){
-				Mix_PlayMusic(bgm,0);
+				if(gd.hour>=22){
+					Mix_PlayMusic(bgm,-1);
+					gd.secondMusic=true;
+				}else{
+					Mix_PlayMusic(bgm,0);
+					gd.secondMusic=false;
+				}
 				gd.bgm_timestamp=SDL_GetTicks();
-				gd.secondMusic=false;
 			}
 		}
 		if(!gd.secondMusic && gd.hour>=22 && (SDL_GetTicks()-gd.bgm_timestamp)/16>10000){
@@ -2589,20 +2617,21 @@ void drawTerop(SDL_Surface* scr, String str, int rcv, int mg_rcv){
 }
 
 void estimate_rural(){
-	int *a, *t;
-	a=new int[areas];
-	t=new int[areas];
+	int *index, *titles;
+	index=new int[map.rural_num];
+	titles=new int[map.rural_num];
 
-	for(int i=0 ; i<areas ; i++){
-		a[i]=i;
-		t[i]=0;
+	for(int i=0 ; i<map.rural_num ; i++){
+		index[i]=i;
+		titles[i]=0;
 	}
-	for(int i=0 ; i<areas ; i++){
-		for(int j=0 ; j<area[i].st_num ; j++){
+	for(int i=0 ; i<map.rural_num ; i++){
+		for(int j=0 ; j<10 ; j++){
+			if(map.rural_tv[i][j]==-1)continue;
 			for(int k=0 ; k<entries ; k++){
 				for(int n=0 ; n<entry[k].prg_num ; n++){
-					if(entry[k].prg[n].station_index==area[i].station[j]){
-						t[i]++;
+					if(entry[k].prg[n].station_index==map.rural_tv[i][j]){
+						titles[i]++;
 						break;
 					}
 				}
@@ -2610,21 +2639,21 @@ void estimate_rural(){
 		}
 	}
 
-	for(int i=0 ; i<areas-1 ; i++)for(int j=areas-2 ; j>=i ; j--){
-		if(t[j]<t[j+1]){
-			int A=a[j],T=t[j];
-			a[j]=a[j+1];t[j]=t[j+1];
-			a[j+1]=A;t[j+1]=T;
+	for(int i=0 ; i<map.rural_num-1 ; i++)for(int j=map.rural_num-2 ; j>=i ; j--){
+		if(titles[j]<titles[j+1]){
+			int I=index[j],T=titles[j];
+			index[j]=index[j+1];titles[j]=titles[j+1];
+			index[j+1]=I;titles[j+1]=T;
 		}
 	}
 
 	int this_rate=1;
-	for(int i=0 ; i<areas ; i++){
-		if(i!=0 && t[i-1]!=t[i])this_rate=i+1;
-		map.rural_rate[a[i]]=this_rate;
+	for(int i=0 ; i<map.rural_num ; i++){
+		if(i!=0 && titles[i-1]!=titles[i])this_rate=i+1;
+		map.rural_rate[index[i]]=this_rate;
 	}
-	delete [] a;
-	delete [] t;
+	delete [] index;
+	delete [] titles;
 }
 
 void initManekiTV(){

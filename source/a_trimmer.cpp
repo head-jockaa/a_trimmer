@@ -255,7 +255,6 @@ void initAll(){
 	getImage(img.menuback,"file/img/menuback.png",0,0,0);
 	getImage(img.facechip,"file/img/face.png",0,0,255);
 	getSymbolImage();
-	map.rural_loaded=false;
 	fishbox.initAll();
 	load_parameter();
 	load_text();

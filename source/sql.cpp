@@ -30,7 +30,7 @@ int getStationById(int id){
 	for(int i=0 ; i<stas ; i++) {
 		if(sta[i].id==id)return i;
 	}
-	return 0;
+	return -1;
 }
 
 int getSeasonById(int id){
@@ -65,7 +65,6 @@ void freeSQL(){
 }
 
 void readSQL(const char *filename) {
-	freeSQL();
 	int mode=SQL_INSERT;
 	int column_point=0, record_num=0;
 	bool getDataSize=false;
@@ -161,6 +160,7 @@ void readSQL(const char *filename) {
 		}
 		sqlPointer++;
 	}
+	freeSQL();
 }
 
 void initVariableArray(char *tname, int data_size) {
@@ -186,6 +186,37 @@ void initVariableArray(char *tname, int data_size) {
 		}
 		areacode_num=data_size;
 		areacode=new Areacode[areacode_num];
+	}
+	else if(strcmp(tname,"rural")==0) {
+		if(map.rural_num) {
+			for(int i=0 ; i<map.rural_num ; i++) {
+				delete [] map.rural_tv[i];
+			}
+			delete [] map.rural_tv;
+			for(int i=0 ; i<map.ruralW ; i++) {
+				delete [] map.rural[i];
+			}
+			delete [] map.rural;
+			delete [] map.rural_rate;
+		}
+		map.rural_num=data_size;
+		map.rural_tv=new int*[map.rural_num];
+		for(int i=0 ; i<map.rural_num ; i++) {
+			map.rural_tv[i]=new int[10];
+		}
+		map.ruralW=map.mapW/10;
+		map.ruralH=map.mapH/10;
+		map.rural=new Uint8*[map.ruralW];
+		for(int i=0 ; i<map.ruralW ; i++) {
+			map.rural[i]=new Uint8[map.ruralH];
+		}
+		for(int j=0 ; j<map.ruralH ; j++) {
+			for(int i=0 ; i<map.ruralW ; i++) {
+				map.rural[i][j]=-1;
+			}
+		}
+		map.rural_rate=new Uint16[map.rural_num];
+		map.rural_size=10;
 	}
 	else if(strcmp(tname,"cartoon")==0) {
 		if(allofworks_num) {
@@ -374,6 +405,92 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		else if(strcmp(cname,"tv10")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
 			if(get)area[index].station[9]=getStationById(intValue);
+		}
+	}
+	else if(strcmp(tname,"rural")==0) {
+		if(strcmp(cname,"filepath")==0) {
+			sqlPointer+=fetchSqlString(c,str)-1;
+			if(get) {
+				Image *ruralmap;
+				getImage(ruralmap,str,0,0,0);
+				for(int j=0 ; j<map.ruralH ; j++) {
+					if(j==ruralmap->h)break;
+					for(int i=0 ; i<map.ruralW ; i++) {
+						if(i==ruralmap->w)break;
+						// extract BLUE component
+						if(ABGR) {
+							if(ruralmap->RGB[j*(ruralmap->w)+i] & (128<<16)) {
+								map.rural[i][j]=index;
+							}
+						} else {
+							if(ruralmap->RGB[j*(ruralmap->w)+i] & 128) {
+								map.rural[i][j]=index;
+							}
+						}
+					}
+				}
+				freeImage(ruralmap);
+			}
+		}
+		else if(strcmp(cname,"tv1")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][0]=getStationById(intValue);
+			}
+		}
+		else if(strcmp(cname,"tv2")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][1]=getStationById(intValue);
+			}
+		}
+		else if(strcmp(cname,"tv3")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][2]=getStationById(intValue);
+			}
+		}
+		else if(strcmp(cname,"tv4")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][3]=getStationById(intValue);
+			}
+		}
+		else if(strcmp(cname,"tv5")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][4]=getStationById(intValue);
+			}
+		}
+		else if(strcmp(cname,"tv6")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][5]=getStationById(intValue);
+			}
+		}
+		else if(strcmp(cname,"tv7")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][6]=getStationById(intValue);
+			}
+		}
+		else if(strcmp(cname,"tv8")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][7]=getStationById(intValue);
+			}
+		}
+		else if(strcmp(cname,"tv9")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][8]=getStationById(intValue);
+			}
+		}
+		else if(strcmp(cname,"tv10")==0) {
+			sqlPointer+=fetchInt(c,&intValue)-1;
+			if(get) {
+				map.rural_tv[index][9]=getStationById(intValue);
+			}
 		}
 	}
 	else if(strcmp(tname,"areacode")==0) {

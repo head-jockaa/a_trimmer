@@ -37,6 +37,7 @@ void make3dview_sky();
 void resetZ();
 
 struct Map{
+	int rural_num,**rural_tv;
 	int mapW,mapH,ruralW,ruralH,volcanoNum,slideX,slideY;
 	int airX,airY,airW,airH,volX,volY,volW,volH;
 	Uint8 rural_size;
@@ -44,12 +45,11 @@ struct Map{
 	Uint16 **h, **slope;
 	Uint16 *volcano, *volcano_id, *volcanoX, *volcanoY, *rural_rate;
 	Image *rgb;
-	bool moved,buffered,buffered2,rural_loaded;
+	bool moved,buffered,buffered2;
 	Image *rpg;
 	Uint8 c[640*480];
 	Uint16 z[640*480];
 	void set();
-	void set2();
 	void reset();
 	void setRPGchip(int bright);
 };

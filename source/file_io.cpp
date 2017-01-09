@@ -346,19 +346,9 @@ void load_towns(){
 }
 
 void load_rural(){
-	if(map.rural_loaded)return;
-	load_towers();
-	size_t fc=0;
-
-	loadFile("file/data/rural.dat");
-	map.rural_size=fstr[fc];fc++;
-	map.ruralW=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-	map.ruralH=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-	map.set2();
-	for(int j=0 ; j<map.ruralH ; j++)for(int i=0 ; i<map.ruralW ; i++){
-		if(fc>=fsize)break;
-		map.rural[i][j]=fstr[fc];fc++;
-	}
+	if(map.rural_num)return;
+	load_station();
+	readSQL("file/data/sql/rural.sql");
 }
 
 void save_option(){
