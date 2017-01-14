@@ -7,7 +7,7 @@ extern char hex[16];
 
 void load_text();
 void load_season();
-void load_haziashop();
+//void load_haziashop();
 void load_areas();
 void load_station();
 void load_animebook();

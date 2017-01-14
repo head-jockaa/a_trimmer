@@ -106,14 +106,15 @@ extern int stas,entries,prgs,animedex_num,collection,areas,towers,mounts,towns,s
 extern int count,bg_count,face[1000],start;
 extern int talk_kulisap,face_kulisap,ant_dir;
 extern bool SHOW_TOWER, EXPLAIN, NHK_REMOVE;
-extern Uint8 CHAR_CODE,AIR_IMG,WALKING_TYPE,ROD_TYPE,ADJ_DIR,CHANNELS,FULLSCR,SCRSIZE,BGM_VOLUME,SE_VOLUME,CHOSEON,CURVE_TOP,MAGNIFY,MAP3D,DASH_TYPE;
-extern double CURVE_RISE;
+extern Uint8 CHAR_CODE,AIR_IMG,WALKING_TYPE,ROD_TYPE,ADJ_DIR,CHANNELS,FULLSCR,SCRSIZE,BGM_VOLUME,SE_VOLUME,CHOSEON,MAGNIFY,MAP3D,DASH_TYPE;
+extern Uint8 X_OF_GRAPH_VERTEX;
+extern double FILL_GRAPH_HEIGHT;
 extern int pre_magnify;
 extern double test;
-extern double DIS1CH; // 1Ch 500kw ‚Ì“d”g‚ª”ò‚Ô‹——£
-extern double DIS62CH; // 
-extern double RCV_LEVEL; //
-extern double MAP_SCALE; //
+extern double DISTANCE_1CH;
+extern double DISTANCE_62CH;
+extern double RECEIPTION_LEVEL;
+extern double MAP_SCALE;
 extern char weekChar[7][2][4], str[1000], *fstr;
 extern size_t fsize;
 extern int BSchannel[12],BSstation[12];
@@ -144,7 +145,7 @@ extern Season *season;
 
 struct Mhz{
 	int mhz,dis;
-	double dif,ori,shadow,ground;
+	double diffract,directivity,shadow_length,magnify_sight_distance;
 };
 extern Mhz *mhz;
 

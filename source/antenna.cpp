@@ -73,10 +73,10 @@ void Antenna::receive(){
 void Antenna::catching(){
 	Uint32 dir2=abs((int)(area[A].tower[T].dir-gd.ant_dir));
 	if(dir2>180)dir2=360-dir2;
-	if((ant_mode==TURN || (ROD_TYPE!=CONVENIENTROD && ROD_TYPE!=SUPERHANDYROD)) && rcv-mg_rcv>=RCV_LEVEL && dir2<10)Mix_PlayChannel(1,sf.noize,0);
+	if((ant_mode==TURN || (ROD_TYPE!=CONVENIENTROD && ROD_TYPE!=SUPERHANDYROD)) && rcv-mg_rcv>=RECEIPTION_LEVEL && dir2<10)Mix_PlayChannel(1,sf.noize,0);
 
 	if(gd.game_mode==STORYMODE){
-		if(rcv-mg_rcv>=RCV_LEVEL && sta[station].ontv!=EOF){
+		if(rcv-mg_rcv>=RECEIPTION_LEVEL && sta[station].ontv!=EOF){
 			setTmpFish();
 			if(fishbox.getSC(tmp_fish.which_work)<tmp_fish.score || (fishbox.getSC(tmp_fish.which_work)==tmp_fish.score && fishbox.getRCV(tmp_fish.which_work)<tmp_fish.rcv-tmp_fish.mg_rcv)){
 				if(fishbox.getSC(tmp_fish.which_work)==0){
@@ -118,11 +118,11 @@ void Antenna::turnR(){
 }
 void Antenna::drawAntennaMode(SDL_Surface* scr){
 	if(ant_mode==TURN){
-		if(rcv-mg_rcv>=RCV_LEVEL)drawImage(scr,img.fishup,-change_mode_count*6,380,100,100,100,100,255);
+		if(rcv-mg_rcv>=RECEIPTION_LEVEL)drawImage(scr,img.fishup,-change_mode_count*6,380,100,100,100,100,255);
 		else drawImage(scr,img.fishup,0,380,0,100,100,100,255);
 	}
 	else if(ant_mode==TUNE){
-		if(rcv-mg_rcv>=RCV_LEVEL)drawImage(scr,img.fishup,-change_mode_count*6,380,100,0,100,100,255);
+		if(rcv-mg_rcv>=RECEIPTION_LEVEL)drawImage(scr,img.fishup,-change_mode_count*6,380,100,0,100,100,255);
 		else drawImage(scr,img.fishup,0,380,0,0,100,100,255);
 	}
 	else if(ant_mode==TROLL){
@@ -199,7 +199,7 @@ void Antenna::drawMountainHeight(SDL_Surface* scr){
 void Antenna::drawRader(SDL_Surface* scr){
 	if(!MAP3D)drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-30,(int)(gd.y*MAGNIFY)-gd.scrY-30,180,60,60,60,255);
 	drawBuoy(scr);
-	if(rcv-mg_rcv>=RCV_LEVEL && sta[station].ontv!=EOF){
+	if(rcv-mg_rcv>=RECEIPTION_LEVEL && sta[station].ontv!=EOF){
 		if(phase==FISHUP && start>67){
 			drawWaterBall(scr);
 		}else{
@@ -743,7 +743,7 @@ void UVRod::trolling(){
 					if(tw->rcv[k]>=100){
 						st[ar->station[k]]=2;
 					}
-					else if(tw->rcv[k]>=RCV_LEVEL){
+					else if(tw->rcv[k]>=RECEIPTION_LEVEL){
 						if(st[ar->station[k]]!=2)st[ar->station[k]]=1;
 					}
 				}
@@ -892,7 +892,7 @@ void ConvenientRod::makeList(){
 		for(int j=0 ; j<(are->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
 				int this_ch=are->station[k];
-				if(tow->ch[k]>=1 && tow->ch[k]<=CHANNELS && tow->rcv[k]>=RCV_LEVEL){
+				if(tow->ch[k]>=1 && tow->ch[k]<=CHANNELS && tow->rcv[k]>=RECEIPTION_LEVEL){
 					int mr2=0;
 					mr2=receive_mg(i,j,tow->ch[k],(int)tow->dir);
 					if(tow->rcv[k]-mr2<rc[this_ch]-mr[this_ch])continue;
@@ -918,7 +918,7 @@ void ConvenientRod::makeList(){
 	}
 	st_num=0;
 	for(int i=0 ; i<stas ; i++){
-		if(rc[i]-mr[i]<RCV_LEVEL)break;
+		if(rc[i]-mr[i]<RECEIPTION_LEVEL)break;
 		st_num++;
 	}
 }
@@ -1071,10 +1071,10 @@ void SuperHandyRod::makeList2(){
 		Tower *tow=are->tower;
 		for(int j=0 ; j<(are->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
-				if(tow->ch[k]>=1 && tow->ch[k]<=CHANNELS && tow->rcv[k]>=RCV_LEVEL){
+				if(tow->ch[k]>=1 && tow->ch[k]<=CHANNELS && tow->rcv[k]>=RECEIPTION_LEVEL){
 					int mr2=0;
 					mr2=receive_mg(i,j,tow->ch[k],(int)tow->dir);
-					if(tow->rcv[k]-mr2<RCV_LEVEL)continue;
+					if(tow->rcv[k]-mr2<RECEIPTION_LEVEL)continue;
 					rc[st_num]=tow->rcv[k];
 					st[st_num]=are->station[k];
 					ar[st_num]=i;
@@ -1174,7 +1174,7 @@ void SuperHandyRod::drawTrolling(SDL_Surface* scr){
 	drawAntennaMode(scr);
 	drawImage(scr,img.chr,(int)(gd.x*MAGNIFY)-gd.scrX-30,(int)(gd.y*MAGNIFY)-gd.scrY-30,180,60,60,60,255);
 	for(int i=0 ; i<64 ; i++){
-		if(rc2[i]<RCV_LEVEL)break;
+		if(rc2[i]<RECEIPTION_LEVEL)break;
 		int a=255;
 		if(rc2[i]<100)a=128;
 		drawText(scr,(i/16)*160+20,(i%16)*20+20,area[ar2[i]].tower[tw2[i]].name,60,a);

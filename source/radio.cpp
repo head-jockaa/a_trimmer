@@ -9,9 +9,9 @@ RadioData rd;
 void estimate(){
 	if(rd.estimated)return;
 /*powerÇåvéZÇ∑ÇÈ*/
-	double A=(DIS62CH-DIS1CH)/674.0;
-	double B=DIS1CH-A*91;
-	double C=CURVE_TOP,D=CURVE_RISE;
+	double A=(DISTANCE_62CH-DISTANCE_1CH)/674.0;
+	double B=DISTANCE_1CH-A*91;
+	double C=X_OF_GRAPH_VERTEX, D=FILL_GRAPH_HEIGHT;
 	Area *ar=area;
 	for(int i=0 ; i<areas ; i++){
 		Tower *tw=ar->tower;
@@ -149,7 +149,7 @@ void shield_each_tower(double X, double Y, Tower* T){
 			if(rd.seeDIS[n]==EOF || rd.seeCITY[n])continue;
 			a=4.12*(sqrt(1.0*rd.seeH[m])+sqrt(1.0*rd.seeH[n]));
 			for(int i=0 ; i<10 ; i++){
-				if(rd.seeDIS[n]-rd.seeDIS[m]>mhz[T->ch[i]-1].ground*a){
+				if(rd.seeDIS[n]-rd.seeDIS[m]>a*mhz[T->ch[i]-1].magnify_sight_distance){
 					T->rcv[i]=0;
 					T->out[i]=2;
 				}
@@ -185,7 +185,7 @@ void shield_each_ch(Tower* T, int k){
 		if(rd.seeDIS[n]==EOF || rd.seeCITY[n])continue;
 		for(int m=1 ; m<rd.see_mounts-1 ; m++){
 			if(rd.seeDIS[m]==EOF || rd.seeCITY[m])continue;
-			if(rd.seeDIR[n]>rd.seeDIR[m]+mhz[T->ch[k]-1].shadow)rd.seeDIS[n]=EOF;
+			if(rd.seeDIR[n]>rd.seeDIR[m]+mhz[T->ch[k]-1].shadow_length)rd.seeDIS[n]=EOF;
 		}
 	}
 
@@ -194,9 +194,9 @@ void shield_each_ch(Tower* T, int k){
 
 /*éRí∏ÇÇ©Ç∑Ç¡ÇΩï™ÇæÇØå∏êä*/
 	for(int n=1 ; n<rd.see_mounts-1 ; n++)if(rd.seeDIS[n]!=EOF){
-		rcv*=mhz[T->ch[k]-1].dif;
+		rcv*=mhz[T->ch[k]-1].diffract;
 		if(rd.seeCITY[n])for(int p=1 ; p<rd.seeCITY[n] ; p++){
-			rcv*=mhz[T->ch[k]-1].dif;
+			rcv*=mhz[T->ch[k]-1].diffract;
 		}
 	}
 	T->rcv[k]=(int)rcv;
@@ -266,9 +266,9 @@ void receive_each_ch(double X, double Y, Tower* T, int S){
 	if(phase!=SMR_RESULT){
 		T->rcv[S]=(int)( 100.0 * T->power[S] / rd.tower_dis_multi2 );
 	}
-	if(T->out[S] == 1)T->rcv[S]=(int)(1.0*T->rcv[S]*mhz[T->ch[S]-1].dif);
+	if(T->out[S] == 1)T->rcv[S]=(int)(1.0*T->rcv[S]*mhz[T->ch[S]-1].diffract);
 	if(T->bias!=255 && rd.bias_dir!=0){
-		double a=mhz[T->ch[S]-1].ori*rd.bias_dir/180.0;
+		double a=mhz[T->ch[S]-1].directivity*rd.bias_dir/180.0;
 		T->rcv[S]=(int)(1.0*T->rcv[S]/a);
 	}
 }

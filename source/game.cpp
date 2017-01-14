@@ -2751,7 +2751,7 @@ void setManekiData(){
 		for(int j=0 ; j<(are->tower_num) ; j++){
 			for(int k=0 ; k<10 ; k++){
 				int this_ch=area[i].station[k];
-				if(tow->ch[k]>=1 && tow->ch[k]<=CHANNELS && tow->rcv[k]>=RCV_LEVEL){
+				if(tow->ch[k]>=1 && tow->ch[k]<=CHANNELS && tow->rcv[k]>=RECEIPTION_LEVEL){
 					int mr2=0;
 					mr2=receive_mg(i,j,tow->ch[k],(int)tow->dir);
 					if(tow->rcv[k]-mr2<md.rcv[this_ch]-md.mg_rcv[this_ch])continue;
@@ -2777,7 +2777,7 @@ void setManekiData(){
 	}
 	md.st_num=0;
 	for(int i=0 ; i<stas ; i++){
-		if(md.rcv[i]-md.mg_rcv[i]<RCV_LEVEL)break;
+		if(md.rcv[i]-md.mg_rcv[i]<RECEIPTION_LEVEL)break;
 		md.bs[md.st_num]=false;
 		md.st_num++;
 	}

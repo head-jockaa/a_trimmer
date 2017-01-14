@@ -30,20 +30,8 @@ void load_text(){
 	}
 }
 
-void load_haziashop(){
-	loadFile("file/data/haziashop.dat");
-	int fc=0;
-	for(int i=0 ; i<SHOP_ITEMS ; i++){
-		shop_icon[i]=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-	}
-	for(int i=0 ; i<SHOP_ITEMS ; i++){
-		price[i]=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
-	}
-}
-
 void load_season(){
 	if(season_num)return;
-	load_haziashop();
 	size_t fc=0;
 	gd.hazia=0;
 	readSQL("file/data/sql/season.sql");
@@ -406,147 +394,95 @@ void save_option(){
 	fclose(hFile);
 }
 
-void load_parameter(){
-	int fc=0;
-	double SDW400H=0,SDW62CH=0,GROUND1CH=0,GROUND62CH=0,DIF1CH=0,DIF62CH=0,ORI1CH=0,ORI62CH=0;
-
-//	if(loadFile("file/data/parameter.dat")){
-		loadFile("file/data/parameter.dat");
-		map.mapW=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		map.mapH=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		gd.startX=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		gd.startY=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		gd.summerX_start=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		gd.summerY_start=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		gd.summerX=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		gd.summerY=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		gd.memmaX=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		gd.memmaY=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		DIS1CH=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		for(int i=0 ; i<fstr[fc] ; i++)DIS1CH/=10.0;
-		fc++;
-		DIS62CH=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		for(int i=0 ; i<fstr[fc] ; i++)DIS62CH/=10.0;
-		fc++;
-		CURVE_TOP=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-		CURVE_RISE=to8int(fstr[fc]);fc++;
-		for(int i=0 ; i<fstr[fc] ; i++)CURVE_RISE/=10.0;
-		fc++;
-		DIF1CH=to8int(fstr[fc]);fc++;
-		for(int i=0 ; i<fstr[fc] ; i++)DIF1CH/=10.0;
-		fc++;
-		DIF62CH=to8int(fstr[fc]);fc++;
-		for(int i=0 ; i<fstr[fc] ; i++)DIF62CH/=10.0;
-		fc++;
-		SDW400H=to8int(fstr[fc]);fc++;
-		for(int i=0 ; i<fstr[fc] ; i++)SDW400H/=10.0;
-		fc++;
-		SDW62CH=to8int(fstr[fc]);fc++;
-		for(int i=0 ; i<fstr[fc] ; i++)SDW62CH/=10.0;
-		fc++;
-		GROUND1CH=to8int(fstr[fc]);fc++;
-		for(int i=0 ; i<fstr[fc] ; i++)GROUND1CH/=10.0;
-		fc++;
-		GROUND62CH=to8int(fstr[fc]);fc++;
-		for(int i=0 ; i<fstr[fc] ; i++)GROUND62CH/=10.0;
-		fc++;
-		ORI1CH=to8int(fstr[fc]);fc++;
-		ORI62CH=to8int(fstr[fc]);fc++;
-		RCV_LEVEL=to8int(fstr[fc]);fc++;
-		for(int i=0 ; i<fstr[fc] ; i++)RCV_LEVEL/=10.0;
-		fc++;
-		CHANNELS=to8int(fstr[fc]);fc++;
-		MAP_SCALE=to8int(fstr[fc]);fc++;
-		for(int i=0 ; i<fstr[fc] ; i++)MAP_SCALE/=10.0;
-		fc++;
-		mhz=new Mhz[CHANNELS];
-		for(int i=0 ; i<CHANNELS ; i++){
-			mhz[i].mhz=to16int(fstr[fc],fstr[fc+1]);fc+=2;
+int fetchNameString(char *s, char *value) {
+	int pointer=0, length=0;
+	while(*s) {
+		if(*s==' ' || *s==10 || *s==13){
 		}
-/*	}else{
-		map.mapW=1970;map.mapH=2600;
-		gd.startX=1100;gd.startY=1046;
-		gd.summerX_start=700;gd.summerY_start=1300;
-		gd.summerX=1310;gd.summerY=970;
-		gd.memmaX=1370;gd.memmaY=990;
-		DIS1CH=78.7;
-		DIS62CH=22.1;
-		CURVE_TOP=214;
-		CURVE_RISE=4.7;
-		DIF1CH=0.7;
-		DIF62CH=0.3;
-		SDW400H=3.1;
-		SDW62CH=0.1;
-		GROUND1CH=20.8;
-		GROUND62CH=1.0;
-		ORI1CH=18.0;
-		ORI62CH=22.0;
-		RCV_LEVEL=20.0;
-		CHANNELS=62;
-		MAP_SCALE=1.3;
-		mhz=new Mhz[CHANNELS];
-		for(int i=1 ; i<=CHANNELS ; i++){
-			int a=87+i*6;
-			if(i>=4)a+=62;
-			if(i>=8)a-=2;
-			if(i>=13)a+=248;
-			if(i>=63)a+=11321;
-			mhz[i-1].mhz=a;
+		else if(*s=='='){
+			break;
 		}
-		fstr=new char[49+CHANNELS*2];
-		fstr[0]=map.mapW%256;fstr[1]=map.mapW/256;
-		fstr[2]=map.mapH%256;fstr[3]=map.mapH/256;
-		fstr[4]=gd.startX%256;fstr[5]=gd.startX/256;
-		fstr[6]=gd.startY%256;fstr[7]=gd.startY/256;
-		fstr[8]=gd.summerX_start%256;fstr[9]=gd.summerX_start/256;
-		fstr[10]=gd.summerY_start%256;fstr[11]=gd.summerY_start/256;
-		fstr[12]=gd.summerX%256;fstr[13]=gd.summerX/256;
-		fstr[14]=gd.summerY%256;fstr[15]=gd.summerY/256;
-		fstr[16]=gd.memmaX%256;fstr[17]=gd.memmaX/256;
-		fstr[18]=gd.memmaY%256;fstr[19]=gd.memmaY/256;
-		fstr[20]=49;fstr[21]=3;fstr[22]=1;
-		fstr[23]=221-256;fstr[24]=0;fstr[25]=1;
-		fstr[26]=214-256;fstr[27]=0;
-		fstr[28]=47;fstr[29]=1;
-		fstr[30]=7;fstr[31]=1;
-		fstr[32]=3;fstr[33]=1;
-		fstr[34]=31;fstr[35]=1;
-		fstr[36]=1;fstr[37]=1;
-		fstr[38]=208-256;fstr[39]=1;
-		fstr[40]=1;fstr[41]=0;
-		fstr[42]=18;
-		fstr[43]=22;
-		fstr[44]=20;fstr[45]=0;
-		fstr[46]=62;
-		fstr[47]=13;fstr[48]=1;
-		fc=49;
-		for(int i=0 ; i<CHANNELS ; i++){
-			fstr[fc]=mhz[i].mhz%256;fc++;
-			fstr[fc]=mhz[i].mhz/256;fc++;
+		else if(*s>='A' && *s<='Z'){
+			value[pointer]=(*s)+32;
+			pointer++;
+		}else{
+			value[pointer]=*s;
+			pointer++;
 		}
-		FILE* hFile;
-		fopen_s(&hFile,"file/data/parameter.dat","wb");
-		fwrite(fstr, sizeof(fstr[0]), fc/sizeof(fstr[0]), hFile);
-		fclose(hFile);
-		delete [] fstr;
-		fsize=0;
+		length++;
+		s++;
 	}
-*/
-	double SDWFUNC_A=(SDW62CH*SDW62CH-SDW400H*SDW400H)/674.0;
-	double SDWFUNC_B=SDW400H*SDW400H-SDWFUNC_A*93;
-	double DIFFUNC_A=(DIF62CH*DIF62CH-DIF1CH*DIF1CH)/674.0;
-	double DIFFUNC_B=DIF1CH*DIF1CH-DIFFUNC_A*93;
-	double ORIFUNC_A=(ORI62CH*ORI62CH-ORI1CH*ORI1CH)/674.0;
-	double ORIFUNC_B=ORI1CH*ORI1CH-ORIFUNC_A*93;
-	double GROFUNC_A=(GROUND62CH*GROUND62CH-GROUND1CH*GROUND1CH)/674.0;
-	double GROFUNC_B=GROUND1CH*GROUND1CH-GROFUNC_A*93;
+	value[pointer]=0;
+	length++;
+	return length;
+}
 
-	//カーブを与えるためにsqrtを使う
+void load_parameter(){
+	loadFile("file/data/parameter.ini");
+	int fc=0;
+	char name[100];
+	double doubleValue=0;
+	double SHADOW_1CH=0,SHADOW_62CH=0,SIGHT_1CH=0,SIGHT_62CH=0,DIFFRACT_1CH=0,DIFFRACT_62CH=0,DIRECTIVITY_1CH=0,DIRECTIVITY_62CH=0;
+	while(fc<fsize){
+		fc+=fetchNameString(&fstr[fc], name);
+		if(name[0]==0)break;
+		fc+=fetchDouble(&fstr[fc], &doubleValue);
+		if(strcmp(name,"channels")==0){
+			CHANNELS=doubleValue;
+			mhz=new Mhz[CHANNELS];
+			break;
+		}
+	}
+	fc=0;
+	while(fc<fsize){
+		fc+=fetchNameString(&fstr[fc], name);
+		if(name[0]==0)break;
+		fc+=fetchDouble(&fstr[fc], &doubleValue);
+		if(strcmp(name,"map_width")==0)map.mapW=doubleValue;
+		else if(strcmp(name,"map_height")==0)map.mapH=doubleValue;
+		else if(strcmp(name,"start_point_x")==0)gd.startX=doubleValue;
+		else if(strcmp(name,"start_point_y")==0)gd.startY=doubleValue;
+		else if(strcmp(name,"memma_point_x")==0)gd.memmaX=doubleValue;
+		else if(strcmp(name,"memma_point_y")==0)gd.memmaY=doubleValue;
+		else if(strcmp(name,"distance_1ch")==0)DISTANCE_1CH=doubleValue;
+		else if(strcmp(name,"distance_62ch")==0)DISTANCE_62CH=doubleValue;
+		else if(strcmp(name,"x_of_graph_vertex")==0)X_OF_GRAPH_VERTEX=doubleValue;
+		else if(strcmp(name,"fill_graph_height")==0)FILL_GRAPH_HEIGHT=doubleValue;
+		else if(strcmp(name,"diffract_1ch")==0)DIFFRACT_1CH=doubleValue;
+		else if(strcmp(name,"diffract_62ch")==0)DIFFRACT_62CH=doubleValue;
+		else if(strcmp(name,"shadow_length_400m_1ch")==0)SHADOW_1CH=doubleValue;
+		else if(strcmp(name,"shadow_length_400m_62ch")==0)SHADOW_62CH=doubleValue;
+		else if(strcmp(name,"magnify_sight_distance_1ch")==0)SIGHT_1CH=doubleValue;
+		else if(strcmp(name,"magnify_sight_distance_62ch")==0)SIGHT_62CH=doubleValue;
+		else if(strcmp(name,"directivity_1ch")==0)DIRECTIVITY_1CH=doubleValue;
+		else if(strcmp(name,"directivity_62ch")==0)DIRECTIVITY_62CH=doubleValue;
+		else if(strcmp(name,"receiption_level")==0)RECEIPTION_LEVEL=doubleValue;
+		else if(strcmp(name,"map_scale_km")==0)MAP_SCALE=doubleValue;
+		for(int i=0 ; i<18 ; i++){
+			sprintf_s(str,"item_icon_%d",i+1);
+			if(strcmp(name,str)==0)shop_icon[i]=doubleValue;
+			sprintf_s(str,"item_price_%d",i+1);
+			if(strcmp(name,str)==0)price[i]=doubleValue;
+		}
+		for(int i=0 ; i<CHANNELS ; i++){
+			sprintf_s(str,"frequency_%dch",i+1);
+			if(strcmp(name,str)==0)mhz[i].mhz=doubleValue;
+		}
+	}
+	double Y_RANGE=mhz[CHANNELS-1].mhz-mhz[0].mhz;
+	double SLOPE_SHADOW = (SHADOW_62CH*SHADOW_62CH - SHADOW_1CH*SHADOW_1CH)/Y_RANGE;
+	double Y_INTERCEPT_SHADOW = SHADOW_1CH*SHADOW_1CH - SLOPE_SHADOW*mhz[0].mhz;
+	double SLOPE_DIFFRACT = (DIFFRACT_62CH*DIFFRACT_62CH - DIFFRACT_1CH*DIFFRACT_1CH)/Y_RANGE;
+	double Y_INTERCEPT_DIFFRACT = DIFFRACT_1CH*DIFFRACT_1CH - SLOPE_DIFFRACT*mhz[0].mhz;
+	double SLOPE_DIRECTIVITY = (DIRECTIVITY_62CH*DIRECTIVITY_62CH - DIRECTIVITY_1CH*DIRECTIVITY_1CH)/Y_RANGE;
+	double Y_INTERCEPT_DIRECTIVITY = DIRECTIVITY_1CH*DIRECTIVITY_1CH - SLOPE_DIRECTIVITY*mhz[0].mhz;
+	double SLOPE_SIGHT = (SIGHT_62CH*SIGHT_62CH - SIGHT_1CH*SIGHT_1CH)/Y_RANGE;
+	double Y_INTERCEPT_SIGHT = SIGHT_1CH*SIGHT_1CH - SLOPE_SIGHT*mhz[0].mhz;
 	for(int i=0 ; i<CHANNELS ; i++){
-		mhz[i].shadow=sqrt(mhz[i].mhz*SDWFUNC_A+SDWFUNC_B);
-		mhz[i].dif=sqrt(mhz[i].mhz*DIFFUNC_A+DIFFUNC_B);
-		mhz[i].ori=sqrt(mhz[i].mhz*ORIFUNC_A+ORIFUNC_B);
-		mhz[i].ground=sqrt(mhz[i].mhz*GROFUNC_A+GROFUNC_B);
+		mhz[i].shadow_length=sqrt(mhz[i].mhz * SLOPE_SHADOW + Y_INTERCEPT_SHADOW);
+		mhz[i].diffract=sqrt(mhz[i].mhz * SLOPE_DIFFRACT + Y_INTERCEPT_DIFFRACT);
+		mhz[i].directivity=sqrt(mhz[i].mhz * SLOPE_DIRECTIVITY + Y_INTERCEPT_DIRECTIVITY);
+		mhz[i].magnify_sight_distance=sqrt(mhz[i].mhz * SLOPE_SIGHT + Y_INTERCEPT_SIGHT);
 	}
 }
 
