@@ -1630,8 +1630,9 @@ void drawFishup(SDL_Surface* scr){
 			else drawImage(scr,img.fishup,180+(i%4)*72,194+(i/4)*40,200,240,60,44,192);
 		}
 		sprintf_s(str,"%s",toChar(sta[BSstation[gd.bs_ch]].name));
-		drawImage(scr,img.menuback,120,0,0,0,(int)strlen(str)*18,40,128);
-		drawText2(scr,120,0,str,(int)strlen(str));
+		drawImage(scr,img.menuback,120,0,0,0,(int)strlen(str)*18+40,40,128);
+		drawImage(scr,img.symbol,120,0,(sta[BSstation[gd.bs_ch]].mark%16)*34,(sta[BSstation[gd.bs_ch]].mark/16)*34,34,34,255);
+		drawText2(scr,160,0,str,(int)strlen(str));
 		drawImage(scr,img.chr,520,50,220,450,40,30,255);
 		drawImage(scr,img.chr,560,40,(BSchannel[gd.bs_ch]/10)*20,480,20,40,255);
 		drawImage(scr,img.chr,580,40,(BSchannel[gd.bs_ch]%10)*20,480,20,40,255);
