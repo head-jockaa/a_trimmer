@@ -25,6 +25,21 @@ CREATE TABLE `area` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=sjis;
 
+CREATE TABLE `rural` (
+  `filepath` text NOT NULL,
+  `tv1` int(11) DEFAULT NULL,
+  `tv2` int(11) DEFAULT NULL,
+  `tv3` int(11) DEFAULT NULL,
+  `tv4` int(11) DEFAULT NULL,
+  `tv5` int(11) DEFAULT NULL,
+  `tv6` int(11) DEFAULT NULL,
+  `tv7` int(11) DEFAULT NULL,
+  `tv8` int(11) DEFAULT NULL,
+  `tv9` int(11) DEFAULT NULL,
+  `tv10` int(11) DEFAULT NULL,
+  PRIMARY KEY (`filepath`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE `areacode` (
   `id` int(11) NOT NULL,
   `name_jp` varchar(100) NOT NULL,
@@ -99,6 +114,7 @@ CREATE TABLE `timeslot` (
   `week` tinyint(3) unsigned NOT NULL,
   `hour` tinyint(3) unsigned NOT NULL,
   `minute` tinyint(3) unsigned NOT NULL,
+  `type` tinyint(3) unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
