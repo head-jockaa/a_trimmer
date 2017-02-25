@@ -47,7 +47,7 @@ void initMiyazaki(){
 	for(int i=0 ; i<16 ; i++){//‰º‚R‚Â‚ÌƒAƒjƒ‚Í•Û—¯
 		menu[BGM_TEST].stack(text[MIYAZAKITEXT+52+i]);
 	}
-	getImage(img.back,"file/img/miyazaki.png",0,0,255);
+	getImage(img.back,"file/img/miyazaki.png",BLUE);
 	loadCartoon(&cartoonJson, "file/data/cartoon/miyazaki_in.json");
 	loadCartoon(&talkingJson, "file/data/cartoon/miyazaki.json");
 	readCartoon(&talkingJson,0);
@@ -1190,7 +1190,7 @@ void keyMiyazaki(){
 		freeCartoon(&cartoonJson);
 		phase=MIYAZAKI_MUSEUM;
 		freeImage(img.back);
-		getImage(img.back,"file/img/miyazaki.png",0,0,255);
+		getImage(img.back,"file/img/miyazaki.png",BLUE);
 		freeMusic();
 		bgm=Mix_LoadMUS("file/bgm/17.ogg");
 		Mix_PlayMusic(bgm,-1);

@@ -789,7 +789,7 @@ void applyJsonData(JsonData *json){
 		}
 		freeImage(json->bg[id]);
 		if(file[0]){
-			getImage(json->bg[id],file,0,0,255);
+			getImage(json->bg[id],file,BLUE);
 		}
 		if(w!=0 && h!=0){
 			json->bg[id]=new Image(w,h);

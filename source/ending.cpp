@@ -45,7 +45,7 @@ void keyEndingAnime(){
 		}else{
 			if(which_medal!=0){
 				freeImage(img.back);
-				getImage(img.back,"file/img/warning.gif",0,0,255);
+				getImage(img.back,"file/img/warning.gif",BLUE);
 				Mix_HaltMusic();
 				sf.alarm=Mix_LoadWAV("file/se/20.wav");
 				Mix_PlayChannel(1,sf.alarm,2);
@@ -117,7 +117,7 @@ void timerEndingAnime(){
 				if(which_medal!=0 && which_season!=season_num){//ç≈èIÉ{ÉXñ ÇÕï€óØ
 					freeImage(img.back);
 					Mix_HaltMusic();
-					getImage(img.back,"file/img/warning.gif",0,0,255);
+					getImage(img.back,"file/img/warning.gif",BLUE);
 					sf.alarm=Mix_LoadWAV("file/se/20.wav");
 					Mix_PlayChannel(1,sf.alarm,2);
 					phase=WARNING;

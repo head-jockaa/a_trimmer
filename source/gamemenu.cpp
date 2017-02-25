@@ -21,7 +21,7 @@ void initGameMenu(){
 	menu[GAMEMODE].stack(text[MENUTEXT+12]);
 	phase=MAIN;
 	count=-1;start=20;
-	getImage(img.back,"file/img/gamemenu.png",0,0,255);
+	getImage(img.back,"file/img/gamemenu.png",BLUE);
 	bgm=Mix_LoadMUS("file/bgm/3.ogg");
 	sf.thunder=Mix_LoadWAV("file/se/14.wav");
 	sf.swish=Mix_LoadWAV("file/se/25.wav");
@@ -80,7 +80,7 @@ void timerPrologue(){
 		}else{
 			phase=GOTO_GAME;
 			freeImage(img.back);
-			getImage(img.back,"file/img/back.png",0,0,255);
+			getImage(img.back,"file/img/back.png",BLUE);
 			freeMusic();
 			count=0;
 		}

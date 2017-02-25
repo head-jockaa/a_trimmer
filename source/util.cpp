@@ -264,8 +264,8 @@ void Menu::reset(){
 
 void FishBox::initAll(){
 	max=0;
-	getImage(panel,"file/img/colorpanel.png",0,0,0);
-	getImage(mold,"file/img/colorpanel.png",0,0,0);
+	getImage(panel,"file/img/colorpanel.png",BLACK);
+	getImage(mold,"file/img/colorpanel.png",BLACK);
 }
 
 void FishBox::endAll(){
@@ -757,7 +757,7 @@ void putHeadMark(String &s){
 	}
 }
 
-void getImage(Image*& im, const char* st, int r, int g, int b){
+void getImage(Image*& im, const char* st, int alpha){
 	//実際のimgにアクセスするために&を付けている(参照型の&)
 	SDL_Surface *img2=NULL, *img3;
 	img2=IMG_Load(st);
@@ -787,7 +787,8 @@ void getImage(Image*& im, const char* st, int r, int g, int b){
 
 	SDL_UnlockSurface(img3);
 	SDL_FreeSurface(img3);
-	setAlpha(im,r,g,b);
+	if(alpha==BLACK)setAlpha(im,0,0,0);
+	if(alpha==BLUE)setAlpha(im,img.alphaR,img.alphaG,img.alphaB);
 }
 
 void getImage(Image*& im, char* st){
@@ -857,14 +858,14 @@ void getSymbolImage(){
 		a++;
 	}
 	img.symbol=new Image(544,a*544);
-	fillRect(img.symbol,0,0,544,a*544,0,0,254,255);
+	fillRect(img.symbol,0,0,544,a*544,img.alphaR,img.alphaG,img.alphaB,255);
 	for(int i=0 ; i<a ; i++){
 		sprintf_s(str,"file/img/symbol%d.png",i);
-		getImage(img2,str,0,0,254);
+		getImage(img2,str,BLUE);
 		drawImage(img.symbol,img2,0,i*544,0,0,544,544,255);
 		freeImage(img2);
 	}
-	setAlpha(img.symbol,0,0,254);
+	setAlpha(img.symbol,img.alphaR,img.alphaG,img.alphaB);
 }
 
 void drawSurface(SDL_Surface* sdl, SDL_Surface* img, int x, int y, int x2, int y2, int w2, int h2, int a){
@@ -945,7 +946,7 @@ void setAlpha(Image* scr, int R,int G,int B){
 	if(R==0 && G==0 && B==0){
 		color=0;
 	}else{
-		color=setRGB(img.alphaR,img.alphaG,img.alphaB);
+		color=setRGB(R,G,B);
 	}
 	for(int j=0 ; j<scr->h ; j++){
 		for(int i=0 ; i<scr->w ; i++){
@@ -977,7 +978,7 @@ void initFont(){
 		img2=IMG_Load(str);
 		if(img2!=NULL){
 			SDL_FreeSurface(img2);
-			getImage(font2,str,0,0,0);
+			getImage(font2,str,BLACK);
 			font[k]=new Image(font2->w,font2->h);
 			fillRect(font[k],0,0,font2->w,font2->h,img.alphaR,img.alphaG,img.alphaB,255);
 			drawImage(font[k],font2,0,0,0,0,font2->w,font2->h,255);

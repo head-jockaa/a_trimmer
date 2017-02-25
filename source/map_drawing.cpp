@@ -24,12 +24,12 @@ void Map::set(){
 		rgb->RGB[j*mapW+i]=0;h[i][j]=0;
 		type[j*mapW+i]=0;slope[i][j]=0;smr[i][j]=0;
 	}
-	getImage(rpg,"file/img/rpgchip.png",0,0,0);
+	getImage(rpg,"file/img/rpgchip.png",BLACK);
 }
 
 void Map::setRPGchip(int bright){
 	freeImage(rpg);
-	getImage(rpg,"file/img/rpgchip.png",0,0,0);
+	getImage(rpg,"file/img/rpgchip.png",BLACK);
 	int a=(1000-bright)*255/1000;
 	fillRect_except_yellow(rpg,0,0,64,8,0,0,0,a);
 	fillRect_except_yellow(rpg,64,0,128,16,0,0,0,a);

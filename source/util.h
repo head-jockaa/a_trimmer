@@ -37,6 +37,8 @@
 #define HIDE 0
 #define GRAY 1
 #define VISIBLE 2
+#define BLACK 0
+#define BLUE 1
 #define SMOOTH 0
 #define BUMPY 1
 #define TYPE1_EDGE 1
@@ -347,7 +349,7 @@ void drawText2(Image* img, int X, int Y, String st);
 void drawText2(Image* img, int x, int y, String str, int strl);
 void drawText2(Image* img, int x, int y, String str, int strl, Uint8 a);
 void drawText2_lang(Image* img, int x, int y, String st, int l, Uint8 a, int lang);
-void getImage(Image*& img, const char* st, int r, int g, int b);
+void getImage(Image*& img, const char* st, int alpha);
 void getImage(Image*& im, char* st);
 void freeImage(Image*& im);
 void freeMusic();

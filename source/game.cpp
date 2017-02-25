@@ -32,18 +32,18 @@ void setManekiData();
 void setAntenna(){
 	if(ROD_TYPE==SIMPLEROD){
 		ant=new SimpleRod();
-		getImage(img.rod,"file/img/srod.png",255,255,255);
+		getImage(img.rod,"file/img/srod.png",BLUE);
 	}
 	else if(ROD_TYPE==BUTTONROD){
 		ant=new ButtonRod();
-		getImage(img.rod,"file/img/brod.png",0,0,255);
+		getImage(img.rod,"file/img/brod.png",BLUE);
 	}
 	else if(ROD_TYPE==UVROD){
 		ant=new UVRod();
-		getImage(img.rod,"file/img/uvrod.png",0,0,255);
+		getImage(img.rod,"file/img/uvrod.png",BLUE);
 	}
 	else if(ROD_TYPE==MHZROD){
-		getImage(img.rod,"file/img/mhzrod.png",0,0,255);
+		getImage(img.rod,"file/img/mhzrod.png",BLUE);
 		ant=new MHzRod();
 	}
 	else if(ROD_TYPE==CONVENIENTROD)ant=new ConvenientRod();
@@ -57,7 +57,7 @@ void initGame(){
 	img.colorlight=new Image(2560,490);
 	makeColorLight();
 
-	getImage(img.fishup,"file/img/fishup.png",0,0,255);
+	getImage(img.fishup,"file/img/fishup.png",BLUE);
 	sf.water=Mix_LoadWAV("file/se/9.wav");
 	sf.thunder=Mix_LoadWAV("file/se/14.wav");
 	sf.meow=Mix_LoadWAV("file/se/16.wav");
@@ -165,7 +165,7 @@ void initGame2(){
 		for(int i=0 ; i<stas ; i++)sta[i].ontv=EOF;
 	}
 	sprintf_s(str,"file/img/ready%d.png",gd.week%6);
-	getImage(img.tv_asahi,str,0,0,0);
+	getImage(img.tv_asahi,str,BLACK);
 
 	if(md.maneki_mode==PLUGGED_IN){
 		receiveAll(md.manekiX,md.manekiY);
@@ -331,7 +331,7 @@ void keyFinish(){
 		}
 		phase=TODAYS_CROP;
 		freeImage(img.back);
-		getImage(img.back,"file/img/result.png",0,0,255);
+		getImage(img.back,"file/img/result.png",BLUE);
 		sprintf_s(str,"file/data/cartoon/end%d.json",which_season);
 		loadCartoon(&cartoonJson,str);
 		readCartoon(&cartoonJson,0);
@@ -373,7 +373,7 @@ void keyResult(){
 					gd.week++;gd.hour=4;
 					freeImage(img.tv_asahi);
 					sprintf_s(str,"file/img/ready%d.png",gd.week%6);
-					getImage(img.tv_asahi,str,0,0,0);
+					getImage(img.tv_asahi,str,BLACK);
 					if(gd.hour<gd.sunrise_hour || gd.hour>=gd.sunset_hour+2)createMap_color(200);
 					else createMap_color(1000);
 					phase=GAMESTART;
@@ -2166,7 +2166,7 @@ bool createSearchImage(int n){
 
 	//sometimes fails to load a file because of bad timing
 	if(img2){
-		getImage(img.searchImage,"file/img/image_search.png",0,0,0);
+		getImage(img.searchImage,"file/img/image_search.png",BLACK);
 
 		int w=img.searchImage->w, h=img.searchImage->h;
 		int w2=img2->w, h2=img2->h;

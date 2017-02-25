@@ -250,10 +250,10 @@ void initAll(){
 	sf.decide=Mix_LoadWAV("file/se/3.wav");
 	sf.decide2=Mix_LoadWAV("file/se/2.wav");
 	sf.cursor_move=Mix_LoadWAV("file/se/1.wav");
-	getImage(img.chr, "file/img/chr.png", 0,0,255);
-	getImage(img.keyboard,"file/img/keyboard.gif",0,0,255);
-	getImage(img.menuback,"file/img/menuback.png",0,0,0);
-	getImage(img.facechip,"file/img/face.png",0,0,255);
+	getImage(img.chr, "file/img/chr.png", BLUE);
+	getImage(img.keyboard,"file/img/keyboard.gif",BLUE);
+	getImage(img.menuback,"file/img/menuback.png",BLACK);
+	getImage(img.facechip,"file/img/face.png",BLUE);
 	getSymbolImage();
 	fishbox.initAll();
 	load_parameter();

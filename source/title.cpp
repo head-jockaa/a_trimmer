@@ -5,7 +5,7 @@ void initTitle2();
 void initOpening(){
 	mode=OPENING;
 	count=0;phase=0;
-	getImage(img.back,"file/img/testcard.png",0,0,255);
+	getImage(img.back,"file/img/testcard.png",BLUE);
 }
 void endOpening(){
 	freeCartoon(&cartoonJson);

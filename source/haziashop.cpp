@@ -22,7 +22,7 @@ void initHaziaShop(){
 	menu[OHANA_MENU].setMenu(320,200,10,2,2);
 	menu[OHANA_MENU].stack(text[MIYAZAKITEXT+31]);
 	menu[OHANA_MENU].stack(text[EPILOGUE+10]);
-	getImage(img.back,"file/img/haziashop.png",0,0,255);
+	getImage(img.back,"file/img/haziashop.png",BLUE);
 	sf.coin=Mix_LoadWAV("file/se/17.wav");
 	loadCartoon(&cartoonJson, "file/data/cartoon/haziashop.json");
 	readCartoon(&cartoonJson,0);

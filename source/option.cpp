@@ -22,7 +22,7 @@ void initOption(){
 	phase=OPTION_MENU;
 	start=65;
 	count=-1;
-	getImage(img.back,"file/img/setting.png",0,0,0);
+	getImage(img.back,"file/img/setting.png",BLACK);
 }
 
 void keyOption(){

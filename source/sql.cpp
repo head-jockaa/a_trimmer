@@ -412,7 +412,7 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 			sqlPointer+=fetchSqlString(c,str)-1;
 			if(get) {
 				Image *ruralmap;
-				getImage(ruralmap,str,0,0,0);
+				getImage(ruralmap,str,BLACK);
 				for(int j=0 ; j<map.ruralH ; j++) {
 					if(j==ruralmap->h)break;
 					for(int i=0 ; i<map.ruralW ; i++) {
