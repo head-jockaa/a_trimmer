@@ -65,6 +65,7 @@ void freeSQL(){
 }
 
 void readSQL(const char *filename) {
+	loadEncodingFiles();
 	int mode=SQL_INSERT;
 	int column_point=0, record_num=0;
 	bool getDataSize=false;
@@ -161,6 +162,7 @@ void readSQL(const char *filename) {
 		sqlPointer++;
 	}
 	freeSQL();
+	freeEncodingFiles();
 }
 
 void initVariableArray(char *tname, int data_size) {
@@ -290,7 +292,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str)-1;
-			if(get)strcpy_s(area[index].name.str[0],str);
+			if(get){
+				strcpy_s(area[index].name.str[0],str);
+				UTF8toSJIS(area[index].name.str[0]);
+			}
 		}
 		else if(strcmp(cname,"name_en")==0) {
 			sqlPointer+=fetchSqlString(c,str)-1;
@@ -500,7 +505,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(areacode[index].name.str[0],str);
+			if(get){
+				strcpy_s(areacode[index].name.str[0],str);
+				UTF8toSJIS(areacode[index].name.str[0]);
+			}
 		}
 		else if(strcmp(cname,"name_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);
@@ -565,7 +573,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(allofworks[index].title.str[0],str);
+			if(get){
+				strcpy_s(allofworks[index].title.str[0],str);
+				UTF8toSJIS(allofworks[index].title.str[0]);
+			}
 		}
 		else if(strcmp(cname,"name_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);
@@ -639,7 +650,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(season[index].name.str[0],str);
+			if(get){
+				strcpy_s(season[index].name.str[0],str);
+				UTF8toSJIS(season[index].name.str[0]);
+			}
 		}
 		else if(strcmp(cname,"name_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);
@@ -657,7 +671,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(sta[index].name.str[0],str);
+			if(get){
+				strcpy_s(sta[index].name.str[0],str);
+				UTF8toSJIS(sta[index].name.str[0]);
+			}
 		}
 		else if(strcmp(cname,"name_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);
@@ -665,7 +682,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"message_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(sta[index].talk.str[0],str);
+			if(get){
+				strcpy_s(sta[index].talk.str[0],str);
+				UTF8toSJIS(sta[index].talk.str[0]);
+			}
 		}
 		else if(strcmp(cname,"message_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);
@@ -743,7 +763,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(tower[index].name.str[0],str);
+			if(get){
+				strcpy_s(tower[index].name.str[0],str);
+				UTF8toSJIS(tower[index].name.str[0]);
+			}
 		}
 		else if(strcmp(cname,"name_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);
@@ -829,7 +852,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"name_jp")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(town[index].name.str[0],str);
+			if(get){
+				strcpy_s(town[index].name.str[0],str);
+				UTF8toSJIS(town[index].name.str[0]);
+			}
 		}
 		else if(strcmp(cname,"name_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);

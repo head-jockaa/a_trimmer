@@ -23,7 +23,7 @@ CREATE TABLE `area` (
   `tv9` int(11) DEFAULT NULL,
   `tv10` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `rural` (
   `filepath` text NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE `areacode` (
   `button11` int(11) NOT NULL,
   `button12` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `cartoon` (
   `id` int(11) NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE `cartoon` (
   `green` tinyint(3) unsigned NOT NULL,
   `blue` tinyint(3) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `mountain` (
   `id` int(11) NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE `season` (
   `name_jp` varchar(100) NOT NULL,
   `name_en` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `station` (
   `id` int(11) NOT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE `station` (
   `message` text,
   `message_en` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `timeslot` (
   `id` int(11) NOT NULL,
@@ -153,7 +153,7 @@ CREATE TABLE `tower` (
   `ch9` int(11) DEFAULT NULL,
   `ch10` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `town` (
   `id` int(11) NOT NULL,
@@ -163,4 +163,4 @@ CREATE TABLE `town` (
   `x` int(11) NOT NULL,
   `y` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=sjis;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

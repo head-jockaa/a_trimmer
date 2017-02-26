@@ -5,6 +5,10 @@
 
 extern char hex[16];
 
+void loadEncodingFiles();
+void freeEncodingFiles();
+void UTF8toSJIS(char *s);
+
 void load_text();
 void load_season();
 //void load_haziashop();
