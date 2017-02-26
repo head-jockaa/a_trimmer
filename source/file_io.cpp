@@ -1,8 +1,150 @@
 #include "file_io.h"
 
 char hex[16]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+char *E28XXX,*E38XXX,*E48XXX,*E58XXX,*E68XXX,*E78XXX,*E88XXX,*E98XXX,*EE8XXX,*EF8XXX,*CXXX;
+
+void loadEncodingFiles(){
+	loadFile("file/data/utf8_to_sjis/E28XXX-E2BXXX.txt");
+	E28XXX=new char[fsize];
+	strcpy_s(E28XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/E38XXX-E3BXXX.txt");
+	E38XXX=new char[fsize];
+	strcpy_s(E38XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/E48XXX-E4BXXX.txt");
+	E48XXX=new char[fsize];
+	strcpy_s(E48XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/E58XXX-E5BXXX.txt");
+	E58XXX=new char[fsize];
+	strcpy_s(E58XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/E68XXX-E6BXXX.txt");
+	E68XXX=new char[fsize];
+	strcpy_s(E68XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/E78XXX-E7BXXX.txt");
+	E78XXX=new char[fsize];
+	strcpy_s(E78XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/E88XXX-E8BXXX.txt");
+	E88XXX=new char[fsize];
+	strcpy_s(E88XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/E98XXX-E9BXXX.txt");
+	E98XXX=new char[fsize];
+	strcpy_s(E98XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/EE8XXX-EEBXXX.txt");
+	EE8XXX=new char[fsize];
+	strcpy_s(EE8XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/EF8XXX-EFBXXX.txt");
+	EF8XXX=new char[fsize];
+	strcpy_s(EF8XXX,fstr);
+	loadFile("file/data/utf8_to_sjis/CXXX-DXXX.txt");
+	CXXX=new char[fsize];
+	strcpy_s(CXXX,fstr);
+}
+
+void freeEncodingFiles(){
+	delete [] E28XXX;
+	delete [] E38XXX;
+	delete [] E48XXX;
+	delete [] E58XXX;
+	delete [] E68XXX;
+	delete [] E78XXX;
+	delete [] E88XXX;
+	delete [] E98XXX;
+	delete [] EE8XXX;
+	delete [] EF8XXX;
+	delete [] CXXX;
+}
+
+void UTF8toSJIS(char *s){
+	char *pointer=s;
+	for(int i=0 ; i<200 ; i++){
+		if(*pointer==0){
+			s[i]=0;
+			break;
+		}
+		if(*pointer>=-64 && *pointer<=-33){
+			int n=(64+*pointer)*64+(128+*(pointer+1));
+			s[i]=CXXX[n*2];
+			s[i+1]=CXXX[n*2+1];
+			i++;
+			pointer+=2;
+		}
+		else if(*pointer==-30){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=E28XXX[n*2];
+			s[i+1]=E28XXX[n*2+1];
+			i++;
+			pointer+=3;
+		}
+		else if(*pointer==-29){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=E38XXX[n*2];
+			s[i+1]=E38XXX[n*2+1];
+			i++;
+			pointer+=3;
+		}
+		else if(*pointer==-28){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=E48XXX[n*2];
+			s[i+1]=E48XXX[n*2+1];
+			i++;
+			pointer+=3;
+		}
+		else if(*pointer==-27){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=E58XXX[n*2];
+			s[i+1]=E58XXX[n*2+1];
+			i++;
+			pointer+=3;
+		}
+		else if(*pointer==-26){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=E68XXX[n*2];
+			s[i+1]=E68XXX[n*2+1];
+			i++;
+			pointer+=3;
+		}
+		else if(*pointer==-25){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=E78XXX[n*2];
+			s[i+1]=E78XXX[n*2+1];
+			i++;
+			pointer+=3;
+		}
+		else if(*pointer==-24){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=E88XXX[n*2];
+			s[i+1]=E88XXX[n*2+1];
+			i++;
+			pointer+=3;
+		}
+		else if(*pointer==-23){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=E98XXX[n*2];
+			s[i+1]=E98XXX[n*2+1];
+			i++;
+			pointer+=3;
+		}
+		else if(*pointer==-18){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=EE8XXX[n*2];
+			s[i+1]=EE8XXX[n*2+1];
+			i++;
+			pointer+=3;
+		}
+		else if(*pointer==-17){
+			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+			s[i]=EF8XXX[n*2];
+			s[i+1]=EF8XXX[n*2+1];
+			i++;
+			pointer+=3;
+		} else {
+			s[i]=*pointer;
+			pointer++;
+		}
+	}
+}
 
 void load_text(){
+	loadEncodingFiles();
 	size_t fc=0;
 
 	for(int i=0 ; i<1000 ; i++)for(int j=0 ; j<61 ; j++)for(int k=0 ; k<2 ; k++){
@@ -14,7 +156,7 @@ void load_text(){
 		if(k==0)loadFile("file/data/text_jp.dat");
 		else loadFile("file/data/text_en.dat");
 		for(int i=0 ; i<7 ; i++){
-			for(int j=0 ; j<4 ; j++){
+			for(int j=0 ; j<200 ; j++){
 				weekChar[i][k][j]=fstr[fc];fc++;
 				if(weekChar[i][k][j]==0)break;
 			}
@@ -28,6 +170,13 @@ void load_text(){
 			}
 		}
 	}
+	for(int i=0 ; i<7 ; i++){
+		UTF8toSJIS(weekChar[i][0]);
+	}
+	for(int i=0 ; i<1000 ; i++){
+		UTF8toSJIS(text[i].str[0]);
+	}
+	freeEncodingFiles();
 }
 
 void load_season(){
