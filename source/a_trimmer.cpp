@@ -257,6 +257,7 @@ void initAll(){
 	getSymbolImage();
 	fishbox.initAll();
 	load_parameter();
+	loadEncodingFiles();
 	load_text();
 	load_season();
 	initOpening();
@@ -307,6 +308,7 @@ void endAll(){
 	freeCartoon(&cartoonJson);
 	freeCartoon(&talkingJson);
 	freeCartoon(&manekitvJson);
+	freeEncodingFiles();
 }
 
 

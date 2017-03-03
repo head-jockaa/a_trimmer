@@ -442,8 +442,8 @@ void drawRPGchip(Uint8* px, Uint16 scrWidth, int x, int y, int mag, int n, int p
 	Uint16 rgb_skip=((map.rpg->w)-w)*4;
 
 	int shore_bright=1000;
-	if(gd.hour<=5 || gd.hour>=23)shore_bright=200;
-	if(gd.hour==6 || gd.hour==22)shore_bright=bright;
+	if(gd.hour<=gd.sunrise_hour-1 || gd.hour>=gd.sunset_hour+2)shore_bright=200;
+	if(gd.hour==gd.sunrise_hour || gd.hour==gd.sunset_hour+1)shore_bright=bright;
 
 	Uint8 R,G,B;
 	Uint8 R2=*pos, G2=*(pos+1), B2=*(pos+2);
@@ -461,7 +461,7 @@ void drawRPGchip(Uint8* px, Uint16 scrWidth, int x, int y, int mag, int n, int p
 				*px=128+(128*(-A2)>>8);px++;
 				px++;rgb+=4;
 			}
-			else if(n==7 && R==255 && G==255 && B==0){
+			else if(n==7 && ((R==255 && G==255 && B<=10) || (R==51 && G==51 && B<=10))){
 				*px=0;px++;
 				*px=255;px++;
 				*px=255;px++;

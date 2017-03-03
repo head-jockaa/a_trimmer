@@ -82,7 +82,7 @@ void timerLeaveShore(){
 		if(a>=100)initMedalAward(3);
 		else if(a>=80)initMedalAward(2);
 		else if(a>=60)initMedalAward(1);
-		else initMedalAward(3);
+		else initMedalAward(0);
 	}
 }
 

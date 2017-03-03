@@ -65,7 +65,6 @@ void freeSQL(){
 }
 
 void readSQL(const char *filename) {
-	loadEncodingFiles();
 	int mode=SQL_INSERT;
 	int column_point=0, record_num=0;
 	bool getDataSize=false;
@@ -162,7 +161,6 @@ void readSQL(const char *filename) {
 		sqlPointer++;
 	}
 	freeSQL();
-	freeEncodingFiles();
 }
 
 void initVariableArray(char *tname, int data_size) {

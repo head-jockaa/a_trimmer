@@ -23,7 +23,6 @@ void resetObject(JsonData *json, CartoonObject &obj);
 void readJsonObject(JsonData *json, char *basename, char *name);
 void readJsonArray(JsonData *json, char *basename, char *name);
 void applyJsonData(JsonData *json);
-void padSpace(JsonData *json, int n, int k, int x);
 
 JsonData cartoonJson,talkingJson,manekitvJson;
 
@@ -254,7 +253,6 @@ void resetCartoon(JsonData *json){
 	json->jr.talk.valueNum=0;
 	json->jr.image.valueNum=0;
 	json->jr.bgm.valueNum=0;
-	json->jr.loadText.valueNum=0;
 	json->jr.loadSound.valueNum=0;
 	json->jr.sound.valueNum=0;
 }
@@ -293,7 +291,6 @@ void freeCartoon(JsonData *json){
 		json->max_sound=0;
 	}
 	if(json->talk_size){
-		delete [] json->talk;
 		json->talk_size=0;
 	}
 	if(json->jr.resetNum){
@@ -305,7 +302,6 @@ void freeCartoon(JsonData *json){
 	json->jr.talk.free();
 	json->jr.image.free();
 	json->jr.bgm.free();
-	json->jr.loadText.free();
 	json->jr.loadSound.free();
 	json->jr.sound.free();
 }
@@ -325,7 +321,6 @@ void loadCartoon(JsonData *json, const char *filename){
 		json->jr.talk.init(json->jr.talk.maxValueNum);
 		json->jr.image.init(json->jr.image.maxValueNum);
 		json->jr.bgm.init(json->jr.bgm.maxValueNum);
-		json->jr.loadText.init(json->jr.loadText.maxValueNum);
 		json->jr.loadSound.init(json->jr.loadSound.maxValueNum);
 		json->jr.sound.init(json->jr.sound.maxValueNum);
 		json->initializedReaderArray=true;
@@ -427,7 +422,6 @@ void readCartoon(JsonData *json){
 				json->jr.image.valueNum=0;
 				json->jr.loadSound.valueNum=0;
 				json->jr.bgm.valueNum=0;
-				json->jr.loadText.valueNum=0;
 				json->jr.set.valueNum=0;
 				json->jr.move.valueNum=0;
 				json->jr.sound.valueNum=0;
@@ -454,9 +448,6 @@ void readCartoon(JsonData *json){
 				}
 				if(json->jr.bgm.maxValueNum < json->jr.bgm.valueNum) {
 					json->jr.bgm.maxValueNum=json->jr.bgm.valueNum;
-				}
-				if(json->jr.loadText.maxValueNum < json->jr.loadText.valueNum) {
-					json->jr.loadText.maxValueNum=json->jr.loadText.valueNum;
 				}
 				if(json->jr.set.maxValueNum < json->jr.set.valueNum) {
 					json->jr.set.maxValueNum=json->jr.set.valueNum;
@@ -500,17 +491,26 @@ void readCartoon(JsonData *json){
 }
 
 void fetchNextTalking(JsonData *json){
-	int face=0,text=0,shake=0;
+	int face=0,shake=0;
 	for(int i=json->jr.talkPointer ; i<json->jr.talk.valueNum ; i++){
 		if(json->jr.talk.name[i][0]==';')break;
 		if(strcmp(json->jr.talk.name[i],"face")==0)face=json->jr.talk.valueDouble[i];
-		else if(strcmp(json->jr.talk.name[i],"text")==0)text=json->jr.talk.valueDouble[i];
+		else if(strcmp(json->jr.talk.name[i],"text jp")==0)strcpy_s(json->talk.str[0],json->jr.talk.valueString[i]);
+		else if(strcmp(json->jr.talk.name[i],"text en")==0)strcpy_s(json->talk.str[1],json->jr.talk.valueString[i]);
 		else if(strcmp(json->jr.talk.name[i],"shake")==0)shake=json->jr.talk.valueBool[i];
 		json->jr.talkPointer++;
 	}
+	UTF8toSJIS(json->talk.str[0]);
+	UTF8toLatin(json->talk.str[1]);
+	padSpace(json->talk, 30);
+	for(size_t i=strlen(json->talk.str[0]) ; i<200 ; i++){
+		json->talk.str[0][i]=0;
+	}
+	for(size_t i=strlen(json->talk.str[1]) ; i<200 ; i++){
+		json->talk.str[1][i]=0;
+	}
 	json->jr.talkPointer++;
 	json->face_count=face;
-	json->talk_count=text;
 	json->text_count=0;
 	if(shake){
 		json->shake_count=50;
@@ -864,56 +864,6 @@ void applyJsonData(JsonData *json){
 		}
 	}
 
-	int which_lang=0;
-	char lang[20];
-	file[0]=0;
-	lang[0]=0;
-	if(json->initializedObjArray && !json->talk_size){
-		for(int j=0 ; j<json->jr.loadText.valueNum ; j++){
-			int max=0;
-			if(strcmp(json->jr.loadText.name[j],"file")==0){
-				loadFile(json->jr.loadText.valueString[j]);
-				for(size_t k=0 ; k<fsize ; k++){
-					if(fstr[k]==0)max++;
-				}
-				if(json->talk_size<max)json->talk_size=max;
-			}
-		}
-		json->talk=new String[json->talk_size];
-	}
-	for(int i=0 ; i<json->jr.loadText.valueNum ; i++){
-		if(!json->initializedObjArray){
-			break;
-		}
-		for(int j=i ; j<json->jr.loadText.valueNum ; j++){
-			if(json->jr.loadText.name[j][0]==';')break;
-			if(strcmp(json->jr.loadText.name[j],"file")==0)strcpy_s(file,json->jr.loadText.valueString[j]);
-			else if(strcmp(json->jr.loadText.name[j],"lang")==0)strcpy_s(lang,json->jr.loadText.valueString[j]);
-			i++;
-		}
-		if(strcmp(lang, "jp")==0) {
-			which_lang=0;
-		}
-		else if(strcmp(lang, "en")==0) {
-			which_lang=1;
-		}
-		loadFile(file);
-		size_t fc=0;
-		for(int a=0 ; a<json->talk_size ; a++){
-			if(fc>=fsize)break;
-			for(int b=0 ; b<200 ; b++){
-				json->talk[a].str[which_lang][b]=0;
-			}
-			for(int b=0 ; b<200 ; b++){
-				json->talk[a].str[which_lang][b]=fstr[fc];fc++;
-				if(json->talk[a].str[which_lang][b]==0)break;
-			}
-		}
-		for(int a=0 ; a<json->talk_size ; a++){
-			padSpace(json,a,which_lang,30);
-		}
-	}
-
 	if(json->jr.talk.valueNum && json->initializedObjArray){
 		json->talkmode=true;
 		fetchNextTalking(json);
@@ -936,7 +886,6 @@ void applyJsonData(JsonData *json){
 void changeJsonReaderPointer(JsonData *json, char *basename){
 	if(strcmp(basename,"image")==0)json->jr.which=&json->jr.image;
 	else if(strcmp(basename,"load-sound")==0)json->jr.which=&json->jr.loadSound;
-	else if(strcmp(basename,"load-text")==0)json->jr.which=&json->jr.loadText;
 	else if(strcmp(basename,"bgm")==0)json->jr.which=&json->jr.bgm;
 	else if(strcmp(basename,"sound")==0)json->jr.which=&json->jr.sound;
 	else if(strcmp(basename,"set")==0)json->jr.which=&json->jr.set;
@@ -1349,7 +1298,7 @@ void controlTextCount(JsonData *json){
 	else if(json->talk_open_count<0){
 			json->talk_open_count++;
 	}else{
-		while(json->talk[json->talk_count].str[CHAR_CODE][json->text_count]==' ' && json->talk[json->talk_count].str[CHAR_CODE][json->text_count+1]==' '){
+		while(json->talk.str[CHAR_CODE][json->text_count]==' ' && json->talk.str[CHAR_CODE][json->text_count+1]==' '){
 			json->text_count++;
 		}
 		json->text_count++;
@@ -1395,7 +1344,7 @@ bool nextCut(JsonData *json){
 
 bool nextTalk(JsonData *json){
 	if(json->talkmode){
-		if(json->text_count<(int)strlen(json->talk[json->talk_count].str[CHAR_CODE])){
+		if(json->text_count<(int)strlen(json->talk.str[CHAR_CODE])){
 			json->text_count=90;
 		}else{
 			if(json->jr.talkPointer>=json->jr.talk.valueNum){
@@ -1542,7 +1491,7 @@ void _drawAnimationCut(JsonData *json, SDL_Surface* scr, int from, int to){
 		}
 	}
 	if((json->talkmode && json->jr.talk.valueNum>1) || json->talk_open_count!=0){
-		drawTalking(scr,json,json->talk[json->talk_count],json->face_count,json->text_count,json->shake_count);
+		drawTalking(scr,json,json->talk,json->face_count,json->text_count,json->shake_count);
 	}
 }
 

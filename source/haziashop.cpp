@@ -102,6 +102,7 @@ void keyShopping(){
 		}
 		menu[YNFORM].setViewMode(VISIBLE);
 		gd.hazia2=0;
+		cartoonJson.talkmode=false;
 	}
 	if(key.x && !key_stop(key.x)){
 		bool ok=true;
@@ -151,14 +152,17 @@ void keySelling(){
 			else if(menu[SHOPPING].selected()==15)scr_design=NULL;
 			else if(menu[SHOPPING].selected()==16)scr_design=NULL;
 			else if(menu[SHOPPING].selected()==17)CHOSEON=false;
+			cartoonJson.talkmode=false;
 		}
 		if(menu[YNFORM].selected()==2){
 			menu[YNFORM].setViewMode(HIDE);
+			cartoonJson.talkmode=false;
 			phase=SHOPPING;
 		}
 	}
 	if(key.x && !key_stop(key.x)){
 		menu[YNFORM].setViewMode(HIDE);
+		cartoonJson.talkmode=false;
 		phase=SHOPPING;
 	}
 	if(key.up && !key_wait(key.up))menu[YNFORM].cursorUp();
@@ -183,16 +187,19 @@ void keyBuying(){
 					gd.bought[menu[SHOPPING].selected()]=true;
 					gd.hazia2=price[menu[SHOPPING].selected()];
 					save_index();
+					cartoonJson.talkmode=false;
 				}
 			}
 		}
 		if(menu[YNFORM].selected()==2){
 			menu[YNFORM].setViewMode(HIDE);
+			cartoonJson.talkmode=false;
 			phase=SHOPPING;
 		}
 	}
 	if(key.x && !key_stop(key.x)){
 		menu[YNFORM].setViewMode(HIDE);
+		cartoonJson.talkmode=false;
 		phase=SHOPPING;
 	}
 	if(key.up && !key_wait(key.up))menu[YNFORM].cursorUp();
@@ -390,7 +397,7 @@ void drawPlayerInHaziaShop(SDL_Surface* scr){
 }
 
 void drawHaziasInYourPocket(SDL_Surface* scr){
-	if(phase==SHOPPING || phase==BUYING || phase==SELLING){
+	if((phase==SHOPPING || phase==BUYING || phase==SELLING) && !cartoonJson.talkmode){
 		drawText2(scr,230,400,text[MIYAZAKITEXT+6]);
 		int a=1;
 		for(int i=0 ; i<10 ; i++){

@@ -40,111 +40,169 @@ void loadEncodingFiles(){
 }
 
 void freeEncodingFiles(){
-	delete [] E28XXX;
-	delete [] E38XXX;
-	delete [] E48XXX;
-	delete [] E58XXX;
-	delete [] E68XXX;
-	delete [] E78XXX;
-	delete [] E88XXX;
-	delete [] E98XXX;
-	delete [] EE8XXX;
-	delete [] EF8XXX;
-	delete [] CXXX;
+	if(E28XXX){
+		delete [] E28XXX;
+		E28XXX=NULL;
+	}
+	if(E38XXX){
+		delete [] E38XXX;
+		E38XXX=NULL;
+	}
+	if(E48XXX){
+		delete [] E48XXX;
+		E48XXX=NULL;
+	}
+	if(E58XXX){
+		delete [] E58XXX;
+		E58XXX=NULL;
+	}
+	if(E68XXX){
+		delete [] E68XXX;
+		E68XXX=NULL;
+	}
+	if(E78XXX){
+		delete [] E78XXX;
+		E78XXX=NULL;
+	}
+	if(E88XXX){
+		delete [] E88XXX;
+		E88XXX=NULL;
+	}
+	if(E98XXX){
+		delete [] E98XXX;
+		E98XXX=NULL;
+	}
+	if(EE8XXX){
+		delete [] EE8XXX;
+		EE8XXX=NULL;
+	}
+	if(EF8XXX){
+		delete [] EF8XXX;
+		EF8XXX=NULL;
+	}
+	if(CXXX){
+		delete [] CXXX;
+		CXXX=NULL;
+	}
 }
 
-void UTF8toSJIS(char *s){
-	char *pointer=s;
+void UTF8toLatin(char *s){
+	int pointer=0;
 	for(int i=0 ; i<200 ; i++){
-		if(*pointer==0){
+		if(pointer>=200 || s[pointer]==0){
 			s[i]=0;
 			break;
 		}
-		if(*pointer>=-64 && *pointer<=-33){
-			int n=(64+*pointer)*64+(128+*(pointer+1));
+		if(s[pointer]==-61){
+			pointer++;
+			s[i]=s[pointer]+64;
+		}else{
+			s[i]=s[pointer];
+		}
+		pointer++;
+	}
+}
+
+void UTF8toSJIS(char *s){
+	int pointer=0;
+	for(int i=0 ; i<200 ; i++){
+		if(pointer>=200 || s[pointer]==0){
+			s[i]=0;
+			break;
+		}
+		if(i<199 && pointer<199 && s[pointer]>=-64 && s[pointer]<=-33){
+			int n=(64+s[pointer])*64+(128+s[pointer+1]);
 			s[i]=CXXX[n*2];
 			s[i+1]=CXXX[n*2+1];
 			i++;
 			pointer+=2;
 		}
-		else if(*pointer==-30){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+		else if(i<199 && pointer<198 && s[pointer]==-30){
+			int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
 			s[i]=E28XXX[n*2];
 			s[i+1]=E28XXX[n*2+1];
 			i++;
 			pointer+=3;
 		}
-		else if(*pointer==-29){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+		else if(i<199 && pointer<198 && s[pointer]==-29){
+			int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
 			s[i]=E38XXX[n*2];
 			s[i+1]=E38XXX[n*2+1];
 			i++;
 			pointer+=3;
 		}
-		else if(*pointer==-28){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+		else if(i<199 && pointer<198 && s[pointer]==-28){
+			int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
 			s[i]=E48XXX[n*2];
 			s[i+1]=E48XXX[n*2+1];
 			i++;
 			pointer+=3;
 		}
-		else if(*pointer==-27){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+		else if(i<199 && pointer<198 && s[pointer]==-27){
+			int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
 			s[i]=E58XXX[n*2];
 			s[i+1]=E58XXX[n*2+1];
 			i++;
 			pointer+=3;
 		}
-		else if(*pointer==-26){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+		else if(i<199 && pointer<198 && s[pointer]==-26){
+			int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
 			s[i]=E68XXX[n*2];
 			s[i+1]=E68XXX[n*2+1];
 			i++;
 			pointer+=3;
 		}
-		else if(*pointer==-25){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+		else if(i<199 && pointer<198 && s[pointer]==-25){
+			int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
 			s[i]=E78XXX[n*2];
 			s[i+1]=E78XXX[n*2+1];
 			i++;
 			pointer+=3;
 		}
-		else if(*pointer==-24){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+		else if(i<199 && pointer<198 && s[pointer]==-24){
+			int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
 			s[i]=E88XXX[n*2];
 			s[i+1]=E88XXX[n*2+1];
 			i++;
 			pointer+=3;
 		}
-		else if(*pointer==-23){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+		else if(i<199 && pointer<198 && s[pointer]==-23){
+			int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
 			s[i]=E98XXX[n*2];
 			s[i+1]=E98XXX[n*2+1];
 			i++;
 			pointer+=3;
 		}
-		else if(*pointer==-18){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
+		else if(i<199 && pointer<198 && s[pointer]==-18){
+			int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
 			s[i]=EE8XXX[n*2];
 			s[i+1]=EE8XXX[n*2+1];
 			i++;
 			pointer+=3;
 		}
-		else if(*pointer==-17){
-			int n=(128+*(pointer+1))*64+(128+*(pointer+2));
-			s[i]=EF8XXX[n*2];
-			s[i+1]=EF8XXX[n*2+1];
-			i++;
-			pointer+=3;
+		else if(i<199 && pointer<198 && s[pointer]==-17){
+			if(s[pointer+1]==-67){
+				s[i]=s[pointer+2];
+				pointer+=3;
+			}
+			else if(s[pointer+1]==-66){
+				s[i]=s[pointer+2]+64;
+				pointer+=3;
+			}else{
+				int n=(128+s[pointer+1])*64+(128+s[pointer+2]);
+				s[i]=EF8XXX[n*2];
+				s[i+1]=EF8XXX[n*2+1];
+				i++;
+				pointer+=3;
+			}
 		} else {
-			s[i]=*pointer;
+			s[i]=s[pointer];
 			pointer++;
 		}
 	}
 }
 
 void load_text(){
-	loadEncodingFiles();
 	size_t fc=0;
 
 	for(int i=0 ; i<1000 ; i++)for(int j=0 ; j<61 ; j++)for(int k=0 ; k<2 ; k++){
@@ -172,11 +230,12 @@ void load_text(){
 	}
 	for(int i=0 ; i<7 ; i++){
 		UTF8toSJIS(weekChar[i][0]);
+		UTF8toLatin(weekChar[i][1]);
 	}
 	for(int i=0 ; i<1000 ; i++){
 		UTF8toSJIS(text[i].str[0]);
+		UTF8toLatin(weekChar[i][1]);
 	}
-	freeEncodingFiles();
 }
 
 void load_season(){

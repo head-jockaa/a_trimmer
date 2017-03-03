@@ -172,11 +172,11 @@ void initGame2(){
 		setManekiData();
 	}
 
-	if(phase!=READY){
-		sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
-		loadCartoon(&cartoonJson,str);
-	}
 	if(gd.game_mode==STORYMODE){
+		if(phase!=READY){
+			sprintf_s(str,"file/data/cartoon/weekly%d.json",gd.week);
+			loadCartoon(&cartoonJson,str);
+		}
 		if(gd.hour>=22){
 			sprintf_s(str,"file/bgm/%d.ogg",20+gd.randomNumber%3);
 		}else{
@@ -185,7 +185,6 @@ void initGame2(){
 		bgm=Mix_LoadMUS(str);
 	}
 	loadCartoon(&manekitvJson,"file/data/cartoon/maneki_tv.json");
-	readCartoon(&manekitvJson,0);
 
 	if(MAP3D)make3dview(gd.x,gd.y,gd.ant_dir);
 	else{
@@ -2516,6 +2515,7 @@ void timerGame(){
 	else if(phase==PLAYING){
 		if(MAP3D){
 			if(talk_3dtv && count==300){
+				loadCartoon(&talkingJson, "file/data/cartoon/miyazaki.json");
 				readCartoon(&talkingJson,23);
 				phase=TALKING;
 				talk_3dtv=false;

@@ -1109,36 +1109,48 @@ String jummingText(String s, int array_num, int rcv, int mg_rcv){
 	return s;
 }
 
-void padSpace(JsonData *json, int n, int k, int x){
-	int a;
-	a=0;
-	for(int i=0 ; i<100 ; i++){
-		if(json->talk[n].str[k][i]==0)break;
-		else if(json->talk[n].str[k][i]==10){
-			if(a==0){
-				for(int ii=i ; ii<99 ; ii++){
-					json->talk[n].str[k][ii]=json->talk[n].str[k][ii+1];
-					json->talk[n].head[k][ii]=json->talk[n].head[k][ii+1];
+void padSpace(String &st, int columnSize){
+	int column;
+	for(int k=0 ; k<2 ; k++){
+		column=0;
+		for(int i=0 ; i<200 ; i++){
+			if(st.str[k][i]==0)break;
+			else if(st.str[k][i]=='\\' && st.str[k][i+1]=='n'){
+				if(column==0){
+					for(int ii=i ; ii<198 ; ii++){
+						st.str[k][ii]=st.str[k][ii+2];
+						st.head[k][ii]=st.head[k][ii+2];
+					}
+					i--;
+				}else{
+					int sp=columnSize-column;
+					if(sp==1){
+						st.str[k][i]=' ';
+						for(int ii=i+1 ; ii<200 ; ii++){
+							if(ii+1<=199){
+								st.str[k][ii]=st.str[k][ii+1];
+								st.head[k][ii]=st.head[k][ii+1];
+							}
+						}
+					}else{
+						for(int ii=199 ; ii>=i ; ii--){
+							if(ii+sp-2<=199){
+								st.str[k][ii+sp-2]=st.str[k][ii];
+								st.head[k][ii+sp-2]=st.head[k][ii];
+							}
+						}
+						for(int ii=0 ; ii<sp ; ii++){
+							st.str[k][i+ii]=' ';
+							st.head[k][i+ii]=true;
+						}
+					}
+					i+=sp-1;
+					column=0;
 				}
-				i--;
 			}else{
-				int sp=x-a;
-				for(int ii=99-sp+1 ; ii>=i ; ii--){
-					if(ii-i!=0){
-						json->talk[n].str[k][ii+sp-1]=json->talk[n].str[k][ii];
-						json->talk[n].head[k][ii+sp-1]=json->talk[n].head[k][ii];
-					}
-					if(ii-i<sp){
-						json->talk[n].str[k][ii]=' ';
-						json->talk[n].head[k][ii]=true;
-					}
-				}
-				i+=sp-1;
-				a=0;
+				column++;
+				if(column>=columnSize)column=0;
 			}
-		}else{
-			a++;
-			if(a>=x)a=0;
 		}
 	}
 }

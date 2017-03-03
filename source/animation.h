@@ -44,7 +44,7 @@ struct JsonDataReader{
 };
 
 struct JsonReader{
-	JsonDataReader set,move,talk,image,bgm,loadText,sound,loadSound;
+	JsonDataReader set,move,talk,image,bgm,sound,loadSound;
 	char basename[100];
 	JsonDataReader *which;
 	bool sync,hasSync,hasResetTimer,end;
@@ -66,8 +66,8 @@ struct JsonData{
 	Mix_Chunk **sound;
 	Image **bg;
 	JsonReader jr;
-	int talk_size,talk_open_count,talk_count,text_count,face_count,shake_count;
-	String *talk;
+	int talk_size,talk_open_count,text_count,face_count,shake_count;
+	String talk;
 };
 extern JsonData cartoonJson, talkingJson, manekitvJson;
 

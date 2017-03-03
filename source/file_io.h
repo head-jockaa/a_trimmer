@@ -7,6 +7,7 @@ extern char hex[16];
 
 void loadEncodingFiles();
 void freeEncodingFiles();
+void UTF8toLatin(char *s);
 void UTF8toSJIS(char *s);
 
 void load_text();

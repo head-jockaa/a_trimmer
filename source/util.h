@@ -137,6 +137,7 @@ void drawText2(SDL_Surface* scr, int x, int y, String str, int strl, Uint8 a);
 void drawText2_lang(SDL_Surface* scr, int x, int y, String st, int l, Uint8 a, int lang);
 void putHeadMark(String &s);
 String jummingText(String s, int strl, int rcv, int mg_rcv);
+void padSpace(String &st, int x);
 
 struct Season{
 	String name;
