@@ -6,10 +6,6 @@
     {"id":0, "file":"file/se/25.wav"}
   ],
   "bgm": {"file":"file/bgm/4.ogg"},
-  "load-text": [
-    {"lang":"jp", "file":"file/data/story/talk2_jp.dat"},
-    {"lang":"en", "file":"file/data/story/talk2_en.dat"}
-  ],
   "set":[
     {"id":0, "x":0, "y":40, "w":640, "h":400, "col":"000000", "note":"night sky"},
     {"id":1, "x":-20, "y":40, "ix":0, "iy":340, "w":680, "h":400, "a":192, "note":"cloud"},
@@ -41,7 +37,10 @@
     {"id":8, "x":0}
   ],
   "talk":[
-    {"face":1, "text":0}
+    {"face":1, "text":{
+      "jp":"よし、今週もたくさん釣るぞ！",
+      "en":"Alright, I'll fish for them\nthis week too."
+    }}
   ]
 }}, {"time":0, "act":{
   "reset":[5, 8],

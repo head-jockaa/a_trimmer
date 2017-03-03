@@ -7,10 +7,6 @@
     {"id":0, "file":"file/se/14.wav"},
     {"id":1, "file":"file/se/25.wav"}
   ],
-  "load-text": [
-    {"lang":"jp", "file":"file/data/story/talk1_jp.dat"},
-    {"lang":"en", "file":"file/data/story/talk1_en.dat"}
-  ],
   "set":[
     {"id":0, "x":260, "y":40, "ix":280, "iy":0, "w":320, "h":400, "note":"background"},
     {"id":1, "x":180, "y":160, "ix":600, "iy":0, "w":160, "h":280, "note":"rotation cat"},
@@ -65,13 +61,34 @@
     {"id":11, "slide":{"a":{"step":13, "from":-520, "to":260, "pos":-390}}}
   ],
   "talk":[
-    {"face":1, "text":26},
-    {"face":6, "text":27},
-    {"face":6, "text":28},
-    {"face":1, "text":29},
-    {"face":6, "text":30},
-    {"face":6, "text":31},
-    {"face":1, "text":32}
+    {"face":1, "text":{
+      "jp":"だれた、きさまは!?",
+      "en":"Who are you, buddy!?"
+    }},
+    {"face":6, "text":{
+      "jp":"おいらは回るセールスマンだ。",
+      "en":"Me's a turning salesman."
+    }},
+    {"face":6, "text":{
+      "jp":"お前の持っているアニメと\nおいらのハジアを交換しないか？",
+      "en":"Don't you exchange\nanime you have with my Hazia?"
+    }},
+    {"face":1, "text":{
+      "jp":"え？",
+      "en":"Eh?"
+    }},
+    {"face":6, "text":{
+      "jp":"ハジアですよ、ハ・ジ・ア。",
+      "en":"This is Hazia, ha-zi-a."
+    }},
+    {"face":6, "text":{
+      "jp":"うちの店で使えるクーポン券の\nような物だ。\nどうだ？",
+      "en":"It's things like coupons\nyou can use at our shop.\nHow about?"
+    }},
+    {"face":1, "text":{
+      "jp":"まあ、欲しければあげるけど。",
+      "en":"Well, I'll give them\nif you want."
+    }}
   ],
   "end":true
 
@@ -148,9 +165,18 @@
     {"id":11, "slide":{"a":{"step":-13, "from":-520, "to":260, "pos":260}}}
   ],
   "talk":[
-    {"face":6, "text":33},
-    {"face":6, "text":34},
-    {"face":1, "text":35}
+    {"face":6, "text":{
+      "jp":"やったー、家に帰ったら\n英語に翻訳しよう！",
+      "en":"I did ittt,\nI'll translate into English\nafter I get home!"
+    }},
+    {"face":6, "text":{
+      "jp":"あ、それから、\nうちの店もよろしくね。",
+      "en":"Oh, and then,\nlook forward to our shop, huh."
+    }},
+    {"face":1, "text":{
+      "jp":"えへへ、\nハジアをもらっちゃった。",
+      "en":"Tee-hee, I ended up getting\nHazia."
+    }}
   ]
 }}, {"time":0, "act":{
   "move":[
@@ -196,7 +222,10 @@
    ],
   "sound":{"id":1, "ch":0},
   "talk":[
-    {"face":1, "text":36}
+    {"face":1, "text":{
+      "jp":"よし、今日も大漁！",
+      "en":"Good,\ngot a large catch today, too!"
+    }}
   ]
 }}, {"time":0, "act":{
   "move":[

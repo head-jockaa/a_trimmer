@@ -7,10 +7,6 @@
     {"id":0, "file":"file/se/14.wav"},
     {"id":1, "file":"file/se/25.wav"}
   ],
-  "load-text": [
-    {"lang":"jp", "file":"file/data/story/talk7_jp.dat"},
-    {"lang":"en", "file":"file/data/story/talk7_en.dat"}
-  ],
   "set":[
     {"id":0, "x":260, "y":40, "ix":280, "iy":0, "w":320, "h":400, "note":"background"},
     {"id":1, "x":180, "y":160, "ix":600, "iy":0, "w":160, "h":280, "note":"rotation cat"},
@@ -65,7 +61,10 @@
     {"id":11, "slide":{"a":{"step":13, "from":-520, "to":260, "pos":-390}}}
   ],
   "talk":[
-    {"face":6, "text":1}
+    {"face":6, "text":{
+      "jp":"やあ、また会ったね。\n今日もハジアと交換しよう。",
+      "en":"Hi, we meet again.\nLet's exchange with Hazia\ntoday too."
+    }}
   ],
   "end":true
 
@@ -142,7 +141,10 @@
     {"id":11, "slide":{"a":{"step":-13, "from":-520, "to":260, "pos":260}}}
   ],
   "talk":[
-    {"face":6, "text":2}
+    {"face":6, "text":{
+      "jp":"やったー、家に帰ったら\nドイツ語に翻訳しよう！",
+      "en":"I did ittt,\nI'll translate into German\nafter I get home!"
+    }}
   ]
 }}, {"time":0, "act":{
   "move":[
@@ -188,7 +190,10 @@
    ],
   "sound":{"id":1, "ch":0},
   "talk":[
-    {"face":1, "text":3}
+    {"face":1, "text":{
+      "jp":"よし、今日も大漁！",
+      "en":"Good,\ngot a large catch today, too!"
+    }}
   ]
 }}, {"time":0, "act":{
   "move":[

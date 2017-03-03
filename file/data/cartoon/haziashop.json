@@ -8,10 +8,6 @@
     {"id":1, "file":"file/se/17.wav"},
     {"id":2, "file":"file/se/19.wav"},
     {"id":3, "file":"file/se/25.wav"}
-  ],
-  "load-text": [
-    {"lang":"jp", "file":"file/data/story/talk0_jp.dat"},
-    {"lang":"en", "file":"file/data/story/talk0_en.dat"}
   ]
 }}, {"index":1, "act":{
   "reset":[0,1,2,3,4],
@@ -40,44 +36,92 @@
     {"id":4, "flip":{"in":5, "iy":280, "n":2}}
   ],
   "talk":[
-    {"face":1, "text":80},
-    {"face":6, "text":81},
-    {"face":6, "text":82}
+    {"face":1, "text":{
+      "jp":"誰だ、きさまは!?",
+      "en":"Who are you, buddy!?"
+    }},
+    {"face":6, "text":{
+      "jp":"おいらは、回るセールスマンだ。",
+      "en":"Me's a turning salesman."
+    }},
+    {"face":6, "text":{
+      "jp":"集めたハジアでお買い物が\nできるよ。",
+      "en":"You can do your shopping with Hazias you've gathered."
+    }}
   ],
   "end":true
 
 }}, {"index":3, "act":{
   "talk":[
-    {"face":6, "text":83}
+    {"face":6, "text":{
+      "jp":"おいおい、そんなくだらない物に\n大金を注ぎ込むつもりか？",
+      "en":"Hey there, do you intend to\nsink a large sum into\nsuch trifles?"
+    }}
   ],
   "end":true
 }}, {"index":4, "act":{
   "talk":[
-    {"face":6, "text":84},
-    {"face":6, "text":85}
+    {"face":6, "text":{
+      "jp":"そんな魂の無い答えをしても\nしょうがないよ。",
+      "en":"It's no use giving\na spiritless answer like that."
+    }},
+    {"face":6, "text":{
+      "jp":"だから結局、宮さんが\nちょっかいを出すことに\nなるんじゃないか。",
+      "en":"That's why Miya-san is\nto poke his nose into it\nafter all, I should think."
+    }}
   ],
   "end":true
 }}, {"index":5, "act":{
   "talk":[
-    {"face":6, "text":86}
+    {"face":6, "text":{
+      "jp":"ジブラーなら当然その選択肢を\n選ぶ。",
+      "en":"Naturally, Ghibler should\nchoose this option."
+    }}
   ],
   "end":true
 
 }}, {"index":6, "act":{
   "talk":[
-    {"face":6, "text":87},
-    {"face":6, "text":88},
-    {"face":1, "text":89},
-    {"face":6, "text":90},
-    {"face":1, "text":91}
+    {"face":6, "text":{
+      "jp":"音楽素材に比べて効果音素材は\n作者が少ないから、",
+      "en":"Compared with music materials,\nthere are few authors of\nsound effect materials."
+    }},
+    {"face":6, "text":{
+      "jp":"あまり選ぶ余地がないんだよね。",
+      "en":"Surely I don't have much\nchoice."
+    }},
+    {"face":1, "text":{
+      "jp":"自分で作れないのか？",
+      "en":"Can't you make them\nby yourself?"
+    }},
+    {"face":6, "text":{
+      "jp":"うーん、オイラも効果音を\n人間の声でやろうかなー。",
+      "en":"Hmm, wonder if me's a should\nmake sound effects with\na voice of human, too."
+    }},
+    {"face":1, "text":{
+      "jp":"まあ、その前にいい効果音を\n探すのが先だ。",
+      "en":"Well, you first search for\ngood sound effects\nbefore that."
+    }}
   ],
   "end":true
 }}, {"index":7, "act":{
   "talk":[
-    {"face":6, "text":92},
-    {"face":1, "text":93},
-    {"face":6, "text":94},
-    {"face":1, "text":95}
+    {"face":6, "text":{
+      "jp":"ぐふふ、もうかった。",
+      "en":"Bwe-hehehe, I made a profit."
+    }},
+    {"face":1, "text":{
+      "jp":"そのお金で、もっとキレイな家を買ったらどうだ？",
+      "en":"Why not buy more fine house\nwith that money?"
+    }},
+    {"face":6, "text":{
+      "jp":"失礼ながら、閣下は、\nタルに住んだ哲人を\nご存知でしょうか。",
+      "en":"Sir, we philosophers can be\ncontent with just a barrel."
+    }},
+    {"face":1, "text":{
+      "jp":"ああ、わかったよ。\nもっといい事に使うといい。",
+      "en":"Ah, I see. You may want to\nuse it for better thing."
+    }}
   ],
   "end":true
 
@@ -89,8 +133,14 @@
     {"id":2, "x":0, "y":360, "w":640, "h":120, "col":"000000", "note":"the rest"}
   ],
   "talk":[
-    {"face":6, "text":96},
-    {"face":1, "text":97}
+    {"face":6, "text":{
+      "jp":"あ、それはね、\n信州のおやゆびりんご姫\nっていうんだ。",
+      "en":"Oh, guess what,\nit's called Apple Thumbelina\nin Shinshu."
+    }},
+    {"face":1, "text":{
+      "jp":"へえー、今度長野に\n行ってみよう。",
+      "en":"Huh, I'll visit Nagano\nanother time."
+    }}
   ],
   "end":true
 
@@ -102,8 +152,14 @@
     {"id":2, "x":0, "y":360, "w":640, "h":120, "col":"000000", "note":"the rest"}
   ],
   "talk":[
-    {"face":1, "text":98},
-    {"face":1, "text":99}
+    {"face":1, "text":{
+      "jp":"ポスターの下側に\nURLが記されている。",
+      "en":"A URL is noted\nat the bottom of a poster."
+    }},
+    {"face":1, "text":{
+      "jp":"arancia-project.com",
+      "en":"arancia-project.com"
+    }}
   ],
   "end":true
 
@@ -117,16 +173,46 @@
   ]
 }}, {"time":40, "act":{
   "talk":[
-    {"face":1, "text":100},
-    {"face":1, "text":101},
-    {"face":8, "text":102},
-    {"face":1, "text":103},
-    {"face":8, "text":104},
-    {"face":1, "text":105},
-    {"face":8, "text":106},
-    {"face":8, "text":107},
-    {"face":8, "text":108},
-    {"face":6, "text":109}
+    {"face":1, "text":{
+      "jp":"つかぬ事を聞くけど…",
+      "en":"Incidentally, let me ask..."
+    }},
+    {"face":1, "text":{
+      "jp":"マップの上を歩いていると、\nたまに誰かが殴ってくる気が\nするんだ。",
+      "en":"When I walk on the map,\nI feel someone come knocking\nme once in a while."
+    }},
+    {"face":8, "text":{
+      "jp":"それはもしかして、\n埼玉県の秩父の当たり？",
+      "en":"Is that perhaps\naround Chichibu in Saitama\nprefecture?"
+    }},
+    {"face":1, "text":{
+      "jp":"うん、そうかも。",
+      "en":"Yeah, maybe."
+    }},
+    {"face":8, "text":{
+      "jp":"あそこは出るよ。\nとある女の子の幽霊が。",
+      "en":"I'm sure it's haunted there.\nWith a ghost of a certain girl"
+    }},
+    {"face":1, "text":{
+      "jp":"見たのか？",
+      "en":"Have you seen?"
+    }},
+    {"face":8, "text":{
+      "jp":"見たことはないが、\n触ったことはある。",
+      "en":"I've never seen\nbut I've touched her."
+    }},
+    {"face":8, "text":{
+      "jp":"成仏する手前であれば、\nおそらく姿も見えるだろう。",
+      "en":"Probably we can also see her\njust before she's called\nhome to Heaven."
+    }},
+    {"face":8, "text":{
+      "jp":"おじさん、メンマひとつ！",
+      "en":"Sir, one memma!"
+    }},
+    {"face":6, "text":{
+      "jp":"はい、ひとつ30ハジア！",
+      "en":"Here, sir, 30 hazias each!"
+    }}
   ]
 }}, {"time":0, "act":{
   "set":[
@@ -148,20 +234,35 @@
 
 }}, {"index":11, "act":{
   "talk":[
-    {"face":14, "text":110}
+    {"face":14, "text":{
+      "jp":"いらっしゃいませ。\n本日お泊りのお客様ですね。",
+      "en":"Welcome.\nYou stay here with us today."
+    }}
   ],
   "end":true
 }}, {"index":12, "act":{
   "talk":[
-    {"face":14, "text":110}
+    {"face":14, "text":{
+      "jp":"いらっしゃいませ。\n本日お泊りのお客様ですね。",
+      "en":"Welcome.\nYou stay here with us today."
+    }}
   ],
   "end":true
 
 }}, {"index":13, "act":{
   "talk":[
-    {"face":1, "text":111},
-    {"face":1, "text":112},
-    {"face":14, "text":113}
+    {"face":1, "text":{
+      "jp":"宿屋システムとか、\nいらない気がするけど…",
+      "en":"I don't suppose we need\nthe inn system and stuff..."
+    }},
+    {"face":1, "text":{
+      "jp":"泊まるとどうなるの？",
+      "en":"What happens if I stay here?"
+    }},
+    {"face":14, "text":{
+      "jp":"特にどうもなりませんので\n安心してお休みくださいな。",
+      "en":"Nothing special will happen,\nwell, relax and have a good\nsleep, please."
+    }}
   ]
 }}, {"time":0, "act":{
   "set":[
@@ -219,204 +320,348 @@
     {"id":4, "slide":{"x":{"step":-1, "from":-100, "to":0, "turnback":false}}, "slide":{"y":{"step":1, "from":0, "to":100, "turnback":false}}, "slide":{"a":{"step":-2.5, "from":0, "to":250, "pos":250, "turnback":false}}}
   ],
   "talk":[
-    {"face":14, "text":114},
-    {"face":1, "text":115},
-    {"face":14, "text":116},
-    {"face":14, "text":117},
-    {"face":14, "text":118},
-    {"face":1, "text":119}
+    {"face":14, "text":{
+      "jp":"またのお越しをお待ちして\nおります。",
+      "en":"We hope to see you again soon."
+    }},
+    {"face":1, "text":{
+      "jp":"このイベントによって、\n何の変化も起きないのだろうか。",
+      "en":"I wonder if this event does\nnot make any changes."
+    }},
+    {"face":14, "text":{
+      "jp":"変化って？",
+      "en":"Changes? You mean..."
+    }},
+    {"face":14, "text":{
+      "jp":"朝起きたら、\nあそこの部分が変わってるとか、\nですか？",
+      "en":"Say, my parts will change\nwhen I get up in the morning?"
+    }},
+    {"face":14, "text":{
+      "jp":"目が覚めるたびに、そんなの\nいやじゃないですか。",
+      "en":"Every time I wake up,\nI don't like such.\nDon't you think so?"
+    }},
+    {"face":1, "text":{
+      "jp":"ですよねー",
+      "en":"No kiddinggg"
+    }}
   ],
   "end":true
 
 }}, {"index":14, "act":{
   "talk":[
-    {"face":14, "text":120},
-    {"face":1, "text":121},
-    {"face":14, "text":122},
-    {"face":14, "text":123},
-    {"face":1, "text":124},
-    {"face":1, "text":125}
+    {"face":14, "text":{
+      "jp":"うち、まねきTVを契約してたん\nですよ。",
+      "en":"Actually we had contracted\nwith Maneki TV."
+    }},
+    {"face":1, "text":{
+      "jp":"まねきTV……\nどこかで聞いたような。",
+      "en":"Maneki TV...\nI've heard that before."
+    }},
+    {"face":14, "text":{
+      "jp":"あれのおかげで北陸でも\nテレビ三昧だったのに、",
+      "en":"We owe our luxury TV life\nto that one in Hokuriku\nas well, but.."
+    }},
+    {"face":14, "text":{
+      "jp":"結局サービスが打ち切りになって\n川に捨てましたけどね。",
+      "en":"its service was discontinued\nafter all, so I threw it into\nthe river, you know."
+    }},
+    {"face":1, "text":{
+      "jp":"すると、今頃は海の上を\n漂っているのか。",
+      "en":"I guess that means\nit's drifting on the sea\nby now."
+    }},
+    {"face":1, "text":{
+      "jp":"マップをすみずみまで探せば\n見つかるかも。",
+      "en":"Maybe I can find it\nif I look for every corner of\nthe map."
+    }}
   ],
   "end":true
 
 }}, {"index":15, "act":{
   "talk":[
-    {"face":1, "text":126}
+    {"face":6, "text":{
+      "jp":"骨董マニア向け。",
+      "en":"For antique maniacs."
+    }}
   ],
   "end":true
 }}, {"index":16, "act":{
   "talk":[
-    {"face":1, "text":127}
+    {"face":6, "text":{
+      "jp":"細長くて面倒くさい。",
+      "en":"Long, narrow and troublesome."
+    }}
   ],
   "end":true
 }}, {"index":17, "act":{
   "talk":[
-    {"face":1, "text":128}
+    {"face":6, "text":{
+      "jp":"空きチャンネルが多いと寂しい。",
+      "en":"Feel lonely if many channels\nare empty."
+    }}
   ],
   "end":true
 }}, {"index":18, "act":{
   "talk":[
-    {"face":1, "text":129}
+    {"face":6, "text":{
+      "jp":"目指せ中継局マスター！",
+      "en":"Aim to be a relay-sta master!"
+    }}
   ],
   "end":true
 }}, {"index":19, "act":{
   "talk":[
-    {"face":1, "text":130}
+    {"face":6, "text":{
+      "jp":"RPGのマップみたいな画面になる 。",
+      "en":"It becomes the screen like\nthe map of RPG."
+    }}
   ],
   "end":true
 }}, {"index":20, "act":{
   "talk":[
-    {"face":1, "text":131}
+    {"face":6, "text":{
+      "jp":"穴場を探せ！",
+      "en":"Search for great spots!"
+    }}
   ],
   "end":true
 }}, {"index":21, "act":{
   "talk":[
-    {"face":1, "text":132}
+    {"face":6, "text":{
+      "jp":"二次元で分かる中継局一覧。",
+      "en":"The relay stations' list you\ncan tell by two dimentions."
+    }}
   ],
   "end":true
 }}, {"index":22, "act":{
   "talk":[
-    {"face":1, "text":133}
+    {"face":6, "text":{
+      "jp":"全地域のアニメ放映時間を並べて表示。",
+      "en":"Arrange and display the times of broadcasting anime in the\nwhole area."
+    }}
   ],
   "end":true
 }}, {"index":23, "act":{
   "talk":[
-    {"face":1, "text":134}
+    {"face":6, "text":{
+      "jp":"電波が見えるレーダー。",
+      "en":"The radar that makes the radiowave visible."
+    }}
   ],
   "end":true
 }}, {"index":24, "act":{
   "talk":[
-    {"face":1, "text":135}
+    {"face":6, "text":{
+      "jp":"スーパーマリオカートっぽい3D。",
+      "en":"Super Mario Kart-like 3D."
+    }}
   ],
   "end":true
 }}, {"index":25, "act":{
   "talk":[
-    {"face":1, "text":136}
+    {"face":6, "text":{
+      "jp":"NHKチャンネルしか無い中継局を\n消す。",
+      "en":"It removes the relay stations\nthat have only NHK's channels."
+    }}
   ],
   "end":true
 }}, {"index":26, "act":{
   "talk":[
-    {"face":1, "text":137}
+    {"face":6, "text":{
+      "jp":"(余談)\nドラッカーとコトラーは顔が\n似てる。",
+      "en":"(digression)\nDrucker and Kotler have\nsimilar faces."
+    }}
   ],
   "end":true
 }}, {"index":27, "act":{
   "talk":[
-    {"face":1, "text":138}
+    {"face":6, "text":{
+      "jp":"放課後の腹ごしらえに。\nティータイムのおやつに。",
+      "en":"For satisfying your hunger\nafter school.\nFor a teatime snack."
+    }}
   ],
   "end":true
 }}, {"index":28, "act":{
   "talk":[
-    {"face":1, "text":139}
+    {"face":6, "text":{
+      "jp":"それっぽいキー操作で加速できる。",
+      "en":"You can accelerate by\nkey-control like that."
+    }}
   ],
   "end":true
 }}, {"index":29, "act":{
   "talk":[
-    {"face":1, "text":140}
+    {"face":6, "text":{
+      "jp":"山を登ると減速する。",
+      "en":"Climbing a mountain causes\ndeceleration."
+    }}
   ],
   "end":true
 }}, {"index":30, "act":{
   "talk":[
-    {"face":1, "text":141}
+    {"face":6, "text":{
+      "jp":"ゲーマーの心をくすぐる、\nぼくらのアイドル。",
+      "en":"Our idol who tickles\ngamers' heart."
+    }}
   ],
   "end":true
 }}, {"index":31, "act":{
   "talk":[
-    {"face":1, "text":142}
+    {"face":6, "text":{
+      "jp":"画面がかっこよくなる。",
+      "en":"The screen gets cool."
+    }}
   ],
   "end":true
 }}, {"index":32, "act":{
   "talk":[
-    {"face":6, "text":143}
+    {"face":6, "text":{
+      "jp":"F10キーでKCTVロゴに変えられる。",
+      "en":"You can change it into\nKCTV logo by F10 key."
+    }}
   ],
   "end":true
 }}, {"index":33, "act":{
   "talk":[
-    {"face":6, "text":144}
+    {"face":6, "text":{
+      "jp":"ゲーム中にメニューを開いて\n「アンテナ」を選ぶ。",
+      "en":"Open the menu and choose\n\"Antenna\" during the game."
+    }}
   ],
   "end":true
 }}, {"index":34, "act":{
   "talk":[
-    {"face":6, "text":145}
+    {"face":6, "text":{
+      "jp":"ゲーム中にメニューを開いて\n「アンテナ」を選ぶ。",
+      "en":"Open the menu and choose\n\"Antenna\" during the game."
+    }}
   ],
   "end":true
 }}, {"index":35, "act":{
   "talk":[
-    {"face":6, "text":146}
+    {"face":6, "text":{
+      "jp":"ゲーム中にメニューを開いて\n「アンテナ」を選ぶ。",
+      "en":"Open the menu and choose\n\"Antenna\" during the game."
+    }}
   ],
   "end":true
 }}, {"index":36, "act":{
   "talk":[
-    {"face":6, "text":147}
+    {"face":6, "text":{
+      "jp":"ゲーム中にメニューを開いて\n「アンテナ」を選ぶ。",
+      "en":"Open the menu and choose\n\"Antenna\" during the game."
+    }}
   ],
   "end":true
 }}, {"index":37, "act":{
   "talk":[
-    {"face":6, "text":148}
+    {"face":6, "text":{
+      "jp":"「設定」の「マップ拡大」で\n選べる。",
+      "en":"You can choose it\nat \"Magnify map\" in \"Config.\""
+    }}
   ],
   "end":true
 }}, {"index":38, "act":{
   "talk":[
-    {"face":6, "text":149}
+    {"face":6, "text":{
+      "jp":"アンテナを使っている時に、\nモード切り換えで選べる。",
+      "en":"When you're using the antenna,\nyou can choose it\nby mode-switching."
+    }}
   ],
   "end":true
 }}, {"index":39, "act":{
   "talk":[
-    {"face":6, "text":150}
+    {"face":6, "text":{
+      "jp":"宮崎館に設置。",
+      "en":"Installed in Miyazaki Museum."
+    }}
   ],
   "end":true
 }}, {"index":40, "act":{
   "talk":[
-    {"face":6, "text":151}
+    {"face":6, "text":{
+      "jp":"宮崎館のモンスターボールの所に追加。",
+      "en":"Added at monsterball's\nplace in Miyazaki Museum."
+    }}
   ],
   "end":true
 }}, {"index":41, "act":{
   "talk":[
-    {"face":6, "text":152}
+    {"face":6, "text":{
+      "jp":"ゲーム中にメニューを開いて\n「アンテナ」を選ぶ。",
+      "en":"Open the menu and choose\n\"Antenna\" during the game."
+    }}
   ],
   "end":true
 }}, {"index":42, "act":{
   "talk":[
-    {"face":6, "text":153}
+    {"face":6, "text":{
+      "jp":"宮崎館に設置。",
+      "en":"Installed in Miyazaki Museum."
+    }}
   ],
   "end":true
 }}, {"index":43, "act":{
   "talk":[
-    {"face":6, "text":154}
+    {"face":6, "text":{
+      "jp":"「設定」に追加。",
+      "en":"Added to \"Config.\""
+    }}
   ],
   "end":true
 }}, {"index":44, "act":{
   "talk":[
-    {"face":6, "text":155}
+    {"face":6, "text":{
+      "jp":"宮崎館に設置。",
+      "en":"Installed in Miyazaki Museum."
+    }}
   ],
   "end":true
 }}, {"index":45, "act":{
   "talk":[
-    {"face":6, "text":156}
+    {"face":6, "text":{
+      "jp":"宮崎館に設置。",
+      "en":"Installed in Miyazaki Museum."
+    }}
   ],
   "end":true
 }}, {"index":46, "act":{
   "talk":[
-    {"face":6, "text":157}
+    {"face":6, "text":{
+      "jp":"「設定」の「加速」で選べる。",
+      "en":"You can choose it at \"accel.\" in \"Config.\""
+    }}
   ],
   "end":true
 }}, {"index":47, "act":{
   "talk":[
-    {"face":6, "text":158}
+    {"face":6, "text":{
+      "jp":"「設定」に追加。",
+      "en":"Added to \"Config.\""
+    }}
   ],
   "end":true
 }}, {"index":48, "act":{
   "talk":[
-    {"face":6, "text":159}
+    {"face":6, "text":{
+      "jp":"宮崎館に設置。",
+      "en":"Installed in Miyazaki Museum."
+    }}
   ],
   "end":true
 }}, {"index":49, "act":{
   "talk":[
-    {"face":6, "text":160}
+    {"face":6, "text":{
+      "jp":"宮崎館に設置。",
+      "en":"Installed in Miyazaki Museum."
+    }}
   ],
   "end":true
 }}, {"index":50, "act":{
   "talk":[
-    {"face":6, "text":161}
+    {"face":6, "text":{
+      "jp":"F10キーを押せ。",
+      "en":"Just press F10 key."
+    }}
   ],
   "end":true
 }}]

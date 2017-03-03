@@ -1,14 +1,25 @@
 [{"date":"Mon, 06:30", "act":{
-  "load-text": [
-    {"lang":"jp", "file":"file/data/story/talk1_jp.dat"},
-    {"lang":"en", "file":"file/data/story/talk1_en.dat"}
-  ],
   "talk":[
-    {"face":1, "text":21},
-    {"face":2, "text":22},
-    {"face":2, "text":23},
-    {"face":1, "text":24},
-    {"face":2, "text":25}
+    {"face":1, "text":{
+      "jp":"そういえば、何か新しい部品が\n付いてるな。",
+      "en":"Speaking of which,\nthere's some new parts on it."
+    }},
+    {"face":2, "text":{
+      "jp":"それはアニメゴーグルだ。",
+      "en":"That's the anime-goggles."
+    }},
+    {"face":2, "text":{
+      "jp":"アニメが放映されている所だけ、光って見えるようになっている。",
+      "en":"It's adapted to flash\nonly points where anime is\ntelevised."
+    }},
+    {"face":1, "text":{
+      "jp":"へえ、それなら\n番組表を読む手間が省けるな。",
+      "en":"Huh, in that case, we can save\ntime to read TV listing."
+    }},
+    {"face":2, "text":{
+      "jp":"それを使って、洗いざらい\nアニメを集めてくれ！",
+      "en":"Gather every single anime\nby using it, please!"
+    }}
   ],
   "end":true
 }}]

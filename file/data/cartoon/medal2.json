@@ -6,10 +6,6 @@
     {"id":0, "file":"file/se/13.wav"}
   ],
   "bgm": {"file":"file/bgm/4.ogg"},
-  "load-text": [
-    {"lang":"jp", "file":"file/data/story/talk0_jp.dat"},
-    {"lang":"en", "file":"file/data/story/talk0_en.dat"}
-  ],
   "set":[
     {"id":0, "x":0, "y":60, "w":640, "h":400, "col":"6088d8", "note":"night sky"},
     {"id":1, "x":0, "y":240, "ix":0, "iy":800, "w":640, "h":240, "note":"background"},
@@ -38,9 +34,18 @@
     {"id":6, "x":0}
   ],
   "talk":[
-    {"face":1, "text":65},
-    {"face":13, "text":66},
-    {"face":1, "text":67}
+    {"face":1, "text":{
+      "jp":"おーい、アニメ回収率60%を\n超えたよー。",
+      "en":"Heeey, my anime collection\nrate has just topped 60%!!"
+    }},
+    {"face":13, "text":{
+      "jp":"よし、目標クリアだ。\nさわると臭い銅メダルをあげよう。",
+      "en":"Good, you cleared a target.\nI give you a bronze medal that\nmakes your hand stinky."
+    }},
+    {"face":1, "text":{
+      "jp":"スズの方が好みなんだけどな…",
+      "en":"My preference is just for tin,\nthough..."
+    }}
   ]
 }}, {"time":0, "act":{
   "set":[
@@ -50,7 +55,10 @@
     {"id":2, "flip":{"in":5, "iy":60, "n":2}}
    ],
   "talk":[
-    {"face":12, "text":68, "shake":true}
+    {"face":12, "text":{
+      "jp":"缶カラでも拾って来い！",
+      "en":"Go and pick up a tin can\nor something!"
+    }}
   ]
 }}, {"time":0, "act":{
   "move":[
@@ -70,7 +78,10 @@
   ],
   "sound":{"id":0, "ch":0},
   "talk":[
-    {"face":13, "text":69}
+    {"face":13, "text":{
+      "jp":"む……今一瞬、人間だった頃の\n記憶が……",
+      "en":"Mm...just for an instant\na memory when I was a human..."
+    }}
   ]
 }}, {"time":0, "act":{
   "move":[

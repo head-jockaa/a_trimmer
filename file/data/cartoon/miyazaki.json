@@ -1,167 +1,337 @@
 [{"index":0, "act":{
   "image":[
     {"file":"file/img/miyazaki.png"}
-  ],
-  "load-text": [
-    {"lang":"jp", "file":"file/data/story/talk0_jp.dat"},
-    {"lang":"en", "file":"file/data/story/talk0_en.dat"}
   ]
 }}, {"index":1, "act":{
   "talk":[
-    {"face":4, "text":0}
+    {"face":4, "text":{
+      "jp":"なんだろうね。",
+      "en":"Wonder what it is."
+    }}
   ],
   "end":true
 }}, {"index":2, "act":{
   "talk":[
-    {"face":4, "text":1},
-    {"face":1, "text":2},
-    {"face":4, "text":3},
-    {"face":1, "text":4}
+    {"face":4, "text":{
+      "jp":"その部屋は宮崎アニメ美術館\nだよ。",
+      "en":"Oh, That room is Miyazaki\nAnime Museum."
+    }},
+    {"face":1, "text":{
+      "jp":"宮崎アニメっていうと、あの…",
+      "en":"By Miyazaki Anime, do you mean\nthat..."
+    }},
+    {"face":4, "text":{
+      "jp":"宮崎県で放映されたアニメの\n展示をしているよ。",
+      "en":"Cartoons televised in Miyazaki\npref are displayed now."
+    }},
+    {"face":1, "text":{
+      "jp":"へぇー、\nんなわけねえだろ！",
+      "en":"Aha...\nGotta be kidding!"
+    }}
   ],
   "end":true
 }}, {"index":3, "act":{
   "talk":[
-    {"face":4, "text":5},
-    {"face":4, "text":6}
+    {"face":4, "text":{
+      "jp":"ボールを見れば分かるだろ。",
+      "en":"You can tell what the ball\nmeans."
+    }},
+    {"face":4, "text":{
+      "jp":"アニメ図鑑だよ。",
+      "en":"It's Animédex."
+    }}
   ],
   "end":true
 }}, {"index":4, "act":{
   "talk":[
-    {"face":4, "text":7},
-    {"face":4, "text":8}
+    {"face":4, "text":{
+      "jp":"ただ散歩をするだけのゲームだよ。",
+      "en":"It's the game you only go for a stroll."
+    }},
+    {"face":4, "text":{
+      "jp":"いろんな場所でテレビ電波を\n捕えてみよう。",
+      "en":"Let's try catching TV waves\nat various places."
+    }}
   ],
   "end":true
 }}, {"index":5, "act":{
   "talk":[
-    {"face":4, "text":9}
+    {"face":4, "text":{
+      "jp":"それは、おばけのポストだよ。",
+      "en":"Oh, It's the haunted mailbox."
+    }}
   ],
   "end":true
 }}, {"index":6, "act":{
   "talk":[
-    {"face":4, "text":10},
-    {"face":1, "text":11},
-    {"face":4, "text":12, "shake":true}
+    {"face":4, "text":{
+      "jp":"それは夏目漱石の小説『こころ』だよ。",
+      "en":"Oh, It's Natsume Soseki's\nstory \"Kokoro(heart)\"."
+    }},
+    {"face":1, "text":{
+      "jp":"……ないけど？",
+      "en":".....But nothing?"
+    }},
+    {"face":4, "shake":true, "text":{
+      "jp":"あああああ、盗まれてる!!",
+      "en":"Aaaaargh, it's stolen!!"
+    }}
   ],
   "end":true
 }}, {"index":7, "act":{
   "talk":[
-    {"face":4, "text":13}
+    {"face":4, "text":{
+      "jp":"中継局のケチリ具合がマップで\nよく分かるよ。",
+      "en":"You can see the state of\nskimping on relay stations\non the map very well."
+    }}
   ],
   "end":true
 }}, {"index":8, "act":{
   "talk":[
-    {"face":4, "text":14}
+    {"face":4, "text":{
+      "jp":"かじるとHPが全回復するよ。",
+      "en":"Your HP will be all recovered\nif you bite her."
+    }}
   ],
   "end":true
 }}, {"index":9, "act":{
   "talk":[
-    {"face":4, "text":15}
+    {"face":4, "text":{
+      "jp":"かきフライだよ。",
+      "en":"Oh, It's a fried oyster."
+    }}
   ],
   "end":true
 }}, {"index":10, "act":{
   "talk":[
-    {"face":1, "text":16},
-    {"face":4, "text":17}
+    {"face":1, "text":{
+      "jp":"このセーラー服は何？",
+      "en":"What's this sailor outfit?"
+    }},
+    {"face":4, "text":{
+      "jp":"画面のコントラストが強くなるよ。",
+      "en":"Oh, It makes the screen\nhigh contrast."
+    }}
   ],
   "end":true
 }}, {"index":11, "act":{
   "talk":[
-    {"face":4, "text":18},
-    {"face":1, "text":19},
-    {"face":4, "text":20}
+    {"face":4, "text":{
+      "jp":"今、話題の3Dテレビだよ。",
+      "en":"Oh, It's the 3D TV set\nthat is much talked about."
+    }},
+    {"face":1, "text":{
+      "jp":"え、これ…立体映像になるの？",
+      "en":"Eh, Does it... turn into\nstereograph?"
+    }},
+    {"face":4, "text":{
+      "jp":"メガネを使わなくても立体的に\n見えるよ。",
+      "en":"It looks stereoscopic even if\nyou don't use glasses."
+    }}
   ],
   "end":true
 }}, {"index":12, "act":{
   "talk":[
-    {"face":4, "text":21},
-    {"face":4, "text":22},
-    {"face":1, "text":23}
+    {"face":4, "text":{
+      "jp":"もしも中継局が\nひとつも無かったら…",
+      "en":"If there are no relay stations..."
+    }},
+    {"face":4, "text":{
+      "jp":"壮大なスケールで描かれる\nシミュレーション!!",
+      "en":"The simulation expressed on a magnific scale!!"
+    }},
+    {"face":1, "text":{
+      "jp":"壮大じゃないだろ。",
+      "en":"Well, it's not magnific."
+    }}
   ],
   "end":true
 }}, {"index":13, "act":{
   "talk":[
-    {"face":4, "text":24}
+    {"face":4, "text":{
+      "jp":"それは\"いったんもめん\"だよ。",
+      "en":"Oh, It's a \"ittan momen\"."
+    }}
   ],
   "end":true
 }}, {"index":14, "act":{
   "talk":[
-    {"face":4, "text":25},
-    {"face":4, "text":26}
+    {"face":4, "text":{
+      "jp":"それは、デス・イレイザーだよ。",
+      "en":"Oh, It's the DEATH-ERASER."
+    }},
+    {"face":4, "text":{
+      "jp":"読み切り漫画だった頃にだけ、\n出てきたアイテムだ。",
+      "en":"The item that appeared\nonly in the time when\nthe comic was one-shot."
+    }}
   ],
   "end":true
 }}, {"index":15, "act":{
   "talk":[
-    {"face":1, "text":27},
-    {"face":4, "text":28}
+    {"face":1, "text":{
+      "jp":"これはバグなのか？",
+      "en":"Can it be a bug?"
+    }},
+    {"face":4, "text":{
+      "jp":"ああ、それは\"けつばん\"だよ。",
+      "en":"Oh, Yeah, it's a \"MissingNo.\""
+    }}
   ],
   "end":true
 }}, {"index":16, "act":{
   "talk":[
-    {"face":4, "text":29},
-    {"face":1, "text":30},
-    {"face":4, "text":31}
+    {"face":4, "text":{
+      "jp":"あ、まだ開いてないよ。",
+      "en":"Hey, you, It's still not open."
+    }},
+    {"face":1, "text":{
+      "jp":"マスターキーを使った。",
+      "en":"You have used the MASTER KEY."
+    }},
+    {"face":4, "text":{
+      "jp":"何それ！なんでそんなもの\n持ってるの？",
+      "en":"What's that!\nWhy do you have such a thing?"
+    }}
   ],
   "end":true
 }}, {"index":17, "act":{
   "talk":[
-    {"face":4, "text":32}
+    {"face":4, "text":{
+      "jp":"カラン、コロン",
+      "en":"CLIP, CLOP"
+    }}
   ],
   "end":true
 }}, {"index":18, "act":{
   "talk":[
-    {"face":4, "text":33},
-    {"face":1, "text":34},
-    {"face":4, "text":35},
-    {"face":1, "text":36}
+    {"face":4, "text":{
+      "jp":"とんでもない物を盗んで\nいったな。",
+      "en":"He just stole something of\nno small value."
+    }},
+    {"face":1, "text":{
+      "jp":"いいじゃないか、本一冊ぐらい。",
+      "en":"What about it?\njust a single book."
+    }},
+    {"face":4, "text":{
+      "jp":"オレの心だ。",
+      "en":"My heart."
+    }},
+    {"face":1, "text":{
+      "jp":"そんなギャグはどうでもいいよ。",
+      "en":"I don't care such a gag."
+    }}
   ],
   "end":true
 }}, {"index":19, "act":{
   "talk":[
-    {"face":1, "text":37}
+    {"face":1, "text":{
+      "jp":"HP・MPが全回復した。",
+      "en":"HP, MP are all recovered."
+    }}
   ],
   "end":true
 }}, {"index":20, "act":{
   "talk":[
-    {"face":3, "text":38},
-    {"face":4, "text":39}
+    {"face":3, "text":{
+      "jp":"ぎゃああああああ",
+      "en":"YEOWWWWWWWWWWWW"
+    }},
+    {"face":4, "text":{
+      "jp":"がはは、オレはもともと\n白黒だから、関係ねえ！",
+      "en":"Bwahaha, I am originally\nblack and white,\nso I don't give a shit!"
+    }}
   ],
   "end":true
 }}, {"index":21, "act":{
   "talk":[
-    {"face":4, "text":40},
-    {"face":1, "text":41}
+    {"face":4, "text":{
+      "jp":"ほどいちゃダメだよ、\n逃げるから。",
+      "en":"You mustn't untie it, because it can run away."
+    }},
+    {"face":1, "text":{
+      "jp":"こんなことして、カランコロンが来るぞ。",
+      "en":"You do this...,\nthe CLIPCLOP will come over."
+    }}
   ],
   "end":true
 }}, {"index":22, "act":{
   "talk":[
-    {"face":1, "text":42},
-    {"face":4, "text":43}
+    {"face":1, "text":{
+      "jp":"10回\"やる\"を選ぶと…",
+      "en":"Choosing \"Do it\" 10 times\nwill cause..."
+    }},
+    {"face":4, "text":{
+      "jp":"そんなネタは無いよ。",
+      "en":"We don't have such a routine."
+    }}
   ],
   "end":true
 }}, {"index":23, "act":{
   "talk":[
-    {"face":1, "text":44},
-    {"face":4, "text":45},
-    {"face":1, "text":46},
-    {"face":4, "text":47},
-    {"face":1, "text":48},
-    {"face":4, "text":49}
+    {"face":1, "text":{
+      "jp":"あ…あの……",
+      "en":"Uh...Well....."
+    }},
+    {"face":4, "text":{
+      "jp":"どうだ、立体的に見えるだろ。",
+      "en":"Well, how do you like the\nstereoscopic view?"
+    }},
+    {"face":1, "text":{
+      "jp":"いや、オレが期待していたのは、こういう3Dじゃなくて…",
+      "en":"Nope, what I expected is not\n3D like this..."
+    }},
+    {"face":4, "text":{
+      "jp":"え？ああいう3Dの方が良かった？",
+      "en":"Eh? Did you want better 3D\nlike that?"
+    }},
+    {"face":1, "text":{
+      "jp":"激しく古典的な3Dテレビだな。",
+      "en":"Quite a severely classic\n3D TV set."
+    }},
+    {"face":4, "text":{
+      "jp":"原点回帰だ。",
+      "en":"Return to the origin."
+    }}
   ],
   "end":true
 }}, {"index":24, "act":{
   "talk":[
-    {"face":1, "text":50},
-    {"face":3, "text":51, "shake":true},
-    {"face":4, "text":52},
-    {"face":1, "text":53},
-    {"face":3, "text":54}
+    {"face":1, "text":{
+      "jp":"ちょっと待て、\nどうなってるんだ？",
+      "en":"Just a minute,\nwhat's going on here?"
+    }},
+    {"face":3, "shake":true, "text":{
+      "jp":"効き目が強すぎて、\n世界が緑色に見えるー！",
+      "en":"It has too strong effect,\nso the world looks greennn!"
+    }},
+    {"face":4, "text":{
+      "jp":"あの店は、よくわからない物を\n売ってるから。\nだから隠してたのに。",
+      "en":"That shop sells what\nwe can't make sense.\nSo that's why I've hidden it."
+    }},
+    {"face":1, "text":{
+      "jp":"なんか知らんが、\nゲームボーイソフトをあさりたく\nなってきたな。",
+      "en":"No idea, but it makes me\nwant to rake through\nGame Boy software."
+    }},
+    {"face":3, "text":{
+      "jp":"スーパードンキーコングGBとか\nやりたい。",
+      "en":"I want to play\nDonkey Kong Land and so on."
+    }}
   ],
   "end":true
 }}, {"index":25, "act":{
   "talk":[
-    {"face":4, "text":55},
-    {"face":4, "text":56},
-    {"face":4, "text":57}
+    {"face":4, "text":{
+      "jp":"わあ  すごい！\nアニメずかん  ぜんぶの  ページ",
+      "en":"Wow! Excellent!\nYou Completed"
+    }},
+    {"face":4, "text":{
+      "jp":"とうとう  あつめたんだね！\nおめでとう！",
+      "en":"your ANIMéDEX!\nCongratulations!"
+    }},
+    {"face":4, "text":{
+      "jp":"…………",
+      "en":"..."
+    }}
   ]
 }}, {"time":0, "act":{
   "set":[

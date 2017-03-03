@@ -6,10 +6,6 @@
     {"id":0, "file":"file/se/13.wav"}
   ],
   "bgm": {"file":"file/bgm/4.ogg"},
-  "load-text": [
-    {"lang":"jp", "file":"file/data/story/talk0_jp.dat"},
-    {"lang":"en", "file":"file/data/story/talk0_en.dat"}
-  ],
   "set":[
     {"id":0, "x":0, "y":60, "w":640, "h":400, "col":"6088d8", "note":"night sky"},
     {"id":1, "x":0, "y":240, "ix":0, "iy":800, "w":640, "h":240, "note":"background"},
@@ -38,9 +34,18 @@
     {"id":6, "x":0}
   ],
   "talk":[
-    {"face":1, "text":75},
-    {"face":13, "text":76},
-    {"face":1, "text":77}
+    {"face":1, "text":{
+      "jp":"見つけられるか、あんなの！",
+      "en":"Who can find that!"
+    }},
+    {"face":13, "text":{
+      "jp":"コンプリートおめでとう。\nほら、木のメダルだ。",
+      "en":"Congrats on your completion.\nHere, it's the wood medal."
+    }},
+    {"face":1, "text":{
+      "jp":"あれ？金じゃなくて…？",
+      "en":"Oh? It's not gold but...?"
+    }}
   ]
 }}, {"time":0, "act":{
   "set":[
@@ -50,7 +55,10 @@
     {"id":2, "flip":{"in":5, "iy":60, "n":2}}
    ],
   "talk":[
-    {"face":12, "text":78, "shake":true}
+    {"face":12, "text":{
+      "jp":"金は貴重なんだよ。\n文句たれないで受け取れ！",
+      "en":"Gold is valuable, you know.\nTake it without beefing about!"
+    }}
   ]
 }}, {"time":0, "act":{
   "move":[
@@ -70,7 +78,10 @@
   ],
   "sound":{"id":0, "ch":0},
   "talk":[
-    {"face":13, "text":79}
+    {"face":13, "text":{
+      "jp":"おっと、危ない。\nうっかり真の姿を見せるところ\nだった。",
+      "en":"Oops, look out.\nI was about to show\nmy real form carelessly."
+    }}
   ]
 }}, {"time":0, "act":{
   "move":[

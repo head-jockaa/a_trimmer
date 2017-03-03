@@ -1,29 +1,45 @@
-[{"index":0, "act":{
-  "load-text": [
-    {"lang":"jp", "file":"file/data/text_jp.dat"},
-    {"lang":"en", "file":"file/data/text_en.dat"}
-  ]
-}},{"index":1, "act":{
+[{"index":1, "act":{
   "talk":[
-    {"face":1, "text":104},
-    {"face":1, "text":105},
-    {"face":1, "text":106}
+    {"face":1, "text":{
+      "jp":"おっ！",
+      "en":"Wow!"
+    }},
+    {"face":1, "text":{
+      "jp":"こ、これは！！！！！！\nなんと  まねきTVを\nひろってしまった",
+      "en":"Is this what I think it is?\nAstonishing!\nYou snagged a Maneki-TV!"
+    }},
+    {"face":1, "text":{
+      "jp":"どうしよう？",
+      "en":"What do you want to do with it?"
+    }}
   ],
   "end":true
 }},{"index":2, "act":{
   "talk":[
-    {"face":1, "text":111}
+    {"face":1, "text":{
+      "jp":"この場所に差し込む？",
+      "en":"Plug in this place?"
+    }}
   ],
   "end":true
 }},{"index":3, "act":{
   "talk":[
-    {"face":1, "text":112}
+    {"face":1, "text":{
+      "jp":"うーん、ちょっと場所を\n変えようかな。",
+      "en":"Hmm, I guess I'll move it\na bit."
+    }}
   ],
   "end":true
 }},{"index":4, "act":{
   "talk":[
-    {"face":1, "text":109},
-    {"face":1, "text":110}
+    {"face":1, "text":{
+      "jp":"急がなきゃ！\n次の時間のアニメ番組が\n始まっちゃうわ",
+      "en":"I must hurry!\nThe anime arranged in the\nnext time will come."
+    }},
+    {"face":1, "text":{
+      "jp":"省略、省略！",
+      "en":"Skip this, skip that!"
+    }}
   ],
   "end":true
 }}]
