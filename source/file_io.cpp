@@ -404,82 +404,52 @@ void load_entries(int n){
 	readSQL("file/data/sql/timeslot.sql");
 }
 
-void load_searchQueries(Entry *wk, int wk_num){
-	loadFile("file/data/work/search_query.dat");
-	int query_num = 0;
-	int j = 0;
-	String *query;
-
-	for(size_t i=0 ; i<fsize ; i++){
-		if(fstr[i]==0){
-			query_num++;
+void escapeSearchQuery(char* utf8, char*escaped){
+	int value=0, pointer=0;
+	for(int i=0 ; i<600 ; i++){
+		if(utf8[i] == 0){
+			escaped[pointer] = 0;
+			break;
+		}
+		else if(utf8[i] == 32){
+			escaped[pointer] = '+';pointer++;
+		}
+		else if(utf8[i]<=-33 && utf8[i]>=-62){
+			escaped[pointer] = '%';pointer++;
+			value = utf8[i];
+			if(value < 0)value += 256;
+			escaped[pointer] = hex[value/16];pointer++;
+			escaped[pointer] = hex[value%16];pointer++;
+			i++;
+			escaped[pointer] = '%';pointer++;
+			value = utf8[i];
+			if(value < 0)value += 256;
+			escaped[pointer] = hex[value/16];pointer++;
+			escaped[pointer] = hex[value%16];pointer++;
+		}
+		else if(utf8[i]<=-17 && utf8[i]>=-32){
+			escaped[pointer] = '%';pointer++;
+			value = utf8[i];
+			if(value < 0)value += 256;
+			escaped[pointer] = hex[value/16];pointer++;
+			escaped[pointer] = hex[value%16];pointer++;
+			i++;
+			escaped[pointer] = '%';pointer++;
+			value = utf8[i];
+			if(value < 0)value += 256;
+			escaped[pointer] = hex[value/16];pointer++;
+			escaped[pointer] = hex[value%16];pointer++;
+			i++;
+			escaped[pointer] = '%';pointer++;
+			value = utf8[i];
+			if(value < 0)value += 256;
+			escaped[pointer] = hex[value/16];pointer++;
+			escaped[pointer] = hex[value%16];pointer++;
+		}
+		else{
+			escaped[pointer] = utf8[i];pointer++;
 		}
 	}
-	query=new String[query_num];
-	query_num=0;
-	for(size_t i=0 ; i<fsize ; i++){
-		if(j<200){
-			query[query_num].str[0][j] = fstr[i];
-		}
-		j++;
-
-		if(fstr[i]==0){
-			j = 0;
-			query_num++;
-		}
-	}
-
-	int value, w;
-	for(int i=0 ; i<wk_num ; i++){
-		j = 0;
-		w = wk[i].cartoon_index;
-		for(int k=0 ; k<200 ; k++){
-			if(query[w].str[0][k] == 0){
-				wk[i].query[j] = 0;
-				break;
-			}
-			else if(query[w].str[0][k] == 32){
-				wk[i].query[j] = '+';j++;
-			}
-			else if(query[w].str[0][k]<=-33 && query[w].str[0][k]>=-62){
-				wk[i].query[j] = '%';j++;
-				value = query[w].str[0][k];
-				if(value < 0)value += 256;
-				wk[i].query[j] = hex[value/16];j++;
-				wk[i].query[j] = hex[value%16];j++;
-				k++;
-				wk[i].query[j] = '%';j++;
-				value = query[w].str[0][k];
-				if(value < 0)value += 256;
-				wk[i].query[j] = hex[value/16];j++;
-				wk[i].query[j] = hex[value%16];j++;
-			}
-			else if(query[w].str[0][k]<=-17 && query[w].str[0][k]>=-32){
-				wk[i].query[j] = '%';j++;
-				value = query[w].str[0][k];
-				if(value < 0)value += 256;
-				wk[i].query[j] = hex[value/16];j++;
-				wk[i].query[j] = hex[value%16];j++;
-				k++;
-				wk[i].query[j] = '%';j++;
-				value = query[w].str[0][k];
-				if(value < 0)value += 256;
-				wk[i].query[j] = hex[value/16];j++;
-				wk[i].query[j] = hex[value%16];j++;
-				k++;
-				wk[i].query[j] = '%';j++;
-				value = query[w].str[0][k];
-				if(value < 0)value += 256;
-				wk[i].query[j] = hex[value/16];j++;
-				wk[i].query[j] = hex[value%16];j++;
-			}
-			else{
-				wk[i].query[j] = query[w].str[0][k];j++;
-			}
-		}
-	}
-
-	delete query;
 }
 
 void load_towers(){

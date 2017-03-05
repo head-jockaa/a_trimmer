@@ -578,7 +578,14 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		}
 		else if(strcmp(cname,"name_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);
-			if(get)strcpy_s(allofworks[index].title.str[1],str);
+			if(get){
+				strcpy_s(allofworks[index].title.str[1],str);
+				UTF8toLatin(allofworks[index].title.str[1]);
+			}
+		}
+		else if(strcmp(cname,"search_query")==0) {
+			sqlPointer+=fetchSqlString(c,str);
+			if(get)escapeSearchQuery(str,allofworks[index].query);
 		}
 		else if(strcmp(cname,"icon")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;

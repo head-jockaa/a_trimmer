@@ -12,13 +12,12 @@ void UTF8toSJIS(char *s);
 
 void load_text();
 void load_season();
-//void load_haziashop();
 void load_areas();
 void load_station();
 void load_animebook();
 void save_animebook();
 void load_entries(int n);
-void load_searchQueries(Entry *wk, int wk_num);
+void escapeSearchQuery(char* utf8, char*escaped);
 void load_towers();
 void load_mounts();
 void load_towns();

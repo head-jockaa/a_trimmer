@@ -154,7 +154,6 @@ void initGame2(){
 	createMap_tower();
 	if(gd.game_mode==STORYMODE){
 		load_entries(which_season);
-		load_searchQueries(entry,entries);
 		if(!fishbox.loaded())fishbox.initFishBox(entries);
 		for(int i=0 ; i<entries ; i++){
 			gd.score+=fishbox.getSC(i);

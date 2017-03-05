@@ -1416,7 +1416,6 @@ void makeGuideBook(){
 		delete [] prgs_of_each_season;
 	}
 	prgs_of_each_season=new int[season_num];
-	load_searchQueries(allofworks,(int)allofworks_num);
 	for(int i=0 ; i<season_num ; i++){
 		sprintf_s(str,"file/data/sql/timetable%d.sql",season[i].id);
 		readSQL(str);
