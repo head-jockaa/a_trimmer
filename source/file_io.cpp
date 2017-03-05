@@ -211,20 +211,35 @@ void load_text(){
 
 	for(int k=0 ; k<2 ; k++){
 		fc=0;
-		if(k==0)loadFile("file/data/text_jp.dat");
-		else loadFile("file/data/text_en.dat");
+		if(k==0)loadFile("file/data/text_jp.txt");
+		else loadFile("file/data/text_en.txt");
 		for(int i=0 ; i<7 ; i++){
 			for(int j=0 ; j<200 ; j++){
-				weekChar[i][k][j]=fstr[fc];fc++;
-				if(weekChar[i][k][j]==0)break;
+				weekChar[i][k][j]=fstr[fc];
+				if(fc<fsize-1 && fstr[fc]==13 && fstr[fc+1]==10){
+					fc+=2;
+					break;
+				}
+				else if(fstr[fc]==13 || fstr[fc]==10){
+					fc++;
+					break;
+				}
+				fc++;
 			}
 		}
 		for(int i=0 ; i<1000 ; i++){
 			if(fc>=fsize)break;
 			for(int j=0 ; j<200 ; j++){
 				text[i].str[k][j]=fstr[fc];
+				if(fc<fsize-1 && fstr[fc]==13 && fstr[fc+1]==10){
+					fc+=2;
+					break;
+				}
+				else if(fstr[fc]==13 || fstr[fc]==10){
+					fc++;
+					break;
+				}
 				fc++;
-				if(fstr[fc-1]==0)break;
 			}
 		}
 	}

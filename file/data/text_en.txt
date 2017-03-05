@@ -1,0 +1,197 @@
+Mon
+Tue
+Wed
+Thr
+Fri
+Sat
+Sun
+Anime Trimmer X
+Game Start
+Config.
+Close
+Game Start
+Continue
+Record
+Miyazaki mus.
+Back
+Story
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+Sunday
+Yes
+No
+choose
+Preparing
+Freezing for a few seconds
+No data exists
+Final Boss
+Key Setting
+Decide
+radio tower: Display
+radio tower: Not display
+drawing radio: type1-edge
+drawing radio: type1
+drawing radio: type2-edge
+drawing radio: type2
+drawing radio: Not display
+accel.: type-Mario
+accel.: type-Kirby
+accel.: type-MegaMan
+accel.: type-Sonic
+language: ENGLISH
+Magnify map: x
+Adjust dir.: Manual
+Adjust dir.: Auto
+Guide: Display
+Guide: Not display
+BGM volume: 
+SE volume:
+NHK removal:OFF 
+NHK removal: ON
+Walking: Smooth
+Walking: Bumpy
+[F11]Initialize key setting
+Satellite
+Antenna
+Crops now
+Save
+Close Game
+Collection Rate
+Score
+Highest Score
+wield the antenna
+MENU
+sleep like a log
+Not sleep like a log
+move
+missing
+SimpleRod
+ConvenientRod
+UVRod
+MHzRod
+ButtonRod
+SuperHandyRod
+SMR
+Special Maniac Radar
+Measuring
+break off
+(while moving)Run
+(beating)Run
+Alt.: 
+zoom: 
+Transfer
+Saved successfully
+tune channel
+turn left
+turn right
+adjust antenna direction
+low number
+high number
+turn over channels
+turn knob
+choose knob
+push button
+choose button
+Area Code
+Channel Search
+Trolling
+Amateur Radio
+
+Okinotorishima
+
+
+
+Use it now.
+Get rid of it.
+
+
+
+
+skip
+go ahead with talking
+A deal of this time
+Medal awarding
+Do you leave the record?
+Recorded successfully
+Let's give the
+next stage a try
+Let's play a match with
+<-this one next(pending)
+Talk
+What's this?
+All titles
+Televised data(by title)
+Televised data(by TV stat.)
+Time table
+Display them all
+Hazias
+Buy it
+Not buy
+Where?
+Sell it
+Not sell
+          Purchased
+Buy it with a nod
+Enter
+Not enter
+Watch it
+Not watch
+Do it
+Not do
+Drop it
+Not drop
+Bite it
+Not bite
+Put it on
+Not put on
+Untie it
+Not untie
+Delete it
+Not delete
+Check
+Stay in
+Animédex
+Score and Hazia
+UV rod
+MHz rod
+Button rod
+Super handy rod
+Magnify map over x8
+Trolling
+Relay stations guide
+Timetable
+Special maniac radar
+3D mode
+NHK-removal
+If there are no relay stations
+Fried oyster
+Kirby & Megaman
+Bumpy walking
+fairy of leaf
+Sailor outfit
+KCTV logo
+Dog bus
+Megoi TV
+Dream and Reality
+Reverse predator
+Evil Resident
+Night on Third Street
+Battle with shadow
+Nitrogen medal
+Bronze medal
+Silver medal
+Gold medal
+Chivalry of commercial TV
+Fan Sub
+Tower of Idea
+2012: A Komoro Odyssay
+The new war
+Rotary cat
+The movie thief
+Nostalgia
+Talking of TV, it's Miyazaki
+Talking of Anime, it's Miyazaki
