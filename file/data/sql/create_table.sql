@@ -63,6 +63,7 @@ CREATE TABLE `cartoon` (
   `id` int(11) NOT NULL,
   `name_jp` varchar(200) NOT NULL,
   `name_en` varchar(200) NOT NULL,
+  `search_query` text NOT NULL,
   `icon` int(11) NOT NULL,
   `red` tinyint(3) unsigned NOT NULL,
   `green` tinyint(3) unsigned NOT NULL,
