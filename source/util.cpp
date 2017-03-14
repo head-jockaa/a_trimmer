@@ -916,12 +916,38 @@ void fix_XY(){
 	if(gd.y<0)gd.y=0;
 	if(gd.y>=map.mapH)gd.y=map.mapH-1;
 	if(!MAP3D){
-		int X=(int)(gd.x*100),Y=(int)(gd.y*100);
-		X/=100/MAGNIFY;
-		X*=100/MAGNIFY;
-		Y/=100/MAGNIFY;
-		Y*=100/MAGNIFY;
-		gd.dotX=X/100.0;gd.dotY=Y/100.0;
+		int intX=(int)gd.x, intY=(int)gd.y;
+		double decimalX=gd.x-intX, decimalY=gd.y-intY;
+		gd.dotX=intX;
+		gd.dotY=intY;
+		if(MAGNIFY==2){
+			if(decimalX>=0.5)gd.dotX+=0.5;
+			if(decimalY>=0.5)gd.dotY+=0.5;
+		}
+		else if(MAGNIFY==4){
+			for(double i=0.25 ; i<=0.75 ; i+=0.25){
+				if(decimalX>=i)gd.dotX+=0.25;
+				if(decimalY>=i)gd.dotY+=0.25;
+			}
+		}
+		else if(MAGNIFY==8){
+			for(double i=0.125 ; i<=0.875 ; i+=0.125){
+				if(decimalX>=i)gd.dotX+=0.125;
+				if(decimalY>=i)gd.dotY+=0.125;
+			}
+		}
+		else if(MAGNIFY==16){
+			for(double i=0.0625 ; i<=0.9375 ; i+=0.0625){
+				if(decimalX>=i)gd.dotX+=0.0625;
+				if(decimalY>=i)gd.dotY+=0.0625;
+			}
+		}
+		else if(MAGNIFY==32){
+			for(double i=0.03125 ; i<=0.96875 ; i+=0.03125){
+				if(decimalX>=i)gd.dotX+=0.03125;
+				if(decimalY>=i)gd.dotY+=0.03125;
+			}
+		}
 	}
 }
 

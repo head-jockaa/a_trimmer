@@ -2,6 +2,7 @@
 
 GameData gd;
 ManekiData md;
+int selectedPref, selectedTown;
 
 int mwave[68]={
 11,4,0,0,12,10,2,0,13,11,7,0,11,12,10,3,10,12,11,8,8,11,12,10,
@@ -95,6 +96,7 @@ void initGame(){
 	gd.current_area=EOF;gd.current_town=EOF;
 	rd.received=false;
 	setSMR=true;
+	selectedPref=0;selectedTown=0;
 	if(gd.game_mode==STORYMODE)phase=GAMESTART;
 	else phase=READY;
 
@@ -955,6 +957,12 @@ void keyPrefList_trans(){
 		for(int i=0 ; i<area[n].town_num ; i++){
 			menu[TOWN_LIST].stack(area[n].town[i].name);
 		}
+		if(selectedPref==n){
+			for(int i=0 ; i<selectedTown; i++){
+				menu[TOWN_LIST].cursorDown();
+			}
+		}
+		selectedPref=n;
 		menu[TOWN_LIST].setViewMode(VISIBLE);
 		phase=TOWN_LIST;
 		menu[PREF_LIST].setViewMode(GRAY);
@@ -973,6 +981,7 @@ void keyTownList(){
 	if(key.z && !key_stop(key.z)){
 		int m=menu[PREF_LIST].selected();
 		int n=menu[TOWN_LIST].selected();
+		selectedTown=n;
 		gd.x=area[m].town[n].x;
 		gd.y=area[m].town[n].y;
 		fix_XY();
