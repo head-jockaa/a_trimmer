@@ -114,6 +114,9 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 
 	networkLog(id, "resolved host google.co.jp");
 
+	//to avoid this error "SSL23_GET_SERVER_HELLO:tlsv1 alert internal error"
+	SSL_set_tlsext_host_name(ssl, host);
+
 	//start comm.
 	if(tm.tcpsock){
 		networkLog(id, "Wait: another thread is opening socket");
@@ -528,6 +531,9 @@ void getTargetImage_https(int id, char *url){
 	}
 
 	networkLog(id, "resolved");
+
+	//to avoid this error "SSL23_GET_SERVER_HELLO:tlsv1 alert internal error"
+	SSL_set_tlsext_host_name(ssl, host);
 
 	//start comm.
 	if(tm.tcpsock){
