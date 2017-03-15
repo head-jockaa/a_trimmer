@@ -664,19 +664,8 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 				break;
 			}
 
-			//this means that the url is wrong
-			char *result = strstr(get_msg, "200 OK");
-			if(!result){
-				tm.which++;
-				tm.timeout = 0;
-				networkLog(id, "get text 200 OK (pass it)");
-				parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-				tm.halt = RESTART_GETIMAGE;
-				break;
-			}
-
 			//to redirect
-			result = strstr(get_msg, "Location:");
+			char *result = strstr(get_msg, "Location:");
 			if(result){
 				networkLog(id, "redirect to another url");
 				result += 10;
@@ -689,13 +678,24 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 				}
 				char *url2 = new char[size+1];
 				for(int j=0 ; j<size ; j++){
-					url2[i] = result[j];
+					url2[j] = result[j];
 				}
 				url2[size] = 0;
 				tm.timeout = 0;
 				tm.halt = RESTART_GETIMAGE;
 				strcpy_s(url, 1000, url2);
 				delete[] url2;
+				break;
+			}
+
+			//if not 200, it would mean that the url is wrong
+			result = strstr(get_msg, "200 OK");
+			if(!result){
+				tm.which++;
+				tm.timeout = 0;
+				networkLog(id, "get text 200 OK (pass it)");
+				parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+				tm.halt = RESTART_GETIMAGE;
 				break;
 			}
 
