@@ -1856,9 +1856,6 @@ void drawNetworkStatus(SDL_Surface* scr){
 	else if(ns.status==NS_RCV_GIF){
 		drawImage(scr,img.chr,0,440,280,840,40,40,255);
 	}
-	if(ns.timeoutIcon){
-		drawImage(scr,img.chr,80,440,320,840,40,40,255);
-	}
 	if(ns.status==NS_RCV_JPEG || ns.status==NS_RCV_PNG || ns.status==NS_RCV_GIF){
 		drawImage(scr,img.chr,40,440,(tm.which-1)*40,880,40,40,255);
 		if(ns.contentLength){
@@ -2209,14 +2206,6 @@ bool createSearchImage(int n){
 		freeImage(img2);
 		return true;
 	}else{
-		/*
-		tm.which++;
-		tm.timeout = 0;
-		tm.failure=true;
-		tm.finish=false;
-		parseHTML(0, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-		tm.halt = RESTART_GETIMAGE;
-		*/
 		networkLog(0, "failed to open the saved image file");
 		return false;
 	}
@@ -2456,11 +2445,9 @@ void timerFishUp(){
 void startThread(int id, char *query){
 	tm.selected=id;
 	strcpy_s(tm.query, 300, query);
-	tm.timeout=0;
 	tm.which=1;
 	tm.finish=false;
 	tm.failure=false;
-	ns.timeoutIcon=false;
 	if(tm.running){
 		tm.halt=THREAD_SHUTDOWN;
 		networkLog(0, "shutdown TCP before starting new thread");
@@ -2571,20 +2558,6 @@ void timerGame(){
 }
 
 void manageThread(){
-	tm.timeout++;
-	if(tm.running && tm.timeout>200){
-		networkLog(0, "timeout");
-		tm.which++;
-		tm.finish=false;
-		tm.failure=false;
-		tm.halt=THREAD_SHUTDOWN;
-		ns.timeoutIcon=true;
-		ns.display=300;
-		if(tm.tcpsock)TCPshutdown(0);
-		tm.timeout=0;
-		parseHTML(0, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-		thread = SDL_CreateThread(AnotherThread, "AnotherThread", nullptr);
-	}
 	if(!tm.running && tm.halt==RESTART_GETIMAGE){
 		thread = SDL_CreateThread(AnotherThread, "AnotherThread", nullptr);
 	}

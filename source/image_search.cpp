@@ -5,6 +5,12 @@
 #include <openssl/applink.c>
 #endif
 
+#ifdef __WIN32__
+// TODO
+#else
+#include <fcntl.h>
+#endif
+
 ThreadManager tm;
 NetworkStatus ns;
 ImageFormatReader ifr;
@@ -178,7 +184,6 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 		}
 		
 		if(length){
-			tm.timeout=0;
 			ns.receiveCounter++;
 		}
 
@@ -427,7 +432,6 @@ void getTargetImage_http(int id, char *url){
 		delete host;
 		delete path;
 		tm.which++;
-		tm.timeout = 0;
 		ns.status=NS_IPADDRESS_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
@@ -449,7 +453,6 @@ void getTargetImage_http(int id, char *url){
 		delete host;
 		delete path;
 		tm.which++;
-		tm.timeout = 0;
 		ns.status=NS_CONNECT_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
@@ -467,6 +470,7 @@ void getTargetImage_http(int id, char *url){
 	networkLog_noparam(id, msg);
 
 	SDLNet_TCP_Send(tm.tcpsock, msg, (int)strlen(msg)+1);
+
 	networkLog(id, SDLNet_GetError());
 	delete[] msg;
 
@@ -522,7 +526,6 @@ void getTargetImage_https(int id, char *url){
 		delete host;
 		delete path;
 		tm.which++;
-		tm.timeout = 0;
 		ns.status=NS_IPADDRESS_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
@@ -546,7 +549,6 @@ void getTargetImage_https(int id, char *url){
 		delete host;
 		delete path;
 		tm.which++;
-		tm.timeout = 0;
 		ns.status=NS_CONNECT_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
@@ -574,7 +576,6 @@ void getTargetImage_https(int id, char *url){
 		networkLog(id, "SSL error occurred");
 		ERR_print_errors_fp(stderr);
 		tm.which++;
-		tm.timeout = 0;
 		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
 		return;
@@ -623,18 +624,37 @@ void getTargetImage(int id, char *url){
 }
 
 void receivingImageFile(int id, char *url, SSL *ssl){
+	// to avoid the blocking of recv()
+#ifdef __WIN32__
+	// TODO
+#else
+	int flags;
+	flags = fcntl(tm.tcpsock->channel, F_GETFL, 0);
+	flags |= O_NONBLOCK;
+	fcntl(tm.tcpsock->channel, F_SETFL, flags);
+#endif
+
 	networkLog(id, "receivingImageFile()");
 	FILE *file=NULL;
 	char get_msg[BUF_LEN];
 	int length = 0;
 	char fn[100];
+	bool endHeader=false;
 
 	ns.receiveCounter=0;
 	ns.receiveLength=0;
 	ifr.reset();
 
 	//receive
-	for(int i=0 ; i<10000 ; i++){
+	for(int i=0 ; i<=10000 ; i++){
+		if(i==10000){
+			tm.which++;
+			networkLog(id, "recv() won't be ready forever (pass it)");
+			parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+			tm.halt = RESTART_GETIMAGE;
+			break;
+		}
+
 		//forced termination
 		if(tm.halt){
 			networkLog(id, "halted");
@@ -652,21 +672,18 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 			networkLog(id, "received zero length");
 			break;
 		}
-		if(length){
-			tm.timeout = 0;
-			ns.receiveCounter++;
+		if(length==-1){
+			// message is not ready
+			continue;
 		}
+		ns.receiveCounter++;
 
-		if(i == 0){
-			//error
-			if(length==-1){
-				networkLog(id, "error code -1 caused by shut-down");
-				break;
-			}
-
+		if(!endHeader){
 			//to redirect
+			//becareful about confusing names such as X-XRDS-Location
+			char *check = strstr(get_msg, "-Location:");
 			char *result = strstr(get_msg, "Location:");
-			if(result){
+			if(!check && result){
 				networkLog(id, "redirect to another url");
 				result += 10;
 				int size = 0;
@@ -681,10 +698,15 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 					url2[j] = result[j];
 				}
 				url2[size] = 0;
-				tm.timeout = 0;
-				tm.halt = RESTART_GETIMAGE;
-				strcpy_s(url, 1000, url2);
+				if(strcmp(url,url2)==0){
+					// avoid an infinite loop (rarely happens though)
+					tm.which++;
+					parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+				}else{
+					strcpy_s(url, 1000, url2);
+				}
 				delete[] url2;
+				tm.halt = RESTART_GETIMAGE;
 				break;
 			}
 
@@ -692,8 +714,7 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 			result = strstr(get_msg, "200 OK");
 			if(!result){
 				tm.which++;
-				tm.timeout = 0;
-				networkLog(id, "get text 200 OK (pass it)");
+				networkLog(id, "get an error code (pass it)");
 				parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 				tm.halt = RESTART_GETIMAGE;
 				break;
@@ -723,6 +744,17 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 				}
 				networkLog(id, "content length is %d\n", ns.contentLength);
 			}
+		}
+
+		char *result = strstr(get_msg, "\r\n\r\n");
+		if(!result){
+			result = strstr(get_msg, "\n\n");
+		}
+		if(!result){
+			result = strstr(get_msg, "\r\r");
+		}
+		if(result){
+			endHeader=true;
 		}
 
 		for( int j=0 ; j<length ; j++ ){

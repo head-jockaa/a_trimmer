@@ -43,7 +43,7 @@ struct _TCPsocket {
 #define USER_AGENT "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"
 
 struct ThreadManager {
-	int selected, timeout, which, halt, threadID;
+	int selected, which, halt, threadID;
 	TCPsocket tcpsock;
 	char targetURL[1000];
 	char query[300];
@@ -61,7 +61,6 @@ extern ThreadManager tm;
 #define NS_RCV_GIF 8
 struct NetworkStatus {
 	int status, contentLength, receiveLength, receiveCounter, display;
-	bool timeoutIcon;
 };
 extern NetworkStatus ns;
 
