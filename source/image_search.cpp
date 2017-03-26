@@ -469,7 +469,8 @@ void getTargetImage_http(int id, char *url){
 
 	networkLog_noparam(id, msg);
 
-	SDLNet_TCP_Send(tm.tcpsock, msg, (int)strlen(msg)+1);
+	// Don't mistake the length of data because you'll fail to send to some servers
+	SDLNet_TCP_Send(tm.tcpsock, msg, (int)strlen(msg));
 
 	networkLog(id, SDLNet_GetError());
 	delete[] msg;
@@ -674,7 +675,10 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 		}
 		if(length==-1){
 			// message is not ready
+			SDL_Delay(1);
 			continue;
+		}else{
+			i=0;
 		}
 		ns.receiveCounter++;
 
