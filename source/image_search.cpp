@@ -374,8 +374,17 @@ void parseHTML(int id, int n, const char *table_prefix, const char *url_prefix, 
 	size = n;
     url[n] = 0;
 	n=0;
+	bool queryFound=false, queryFoundDouble=false;
     for(size_t i=0 ; i<size ; i++){
-		if(i<=size-3 && url[i]=='%' && (url[i+1]=='2' || url[i+1]=='3')){
+		if(i<size-2 && url[i]=='%' && url[i+1]=='3' && url[i+2]=='F'){
+			if(queryFound){
+				// there's only one query symbol '?' in a URL path
+				queryFoundDouble=true;
+			}else{
+				queryFound=true;
+			}
+		}
+		if(!queryFoundDouble && i<size-2 && url[i]=='%' && (url[i+1]=='2' || url[i+1]=='3')){
 			for(int j=0 ; j<16 ; j++){
 				if(url[i+1] == hex[j]){
 					url[n] = j*16;
@@ -394,16 +403,9 @@ void parseHTML(int id, int n, const char *table_prefix, const char *url_prefix, 
     }
 	url[n] = 0;
 
-	if(strstr(url, "images-amazon.")){
-		std::cout << "skip images-amazon.\n";
-		tm.which++;
-		parseHTML(id, tm.which, table_prefix, url_prefix, url_surfix);
-		return;
-	}
-
     strcpy_s(tm.targetURL, 1000, url);
 	FILE *hFile;
-	sprintf_s(fn,"save/tmp_url/%d.dat",tm.selected);
+	sprintf_s(fn,"save/tmp_url/%d.txt",tm.selected);
 	fopen_s(&hFile, fn, "wb");
 	networkLog(id, fn);
 	fwrite(tm.targetURL, sizeof(tm.targetURL[0]), n/sizeof(tm.targetURL[0]), hFile);
@@ -429,13 +431,17 @@ void getTargetImage_http(int id, char *url){
 
 	if(res){
 		//go to the next image file if failed
-		delete host;
-		delete path;
 		tm.which++;
 		ns.status=NS_IPADDRESS_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
-		networkLog(id, "resolving host failed");
+		networkLog(id, "resolving host failed: %s", host);
+		char *result = strstr(host, "%");
+		if(result){
+			networkLog(id, "punycode is not supported");
+		}
+		delete host;
+		delete path;
 		return;
 	}
 
@@ -467,6 +473,7 @@ void getTargetImage_http(int id, char *url){
 	char *msg = new char[msg_size];
 	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", path, host, USER_AGENT);
 
+	networkLog(id, "Request header is below");
 	networkLog_noparam(id, msg);
 
 	// Don't mistake the length of data because you'll fail to send to some servers
@@ -524,13 +531,17 @@ void getTargetImage_https(int id, char *url){
 
 	if(res){
 		//go to the next image file if failed
-		delete host;
-		delete path;
 		tm.which++;
 		ns.status=NS_IPADDRESS_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
 		tm.halt = RESTART_GETIMAGE;
-		networkLog(id, "resolving host failed");
+		networkLog(id, "resolving host failed: %s", host);
+		char *result = strstr(host, "%");
+		if(result){
+			networkLog(id, "punycode is not supported");
+		}
+		delete host;
+		delete path;
 		return;
 	}
 
@@ -587,6 +598,7 @@ void getTargetImage_https(int id, char *url){
 	char *msg = new char[msg_size];
 	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", path, host, USER_AGENT);
 
+	networkLog(id, "Request header is below");
 	networkLog_noparam(id, msg);
 
 	ret = SSL_write(ssl, msg, (int)strlen(msg));
@@ -624,6 +636,139 @@ void getTargetImage(int id, char *url){
 	}
 }
 
+void toLowerCase(char *headerLine){
+	for(int i=0 ; i<BUF_LEN ; i++){
+		if(headerLine[i]==0)break;
+		if(headerLine[i]>='A' && headerLine[i]<='Z'){
+			headerLine[i]+=32;
+		}
+	}
+}
+
+bool checkHeaderName(char *headerLine, const char *name){
+	int namePos=0;
+	for(int i=0 ; i<BUF_LEN ; i++){
+		if(headerLine[i]==0)break;
+		if(headerLine[i]==':')break;
+		if(headerLine[i]==' ')continue;
+		if(headerLine[i]==name[namePos]){
+			namePos++;
+		}else{
+			break;
+		}
+	}
+	return name[namePos]==0;
+}
+
+bool checkHeaderValue(char *headerLine, const char *name){
+	int namePos=0;
+	bool pasColon=false;
+	for(int i=0 ; i<BUF_LEN ; i++){
+		if(headerLine[i]==0)break;
+		if(headerLine[i]==':')pasColon=true;
+		else if(pasColon){
+			if(headerLine[i]==0)break;
+			if(headerLine[i]==' ')continue;
+			if(headerLine[i]==name[namePos]){
+				namePos++;
+			}else{
+				break;
+			}
+		}
+	}
+	return name[namePos]==0;
+}
+
+void readHttpHeader(int id, char *headerLine, char*url){
+	networkLog(id, headerLine);
+
+	toLowerCase(headerLine);
+
+	//getting file size info
+	bool result = checkHeaderName(headerLine, "content-length");
+	if(!result){
+		result = checkHeaderName(headerLine, "x-oct-size");
+	}
+	if(result){
+		ns.contentLength=0;
+		bool passColon=false;
+		for(int i=0 ; i<BUF_LEN ; i++){
+			if(passColon){
+				if(headerLine[i]==0){
+					networkLog(id, "content length has been found above: %d", ns.contentLength);
+					break;
+				}
+				else if(headerLine[i]>='0' && headerLine[i]<='9'){
+					ns.contentLength *= 10;
+					ns.contentLength += headerLine[i]-48;
+				}
+			}
+			else if(headerLine[i]==':'){
+				passColon=true;
+			}
+		}
+	}
+
+	// ckeck if chunked or not
+	result = checkHeaderName(headerLine, "transfer-encoding");
+	if(result){
+		result = checkHeaderValue(headerLine, "chunked");
+	}
+	if(result){
+		networkLog(id, "the mode chunked has been found above");
+		ns.chunked = true;
+	}
+
+	//to redirect
+	result = checkHeaderName(headerLine, "location");
+	if(result){
+		networkLog(id, "redirect to another url");
+		bool passColon=false;
+		char *url2 = new char[BUF_LEN];
+		int urlPos = 0;
+		for(int i=0 ; i<BUF_LEN ; i++){
+			if(passColon){
+				if(headerLine[i]!=' '){
+					url2[urlPos]=headerLine[i];
+					urlPos++;
+				}
+				if(headerLine[i]==0)break;
+			}
+			else if(headerLine[i]==':'){
+				passColon=true;
+			}
+		}
+
+		if(strcmp(url,url2)==0){
+			// avoid an infinite loop (rarely happens though)
+			tm.which++;
+			parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		}else{
+			strcpy_s(url, BUF_LEN, url2);
+		}
+		delete[] url2;
+		tm.halt = RESTART_GETIMAGE;
+	}
+
+	//Content-Encoding gzip is not supported
+	result = checkHeaderName(headerLine, "content-encoding");
+	if(result){
+		result = checkHeaderValue(headerLine, "gzip");
+		if(result){
+			tm.which++;
+			networkLog(id, "Content-Encoding gzip is not supported");
+			parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+			tm.halt = RESTART_GETIMAGE;
+		}
+	}
+
+	//if not 200, it would mean that the url is wrong
+	char *result2 = strstr(headerLine, "200 ok");
+	if(result2){
+		ns.found200=true;
+	}
+}
+
 void receivingImageFile(int id, char *url, SSL *ssl){
 	// to avoid the blocking of recv()
 #ifdef __WIN32__
@@ -638,10 +783,17 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 	networkLog(id, "receivingImageFile()");
 	FILE *file=NULL;
 	char get_msg[BUF_LEN];
-	int length = 0;
-	char fn[100];
-	bool endHeader=false;
+	int length = 0, headerPos = 0, readmode = HTTPGET_HEADER;
+	char fn[100], headerLine[BUF_LEN];
 
+	for(int i=0 ; i<BUF_LEN ; i++){
+		get_msg[i]=0;
+		headerLine[i]=0;
+	}
+
+	ns.found200=false;
+	ns.chunked=false;
+	ns.chunksize=0;
 	ns.receiveCounter=0;
 	ns.receiveLength=0;
 	ifr.reset();
@@ -661,12 +813,12 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 			networkLog(id, "halted");
 			break;
 		}
+		get_msg[0]=0;
 		if(ssl){
 			length = SSL_read(ssl, get_msg, BUF_LEN);
 		}else{
 			length = SDLNet_TCP_Recv(tm.tcpsock, get_msg, BUF_LEN);
 		}
-
 		if(!ns.contentLength && !length){
 			ns.status=NS_RCV_ZERO_LENGTH;
 			ns.display=300;
@@ -682,94 +834,119 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 		}
 		ns.receiveCounter++;
 
-		if(!endHeader){
-			//to redirect
-			//becareful about confusing names such as X-XRDS-Location
-			char *check = strstr(get_msg, "-Location:");
-			char *result = strstr(get_msg, "Location:");
-			if(!check && result){
-				networkLog(id, "redirect to another url");
-				result += 10;
-				int size = 0;
-				for(size_t j=0 ; j<strlen(result) ; j++){
-					if(result[j]==10 || result[j]==13){
-						break;
-					}
-					size++;
-				}
-				char *url2 = new char[size+1];
-				for(int j=0 ; j<size ; j++){
-					url2[j] = result[j];
-				}
-				url2[size] = 0;
-				if(strcmp(url,url2)==0){
-					// avoid an infinite loop (rarely happens though)
-					tm.which++;
-					parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-				}else{
-					strcpy_s(url, 1000, url2);
-				}
-				delete[] url2;
-				tm.halt = RESTART_GETIMAGE;
-				break;
-			}
-
-			//if not 200, it would mean that the url is wrong
-			result = strstr(get_msg, "200 OK");
-			if(!result){
-				tm.which++;
-				networkLog(id, "get an error code (pass it)");
-				parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-				tm.halt = RESTART_GETIMAGE;
-				break;
-			}
-
-			//getting file size info
-			ns.contentLength = 0;
-			result = strstr(get_msg, "Content-Length:");
-			if(result){
-				networkLog(id, "response header has Content-Length");
-				result += 16;
-			}
-			if(!result){
-				result = strstr(get_msg, "x-oct-size:");
-				if(result){
-					networkLog(id, "response header has x-oct-size");
-					result += 12;
-				}
-			}
-			if(result){
-				for(int j=0 ; j<BUF_LEN ; j++){
-					if(result[j]==10 || result[j]==13){
-						break;
-					}
-					ns.contentLength *= 10;
-					ns.contentLength += result[j]-48;
-				}
-				networkLog(id, "content length is %d\n", ns.contentLength);
-			}
-		}
-
-		char *result = strstr(get_msg, "\r\n\r\n");
-		if(!result){
-			result = strstr(get_msg, "\n\n");
-		}
-		if(!result){
-			result = strstr(get_msg, "\r\r");
-		}
-		if(result){
-			endHeader=true;
-		}
-
 		for( int j=0 ; j<length ; j++ ){
-			//check the startpoint of the image file
-			if(!ifr.jpgStart && !ifr.pngStart && !ifr.gifStart){
-				ifr.checkPNG(id, get_msg[j]);
-				ifr.checkJPG(id, get_msg[j]);
-				ifr.checkGIF(id, get_msg[j]);
+			if(readmode==HTTPGET_HEADER){
+				if(get_msg[j]==13)readmode=HTTPGET_HEADER_R;
+				else if(get_msg[j]==10)readmode=HTTPGET_HEADER_N;
+				if(get_msg[j]==13 || get_msg[j]==10){
+					for(int k=headerPos; k<BUF_LEN ; k++){
+						headerLine[k]=0;
+					}
+					readHttpHeader(id,headerLine,url);
+					headerPos=0;
+				}else{
+					headerLine[headerPos]=get_msg[j];
+					headerPos++;
+				}
+			}
+			else if(readmode==HTTPGET_HEADER_R){
+				if(get_msg[j]==13){
+					if(ns.chunked)readmode=HTTPGET_CHUNK_SIZE;
+					else readmode=HTTPGET_DATA;
+				}
+				else if(get_msg[j]==10)readmode=HTTPGET_HEADER_RN;
+				else{
+					readmode=HTTPGET_HEADER;
+					headerLine[0]=get_msg[j];
+					headerPos=1;
+				}
+			}
+			else if(readmode==HTTPGET_HEADER_N){
+				if(get_msg[j]==10){
+					if(ns.chunked)readmode=HTTPGET_CHUNK_SIZE;
+					else readmode=HTTPGET_DATA;
+				}else{
+					readmode=HTTPGET_HEADER;
+					headerLine[0]=get_msg[j];
+					headerPos=1;
+				}
+			}
+			else if(readmode==HTTPGET_HEADER_RN){
+				if(get_msg[j]==13)readmode=HTTPGET_HEADER_RNR;
+				else{
+					readmode=HTTPGET_HEADER;
+					headerLine[0]=get_msg[j];
+					headerPos=1;
+				}
+			}
+			else if(readmode==HTTPGET_HEADER_RNR){
+				if(get_msg[j]==10){
+					if(ns.chunked)readmode=HTTPGET_CHUNK_SIZE;
+					else readmode=HTTPGET_DATA;
+				}
+				else readmode=HTTPGET_HEADER;
+			}
+			else if(readmode==HTTPGET_CHUNK_SIZE){
+				if(get_msg[j]==13 || get_msg[j]==10){
+					networkLog(id, "Receiving chunk %d bytes", ns.chunksize);
+					if(ns.chunksize==0){
+						tm.finish=true;
+						break;
+					}
+				}
+				if(get_msg[j]==13){
+					readmode=HTTPGET_CHUNK_R;
+				}
+				else if(get_msg[j]==10){
+					readmode=HTTPGET_DATA;
+				}else{
+					ns.chunksize *= 16;
+					if(get_msg[j]>='a' && get_msg[j]<='f'){
+						ns.chunksize += get_msg[j]-87;
+					}
+					else if(get_msg[j]>='A' && get_msg[j]<='F'){
+						ns.chunksize += get_msg[j]-55;
+					}else{
+						ns.chunksize += get_msg[j]-48;
+					}
+				}
+			}
+			else if(readmode==HTTPGET_CHUNK_R){
+				if(get_msg[j]==10){
+					readmode=HTTPGET_DATA;
+				}
+			}
+			else if(readmode==HTTPGET_END_CHUNK){
+				ns.chunksize=0;
+				ns.receiveLength=0;
+				if(get_msg[j]==13)readmode=HTTPGET_END_CHUNK_R;
+				else if(get_msg[j]==10)readmode=HTTPGET_CHUNK_SIZE;
+			}
+			else if(readmode==HTTPGET_END_CHUNK_R){
+				readmode=HTTPGET_CHUNK_SIZE;
+				if(get_msg[j]!=10){
+					if(get_msg[j]>='a' && get_msg[j]<='f'){
+						ns.chunksize = get_msg[j]-87;
+					}
+					else if(get_msg[j]>='A' && get_msg[j]<='F'){
+						ns.chunksize = get_msg[j]-55;
+					}else{
+						ns.chunksize = get_msg[j]-48;
+					}
+				}
+			}
+			else if(readmode==HTTPGET_DATA){
+				if(!ns.found200){
+					std::cout << "not 200\n";
+					tm.which++;
+					networkLog(id, "get an error code (pass it)");
+					parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+					tm.halt = RESTART_GETIMAGE;
+					break;
+				}
 
-				if(ifr.jpgStart || ifr.pngStart || ifr.gifStart){
-					//save the image file
+				//start to save an image file
+				if(file==NULL){
 					sprintf_s(fn, "save/tmp_image/%d.jpg", tm.selected);
 					fopen_s(&file, fn, "wb");
 					networkLog(id, fn);
@@ -778,56 +955,37 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 						tm.halt = THREAD_END;
 						break;
 					}
-					if(ifr.jpgStart){
-						fputc(-1, file);
-						fputc(-40, file);
-						ns.receiveLength = 2;
-						networkLog(id, "passed JPEG head");
-						ns.status = NS_RCV_JPEG;
-					}
-					else if(ifr.pngStart){
-						fputc(-119, file);
-						fputc('P', file);
-						fputc('N', file);
-						fputc('G', file);
-						ns.receiveLength = 4;
-						networkLog(id, "passed PNG head");
-						ns.status = NS_RCV_PNG;
-					}
-					else if(ifr.gifStart){
-						fputc('G', file);
-						fputc('I', file);
-						fputc('F', file);
-						fputc('8', file);
-						ns.receiveLength = 4;
-						networkLog(id, "passed GIF head");
-						ns.status = NS_RCV_GIF;
-					}
-					continue;
+				}
+
+				ifr.checkPNG(id, get_msg[j]);
+				ifr.checkJPG(id, get_msg[j]);
+				ifr.checkGIF(id, get_msg[j]);
+
+				//writing new image file
+				fputc(get_msg[j], file);
+				ns.receiveLength++;
+
+				if(ns.chunked && ns.receiveLength==ns.chunksize){
+					readmode=HTTPGET_END_CHUNK;
 				}
 			}
 
-			//writing new image file
-			if(ifr.jpgStart || ifr.pngStart || ifr.gifStart){
-				fputc(get_msg[j], file);
-				ns.receiveLength++;
-				
-				//check the endpoint of the image file
-				if(!ns.contentLength){
-					ifr.checkPNG(id, get_msg[j]);
-					ifr.checkJPG(id, get_msg[j]);
-					ifr.checkGIF(id, get_msg[j]);
-				}
+			if(tm.halt==RESTART_GETIMAGE){
+				break;
 			}
 
 			//finish writing a file
-			if((ns.contentLength && ns.receiveLength>=ns.contentLength) || ifr.jpgEnd || ifr.pngEnd || ifr.gifEnd){
+			if(ns.contentLength && ns.receiveLength>=ns.contentLength){
+				tm.finish=true;
+				break;
+			}
+			if(!ns.contentLength && (ifr.jpgEnd|| ifr.pngEnd || ifr.gifEnd)){
 				tm.finish=true;
 				break;
 			}
 		}
 
-		if(tm.finish){
+		if(tm.finish || tm.halt==RESTART_GETIMAGE){
 			break;
 		}
 	}
@@ -843,6 +1001,7 @@ void getGoogleImageSearch(int id, char *query){
 	long request_size = strlen(query)+100+120;
     char *request = new char[request_size];
     sprintf_s(request, request_size, "GET /search?q=%s&source=lnms&tbm=isch HTTP/1.1\r\nHost: www.google.co.jp\r\nUser-Agent: %s\r\n\r\n", query, USER_AGENT);
+	networkLog(id, "Request header is below");
 	networkLog_noparam(id, request);
     imageSearch_https(id, "www.google.co.jp", 443, request);
     delete[] request;
@@ -882,6 +1041,7 @@ void ImageFormatReader::checkPNG(int id, char c){
             if(c == 'G'){
                 pngStart = true;
 				networkLog(id, "found PNG data");
+				ns.status = NS_RCV_PNG;
             }else{
                 pngPointer1 = 0;
             }
@@ -967,6 +1127,7 @@ void ImageFormatReader::checkJPG(int id, char c){
             jpgPointer = 0;
             jpgStart = true;
 			networkLog(id, "found JPG data");
+			ns.status = NS_RCV_JPEG;
             return;
         }
         else if(c == -38){
@@ -992,7 +1153,7 @@ void ImageFormatReader::checkJPG(int id, char c){
     else if(jpgPointer >= 4){
         if(!jpgImageDataStart && jpgPointer-1 == jpgBytes){
             jpgPointer = 0;
-			networkLog(id, "END CHUNK");
+			networkLog(id, "END CHUNK: received %d bytes", jpgBytes);
             return;
         }
     }
@@ -1026,6 +1187,7 @@ void ImageFormatReader::checkGIF(int id, char c){
                 gifPointer = 4;
                 gifField = GIF_HEADER;
 				networkLog(id, "found GIF data");
+				ns.status = NS_RCV_GIF;
             }else{
                 gifPointer = 0;
             }

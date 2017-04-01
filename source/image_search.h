@@ -45,7 +45,7 @@ struct _TCPsocket {
 struct ThreadManager {
 	int selected, which, halt, threadID;
 	TCPsocket tcpsock;
-	char targetURL[1000];
+	char targetURL[BUF_LEN];
 	char query[300];
 	bool running, finish, failure;
 };
@@ -60,7 +60,8 @@ extern ThreadManager tm;
 #define NS_RCV_PNG 7
 #define NS_RCV_GIF 8
 struct NetworkStatus {
-	int status, contentLength, receiveLength, receiveCounter, display;
+	int status, contentLength, receiveLength, receiveCounter, display, chunksize;
+	bool chunked, found200;
 };
 extern NetworkStatus ns;
 
@@ -86,6 +87,16 @@ extern ImageFormatReader ifr;
 #define GIF_IMAGE_DATA_HEADER 7
 #define GIF_IMAGE_DATA_BLOCK 8
 
+#define HTTPGET_HEADER 0
+#define HTTPGET_HEADER_R 1
+#define HTTPGET_HEADER_N 2
+#define HTTPGET_HEADER_RN 3
+#define HTTPGET_HEADER_RNR 4
+#define HTTPGET_CHUNK_SIZE 5
+#define HTTPGET_CHUNK_R 6
+#define HTTPGET_END_CHUNK 7
+#define HTTPGET_END_CHUNK_R 8
+#define HTTPGET_DATA 9
 
 extern SDL_Thread *thread;
 int ImageSearchThread(void *ptr);
