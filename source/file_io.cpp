@@ -205,6 +205,9 @@ void UTF8toSJIS(char *s){
 void load_text(){
 	size_t fc=0;
 
+	for(int i=0 ; i<7 ; i++)for(int j=0 ; j<2 ; j++)for(int k=0 ; k<4 ; k++){
+		weekChar[i][j][k]=0;
+	}
 	for(int i=0 ; i<1000 ; i++)for(int j=0 ; j<61 ; j++)for(int k=0 ; k<2 ; k++){
 		text[i].str[k][j]=0;
 	}
@@ -215,7 +218,6 @@ void load_text(){
 		else loadFile("file/data/text_en.txt");
 		for(int i=0 ; i<7 ; i++){
 			for(int j=0 ; j<200 ; j++){
-				weekChar[i][k][j]=fstr[fc];
 				if(fc<fsize-1 && fstr[fc]==13 && fstr[fc+1]==10){
 					fc+=2;
 					break;
@@ -224,13 +226,13 @@ void load_text(){
 					fc++;
 					break;
 				}
+				weekChar[i][k][j]=fstr[fc];
 				fc++;
 			}
 		}
 		for(int i=0 ; i<1000 ; i++){
 			if(fc>=fsize)break;
 			for(int j=0 ; j<200 ; j++){
-				text[i].str[k][j]=fstr[fc];
 				if(fc<fsize-1 && fstr[fc]==13 && fstr[fc+1]==10){
 					fc+=2;
 					break;
@@ -239,6 +241,7 @@ void load_text(){
 					fc++;
 					break;
 				}
+				text[i].str[k][j]=fstr[fc];
 				fc++;
 			}
 		}
@@ -382,6 +385,9 @@ void load_entries(int n){
 			entry[entries].prg_num=0;
 			entry[entries].cartoon_id=allofworks[i].cartoon_id;
 			entry[entries].cartoon_index=allofworks[i].cartoon_index;
+			for(int j=0 ; j<600 ; j++){
+				entry[entries].query[j]=allofworks[i].query[j];
+			}
 			entries++;
 		}
 	}

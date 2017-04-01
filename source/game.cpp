@@ -118,6 +118,9 @@ void initGame(){
 	estimate();
 	setAntenna();
 	initManekiTV();
+	for(int i=0 ; i<towers ; i++) {
+		tower[i].onair_num=0;
+	}
 	menu[PREF_LIST].setMenu(60,40,20,8,areas);
 	for(int i=0 ; i<areas-1 ; i++)menu[PREF_LIST].stack(area[i].name);
 	if(gd.game_mode!=NO_RELAY){
@@ -2427,7 +2430,7 @@ void timerFishUp(){
 		int n;
 		if(phase==FISHUP)n=sta[ant->station].ontv;
 		else n=md.fish[0].which_work;
-		startThread(entry[n].cartoon_index, entry[n].query);
+		startThread(entry[n].cartoon_id, entry[n].query);
 	}
 	if(start==72){
 		Mix_PlayChannel(0, sf.get, 0);
@@ -2460,7 +2463,7 @@ void timerBSAttack(){
 	if(start==49){
 		fishbox.text_count=1;
 		int n=sta[ BSstation[gd.bs_ch] ].ontv;
-		startThread(entry[n].cartoon_index, entry[n].query);
+		startThread(entry[n].cartoon_id, entry[n].query);
 	}
 	if(start==0 && tm.finish && !tm.failure){
 		createSearchImage(tm.selected);
