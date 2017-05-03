@@ -72,7 +72,9 @@ void switchSetting(int n, bool up_key){
 	if(n==1){
 		if(SHOW_TOWER==true)SHOW_TOWER=false;
 		else SHOW_TOWER=true;
-		if(mode==GAME)map.buffered=false;
+		if(mode==GAME){
+			refreshGroundImage();
+		}
 	}
 	else if(n==2){
 		if(up_key){
@@ -90,7 +92,12 @@ void switchSetting(int n, bool up_key){
 		}
 		if(mode==GAME){
 			makeColorLight();
-			map.buffered2=false;
+			refreshGroundImage();
+			map.airMinX=640;
+			map.airMaxX=0;
+			map.airMinY=480;
+			map.airMaxY=0;
+			drawColorLight(gd.scrX,gd.scrY,0,0,640,480);
 		}
 	}
 	else if(n==3){
@@ -131,8 +138,7 @@ void switchSetting(int n, bool up_key){
 			gd.second*=MAGNIFY;
 			fix_XY();
 			fix_scrXY();
-			map.buffered=false;
-			map.buffered2=false;
+			refreshGroundImage();
 		}
 		if(MAGNIFY<8){
 			gd.current_area=EOF;
@@ -164,11 +170,12 @@ void switchSetting(int n, bool up_key){
 		if(mode==GAME && gd.game_mode!=NO_RELAY){
 			bool ok;
 			for(int i=0 ; i<areas ; i++){
-				for(int j=0 ; j<towers ; j++){
+				for(int j=0 ; j<area[i].tower_num ; j++){
 					ok=false;
 					if(NHK_REMOVE && area[i].tower[j].kw<1){
-						for(int k=0 ; k<10 ; k++)if(tower[j].ch[k]!=0){
-							if(sta[area[i].station[k]].mark!=5 && sta[area[i].station[k]].mark!=6){
+						for(int k=0 ; k<10 ; k++)if(area[i].tower[j].ch[k]!=0){
+							if(isNHK(sta[area[i].station[k]])){
+							}else{
 								ok=true;break;
 							}
 						}
@@ -179,8 +186,7 @@ void switchSetting(int n, bool up_key){
 				}
 			}
 			createMap_tower();
-			map.buffered=false;
-			map.buffered2=false;
+			refreshGroundImage();
 			rd.received=false;
 		}
 	}

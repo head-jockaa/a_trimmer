@@ -212,12 +212,13 @@ void keySaveData(){
 
 void keyRecordMenu(){
 	if(key.z && !key_stop(key.z)){
-		fillRect(img.buffer[1],0,0,640,480,0,0,0,255);
+		fillRect(map.bufferTowerSpot,0,0,640,480,0,0,0,255);
 		int n=menu[RECORDMENU].selected();
 		load_record(n);
-		gd.scrX=fishbox.getX()-320;
-		gd.scrY=fishbox.getY()-240;
-		map.buffered=false;
+		gd.scrX=fishbox.getX()*2-320;
+		gd.scrY=fishbox.getY()*2-240;
+		map.bufferedTowerSpotImage=false;
+		drawGround(gd.scrX,gd.scrY,0,0,640,480,1000);
 		phase=RECORD;
 		menu[RECORDMENU].setViewMode(GRAY);
 	}
@@ -242,7 +243,10 @@ void keyGameRecord(){
 	if(key.left && !key_wait(key.left))fishbox.cursorLeft();
 	if(key.right && !key_wait(key.right))fishbox.cursorRight();
 	if(preX!=fishbox.getX() || preY!=fishbox.getY()){
-		map.buffered=false;
+		map.bufferedTowerSpotImage=false;
+		gd.scrX=fishbox.getX()*2-320;
+		gd.scrY=fishbox.getY()*2-240;
+		drawGround(gd.scrX,gd.scrY,0,0,640,480,1000);
 	}
 }
 

@@ -328,7 +328,6 @@ struct ImageFile{
 	SDL_Surface *iwa, *screen;
 	Image *back, *chr, *menuback, *facechip, *keyboard, *symbol, *pre_scr;
 	Image *rod, *fishup, *colorlight, *tv_asahi;
-	Image *buffer[4];
 	Image *searchImage;
 	Uint8 alphaR, alphaG, alphaB;
 };

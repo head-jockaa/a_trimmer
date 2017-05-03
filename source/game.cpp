@@ -55,7 +55,7 @@ void initGame(){
 	mode=GAME;
 	load_station();
 
-	img.colorlight=new Image(2560,490);
+	img.colorlight=new Image(2560,170);
 	makeColorLight();
 
 	getImage(img.fishup,"file/img/fishup.png",BLUE);
@@ -130,7 +130,8 @@ void initGame(){
 				ok=false;
 				if(NHK_REMOVE && area[i].tower[j].kw<1){
 					for(int k=0 ; k<10 ; k++)if(area[i].tower[j].ch[k]!=0){
-						if(sta[area[i].station[k]].mark!=5 && sta[area[i].station[k]].mark!=6){
+						if(isNHK(sta[area[i].station[k]])){
+						}else{
 							ok=true;break;
 						}
 					}
@@ -150,6 +151,12 @@ void initGame(){
 			}
 		}
 		createMap_tower();
+	}
+	for(int i=0 ; i<areas ; i++){
+		for(int j=0 ; j<area[i].tower_num ; j++){
+			area[i].tower[j].onair_num=0;
+			area[i].tower[j].colorlight_size=0;
+		}
 	}
 }
 
@@ -190,10 +197,9 @@ void initGame2(){
 	}
 	loadCartoon(&manekitvJson,"file/data/cartoon/maneki_tv.json");
 
+	refreshGroundImage();
+
 	if(MAP3D)make3dview(gd.x,gd.y,gd.ant_dir);
-	else{
-		map.buffered=false;
-	}
 }
 
 void endGame(){
@@ -256,7 +262,7 @@ void endGame(){
 void keyGameStart(){
 	if((key.z || key.x || key.c) && (!key_stop(key.z) || !key_stop(key.x) || !key_stop(key.c))){
 		if(count>=10){
-			map.buffered2=false;
+			refreshGroundImage();
 			if(gd.week==0)phase=READY;
 			else phase=PLAYING;
 			count=2;
@@ -270,7 +276,7 @@ void keyFishup(){
 	if((key.z||key.x||key.c||key.left||key.right||key.up||key.down)){
 		if(!key_stop(key.z) || !key_stop(key.x) || !key_stop(key.c) || !key_stop(key.left) || !key_stop(key.right) || !key_stop(key.up) || !key_stop(key.down)){
 			if(start<40){
-				int n;
+				int n=0;
 				if(phase==FISHUP || phase==GRADEUP){
 					phase=ANTENNA;
 					n=sta[ant->station].ontv;
@@ -646,12 +652,32 @@ void walking(){
 	fix_XY();
 	fix_scrXY();
 	map.moved=false;
-	map.slideX=gd.scrX-preX;
-	map.slideY=gd.scrY-preY;
-	if(!MAP3D && (map.slideX!=0 || map.slideY!=0)){
+	if(!MAP3D && (gd.scrX!=preX || gd.scrY!=preY)){
+		int slideX=preX-gd.scrX;
+		int slideY=preY-gd.scrY;
 		map.moved=true;
-		map.buffered=false;
-		map.buffered2=false;
+		map.bufferedTowerSpotImage=false;
+		map.bufferedVolcanoImage=false;
+		slideImage(map.bufferGround,slideX,slideY);
+		int X=0,Y=0;
+		if(slideX<0)X=640+slideX;
+		if(slideY<0)Y=480+slideY;
+		int blight=1000;
+		if(mode==GAME){
+			if(gd.hour==gd.sunset_hour+1)blight=(120000-gd.minute*1600)/120;
+			else if(gd.hour==gd.sunrise_hour)blight=(24000+gd.minute*1600)/120;
+		}
+		drawGround(gd.scrX+X,gd.scrY,X,0,abs(slideX),480,blight);
+		drawGround(gd.scrX,gd.scrY+Y,0,Y,640,abs(slideY),blight);
+		if(AIR_IMG!=0){
+			map.airMinX+=slideX;
+			map.airMaxX+=slideX;
+			map.airMinY+=slideY;
+			map.airMaxY+=slideY;
+			slideImage(map.bufferColorLight,slideX,slideY);
+			drawColorLight(gd.scrX+X,gd.scrY,X,0,abs(slideX),480);
+			drawColorLight(gd.scrX,gd.scrY+Y,0,Y,640,abs(slideY));
+		}
 	}
 
 	if(MAGNIFY>=8 && (key.up||key.down||key.left||key.right)){
@@ -927,7 +953,7 @@ void keyPrefList_SMR(){
 		menu[SMR].setMenu(0,40,40,10,area[menu[PREF_LIST].selected()].st_num);
 		for(int i=0 ; i<area[menu[PREF_LIST].selected()].st_num ; i++){
 			if(NHK_REMOVE && gd.game_mode!=NO_RELAY){
-				if(sta[area[menu[PREF_LIST].selected()].station[i]].mark==5 || sta[area[menu[PREF_LIST].selected()].station[i]].mark==6){
+				if(isNHK(sta[area[menu[PREF_LIST].selected()].station[i]])){
 					menu[SMR].stack("------");
 					continue;
 				}
@@ -942,8 +968,7 @@ void keyPrefList_SMR(){
 	if(key.x && !key_stop(key.x)){
 		fix_XY();
 		fix_scrXY();
-		map.buffered=false;
-		map.buffered2=false;
+		refreshGroundImage();
 		phase=ANTENNA_MENU;
 		menu[PREF_LIST].setViewMode(HIDE);
 	}
@@ -989,8 +1014,7 @@ void keyTownList(){
 		gd.y=area[m].town[n].y;
 		fix_XY();
 		fix_scrXY();
-		map.buffered=false;
-		map.buffered2=false;
+		refreshGroundImage();
 		gd.current_area=m;
 		gd.current_town=n;
 		gd.town_count=0;
@@ -1015,8 +1039,7 @@ void keySMR(){
 	if(key.z && !key_stop(key.z)){
 		bool ok=true;
 		if(NHK_REMOVE && gd.game_mode!=NO_RELAY){
-			if(sta[area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]].mark==5
-			|| sta[area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]].mark==6){
+			if(isNHK(sta[area[menu[PREF_LIST].selected()].station[menu[SMR].selected()]])){
 				ok=false;
 			}
 		}
@@ -1031,8 +1054,7 @@ void keySMR(){
 			MAGNIFY=1;
 			fix_XY();
 			fix_scrXY();
-			map.buffered=false;
-			map.buffered2=false;
+			refreshGroundImage();
 			menu[SMR].setViewMode(HIDE);
 			menu[PREF_LIST].setViewMode(HIDE);
 		}
@@ -1409,7 +1431,7 @@ void televise(){
 			}
 		}
 	}
-	bool a=false, b=false;
+	bool a=false, b=false, c=false;
 	for(int i=0 ; i<stas ; i++){
 		if(pre[i]!=sta[i].ontv){
 			if(sta[i].ontv!=EOF){
@@ -1423,11 +1445,19 @@ void televise(){
 				if(hit)b=true;
 				else a=true;
 			}
-			map.buffered2=false;
+			c=true;
 		}
 	}
+	if(AIR_IMG!=0 && a){
+		map.airMinX=640;
+		map.airMaxX=0;
+		map.airMinY=480;
+		map.airMaxY=0;
+	}
+
 	if(a)Mix_PlayChannel(1,sf.lamp,0);
 	if(b)Mix_PlayChannel(2,sf.bubble,0);
+	if(c)drawColorLight(gd.scrX,gd.scrY,0,0,640,480);
 
 	delete [] pre;
 }
@@ -1816,9 +1846,9 @@ void drawThrowPhoto(SDL_Surface *scr){
 	int w=img.searchImage->w;
 	int h=img.searchImage->h;
 	if(start>=50){
-		rotateImage_x(scr,img.searchImage,320,240,start/4.0+0.3,(100-start)/50.0,0,0,w/2,h/2,w,h,255);
+		rotateImage_x(scr,img.searchImage,320,240,start/4.0,(100-start)/50.0,0,0,w/2,h/2,w,h,255);
 	}else{
-		rotateImage(scr,img.searchImage,320,240,0.3,0,0,w/2,h/2,w,h,255);
+		drawImage(scr,img.searchImage,0,0,30,60,640,480,255);
 		if(strlen(tm.targetURL)>80){
 			drawImage(scr,img.menuback,0,440+start/2,0,0,320,40,128);
 			drawImage(scr,img.menuback,320,440+start/2,0,0,320,40,128);
@@ -1901,7 +1931,8 @@ void drawGame(SDL_Surface* scr){
 
 		if(MAP3D){
 			fillRect(scr,520,360,120,120,192,192,255,255);
-			drawGround(scr,(int)gd.x-60,(int)gd.y-60,520,360,120,120,1000,false);
+			drawGround((int)gd.x-60,(int)gd.y-60,520,360,120,120,1000);
+			drawImage(scr,map.bufferGround,520,360,520,360,120,120,255);
 			drawTowerSpot(scr,(int)gd.x-60,(int)gd.y-60,520,360,120,120,false);
 			int a,b;
 			for(int i=0 ; i<60 ; i++){
@@ -2165,45 +2196,31 @@ void drawGameExplain(SDL_Surface* scr){
 	}
 }
 
-bool createSearchImage(int n){
+bool createSearchImage(int n, double rotate){
 	if (img.searchImage)freeImage(img.searchImage);
 	sprintf_s(str,"save/tmp_image/%d.jpg", n);
-	Image *img2;
+	Image *img2,*img3;
 	getImage(img2,str);
 
 	//sometimes fails to load a file because of bad timing
 	if(img2){
-		getImage(img.searchImage,"file/img/image_search.png",BLACK);
-
-		int w=img.searchImage->w, h=img.searchImage->h;
+		img.searchImage=new Image(700,600);
+		getImage(img3,"file/img/image_search.png",BLACK);
+		rotateImage(img.searchImage,img3,350,300,rotate,0,0,300,220,600,440,255);
+		freeImage(img3);
+		setAlpha(img.searchImage,0,0,0);
 		int w2=img2->w, h2=img2->h;
 		if(w2*1.2<h2){
-			if(w2-h >= 0 && h2-w < 0){
-				rotateImage_x(img.searchImage,img2,w/2,h/2,-PI/2,1.0*h/w2,0,0,w2/2,h2/2,w2,h2,255);
-			}
-			else if(w2-h < 0 && h2-w >= 0){
-				rotateImage_x(img.searchImage,img2,w/2,h/2,-PI/2,1.0*w/h2,0,0,w2/2,h2/2,w2,h2,255);
-			}
-			else{
-				if(1.0*h/w2 < 1.0*w/h2){
-					rotateImage_x(img.searchImage,img2,w/2,h/2,-PI/2,1.0*h/w2,0,0,w2/2,h2/2,w2,h2,255);
-				}else{
-					rotateImage_x(img.searchImage,img2,w/2,h/2,-PI/2,1.0*w/h2,0,0,w2/2,h2/2,w2,h2,255);
-				}
+			if(480.0/w2 < 640.0/h2){
+				rotateImage_x(img.searchImage,img2,350,300,-PI/2+rotate,480.0/w2,0,0,w2/2,h2/2,w2,h2,255);
+			}else{
+				rotateImage_x(img.searchImage,img2,350,300,-PI/2+rotate,640.0/h2,0,0,w2/2,h2/2,w2,h2,255);
 			}
 		}else{
-			if(w2-w >= 0 && h2-h < 0){
-				drawImage_x(img.searchImage,img2,0,0,1.0*w/w2,0,0,w2,h2,255);
-			}
-			else if(w2-w < 0 && h2-h >= 0){
-				drawImage_x(img.searchImage,img2,0,0,1.0*h/h2,0,0,w2,h2,255);
-			}
-			else{
-				if(1.0*w/w2 < 1.0*h/h2){
-					drawImage_x(img.searchImage,img2,0,0,1.0*w/w2,0,0,w2,h2,255);
-				}else{
-					drawImage_x(img.searchImage,img2,0,0,1.0*h/h2,0,0,w2,h2,255);
-				}
+			if(640.0/w2 < 480.0/h2){
+				rotateImage_x(img.searchImage,img2,350,300,rotate,640.0/w2,0,0,w2/2,h2/2,w2,h2,255);
+			}else{
+				rotateImage_x(img.searchImage,img2,350,300,rotate,480.0/h2,0,0,w2/2,h2/2,w2,h2,255);
 			}
 		}
 		freeImage(img2);
@@ -2361,10 +2378,14 @@ void timerSunMovement(){
 				createMap_color(200);
 			}
 			if(gd.hour==gd.sunrise_hour){
-				map.buffered=false;
+				map.bufferedTowerSpotImage=false;
+				drawGround(gd.scrX,gd.scrY,0,0,640,480,(24000+gd.minute*1600)/120);
+				drawTowerSpot(NULL,gd.scrX,gd.scrY,0,0,640,480,true);
 			}
 			if(gd.hour==gd.sunset_hour+1){
-				map.buffered=false;
+				map.bufferedTowerSpotImage=false;
+				drawGround(gd.scrX,gd.scrY,0,0,640,480,(120000-gd.minute*1600)/120);
+				drawTowerSpot(NULL,gd.scrX,gd.scrY,0,0,640,480,true);
 			}
 		}
 		if(gd.game_mode==STORYMODE){
@@ -2437,7 +2458,7 @@ void timerFishUp(){
 		fishbox.text_count=1;
 	}
 	if(start==0 && tm.finish && !tm.failure){
-		if(createSearchImage(tm.selected)){
+		if(createSearchImage(tm.selected,0.3)){
 			start=100;
 			if(phase==FISHUP)phase=THROW_PHOTO;
 			else phase=MANEKI_THROW_PHOTO;
@@ -2466,7 +2487,7 @@ void timerBSAttack(){
 		startThread(entry[n].cartoon_id, entry[n].query);
 	}
 	if(start==0 && tm.finish && !tm.failure){
-		createSearchImage(tm.selected);
+		createSearchImage(tm.selected,0.3);
 		if(!tm.failure){
 			start=100;
 			phase=BS_THROW_PHOTO;
@@ -2843,28 +2864,28 @@ void ManekiTV_catch(){
 
 void makeColorLight(){
 	Uint32 *rgb=img.colorlight->RGB;
-	for(int m=0 ; m<3 ; m++){
-		for(int k=0 ; k<16 ; k++){
-			for(int i=0 ; i<160 ; i++)for(int j=0 ; j<160 ; j++){
-				double a=15.97*(sqrt((k*5.0-i)*(k*5-i)+(k*5-j)*(k*5-j))/(k*5));
-				int b=(int)(a*a);
-				int c;
-				if(b==0)c=1;
-				else if(b>255)c=0;
-				else{
-					if(AIR_IMG==TYPE1_EDGE||AIR_IMG==TYPE1_BARE)c=b;
-					else c=256-b;
-				}
-				if(m==0)*(rgb+(j)*2560+(i+k*160))=setRGB(0,0,c);
-				if(m==1)*(rgb+(j+160)*2560+(i+k*160))=setRGB(c,0,0);
-				if(m==2)*(rgb+(j+320)*2560+(i+k*160))=setRGB(c,c,0);
+	for(int k=0 ; k<16 ; k++){
+		for(int i=0 ; i<160 ; i++)for(int j=0 ; j<160 ; j++){
+			double a=15.97*(sqrt((k*5.0-i)*(k*5-i)+(k*5-j)*(k*5-j))/(k*5));
+			int b=(int)(a*a);
+			int c;
+			if(b==0)c=1;
+			else if(b>255)c=0;
+			else{
+				if(AIR_IMG==TYPE1_EDGE||AIR_IMG==TYPE1_BARE)c=b;
+				else c=256-b;
 			}
+			*(rgb+(j*2560)+(i+k*160))=setRGB(c,c,c);
 		}
 	}
 
 	for(int i=0 ; i<10 ; i++)for(int j=0 ; j<10 ; j++){
 		int a=255-(int)(255.0*(sqrt((5.0-i)*(5-i)+(5-j)*(5-j))/5));
-		if(a<0)*(rgb+(j+480)*2560+i)=0;
-		else *(rgb+(j+480)*2560+i)=setRGB(a,0,0);
+		if(a<0)*(rgb+(j+160)*2560+i)=0;
+		else *(rgb+(j+160)*2560+i)=setRGB(a,a,a);
 	}
+}
+
+bool isNHK(Station sta){
+	return sta.name.str[0][0]=='N' && sta.name.str[0][1]=='H' && sta.name.str[0][2]=='K';
 }

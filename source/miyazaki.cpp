@@ -111,9 +111,10 @@ void gotoTowerList(){
 	createMap();
 	createMap_color(1000);
 	createMap_tower();
-	gd.scrX=(int)gd.x*MAGNIFY-320;
-	gd.scrY=(int)gd.y*MAGNIFY-240;
-	map.buffered=false;
+	gd.scrX=(int)gd.x-320;
+	gd.scrY=(int)gd.y-240;
+	map.bufferedTowerSpotImage=false;
+	drawGround(gd.scrX,gd.scrY,0,0,640,480,1000);
 	phase=TOWERLIST;
 }
 
@@ -186,7 +187,7 @@ void timerMiyazaki(){
 
 	if(phase==GUIDE_ALL || phase==GUIDE_ANIME){
 		if(start==0 && tm.finish && !tm.failure && !showSearchImage){
-			if (createSearchImage(tm.selected)) {
+			if (createSearchImage(tm.selected,0)) {
 				tm.finish = false;
 				showSearchImage = true;
 			}
@@ -761,9 +762,11 @@ void keyTowerList(){
 		if(key.down)gd.y++;
 		if(key.left)gd.x--;
 		if(key.right)gd.x++;
-		gd.scrX=(int)gd.x*MAGNIFY-320;
-		gd.scrY=(int)gd.y*MAGNIFY-240;
-		map.buffered=false;
+		gd.scrX=(int)gd.x-320;
+		gd.scrY=(int)gd.y-240;
+		map.bufferedTowerSpotImage=false;
+		drawGround(gd.scrX,gd.scrY,0,0,640,480,1000);
+		drawTowerSpot(NULL,gd.scrX,gd.scrY,0,0,640,480,true);
 	}
 	if(key.left||key.right||key.up||key.down){
 		for(int i=0 ; i<10 ; i++){
@@ -1299,7 +1302,7 @@ void drawMiyazaki(SDL_Surface* scr){
 	}
 	drawNetworkStatus(scr);
 	if(showSearchImage){
-		drawImage(scr,img.searchImage,0,0,0,0,640,480,255);
+		drawImage(scr,img.searchImage,0,0,30,70,640,480,255);
 		if(strlen(tm.targetURL)>80){
 			drawImage(scr,img.menuback,0,440,0,0,320,40,128);
 			drawImage(scr,img.menuback,320,440,0,0,320,40,128);

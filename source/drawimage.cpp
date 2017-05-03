@@ -1,6 +1,6 @@
 #include "drawimage.h"
 
-int imgPointX[640],imgPointY[480],horizontalX[640],horizontalY[640],verticalX[480],verticalY[480];
+int imgPointX[1000],imgPointY[1000],horizontalX[1000],horizontalY[1000],verticalX[1000],verticalY[1000];
 
 
 void clipping(int *x, int *y, int *scr_w, int *scr_h, int *x2, int *y2, int *w2, int *h2, int *ima_w, int *ima_h, int *a){
@@ -703,6 +703,139 @@ void fillRect(Image* scr, int x, int y, int w, int h, Uint8 R, Uint8 G, Uint8 B,
 	__fillRect((Uint8*)scr->RGB, scr->w, x, y, w, h, R, G, B, a);
 }
 
+void __illuminateImage_quick(Uint8* px, int pxwidth, Image* ima, int x, int y, int x2, int y2, int w2, int h2, int c, int a){
+	Uint8 *rgb=(Uint8*)ima->RGB;
+	Uint16 px_skip, rgb_skip;
+
+	px=px+(pxwidth*y+x)*4;
+	px_skip=(pxwidth-w2)*4;
+	rgb=rgb+(y2*(ima->w)+x2)*4;
+	rgb_skip=((ima->w)-w2)*4;
+
+	if(a==255){
+		if((!ABGR&&c==0) || (ABGR&&c==1)){
+			for(int j=0 ; j<h2 ; j++){
+				for(int i=0 ; i<w2 ; i++){
+					if(*rgb+*px<256)*px+=*rgb;
+					else *px=255;
+					px+=4;rgb+=4;
+				}
+				px+=px_skip;
+				rgb+=rgb_skip;
+			}
+		}
+		else if(!ABGR&&c==2){
+			for(int j=0 ; j<h2 ; j++){
+				for(int i=0 ; i<w2 ; i++){
+					px++;rgb++;
+					if(*rgb+*px<256)*px+=*rgb;
+					else *px=255;
+					px++;rgb++;
+					if(*rgb+*px<256)*px+=*rgb;
+					else *px=255;
+					px+=2;rgb+=2;
+				}
+				px+=px_skip;
+				rgb+=rgb_skip;
+			}
+		}
+		else if(ABGR&&c==2){
+			for(int j=0 ; j<h2 ; j++){
+				for(int i=0 ; i<w2 ; i++){
+					if(*rgb+*px<256)*px+=*rgb;
+					else *px=255;
+					px++;rgb++;
+					if(*rgb+*px<256)*px+=*rgb;
+					else *px=255;
+					px+=3;rgb+=3;
+				}
+				px+=px_skip;
+				rgb+=rgb_skip;
+			}
+		}
+		else if((!ABGR&&c==1) || (ABGR&&c==0)){
+			for(int j=0 ; j<h2 ; j++){
+				for(int i=0 ; i<w2 ; i++){
+					px+=2;rgb+=2;
+					if(*rgb+*px<256)*px+=*rgb;
+					else *px=255;
+					px+=2;rgb+=2;
+				}
+				px+=px_skip;
+				rgb+=rgb_skip;
+			}
+		}
+	}else{
+		Uint8 col;
+		if((!ABGR&&c==0) || (ABGR&&c==1)){
+			for(int j=0 ; j<h2 ; j++){
+				for(int i=0 ; i<w2 ; i++){
+					col=(*rgb*a)>>8;
+					if(col+*px<256)*px+=col;
+					else *px=255;
+					px+=4;rgb+=4;
+				}
+				px+=px_skip;
+				rgb+=rgb_skip;
+			}
+		}
+		else if(!ABGR&&c==2){
+			for(int j=0 ; j<h2 ; j++){
+				for(int i=0 ; i<w2 ; i++){
+					px++;rgb++;
+					col=(*rgb*a)>>8;
+					if(col+*px<256)*px+=col;
+					else *px=255;
+					px++;rgb++;
+					col=(*rgb*a)>>8;
+					if(col+*px<256)*px+=col;
+					else *px=255;
+					px+=2;rgb+=2;
+				}
+				px+=px_skip;
+				rgb+=rgb_skip;
+			}
+		}
+		else if(ABGR&&c==2){
+			for(int j=0 ; j<h2 ; j++){
+				for(int i=0 ; i<w2 ; i++){
+					col=(*rgb*a)>>8;
+					if(col+*px<256)*px+=col;
+					else *px=255;
+					px++;rgb++;
+					col=(*rgb*a)>>8;
+					if(col+*px<256)*px+=col;
+					else *px=255;
+					px+=3;rgb+=3;
+				}
+				px+=px_skip;
+				rgb+=rgb_skip;
+			}
+		}
+		else if((!ABGR&&c==1) || (ABGR&&c==0)){
+			for(int j=0 ; j<h2 ; j++){
+				for(int i=0 ; i<w2 ; i++){
+					px+=2;rgb+=2;
+					col=(*rgb*a)>>8;
+					if(col+*px<256)*px+=col;
+					else *px=255;
+					px+=2;rgb+=2;
+				}
+				px+=px_skip;
+				rgb+=rgb_skip;
+			}
+		}
+	}
+}
+
+void illuminateImage_quick(SDL_Surface* scr, Image* ima, int x, int y, int x2, int y2, int w2, int h2, int c, int a){
+	__illuminateImage_quick((Uint8*)scr->pixels,scr->w,ima,x,y,x2,y2,w2,h2,c,a);
+}
+
+void illuminateImage_quick(Image* scr, Image* ima, int x, int y, int x2, int y2, int w2, int h2, int c, int a){
+	__illuminateImage_quick((Uint8*)scr->RGB,scr->w,ima,x,y,x2,y2,w2,h2,c,a);
+}
+
 void __illuminateImage(Uint8* px, int pxwidth, Image* ima, int x, int y, int x2, int y2, int w2, int h2, int a){
 	if(a<0)return;
 	if(a>255)a=255;
@@ -868,6 +1001,57 @@ void illuminateImage_x(Image* scr, Image* ima, int x, int y, double mag, int x2,
 		illuminateImage(scr, ima, x, y, x2, y2, w2, h2, a);
 	}else{
 		__illuminateImage_x((Uint8*)scr->RGB, scr->w, scr->h, ima, x, y, mag, x2, y2, w2, h2, a);
+	}
+}
+
+void slideImage(Image* scr, int slideX, int slideY){
+	Uint32 *px=scr->RGB;
+	if(slideX<0 && slideY<0){
+		int shiftX=abs(slideX);
+		int shiftY=abs((scr->w)*slideY);
+		for(int j=0 ; j<(scr->h)+slideY ; j++){
+			for(int i=0 ; i<(scr->w)-shiftX ; i++){
+				*px=*(px+shiftX+shiftY);
+				px++;
+			}
+			px+=shiftX;
+		}
+	}
+	else if(slideX>=0 && slideY>=0){
+		int shiftX=slideX;
+		int shiftY=(scr->w)*slideY;
+		px+=(scr->w)*(scr->h)-1;
+		for(int j=0 ; j<(scr->h)-slideY ; j++){
+			for(int i=0 ; i<(scr->w)-shiftX ; i++){
+				*px=*(px-shiftX-shiftY);
+				px--;
+			}
+			px-=shiftX;
+		}
+	}
+	else if(slideX<0 && slideY>=0){
+		int shiftX=abs(slideX);
+		int shiftY=(scr->w)*slideY;
+		px+=(scr->w)*((scr->h)-1);
+		for(int j=0 ; j<(scr->h)-slideY ; j++){
+			for(int i=0 ; i<(scr->w)-shiftX ; i++){
+				*px=*(px+shiftX-shiftY);
+				px++;
+			}
+			px-=((scr->w)-shiftX)+(scr->w);
+		}
+	}
+	else if(slideX>=0 && slideY<0){
+		int shiftX=slideX;
+		int shiftY=abs((scr->w)*slideY);
+		px+=(scr->w)-1;
+		for(int j=0 ; j<(scr->h)+slideY ; j++){
+			for(int i=0 ; i<(scr->w)-shiftX ; i++){
+				*px=*(px-shiftX+shiftY);
+				px--;
+			}
+			px+=((scr->w)-shiftX+1)+((scr->w)-1);
+		}
 	}
 }
 

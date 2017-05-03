@@ -245,7 +245,11 @@ int main(int argc, char *argv[]) {
 
 void initAll(){
 	img.pre_scr=new Image(640,480);
-	for(int i=0 ; i<4 ; i++)img.buffer[i]=new Image(640,480);
+	map.bufferGround=new Image(640,480);
+	map.bufferTowerSpot=new Image(640,480);
+	map.bufferColorLight=new Image(640,480);
+	map.bufferVolcano=new Image(640,480);
+	map.bufferCity=new Image(640,480);
 	checkEndian();
 	sf.decide=Mix_LoadWAV("file/se/3.wav");
 	sf.decide2=Mix_LoadWAV("file/se/2.wav");
@@ -268,7 +272,6 @@ void initAll(){
 }
 
 void endAll(){
-	for(int i=0 ; i<4 ; i++)freeImage(img.buffer[i]);
 	if(fsize)delete [] fstr;
 	if(season_num)delete [] season;
 	if(stas)delete [] sta;
@@ -299,9 +302,11 @@ void endAll(){
 	freeImage(img.pre_scr);
 	freeImage(img.menuback);
 	freeImage(img.facechip);
-	for(int i=0 ; i<4 ; i++){
-		freeImage(img.buffer[i]);
-	}
+	freeImage(map.bufferGround);
+	freeImage(map.bufferTowerSpot);
+	freeImage(map.bufferColorLight);
+	freeImage(map.bufferVolcano);
+	freeImage(map.bufferCity);
 	freeSound(sf.decide);
 	freeSound(sf.decide2);
 	freeSound(sf.cursor_move);
