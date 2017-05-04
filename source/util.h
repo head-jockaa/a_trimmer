@@ -320,7 +320,7 @@ public:
 struct SoundFile{
 	Mix_Chunk *decide, *cursor_move, *decide2, *coin, *swish, *get, *lamp, *bubble;
 	Mix_Chunk *snore, *fw_sound, *noon, *sunset, *hold, *drag_s, *calling;
-	Mix_Chunk *water, *thunder, *meow, *noize, *bupyo, *knob, *alarm, *gaze;
+	Mix_Chunk *water, *thunder, *grumble, *meow, *noize, *bupyo, *knob, *alarm, *gaze;
 };
 extern SoundFile sf;
 

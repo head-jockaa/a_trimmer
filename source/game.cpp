@@ -73,6 +73,7 @@ void initGame(){
 	sf.knob=Mix_LoadWAV("file/se/7.wav");
 	sf.calling=Mix_LoadWAV("file/se/12.wav");
 	sf.coin=Mix_LoadWAV("file/se/17.wav");
+	sf.grumble=Mix_LoadWAV("file/se/19.wav");
 	sf.swish=Mix_LoadWAV("file/se/25.wav");
 	sf.get=Mix_LoadWAV("file/se/26.wav");
 	sf.lamp=Mix_LoadWAV("file/se/27.wav");
@@ -228,6 +229,7 @@ void endGame(){
 	freeSound(sf.knob);
 	freeSound(sf.calling);
 	freeSound(sf.coin);
+	freeSound(sf.grumble);
 	freeSound(sf.swish);
 	freeSound(sf.get);
 	freeSound(sf.lamp);
@@ -1306,12 +1308,10 @@ void receiveBS(){
 				fishbox.today[i]=tmp_fish.which_work;
 				break;
 			}
-			Mix_PlayChannel(0,sf.thunder,0);
-			Mix_PlayChannel(1,sf.meow,0);
 			gd.get_score++;
 			gd.gradeup=1;
 			phase=BS_ATTACK;
-			start=50;
+			start=150;
 		}
 		fishbox.panelColor(tmp_fish.which_work);
 	}
@@ -1632,7 +1632,7 @@ void drawPlayer(SDL_Surface* scr){
 }
 
 void drawFishup(SDL_Surface* scr){
-	if((phase==BS_CH||phase==BS_ATTACK) && sta[BSstation[gd.bs_ch]].ontv!=EOF){
+	if(phase==BS_CH && sta[BSstation[gd.bs_ch]].ontv!=EOF){
 		setTmpFish_bs();
 		fishbox.drawTable(scr,tmp_fish);
 	}
@@ -1644,12 +1644,22 @@ void drawFishup(SDL_Surface* scr){
 		drawImage(scr,img.fishup,0,380,100,0,100,100,255);
 	}
 	if(phase==BS_ATTACK){
-		if(start>0)drawImage(scr,img.fishup,20,40-abs(start%10-5)*10,0,300,320,320,255);
-		else drawImage(scr,img.fishup,20,40,0,300,320,320,255);
-		if(!animebook[ entry[sta[BSstation[gd.bs_ch]].ontv].cartoon_index ]){
-			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
-			sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
-			drawText2(scr,380,220,str);
+		if(start>50){
+			fillRect(scr,0,0,640,480,0,0,0,(150-start)*2);
+			if(start<=140 && start>120)fillRect(scr,0,0,640,480,255,255,255,50-(abs)(start-130)*5);
+			if(start<=120 && start>100)fillRect(scr,0,0,640,480,255,255,255,50-(abs)(start-110)*5);
+			if(start<=70 && start>50)fillRect(scr,0,0,640,480,255,255,255,50-(abs)(start-60)*5);
+		}else{
+			fillRect(scr,0,0,640,480,0,0,0,200);
+			if(start>0)drawImage(scr,img.fishup,20,40-abs(start%10-5)*10,0,300,320,320,255);
+			else drawImage(scr,img.fishup,20,40,0,300,320,320,255);
+			setTmpFish_bs();
+			fishbox.drawTable(scr,tmp_fish);
+			if(!animebook[ entry[sta[BSstation[gd.bs_ch]].ontv].cartoon_index ]){
+				drawImage(scr,img.fishup,300,160,520,0,240,120,255);
+				sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
+				drawText2(scr,380,220,str);
+			}
 		}
 	}
 	if(phase==CROP){
@@ -2496,7 +2506,12 @@ void startThread(int id, char *query){
 }
 
 void timerBSAttack(){
-	if(start==49){
+	if(start==149){
+		Mix_PlayChannel(0,sf.grumble,0);
+	}
+	else if(start==49){
+		Mix_PlayChannel(0,sf.thunder,0);
+		Mix_PlayChannel(1,sf.meow,0);
 		fishbox.text_count=1;
 		int n=sta[ BSstation[gd.bs_ch] ].ontv;
 		tm.hasCacheImage=false;
