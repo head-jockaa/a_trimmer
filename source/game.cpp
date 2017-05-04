@@ -290,11 +290,6 @@ void keyFishup(){
 					phase=ANTENNA;
 					n=sta[ant->station].ontv;
 				}
-				else if(phase==MANEKI_THROW_PHOTO && start==0){
-					phase=PLAYING;
-					n=sta[ant->station].ontv;
-					shiftFish_maneki();
-				}
 				else if(phase==BS_THROW_PHOTO && start==0){
 					phase=BS_CH;
 					n=sta[BSstation[gd.bs_ch]].ontv;
@@ -1249,7 +1244,6 @@ void keyGame(){
 		case MANEKI_FISHUP:
 		case MANEKI_GRADEUP:
 		case THROW_PHOTO:
-		case MANEKI_THROW_PHOTO:
 		case BS_THROW_PHOTO:
 			keyFishup();break;
 		case FINISH:keyFinish();break;
@@ -1845,19 +1839,27 @@ void drawManekiTV(SDL_Surface *scr){
 void drawThrowPhoto(SDL_Surface *scr){
 	int w=img.searchImage->w;
 	int h=img.searchImage->h;
-	if(start>=50){
-		rotateImage_x(scr,img.searchImage,320,240,start/4.0,(100-start)/50.0,0,0,w/2,h/2,w,h,255);
+	if(start>=60){
+		rotateImage_x(scr,img.searchImage,320,240,(start-60)*0.25+0.3,(100-start)/40.0,0,0,w/2,h/2,w,h,255);
 	}else{
+		int a=0;
 		drawImage(scr,img.searchImage,0,0,30,60,640,480,255);
-		if(strlen(tm.targetURL)>80){
-			drawImage(scr,img.menuback,0,440+start/2,0,0,320,40,128);
-			drawImage(scr,img.menuback,320,440+start/2,0,0,320,40,128);
-			drawText(scr,0,440+start/2,tm.targetURL,80);
-			drawText(scr,0,460+start/2,&tm.targetURL[80],80);
+		if(strlen(tm.targetURL)>160){
+			a=start;
+			drawImage(scr,img.menuback,0,420+a,0,0,640,60,128);
+			drawText(scr,0,420+a,tm.targetURL,80);
+			drawText(scr,0,440+a,&tm.targetURL[80],80);
+			drawText(scr,0,460+a,&tm.targetURL[160],80);
+		}
+		else if(strlen(tm.targetURL)>80){
+			if(start>20)a=start-20;
+			drawImage(scr,img.menuback,0,440+a,0,0,640,40,128);
+			drawText(scr,0,440+a,tm.targetURL,80);
+			drawText(scr,0,460+a,&tm.targetURL[80],80);
 		}else{
-			drawImage(scr,img.menuback,0,460+start/2,0,0,320,20,128);
-			drawImage(scr,img.menuback,320,460+start/2,0,0,320,20,128);
-			drawText(scr,0,460+start/2,tm.targetURL,80);
+			if(start>40)a=start-40;
+			drawImage(scr,img.menuback,0,460+a,0,0,640,20,128);
+			drawText(scr,0,460+a,tm.targetURL,80);
 		}
 	}
 }
@@ -2010,7 +2012,7 @@ void drawGame(SDL_Surface* scr){
 		else if(phase==TALKING || talkingJson.talk_open_count!=0){
 			drawAnimationCut(&talkingJson,scr);
 		}
-		if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)drawThrowPhoto(scr);
+		if(phase==THROW_PHOTO || phase==BS_THROW_PHOTO)drawThrowPhoto(scr);
 	}
 	drawGameExplain(scr);
 	drawNetworkStatus(scr);
@@ -2211,16 +2213,16 @@ bool createSearchImage(int n, double rotate){
 		setAlpha(img.searchImage,0,0,0);
 		int w2=img2->w, h2=img2->h;
 		if(w2*1.2<h2){
-			if(480.0/w2 < 640.0/h2){
-				rotateImage_x(img.searchImage,img2,350,300,-PI/2+rotate,480.0/w2,0,0,w2/2,h2/2,w2,h2,255);
+			if(440.0/w2 < 600.0/h2){
+				rotateImage_x(img.searchImage,img2,350,300,-PI/2+rotate,440.0/w2,0,0,w2/2,h2/2,w2,h2,255);
 			}else{
-				rotateImage_x(img.searchImage,img2,350,300,-PI/2+rotate,640.0/h2,0,0,w2/2,h2/2,w2,h2,255);
+				rotateImage_x(img.searchImage,img2,350,300,-PI/2+rotate,600.0/h2,0,0,w2/2,h2/2,w2,h2,255);
 			}
 		}else{
-			if(640.0/w2 < 480.0/h2){
-				rotateImage_x(img.searchImage,img2,350,300,rotate,640.0/w2,0,0,w2/2,h2/2,w2,h2,255);
+			if(600.0/w2 < 440.0/h2){
+				rotateImage_x(img.searchImage,img2,350,300,rotate,600.0/w2,0,0,w2/2,h2/2,w2,h2,255);
 			}else{
-				rotateImage_x(img.searchImage,img2,350,300,rotate,480.0/h2,0,0,w2/2,h2/2,w2,h2,255);
+				rotateImage_x(img.searchImage,img2,350,300,rotate,440.0/h2,0,0,w2/2,h2/2,w2,h2,255);
 			}
 		}
 		freeImage(img2);
@@ -2451,17 +2453,30 @@ void timerFishUp(){
 		int n;
 		if(phase==FISHUP)n=sta[ant->station].ontv;
 		else n=md.fish[0].which_work;
-		startThread(entry[n].cartoon_id, entry[n].query);
+		tm.hasCacheImage=false;
+		if(createSearchImage(entry[n].cartoon_id,0.3)){
+			tm.hasCacheImage=true;
+			sprintf_s(str,"save/tmp_url/%d.txt",entry[n].cartoon_id);
+			loadFile(str);
+			sprintf_s(tm.targetURL,fstr);
+		}else{
+			startThread(entry[n].cartoon_id, entry[n].query);
+		}
 	}
 	if(start==72){
 		Mix_PlayChannel(0, sf.get, 0);
 		fishbox.text_count=1;
 	}
-	if(start==0 && tm.finish && !tm.failure){
-		if(createSearchImage(tm.selected,0.3)){
+	if(start==0 && phase==FISHUP){
+		if(tm.finish || tm.failure){
+			if(createSearchImage(tm.selected,0.3)){
+				start=100;
+				phase=THROW_PHOTO;
+			}
+		}
+		else if(tm.hasCacheImage){
 			start=100;
-			if(phase==FISHUP)phase=THROW_PHOTO;
-			else phase=MANEKI_THROW_PHOTO;
+			phase=THROW_PHOTO;
 		}
 	}
 }
@@ -2484,11 +2499,24 @@ void timerBSAttack(){
 	if(start==49){
 		fishbox.text_count=1;
 		int n=sta[ BSstation[gd.bs_ch] ].ontv;
-		startThread(entry[n].cartoon_id, entry[n].query);
+		tm.hasCacheImage=false;
+		if(createSearchImage(entry[n].cartoon_id,0.3)){
+			tm.hasCacheImage=true;
+			sprintf_s(str,"save/tmp_url/%d.txt",entry[n].cartoon_id);
+			loadFile(str);
+			sprintf_s(tm.targetURL,fstr);
+		}else{
+			startThread(entry[n].cartoon_id, entry[n].query);
+		}
 	}
-	if(start==0 && tm.finish && !tm.failure){
-		createSearchImage(tm.selected,0.3);
-		if(!tm.failure){
+	if(start==0){
+		if(tm.finish || tm.failure){
+			if(createSearchImage(tm.selected,0.3)){
+				start=100;
+				phase=BS_THROW_PHOTO;
+			}
+		}
+		else if(tm.hasCacheImage){
 			start=100;
 			phase=BS_THROW_PHOTO;
 		}
@@ -2496,7 +2524,7 @@ void timerBSAttack(){
 }
 
 void timerThrowPhoto(){
-	if(start==50)Mix_PlayChannel(0,sf.decide,0);
+	if(start==60)Mix_PlayChannel(0,sf.decide,0);
 }
 
 void timerGame(){
@@ -2566,7 +2594,7 @@ void timerGame(){
 	else if(phase==LEAVE_MAP)timerLeaveMap();
 	else if(phase==FISHUP || phase==MANEKI_FISHUP)timerFishUp();
 	else if(phase==BS_ATTACK)timerBSAttack();
-	else if(phase==THROW_PHOTO || phase==MANEKI_THROW_PHOTO || phase==BS_THROW_PHOTO)timerThrowPhoto();
+	else if(phase==THROW_PHOTO || phase==BS_THROW_PHOTO)timerThrowPhoto();
 
 	if(phase==TALKING || talkingJson.talk_open_count!=0){
 		nextCut(&talkingJson);

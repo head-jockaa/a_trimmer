@@ -47,7 +47,7 @@ struct ThreadManager {
 	TCPsocket tcpsock;
 	char targetURL[BUF_LEN];
 	char query[300];
-	bool running, finish, failure;
+	bool running, finish, failure, hasCacheImage;
 };
 extern ThreadManager tm;
 

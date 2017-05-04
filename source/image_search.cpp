@@ -17,7 +17,7 @@ ImageFormatReader ifr;
 char endHTML1[7]={'<','/','H','T','M','L','>'};
 char endHTML2[7]={'<','/','h','t','m','l','>'};
 
-void getGoogleImageSearch(int id, char *query);
+bool getGoogleImageSearch(int id, char *query);
 void getTargetImage(int id, char *url);
 void receivingImageFile(int id, char *url, SSL *ssl);
 SDL_Texture *createSprite(SDL_Surface *surface);
@@ -49,18 +49,20 @@ int ImageSearchThread(void *ptr)
     tm.running = true;
     tm.halt = 0;
 	tm.tcpsock=NULL;
-	getGoogleImageSearch(id, tm.query);
-	if(!tm.halt)parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
-	if(!tm.halt)getTargetImage(id, tm.targetURL);
+	tm.failure = !getGoogleImageSearch(id, tm.query);
+	if(!tm.failure) {
+		if(!tm.halt)parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		if(!tm.halt)getTargetImage(id, tm.targetURL);
+	}
 
     if(tm.halt){
 		networkLog(id, "ImageSearchThread is halted");
-    }else{
+    }
+	else if(!tm.failure){
 		networkLog(id, "ImageSearchThread ended successfully");
     }
 
     tm.running = false;
-//	tm.threadID--;
 	return 0;
 }
 
@@ -83,12 +85,11 @@ int AnotherThread(void *ptr)
     }
 
     tm.running = false;
-//	tm.threadID--;
     return 0;
 }
 
 
-void imageSearch_https(int id, const char *host, int port, const char *request){
+bool imageSearch_https(int id, const char *host, int port, const char *request){
 	networkLog(id, "imageSearch_https()");
 	ns.status=NS_IMAGE_SEARCH;
 	int ret;
@@ -100,13 +101,13 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 	ctx = SSL_CTX_new(SSLv23_client_method());
 	if (!ctx){
 		ERR_print_errors_fp(stderr);
-		return;
+		return false;
 	}
 
 	ssl = SSL_new(ctx);
 	if (!ssl){
 		ERR_print_errors_fp(stderr);
-		return;
+		return false;
 	}
 
 	//getting IP address
@@ -115,7 +116,7 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 	if(res){
 		ns.status=NS_IPADDRESS_FAILURE;
 		ns.display=300;
-		return;
+		return false;
 	}
 
 	networkLog(id, "resolved host google.co.jp");
@@ -132,7 +133,7 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 	if(!tm.tcpsock) {
 		ns.status=NS_CONNECT_FAILURE;
 		ns.display=300;
-		return;
+		return false;
 	}
 
 	networkLog(id, "google.co.jp tcp opened");
@@ -140,7 +141,7 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 	ret = SSL_set_fd(ssl, tm.tcpsock->channel);
 	if (ret == 0){
 		ERR_print_errors_fp(stderr);
-		return;
+		return false;
 	}
 
 	RAND_poll();
@@ -152,13 +153,13 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 	ret = SSL_connect(ssl);
 	if (ret != 1){
 		ERR_print_errors_fp(stderr);
-		return;
+		return false;
 	}
 
 	ret = SSL_write(ssl, request, (int)strlen(request));
 	if (ret < 1){
 		ERR_print_errors_fp(stderr);
-		return;
+		return false;
 	}
 
 	char fn[100];
@@ -210,7 +211,7 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 				}
 			}
 
-			sprintf_s(fn,"save/tmp_search/%d.html",tm.selected);
+			sprintf_s(fn,"save/tmp_google_search_%d.html",tm.selected);
 			fopen_s(&file, fn, "w");
 			networkLog(id, fn);
 		}
@@ -268,6 +269,7 @@ void imageSearch_https(int id, const char *host, int port, const char *request){
 	SSL_free(ssl);
 	SSL_CTX_free(ctx);
 	ERR_free_strings();
+	return true;
 }
 
 char* getHostName(int id, const char *url){
@@ -324,7 +326,7 @@ char* getPath(int id, const char *url){
 void parseHTML(int id, int n, const char *table_prefix, const char *url_prefix, const char *url_surfix){
 	networkLog(id, "parseHTML()");
     char fn[100];
-    sprintf_s(fn, "save/tmp_search/%d.html", tm.selected);
+    sprintf_s(fn, "save/tmp_google_search_%d.html", tm.selected);
     loadFile(fn);
     if(!fsize){
         return;
@@ -937,7 +939,6 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 			}
 			else if(readmode==HTTPGET_DATA){
 				if(!ns.found200){
-					std::cout << "not 200\n";
 					tm.which++;
 					networkLog(id, "get an error code (pass it)");
 					parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
@@ -975,7 +976,7 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 			}
 
 			//finish writing a file
-			if(ns.contentLength && ns.receiveLength>=ns.contentLength){
+			if(!ns.chunked && ns.contentLength && ns.receiveLength>=ns.contentLength){
 				tm.finish=true;
 				break;
 			}
@@ -993,18 +994,21 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 	if(file){
 		networkLog(id, "finished writing img file");
 		fclose(file);
+		sprintf_s(str,"save/tmp_google_search_%d.html",tm.selected);
+		remove(str);
 	}
 }
 
-void getGoogleImageSearch(int id, char *query){
+bool getGoogleImageSearch(int id, char *query){
 	networkLog(id, "getGoogleImageSearch()");
 	long request_size = strlen(query)+100+120;
     char *request = new char[request_size];
     sprintf_s(request, request_size, "GET /search?q=%s&source=lnms&tbm=isch HTTP/1.1\r\nHost: www.google.co.jp\r\nUser-Agent: %s\r\n\r\n", query, USER_AGENT);
 	networkLog(id, "Request header is below");
 	networkLog_noparam(id, request);
-    imageSearch_https(id, "www.google.co.jp", 443, request);
+    bool result = imageSearch_https(id, "www.google.co.jp", 443, request);
     delete[] request;
+	return result;
 }
 
 void ImageFormatReader::reset(){

@@ -186,9 +186,15 @@ void timerMiyazaki(){
 	}
 
 	if(phase==GUIDE_ALL || phase==GUIDE_ANIME){
-		if(start==0 && tm.finish && !tm.failure && !showSearchImage){
+		if(start==0 && !showSearchImage && (tm.finish || tm.failure)){
 			if (createSearchImage(tm.selected,0)) {
+				if(tm.failure){
+					sprintf_s(str,"save/tmp_url/%d.txt",tm.selected);
+					loadFile(str);
+					sprintf_s(tm.targetURL,fstr);
+				}
 				tm.finish = false;
+				tm.failure = false;
 				showSearchImage = true;
 			}
 		}
@@ -1209,14 +1215,14 @@ void drawTowerList(SDL_Surface* scr){
 		drawText2(scr,0,0,tower[this_tower[which_tower]].name);
 		sprintf_s(str,"%.6gkw",tower[this_tower[which_tower]].kw);
 		drawText2(scr,0,40,str);
-		for(int i=0 ; i<10 ; i++){
+		for(int i=0 ; i<area[ this_area[which_tower] ].st_num ; i++){
 			drawImage(scr,img.symbol,0,i*40+80,
 					  (sta[area[ this_area[which_tower] ].station[i]].mark%17)*34,
 					  (sta[area[ this_area[which_tower] ].station[i]].mark/17)*34,
 					  34,34,255);
 			drawText2(scr,40,i*40+80,sta[area[ this_area[which_tower] ].station[i]].name);
 			if(area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]==0)drawText2(scr,400,i*40+80,"----");
-			else if(area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]==CHANNELS+1)drawText(scr,400,i*40+80,"****");
+			else if(area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]==CHANNELS+1)drawText2(scr,400,i*40+80,"****");
 			else{
 				sprintf_s(str,"ch%2d",area[this_area[which_tower]].tower[this_tower[which_tower]].ch[i]);
 				drawText2(scr,400,i*40+80,str);
@@ -1303,15 +1309,19 @@ void drawMiyazaki(SDL_Surface* scr){
 	drawNetworkStatus(scr);
 	if(showSearchImage){
 		drawImage(scr,img.searchImage,0,0,30,70,640,480,255);
-		if(strlen(tm.targetURL)>80){
-			drawImage(scr,img.menuback,0,440,0,0,320,40,128);
-			drawImage(scr,img.menuback,320,440,0,0,320,40,128);
-			drawText(scr,0,440+start/2,tm.targetURL,80);
-			drawText(scr,0,460+start/2,&tm.targetURL[80],80);
+		if(strlen(tm.targetURL)>160){
+			drawImage(scr,img.menuback,0,420,0,0,640,60,128);
+			drawText(scr,0,420,tm.targetURL,80);
+			drawText(scr,0,440,&tm.targetURL[80],80);
+			drawText(scr,0,460,&tm.targetURL[160],80);
+		}
+		else if(strlen(tm.targetURL)>80){
+			drawImage(scr,img.menuback,0,440,0,0,640,40,128);
+			drawText(scr,0,440,tm.targetURL,80);
+			drawText(scr,0,460,&tm.targetURL[80],80);
 		}else{
-			drawImage(scr,img.menuback,0,460,0,0,320,20,128);
-			drawImage(scr,img.menuback,320,460,0,0,320,20,128);
-			drawText(scr,0,460+start/2,tm.targetURL,80);
+			drawImage(scr,img.menuback,0,460,0,0,640,20,128);
+			drawText(scr,0,460,tm.targetURL,80);
 		}
 	}
 }
@@ -1340,9 +1350,11 @@ void drawMiyazakiExplain(SDL_Surface *scr){
 			else if(count%600<400){
 				drawKeyboard(scr,key.zC,0,460);
 				drawText(scr,20,460,text[OPTIONTEXT+1]);
+				drawKeyboard(scr,key.xC,100,460);
+				drawText(scr,120,460,text[MENUTEXT+4]);
 			}else{
-				drawKeyboard(scr,key.xC,0,460);
-				drawText(scr,20,460,text[MENUTEXT+4]);
+				drawKeyboard(scr,key.cC,0,460);
+				drawText(scr,20,460,text[ANTENNATEXT+25]);
 			}
 		}
 		else if(phase==GUIDE_STALIST || phase==GUIDE_STALIST_ALL || phase==GUIDE_PRGLIST || phase==GUIDE_TIME){
