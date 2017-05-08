@@ -73,7 +73,7 @@ void readSQL(const char *filename) {
 	loadFile(filename);
 	sqlSize=fsize;
 	sql=new char[sqlSize];
-	strcpy_s(sql,fstr);
+	strcpy_no_const(sql,fstr,sqlSize);
 
 	while(sqlPointer < sqlSize) {
 		char *c = &sql[sqlPointer];

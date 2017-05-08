@@ -312,7 +312,7 @@ void loadCartoon(JsonData *json, const char *filename){
 	json->size=fsize;
 	if(fsize){
 		json->jsonText=new char[json->size];
-		strcpy_s(json->jsonText,fstr);
+		strcpy_no_const(json->jsonText,fstr,json->size);
 
 		readCartoon(json);
 		resetCartoon(json);
@@ -918,7 +918,7 @@ void readJsonArray(JsonData *json, char *basename, char *name){
 			else if(*c==']') {
 				if(basename!=NULL && name==NULL) {
 					if(json->initializedReaderArray){
-						sprintf_s(json->jr.which->name[json->jr.which->valueNum],";");
+						sprintf_s(json->jr.which->name[json->jr.which->valueNum],100,";");
 					}
 					json->jr.which->valueNum++;
 				}
@@ -956,10 +956,10 @@ void readJsonObject(JsonData *json, char *basename, char *name){
 				strcpy_s(json->jr.basename,str);
 			}
 			else if(name==NULL && json->initializedReaderArray){
-				strcpy_s(json->jr.which->name[json->jr.which->valueNum],str);
+				strcpy_s(json->jr.which->name[json->jr.which->valueNum],100,str);
 			}
 			else if(json->initializedReaderArray){
-				sprintf_s(json->jr.which->name[json->jr.which->valueNum],"%s %s",name,str);
+				sprintf_s(json->jr.which->name[json->jr.which->valueNum],100,"%s %s",name,str);
 			}
 			mode=JSON_COLON;
 		}
@@ -994,7 +994,7 @@ void readJsonObject(JsonData *json, char *basename, char *name){
 			else if(*c=='"'){
 				json->pointer+=fetchString(c,'"',str)-1;
 				if(json->initializedReaderArray){
-					strcpy_s(json->jr.which->valueString[json->jr.which->valueNum],str);
+					strcpy_s(json->jr.which->valueString[json->jr.which->valueNum],1000,str);
 				}
 				json->jr.which->valueNum++;
 			}
@@ -1045,7 +1045,7 @@ void readJsonObject(JsonData *json, char *basename, char *name){
 			else if(*c=='}') {
 				if(basename!=NULL && name==NULL) {
 					if(json->initializedReaderArray){
-						sprintf_s(json->jr.which->name[json->jr.which->valueNum],";");
+						sprintf_s(json->jr.which->name[json->jr.which->valueNum],100,";");
 					}
 					json->jr.which->valueNum++;
 				}

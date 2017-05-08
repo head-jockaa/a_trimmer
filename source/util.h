@@ -360,12 +360,14 @@ void setAlpha(Image* scr, int R,int G,int B);
 void resetAlpha(Image* scr);
 void drawSurface(SDL_Surface* scr, SDL_Surface* img, int x, int y, int x2, int y2, int w2, int h2, int a);
 
+void strcpy_no_const(char* destination, char* source, size_t size);
+
 #ifndef __WIN32__
 void sprintf_s(char *s, const char *c, ...);
 void sprintf_s(char *s, long n, const char *c, ...);
 void fopen_s(FILE **f, const char* c1, const char* c2);
-void strcpy_s(char *s1, char *s2);
-void strcpy_s(char *s1, long n, char *s2);
+void strcpy_s(char *s1, const char *s2);
+void strcpy_s(char *s1, long n, const char *s2);
 #endif
 
 extern Key key;

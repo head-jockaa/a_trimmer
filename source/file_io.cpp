@@ -6,37 +6,37 @@ char *E28XXX,*E38XXX,*E48XXX,*E58XXX,*E68XXX,*E78XXX,*E88XXX,*E98XXX,*EE8XXX,*EF
 void loadEncodingFiles(){
 	loadFile("file/data/utf8_to_sjis/E28XXX-E2BXXX.txt");
 	E28XXX=new char[fsize];
-	strcpy_s(E28XXX,fstr);
+	strcpy_no_const(E28XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/E38XXX-E3BXXX.txt");
 	E38XXX=new char[fsize];
-	strcpy_s(E38XXX,fstr);
+	strcpy_no_const(E38XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/E48XXX-E4BXXX.txt");
 	E48XXX=new char[fsize];
-	strcpy_s(E48XXX,fstr);
+	strcpy_no_const(E48XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/E58XXX-E5BXXX.txt");
 	E58XXX=new char[fsize];
-	strcpy_s(E58XXX,fstr);
+	strcpy_no_const(E58XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/E68XXX-E6BXXX.txt");
 	E68XXX=new char[fsize];
-	strcpy_s(E68XXX,fstr);
+	strcpy_no_const(E68XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/E78XXX-E7BXXX.txt");
 	E78XXX=new char[fsize];
-	strcpy_s(E78XXX,fstr);
+	strcpy_no_const(E78XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/E88XXX-E8BXXX.txt");
 	E88XXX=new char[fsize];
-	strcpy_s(E88XXX,fstr);
+	strcpy_no_const(E88XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/E98XXX-E9BXXX.txt");
 	E98XXX=new char[fsize];
-	strcpy_s(E98XXX,fstr);
+	strcpy_no_const(E98XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/EE8XXX-EEBXXX.txt");
 	EE8XXX=new char[fsize];
-	strcpy_s(EE8XXX,fstr);
+	strcpy_no_const(EE8XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/EF8XXX-EFBXXX.txt");
 	EF8XXX=new char[fsize];
-	strcpy_s(EF8XXX,fstr);
+	strcpy_no_const(EF8XXX,fstr,fsize);
 	loadFile("file/data/utf8_to_sjis/CXXX-DXXX.txt");
 	CXXX=new char[fsize];
-	strcpy_s(CXXX,fstr);
+	strcpy_no_const(CXXX,fstr,fsize);
 }
 
 void freeEncodingFiles(){

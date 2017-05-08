@@ -774,7 +774,8 @@ void readHttpHeader(int id, char *headerLine, char*url){
 void receivingImageFile(int id, char *url, SSL *ssl){
 	// to avoid the blocking of recv()
 #ifdef __WIN32__
-	// TODO
+	unsigned long value = 1;
+	ioctlsocket(tm.tcpsock->channel, FIONBIO, &value);
 #else
 	int flags;
 	flags = fcntl(tm.tcpsock->channel, F_GETFL, 0);

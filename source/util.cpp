@@ -1210,6 +1210,15 @@ Image::Image(int W, int H){
 	}
 }
 
+// strcpy_s of Visual Studio causes an error
+void strcpy_no_const(char* destination, char* source, size_t size) {
+	for (int i = 0; i<size; i++) {
+		*destination = *source;
+		destination++;
+		source++;
+	}
+}
+
 #ifndef __WIN32__
 void sprintf_s(char *s, const char *c, ...){
 	va_list c2;
@@ -1224,10 +1233,10 @@ void sprintf_s(char *s, long n, const char *c, ...){
 void fopen_s(FILE **f, const char* c1, const char* c2){
     *f = fopen(c1, c2);
 }
-void strcpy_s(char *s1, char *s2){
+void strcpy_s(char *s1, const char *s2){
 	strcpy(s1, s2);
 }
-void strcpy_s(char *s1, long n, char *s2){
+void strcpy_s(char *s1, long n, const char *s2){
 	strcpy(s1, s2);
 }
 #endif

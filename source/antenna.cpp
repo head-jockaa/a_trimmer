@@ -492,6 +492,7 @@ ButtonRod::~ButtonRod(){
 	delete [] areacode;
 	delete [] rc;
 	delete [] st;
+	areacode=NULL;
 }
 
 void ButtonRod::hoist(){
