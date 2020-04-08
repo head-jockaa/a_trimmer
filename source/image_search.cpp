@@ -20,6 +20,7 @@ char endHTML2[7]={'<','/','h','t','m','l','>'};
 bool getGoogleImageSearch(int id, char *query);
 void getTargetImage(int id, char *url);
 void receivingImageFile(int id, char *url, SSL *ssl);
+void readHttpHeader(int id, char *headerLine, char *url);
 SDL_Texture *createSprite(SDL_Surface *surface);
 SDL_Thread *thread;
 
@@ -46,23 +47,23 @@ int ImageSearchThread(void *ptr)
 	tm.threadID++;
 	int id=tm.threadID;
 	networkLog(id, "ImageSearchThread()");
-    tm.running = true;
-    tm.halt = 0;
+	tm.running = true;
+	tm.halt = 0;
 	tm.tcpsock=NULL;
 	tm.failure = !getGoogleImageSearch(id, tm.query);
 	if(!tm.failure) {
-		if(!tm.halt)parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		if(!tm.halt)parseHTML(id, tm.which, TABLE_PREFIX);
 		if(!tm.halt)getTargetImage(id, tm.targetURL);
 	}
 
-    if(tm.halt){
+	if(tm.halt){
 		networkLog(id, "ImageSearchThread is halted");
-    }
+	}
 	else if(!tm.failure){
 		networkLog(id, "ImageSearchThread ended successfully");
-    }
+	}
 
-    tm.running = false;
+	tm.running = false;
 	return 0;
 }
 
@@ -71,21 +72,21 @@ int AnotherThread(void *ptr)
 	tm.threadID++;
 	int id=tm.threadID;
 	networkLog(id, "AnotherThread()");
-    tm.running = true;
-    tm.halt = 0;
+	tm.running = true;
+	tm.halt = 0;
 	tm.failure=false;
 	tm.tcpsock=NULL;
-    getTargetImage(id, tm.targetURL);
+	getTargetImage(id, tm.targetURL);
 
-    if(tm.halt){
+	if(tm.halt){
 		networkLog(id, "AnotherThread is halted");
-    }else{
+	}else{
 		networkLog(id, "AnothrtThread ended successfully");
-        tm.halt = THREAD_SUCCESS;
-    }
+		tm.halt = THREAD_SUCCESS;
+	}
 
-    tm.running = false;
-    return 0;
+	tm.running = false;
+	return 0;
 }
 
 
@@ -166,18 +167,20 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 
 	//receive
 	FILE *file=NULL;
-	char get_msg[BUF_LEN];
-	int length = 0;
-	int htmlCount1 = 0, htmlCount2 = 0;
+	char get_msg[BUF_LEN], headerLine[BUF_LEN], url[100];;
+	int length = 0, headerPos = 0, readmode = HTTPGET_HEADER;
 	ns.receiveLength=0;
+	ns.contentLength=0;
 	ns.receiveCounter=0;
+	ns.chunksize=0;
+
 	for(int i=0 ; i<1000 ; i++){
 		//forced termination
 		if(tm.halt){
 			break;
 		}
 		length = SSL_read(ssl, get_msg, sizeof(get_msg));
-		
+
 		if(!ns.contentLength && !length){
 			ns.status=NS_RCV_ZERO_LENGTH;
 			ns.display=300;
@@ -188,65 +191,137 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 			ns.receiveCounter++;
 		}
 
-		//getting filesize info
-		if(i == 0){
-			ns.contentLength = 0;
-			char *result = strstr(get_msg, "Content-Length:");
-			if(result){
-				result += 16;
-			}
-			if(!result){
-				result = strstr(get_msg, "x-oct-size:");
-				if(result){
-					result += 12;
+		for( int j=0 ; j<length ; j++ ){
+			if(readmode==HTTPGET_HEADER){
+				if(get_msg[j]==13)readmode=HTTPGET_HEADER_R;
+				else if(get_msg[j]==10)readmode=HTTPGET_HEADER_N;
+				if(get_msg[j]==13 || get_msg[j]==10){
+					for(int k=headerPos; k<BUF_LEN ; k++){
+						headerLine[k]=0;
+					}
+					readHttpHeader(id,headerLine,url);
+					headerPos=0;
+				}else{
+					headerLine[headerPos]=get_msg[j];
+					headerPos++;
 				}
 			}
-			if(result){
-				for(int j=0 ; j<BUF_LEN ; j++){
-					if(result[j]==10 || result[j]==13){
+			else if(readmode==HTTPGET_HEADER_R){
+				if(get_msg[j]==13){
+					if(ns.chunked){
+						readmode=HTTPGET_CHUNK_SIZE;
+					}
+					else readmode=HTTPGET_DATA;
+				}
+				else if(get_msg[j]==10)readmode=HTTPGET_HEADER_RN;
+				else{
+					readmode=HTTPGET_HEADER;
+					headerLine[0]=get_msg[j];
+					headerPos=1;
+				}
+			}
+			else if(readmode==HTTPGET_HEADER_N){
+				if(get_msg[j]==10){
+					if(ns.chunked)readmode=HTTPGET_CHUNK_SIZE;
+					else readmode=HTTPGET_DATA;
+				}else{
+					readmode=HTTPGET_HEADER;
+					headerLine[0]=get_msg[j];
+					headerPos=1;
+				}
+			}
+			else if(readmode==HTTPGET_HEADER_RN){
+				if(get_msg[j]==13)readmode=HTTPGET_HEADER_RNR;
+				else{
+					readmode=HTTPGET_HEADER;
+					headerLine[0]=get_msg[j];
+					headerPos=1;
+				}
+			}
+			else if(readmode==HTTPGET_HEADER_RNR){
+				if(get_msg[j]==10){
+					if(ns.chunked)readmode=HTTPGET_CHUNK_SIZE;
+					else readmode=HTTPGET_DATA;
+				}
+				else readmode=HTTPGET_HEADER;
+			}
+			else if(readmode==HTTPGET_CHUNK_SIZE){
+				if(get_msg[j]==13 || get_msg[j]==10){
+					networkLog(id, "Receiving chunk %d bytes", ns.chunksize);
+					if(ns.chunksize==0){
+						readmode=HTTPGET_DATA;
 						break;
 					}
-					ns.contentLength *= 10;
-					ns.contentLength += result[j]-48;
+				}
+				if(get_msg[j]==13){
+					readmode=HTTPGET_CHUNK_R;
+				}
+				else if(get_msg[j]==10){
+					readmode=HTTPGET_DATA;
+				}else{
+					ns.chunksize *= 16;
+					if(get_msg[j]>='a' && get_msg[j]<='f'){
+						ns.chunksize += get_msg[j]-87;
+					}
+					else if(get_msg[j]>='A' && get_msg[j]<='F'){
+						ns.chunksize += get_msg[j]-55;
+					}else{
+						ns.chunksize += get_msg[j]-48;
+					}
 				}
 			}
+			else if(readmode==HTTPGET_CHUNK_R){
+				if(get_msg[j]==10){
+					readmode=HTTPGET_DATA;
+				}
+			}
+			else if(readmode==HTTPGET_END_CHUNK){
+				ns.chunksize=0;
+				ns.receiveLength=0;
+				if(get_msg[j]==13)readmode=HTTPGET_END_CHUNK_R;
+				else if(get_msg[j]==10)readmode=HTTPGET_CHUNK_SIZE;
+			}
+			else if(readmode==HTTPGET_END_CHUNK_R){
+				readmode=HTTPGET_CHUNK_SIZE;
+				if(get_msg[j]!=10){
+					if(get_msg[j]>='a' && get_msg[j]<='f'){
+						ns.chunksize = get_msg[j]-87;
+					}
+					else if(get_msg[j]>='A' && get_msg[j]<='F'){
+						ns.chunksize = get_msg[j]-55;
+					}else{
+						ns.chunksize = get_msg[j]-48;
+					}
+				}
+			}
+			else if(readmode==HTTPGET_DATA){
+				//start to save a html file
+				if(file==NULL){
+					sprintf_s(fn,"save/tmp_google_search_%d.html",tm.selected);
+					fopen_s(&file, fn, "w");
+					networkLog(id, fn);
+					if(!file){
+						networkLog(id, "failed to create new html file");
+						tm.halt = THREAD_END;
+						break;
+					}
+				}
 
-			sprintf_s(fn,"save/tmp_google_search_%d.html",tm.selected);
-			fopen_s(&file, fn, "w");
-			networkLog(id, fn);
+				//writing new image file
+				fputc(get_msg[j], file);
+				ns.receiveLength++;
+
+				if(ns.chunked && ns.receiveLength==ns.chunksize){
+					readmode=HTTPGET_END_CHUNK;
+				}
+			}
 		}
+
 		if(!file){
 			break;
 		}
-		for( int j=0; j<length; j++ ){
-			fputc(get_msg[j], file);
-			ns.receiveLength++;
 
-			if(ns.contentLength && ns.receiveLength>=ns.contentLength){
-				break;
-			}
-
-			if(htmlCount1 < 7){
-				if(get_msg[j] == endHTML1[htmlCount1]){
-					htmlCount1++;
-				}else{
-					htmlCount1 = 0;
-				}
-			}
-
-			if(htmlCount2 < 7){
-				if(get_msg[j] == endHTML2[htmlCount2]){
-					htmlCount2++;
-				}else{
-					htmlCount2 = 0;
-				}
-			}
-		}
-
-		if(htmlCount1==7 || htmlCount2==7){
-			break;
-		}
-		if(ns.contentLength && ns.receiveLength>=ns.contentLength){
+		if((ns.contentLength && ns.receiveLength>=ns.contentLength) || (readmode==HTTPGET_DATA && ns.chunksize==0)){
 			break;
 		}
 	}
@@ -273,90 +348,107 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 }
 
 char* getHostName(int id, const char *url){
-    int size = (int)strlen(url);
-    char* host = new char[size];
-    for(int i=0 ; i<size ; i++){
-        host[i] = 0;
-    }
-    int startFrom = 0;
-    for(int i=0 ; i<size ; i++){
-        if(!startFrom){
-            if(url[i]=='/' && url[i+1]=='/'){
-                startFrom = i+2;
-                i++;
-                continue;
-            }
-        }else{
-            if(url[i] == '/'){
-                host[i-startFrom] = 0;
-                break;
-            }
-            host[i-startFrom] = url[i];
-        }
-    }
-    return host;
+	int size = (int)strlen(url);
+	char* host = new char[size];
+	for(int i=0 ; i<size ; i++){
+		host[i] = 0;
+	}
+	int startFrom = 0;
+	for(int i=0 ; i<size ; i++){
+		if(!startFrom){
+			if(url[i]=='/' && url[i+1]=='/'){
+				startFrom = i+2;
+				i++;
+				continue;
+			}
+		}else{
+			if(url[i] == '/'){
+				host[i-startFrom] = 0;
+				break;
+			}
+			host[i-startFrom] = url[i];
+		}
+	}
+	return host;
 }
 
 char* getPath(int id, const char *url){
-    int size = (int)strlen(url);
-    char* path = new char[size];
-    for(int i=0 ; i<size ; i++){
-        path[i] = 0;
-    }
-    int slashNum = 0;
-    int startFrom = 0;
-    for(int i=0 ; i<size ; i++){
-        if(!startFrom){
-            if(url[i] == '/'){
-                slashNum++;
-            }
-            if(slashNum == 3){
-                startFrom = i;
-                i--;
-                continue;
-            }
-        }else{
-            path[i-startFrom] = url[i];
-        }
-    }
-    return path;
+	int size = (int)strlen(url);
+	char* path = new char[size];
+	for(int i=0 ; i<size ; i++){
+		path[i] = 0;
+	}
+	int slashNum = 0;
+	int startFrom = 0;
+	for(int i=0 ; i<size ; i++){
+		if(!startFrom){
+			if(url[i] == '/'){
+				slashNum++;
+			}
+			if(slashNum == 3){
+				startFrom = i;
+				i--;
+				continue;
+			}
+		}else{
+			path[i-startFrom] = url[i];
+		}
+	}
+	return path;
 }
 
 /** fetch the nth URL from an HTML of image search result */
-void parseHTML(int id, int n, const char *table_prefix, const char *url_prefix, const char *url_surfix){
+void parseHTML(int id, int n, const char *table_prefix){
 	networkLog(id, "parseHTML()");
-    char fn[100];
-    sprintf_s(fn, "save/tmp_google_search_%d.html", tm.selected);
-    loadFile(fn);
-    if(!fsize){
-        return;
-    }
-    char *result = NULL, *url = NULL;
+	char fn[100];
+	sprintf_s(fn, "save/tmp_google_search_%d.html", tm.selected);
+	loadFile(fn);
+	if(!fsize){
+		return;
+	}
+	char *result = NULL, *url = NULL;
 
-    //fetch the nth URL string
-    result = strstr(fstr, table_prefix);
-    if(result){
-        for(int i=0 ; i<n ; i++){
-            result = strstr(result, url_prefix);
-            if(result){
-                result += strlen(url_prefix);
-            }else{
-                tm.targetURL[0] = 0;
-                return;
-            }
-        }
-    }else{
-        tm.targetURL[0] = 0;
-        return;
-    }
-	char *result2 = NULL;
-    result2 = strstr(result, url_surfix);
-    size_t size = result2-result;
+	//fetch the nth URL string
+	result = strstr(fstr, table_prefix);
+	size_t size = 0, start = 0, end = 0;
+	if(result){
+		int pointer = 0, which_number = 1;
+		while(pointer < strlen(result)-3){
+			if(
+			   (result[pointer] == '.' && result[pointer+1] == 'j' && result[pointer+2] == 'p' && result[pointer+3] == 'g') ||
+			   (result[pointer] == '.' && result[pointer+1] == 'j' && result[pointer+2] == 'p' && result[pointer+3] == 'e') ||
+			   (result[pointer] == '.' && result[pointer+1] == 'p' && result[pointer+2] == 'n' && result[pointer+3] == 'g') ||
+			   (result[pointer] == '.' && result[pointer+1] == 'g' && result[pointer+2] == 'i' && result[pointer+3] == 'f')
+			   ){
+				if(which_number == n){
+					for(int i=pointer ; i>=0 ; i--){
+						if(result[i] == '"'){
+							start = i+1;
+							break;
+						}
+					}
+					for(int i=pointer ; i<strlen(result) ; i++){
+						if(result[i] == '"'){
+							end = i-1;
+							break;
+						}
+					}
+					size = end-start-1;
+					break;
+				}
+				which_number++;
+			}
+			pointer++;
+		}
+	}else{
+		tm.targetURL[0] = 0;
+		return;
+	}
 
-    //put into the variable "url"
-    url = new char[size+1];
+	//put into the variable "url"
+	url = new char[size+1];
 	n=0;
-    for(size_t i=0 ; i<size ; i++){
+	for(size_t i=start ; i<=end ; i++){
 		if(i<=size-3 && result[i]=='%' && result[i+1]=='2' && result[i+2]=='5'){
 			url[n] = '%';
 			i+=2;
@@ -372,12 +464,12 @@ void parseHTML(int id, int n, const char *table_prefix, const char *url_prefix, 
 	        url[n] = result[i];
 		}
 		n++;
-    }
+	}
 	size = n;
-    url[n] = 0;
+	url[n] = 0;
 	n=0;
 	bool queryFound=false, queryFoundDouble=false;
-    for(size_t i=0 ; i<size ; i++){
+	for(size_t i=0 ; i<size ; i++){
 		if(i<size-2 && url[i]=='%' && url[i+1]=='3' && url[i+2]=='F'){
 			if(queryFound){
 				// there's only one query symbol '?' in a URL path
@@ -402,10 +494,10 @@ void parseHTML(int id, int n, const char *table_prefix, const char *url_prefix, 
 	        url[n] = url[i];
 		}
 		n++;
-    }
+	}
 	url[n] = 0;
 
-    strcpy_s(tm.targetURL, 1000, url);
+	strcpy_s(tm.targetURL, 1000, url);
 	FILE *hFile;
 	sprintf_s(fn,"save/tmp_url/%d.txt",tm.selected);
 	fopen_s(&hFile, fn, "wb");
@@ -435,7 +527,7 @@ void getTargetImage_http(int id, char *url){
 		//go to the next image file if failed
 		tm.which++;
 		ns.status=NS_IPADDRESS_FAILURE;
-		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		parseHTML(id, tm.which, TABLE_PREFIX);
 		tm.halt = RESTART_GETIMAGE;
 		networkLog(id, "resolving host failed: %s", host);
 		char *result = strstr(host, "%");
@@ -462,7 +554,7 @@ void getTargetImage_http(int id, char *url){
 		delete path;
 		tm.which++;
 		ns.status=NS_CONNECT_FAILURE;
-		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		parseHTML(id, tm.which, TABLE_PREFIX);
 		tm.halt = RESTART_GETIMAGE;
 		networkLog(id, "opening tcp failed");
 		return;
@@ -535,7 +627,7 @@ void getTargetImage_https(int id, char *url){
 		//go to the next image file if failed
 		tm.which++;
 		ns.status=NS_IPADDRESS_FAILURE;
-		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		parseHTML(id, tm.which, TABLE_PREFIX);
 		tm.halt = RESTART_GETIMAGE;
 		networkLog(id, "resolving host failed: %s", host);
 		char *result = strstr(host, "%");
@@ -564,7 +656,7 @@ void getTargetImage_https(int id, char *url){
 		delete path;
 		tm.which++;
 		ns.status=NS_CONNECT_FAILURE;
-		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		parseHTML(id, tm.which, TABLE_PREFIX);
 		tm.halt = RESTART_GETIMAGE;
 		networkLog(id, "opening tcp failed");
 		return;
@@ -590,7 +682,7 @@ void getTargetImage_https(int id, char *url){
 		networkLog(id, "SSL error occurred");
 		ERR_print_errors_fp(stderr);
 		tm.which++;
-		parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+		parseHTML(id, tm.which, TABLE_PREFIX);
 		tm.halt = RESTART_GETIMAGE;
 		return;
 	}
@@ -631,6 +723,16 @@ void getTargetImage_https(int id, char *url){
 }
 
 void getTargetImage(int id, char *url){
+	/* TODO
+	char *checkurl = strstr(url, "amazon.com");
+	if(checkurl){
+		networkLog(id, "skip %s", "amazon.com");
+		tm.which++;
+		parseHTML(id, tm.which, TABLE_PREFIX);
+		tm.halt = RESTART_GETIMAGE;
+	}
+	else
+	 */
 	if(strstr(url, "https://")){
 		getTargetImage_https(id, url);
 	}else{
@@ -744,7 +846,7 @@ void readHttpHeader(int id, char *headerLine, char*url){
 		if(strcmp(url,url2)==0){
 			// avoid an infinite loop (rarely happens though)
 			tm.which++;
-			parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+			parseHTML(id, tm.which, TABLE_PREFIX);
 		}else{
 			strcpy_s(url, BUF_LEN, url2);
 		}
@@ -759,7 +861,7 @@ void readHttpHeader(int id, char *headerLine, char*url){
 		if(result){
 			tm.which++;
 			networkLog(id, "Content-Encoding gzip is not supported");
-			parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+			parseHTML(id, tm.which, TABLE_PREFIX);
 			tm.halt = RESTART_GETIMAGE;
 		}
 	}
@@ -806,7 +908,7 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 		if(i==10000){
 			tm.which++;
 			networkLog(id, "recv() won't be ready forever (pass it)");
-			parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+			parseHTML(id, tm.which, TABLE_PREFIX);
 			tm.halt = RESTART_GETIMAGE;
 			break;
 		}
@@ -942,7 +1044,7 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 				if(!ns.found200){
 					tm.which++;
 					networkLog(id, "get an error code (pass it)");
-					parseHTML(id, tm.which, TABLE_PREFIX, URL_PREFIX, URL_SURFIX);
+					parseHTML(id, tm.which, TABLE_PREFIX);
 					tm.halt = RESTART_GETIMAGE;
 					break;
 				}

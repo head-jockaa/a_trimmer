@@ -2238,7 +2238,7 @@ bool createSearchImage(int n, double rotate){
 		freeImage(img2);
 		return true;
 	}else{
-		networkLog(0, "failed to open the saved image file");
+		networkLog(tm.threadID, "failed to open the saved image file");
 		return false;
 	}
 }
@@ -2499,8 +2499,7 @@ void startThread(int id, char *query){
 	tm.failure=false;
 	if(tm.running){
 		tm.halt=THREAD_SHUTDOWN;
-		networkLog(0, "shutdown TCP before starting new thread");
-		TCPshutdown(0);
+		TCPshutdown(tm.threadID);
 	}
 	thread = SDL_CreateThread(ImageSearchThread, "ImageSearchThread", nullptr);
 }
@@ -2625,7 +2624,12 @@ void timerGame(){
 }
 
 void manageThread(){
-	if(!tm.running && tm.halt==RESTART_GETIMAGE){
+	if(tm.halt==RESTART_GETIMAGE){
+		if (tm.running){
+			tm.halt=THREAD_SHUTDOWN;
+			TCPshutdown(0);
+			tm.running=false;
+		}
 		thread = SDL_CreateThread(AnotherThread, "AnotherThread", nullptr);
 	}
 	if(ns.display>0)ns.display--;
