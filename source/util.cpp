@@ -1038,10 +1038,14 @@ bool loadFile(const char* fn){
 	fpos_t a=0,b=0;
 	FILE* hFile;
 
-	if(fsize)delete [] fstr;
+	if(fstr)delete [] fstr;
 	fsize=0;
+	fstr=NULL;
 	fopen_s(&hFile,fn,"rb");
-	if(hFile==NULL)return false;
+	if(hFile==NULL){
+		fstr=NULL;
+		return false;
+	}
 
 	b=fseek(hFile,0,SEEK_END);
 	fgetpos(hFile,&a);

@@ -1850,7 +1850,7 @@ void drawThrowPhoto(SDL_Surface *scr){
 	int w=img.searchImage->w;
 	int h=img.searchImage->h;
 	if(start>=60){
-		rotateImage_x(scr,img.searchImage,320,240,(start-60)*0.25+0.3,(100-start)/40.0,0,0,w/2,h/2,w,h,255);
+		rotateImage_x(scr,img.searchImage,320,240,(start-60)*0.25+0.2,(100-start)/40.0,0,0,w/2,h/2,w,h,255);
 	}else{
 		int a=0;
 		drawImage(scr,img.searchImage,0,0,30,60,640,480,255);
@@ -2464,7 +2464,7 @@ void timerFishUp(){
 		if(phase==FISHUP)n=sta[ant->station].ontv;
 		else n=md.fish[0].which_work;
 		tm.hasCacheImage=false;
-		if(createSearchImage(entry[n].cartoon_id,0.3)){
+		if(createSearchImage(entry[n].cartoon_id,0.2)){
 			tm.hasCacheImage=true;
 			sprintf_s(str,"save/tmp_url/%d.txt",entry[n].cartoon_id);
 			loadFile(str);
@@ -2478,29 +2478,26 @@ void timerFishUp(){
 		fishbox.text_count=1;
 	}
 	if(start==0 && phase==FISHUP){
-		if(tm.finish || tm.failure){
-			if(createSearchImage(tm.selected,0.3)){
+		if(tm.hasCacheImage){
+			start=100;
+			phase=THROW_PHOTO;
+		}
+		else if(tm.finish || tm.failure){
+			if(createSearchImage(tm.selected,0.2)){
 				start=100;
 				phase=THROW_PHOTO;
 			}
-		}
-		else if(tm.hasCacheImage){
-			start=100;
-			phase=THROW_PHOTO;
 		}
 	}
 }
 
 void startThread(int id, char *query){
+	if(tm.running)return;
 	tm.selected=id;
 	strcpy_s(tm.query, 300, query);
 	tm.which=1;
 	tm.finish=false;
 	tm.failure=false;
-	if(tm.running){
-		tm.halt=THREAD_SHUTDOWN;
-		TCPshutdown(tm.threadID);
-	}
 	thread = SDL_CreateThread(ImageSearchThread, "ImageSearchThread", nullptr);
 }
 
@@ -2514,7 +2511,7 @@ void timerBSAttack(){
 		fishbox.text_count=1;
 		int n=sta[ BSstation[gd.bs_ch] ].ontv;
 		tm.hasCacheImage=false;
-		if(createSearchImage(entry[n].cartoon_id,0.3)){
+		if(createSearchImage(entry[n].cartoon_id,0.2)){
 			tm.hasCacheImage=true;
 			sprintf_s(str,"save/tmp_url/%d.txt",entry[n].cartoon_id);
 			loadFile(str);
@@ -2524,15 +2521,15 @@ void timerBSAttack(){
 		}
 	}
 	if(start==0){
-		if(tm.finish || tm.failure){
-			if(createSearchImage(tm.selected,0.3)){
+		if(tm.hasCacheImage){
+			start=100;
+			phase=BS_THROW_PHOTO;
+		}
+		else if(tm.finish || tm.failure){
+			if(createSearchImage(tm.selected,0.2)){
 				start=100;
 				phase=BS_THROW_PHOTO;
 			}
-		}
-		else if(tm.hasCacheImage){
-			start=100;
-			phase=BS_THROW_PHOTO;
 		}
 	}
 }
@@ -2617,22 +2614,10 @@ void timerGame(){
 		nextCut(&manekitvJson);
 	}
 	timerScore();
-	manageThread();
+	if(ns.display>0)ns.display--;
 
 	if(gd.timeslot_count>0)gd.timeslot_count++;
 	if(gd.timeslot_count>100)gd.timeslot_count=0;
-}
-
-void manageThread(){
-	if(tm.halt==RESTART_GETIMAGE){
-		if (tm.running){
-			tm.halt=THREAD_SHUTDOWN;
-			TCPshutdown(0);
-			tm.running=false;
-		}
-		thread = SDL_CreateThread(AnotherThread, "AnotherThread", nullptr);
-	}
-	if(ns.display>0)ns.display--;
 }
 
 void drawM(SDL_Surface* scr, int w, int m, int x, int y){

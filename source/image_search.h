@@ -26,14 +26,7 @@ struct _TCPsocket {
 	int sflag;
 };
 
-#define START_FROM 0
-#define RESTART_SEARCH 1
-#define RESTART_GETIMAGE 2
-#define THREAD_SUCCESS 3
-#define THREAD_END 4
-#define THREAD_SHUTDOWN 5
 #define BUF_LEN 2048
-
 #define OUTPUT_NETWORK_LOG false
 
 // Google
@@ -41,10 +34,11 @@ struct _TCPsocket {
 #define USER_AGENT "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"
 
 struct ThreadManager {
-	int selected, which, halt, threadID;
+	bool halt;
+	int selected, which, threadID;
 	TCPsocket tcpsock;
 	char targetURL[BUF_LEN];
-	char query[300];
+	char query[BUF_LEN], host[BUF_LEN], path[BUF_LEN];
 	bool running, finish, failure, hasCacheImage;
 };
 extern ThreadManager tm;
@@ -95,10 +89,10 @@ extern ImageFormatReader ifr;
 #define HTTPGET_END_CHUNK 7
 #define HTTPGET_END_CHUNK_R 8
 #define HTTPGET_DATA 9
+#define HTTPGET_RESTART 10
 
 extern SDL_Thread *thread;
 int ImageSearchThread(void *ptr);
-int AnotherThread(void *ptr);
 void TCPshutdown(int id);
 void parseHTML(int id, int n, const char *table_prefix);
 void networkLog_noparam(int id, const char *log);

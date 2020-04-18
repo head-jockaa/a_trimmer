@@ -66,7 +66,6 @@ void setManekiData();
 void makeColorLight();
 void walking();
 void startThread(int id, char *query);
-void manageThread();
 void drawNetworkStatus(SDL_Surface* scr);
 void drawThrowPhoto(SDL_Surface *scr);
 bool createSearchImage(int n, double rotate);

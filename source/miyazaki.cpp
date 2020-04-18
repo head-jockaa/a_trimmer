@@ -200,7 +200,7 @@ void timerMiyazaki(){
 		}
 	}
 
-	manageThread();
+	if(ns.display>0)ns.display--;
 }
 
 void keyMiyazakiMuseum(){

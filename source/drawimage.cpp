@@ -537,7 +537,8 @@ void __rotateImage_x(Uint32* px, int pxwidth, int pxheight, Image* ima, int x, i
 	}
 	imgPointX[0]=0;horizontalX[0]=0;horizontalY[0]=0;
 
-	imgX3=(int)imgX, imgY3=(int)imgY;
+	imgX3=(int)imgX;
+	imgY3=(int)imgY;
 	imgPointY2=imgPointY;
 	verticalX2=verticalX;
 	verticalY2=verticalY;

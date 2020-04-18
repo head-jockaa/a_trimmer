@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if(tm.running){
-		tm.halt = THREAD_END;
+		tm.halt = false;
 	}
 	while(tm.running){}
 

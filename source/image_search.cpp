@@ -18,11 +18,14 @@ char endHTML1[7]={'<','/','H','T','M','L','>'};
 char endHTML2[7]={'<','/','h','t','m','l','>'};
 
 bool getGoogleImageSearch(int id, char *query);
-void getTargetImage(int id, char *url);
-void receivingImageFile(int id, char *url, SSL *ssl);
-void readHttpHeader(int id, char *headerLine, char *url);
+bool getTargetImage(int id, char *url);
+bool receivingImageFile(int id, char *url, SSL *ssl);
+bool readHttpHeader(int id, char *headerLine, char *url);
 SDL_Texture *createSprite(SDL_Surface *surface);
 SDL_Thread *thread;
+char thread_str[10000], *thread_fstr;
+size_t thread_fsize;
+bool thread_loadFile(const char* fn);
 
 /** SDLNet_TCP_Close causes trouble */
 void TCPshutdown(int id){
@@ -34,7 +37,7 @@ void TCPshutdown(int id){
 		#else
 			SDLNet_TCP_Close(tm.tcpsock);
 		#endif
-		networkLog(id, "shuted down");
+		networkLog(id, "TCP shuted down");
 	}else{
 		networkLog(id, "tcpsock is null");
 	}
@@ -48,12 +51,17 @@ int ImageSearchThread(void *ptr)
 	int id=tm.threadID;
 	networkLog(id, "ImageSearchThread()");
 	tm.running = true;
-	tm.halt = 0;
+	tm.halt = false;
 	tm.tcpsock=NULL;
 	tm.failure = !getGoogleImageSearch(id, tm.query);
 	if(!tm.failure) {
-		if(!tm.halt)parseHTML(id, tm.which, TABLE_PREFIX);
-		if(!tm.halt)getTargetImage(id, tm.targetURL);
+		parseHTML(id, tm.which, TABLE_PREFIX);
+		bool finish=false;
+		for(int i=0 ; i<10 ; i++){
+			if(!tm.halt)finish=getTargetImage(id, tm.targetURL);
+			if(finish)break;
+			TCPshutdown(id);
+		}
 	}
 
 	if(tm.halt){
@@ -66,29 +74,6 @@ int ImageSearchThread(void *ptr)
 	tm.running = false;
 	return 0;
 }
-
-int AnotherThread(void *ptr)
-{
-	tm.threadID++;
-	int id=tm.threadID;
-	networkLog(id, "AnotherThread()");
-	tm.running = true;
-	tm.halt = 0;
-	tm.failure=false;
-	tm.tcpsock=NULL;
-	getTargetImage(id, tm.targetURL);
-
-	if(tm.halt){
-		networkLog(id, "AnotherThread is halted");
-	}else{
-		networkLog(id, "AnothrtThread ended successfully");
-		tm.halt = THREAD_SUCCESS;
-	}
-
-	tm.running = false;
-	return 0;
-}
-
 
 bool imageSearch_https(int id, const char *host, int port, const char *request){
 	networkLog(id, "imageSearch_https()");
@@ -167,14 +152,14 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 
 	//receive
 	FILE *file=NULL;
-	char get_msg[BUF_LEN], headerLine[BUF_LEN], url[100];;
+	char get_msg[BUF_LEN], headerLine[BUF_LEN];
 	int length = 0, headerPos = 0, readmode = HTTPGET_HEADER;
 	ns.receiveLength=0;
 	ns.contentLength=0;
 	ns.receiveCounter=0;
 	ns.chunksize=0;
 
-	for(int i=0 ; i<1000 ; i++){
+	for(int i=0 ; i<2000 ; i++){
 		//forced termination
 		if(tm.halt){
 			break;
@@ -199,7 +184,7 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 					for(int k=headerPos; k<BUF_LEN ; k++){
 						headerLine[k]=0;
 					}
-					readHttpHeader(id,headerLine,url);
+					readHttpHeader(id,headerLine,tm.targetURL);
 					headerPos=0;
 				}else{
 					headerLine[headerPos]=get_msg[j];
@@ -302,7 +287,7 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 					networkLog(id, fn);
 					if(!file){
 						networkLog(id, "failed to create new html file");
-						tm.halt = THREAD_END;
+						tm.halt = true;
 						break;
 					}
 				}
@@ -336,10 +321,7 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 		ERR_print_errors_fp(stderr);
 	}
 
-	if(tm.tcpsock && tm.halt!=THREAD_SHUTDOWN){
-		TCPshutdown(id);
-		networkLog(id, "close tcp socket (https google)");
-	}
+	TCPshutdown(id);
 
 	SSL_free(ssl);
 	SSL_CTX_free(ctx);
@@ -347,9 +329,8 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 	return true;
 }
 
-char* getHostName(int id, const char *url){
-	int size = (int)strlen(url);
-	char* host = new char[size];
+char* getHostName(int id, const char *url, char *host){
+	int size = BUF_LEN;
 	for(int i=0 ; i<size ; i++){
 		host[i] = 0;
 	}
@@ -372,9 +353,8 @@ char* getHostName(int id, const char *url){
 	return host;
 }
 
-char* getPath(int id, const char *url){
-	int size = (int)strlen(url);
-	char* path = new char[size];
+char* getPath(int id, const char *url, char *path){
+	int size = BUF_LEN;
 	for(int i=0 ; i<size ; i++){
 		path[i] = 0;
 	}
@@ -402,14 +382,14 @@ void parseHTML(int id, int n, const char *table_prefix){
 	networkLog(id, "parseHTML()");
 	char fn[100];
 	sprintf_s(fn, "save/tmp_google_search_%d.html", tm.selected);
-	loadFile(fn);
-	if(!fsize){
+	thread_loadFile(fn);
+	if(!thread_fsize){
 		return;
 	}
 	char *result = NULL, *url = NULL;
 
 	//fetch the nth URL string
-	result = strstr(fstr, table_prefix);
+	result = strstr(thread_fstr, table_prefix);
 	size_t size = 0, start = 0, end = 0;
 	if(result){
 		int pointer = 0, which_number = 1;
@@ -507,36 +487,33 @@ void parseHTML(int id, int n, const char *table_prefix){
 }
 
 /** get an image file from the URL */
-void getTargetImage_http(int id, char *url){
+bool getTargetImage_http(int id, char *url){
 	networkLog(id, "getTargetImage_http()");
 	if(url[0] == 0){
-		return;
+		return false;
 	}
 	ns.status=NS_GET_IMAGE;
 
-	char *host = getHostName(id, url);
-	char *path = getPath(id, url);
+	getHostName(id, url, tm.host);
+	getPath(id, url, tm.path);
 
-	networkLog(id, "resolve host %s",host);
+	networkLog(id, "resolve host %s",tm.host);
 
 	//getting IP address
 	IPaddress ipaddress;
-	int res = SDLNet_ResolveHost(&ipaddress, host, 80);
+	int res = SDLNet_ResolveHost(&ipaddress, tm.host, 80);
 
 	if(res){
 		//go to the next image file if failed
 		tm.which++;
 		ns.status=NS_IPADDRESS_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX);
-		tm.halt = RESTART_GETIMAGE;
-		networkLog(id, "resolving host failed: %s", host);
-		char *result = strstr(host, "%");
+		networkLog(id, "resolving host failed: %s", tm.host);
+		char *result = strstr(tm.host, "%");
 		if(result){
 			networkLog(id, "punycode is not supported");
 		}
-		delete host;
-		delete path;
-		return;
+		return false;
 	}
 
 	networkLog(id, "resolved");
@@ -550,22 +527,19 @@ void getTargetImage_http(int id, char *url){
 
 	if(!tm.tcpsock) {
 		//go to the next image file if failed
-		delete host;
-		delete path;
 		tm.which++;
 		ns.status=NS_CONNECT_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX);
-		tm.halt = RESTART_GETIMAGE;
 		networkLog(id, "opening tcp failed");
-		return;
+		return false;
 	}
 
 	networkLog(id, "connected");
 
 	//send request
-	long msg_size = strlen(path)+strlen(host)+strlen(USER_AGENT)+50;
+	long msg_size = strlen(tm.path)+strlen(tm.host)+strlen(USER_AGENT)+50;
 	char *msg = new char[msg_size];
-	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", path, host, USER_AGENT);
+	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", tm.path, tm.host, USER_AGENT);
 
 	networkLog(id, "Request header is below");
 	networkLog_noparam(id, msg);
@@ -576,22 +550,18 @@ void getTargetImage_http(int id, char *url){
 	networkLog(id, SDLNet_GetError());
 	delete[] msg;
 
-	receivingImageFile(id, url, NULL);
+	if(!receivingImageFile(id, url, NULL))return false;
 
-	if(tm.tcpsock && tm.halt!=THREAD_SHUTDOWN){
-		TCPshutdown(id);
-		networkLog(id, "closed tcp socket");
-	}
+	TCPshutdown(id);
 
 	ns.status=NULL;
-	delete host;
-	delete path;
+	return true;
 }
 
-void getTargetImage_https(int id, char *url){
+bool getTargetImage_https(int id, char *url){
 	networkLog(id, "getTargetImage_https()");
 	if(url[0] == 0){
-		return;
+		return false;
 	}
 
 	int ret;
@@ -603,46 +573,42 @@ void getTargetImage_https(int id, char *url){
 	ctx = SSL_CTX_new(SSLv23_client_method());
 	if (!ctx){
 		ERR_print_errors_fp(stderr);
-		return;
+		return false;
 	}
 
 	ssl = SSL_new(ctx);
 	if (!ssl){
 		ERR_print_errors_fp(stderr);
-		return;
+		return false;
 	}
 
 	ns.status=NS_GET_IMAGE;
 
-	char *host = getHostName(id, url);
-	char *path = getPath(id, url);
-
-	networkLog(id, "resolve host %s", host);
+	getHostName(id, url, tm.host);
+	getPath(id, url, tm.path);
+	networkLog(id, "resolve host %s", tm.host);
 
 	//getting IP address
 	IPaddress ipaddress;
-	int res = SDLNet_ResolveHost(&ipaddress, host, 443);
+	int res = SDLNet_ResolveHost(&ipaddress, tm.host, 443);
 
 	if(res){
 		//go to the next image file if failed
 		tm.which++;
 		ns.status=NS_IPADDRESS_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX);
-		tm.halt = RESTART_GETIMAGE;
-		networkLog(id, "resolving host failed: %s", host);
-		char *result = strstr(host, "%");
+		networkLog(id, "resolving host failed: %s", tm.host);
+		char *result = strstr(tm.host, "%");
 		if(result){
 			networkLog(id, "punycode is not supported");
 		}
-		delete host;
-		delete path;
-		return;
+		return false;
 	}
 
 	networkLog(id, "resolved");
 
 	//to avoid this error "SSL23_GET_SERVER_HELLO:tlsv1 alert internal error"
-	SSL_set_tlsext_host_name(ssl, host);
+	SSL_set_tlsext_host_name(ssl, tm.host);
 
 	//start comm.
 	if(tm.tcpsock){
@@ -652,14 +618,11 @@ void getTargetImage_https(int id, char *url){
 	tm.tcpsock = SDLNet_TCP_Open(&ipaddress);
 	if(!tm.tcpsock) {
 		//go to the next image file if failed
-		delete host;
-		delete path;
 		tm.which++;
 		ns.status=NS_CONNECT_FAILURE;
 		parseHTML(id, tm.which, TABLE_PREFIX);
-		tm.halt = RESTART_GETIMAGE;
 		networkLog(id, "opening tcp failed");
-		return;
+		return false;
 	}
 
 	networkLog(id, "connected");
@@ -668,7 +631,7 @@ void getTargetImage_https(int id, char *url){
 	if (ret == 0){
 		networkLog(id, "SSL_set_fd() failed");
 		ERR_print_errors_fp(stderr);
-		return;
+		return false;
 	}
 
 	RAND_poll();
@@ -683,14 +646,13 @@ void getTargetImage_https(int id, char *url){
 		ERR_print_errors_fp(stderr);
 		tm.which++;
 		parseHTML(id, tm.which, TABLE_PREFIX);
-		tm.halt = RESTART_GETIMAGE;
-		return;
+		return false;
 	}
 
 	//send request
-	long msg_size = strlen(path)+strlen(host)+strlen(USER_AGENT)+50;
+	long msg_size = strlen(tm.path)+strlen(tm.host)+strlen(USER_AGENT)+50;
 	char *msg = new char[msg_size];
-	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", path, host, USER_AGENT);
+	sprintf_s(msg, msg_size, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", tm.path, tm.host, USER_AGENT);
 
 	networkLog(id, "Request header is below");
 	networkLog_noparam(id, msg);
@@ -698,45 +660,41 @@ void getTargetImage_https(int id, char *url){
 	ret = SSL_write(ssl, msg, (int)strlen(msg));
 	if (ret < 1){
 		ERR_print_errors_fp(stderr);
-		return;
+		return false;
 	}
 	delete[] msg;
 
-	receivingImageFile(id, url, ssl);
+	if(!receivingImageFile(id, url, ssl))return false;
 
 	ret = SSL_shutdown(ssl);
 	if (ret != 1){
 		ERR_print_errors_fp(stderr);
 	}
 
-	if(tm.tcpsock && tm.halt!=THREAD_SHUTDOWN){
-		TCPshutdown(id);
-		networkLog(id, "closed tcp socket");
-	}
+	TCPshutdown(id);
 
 	SSL_free(ssl);
 	SSL_CTX_free(ctx);
 	ERR_free_strings();
 	ns.status=NULL;
-	delete host;
-	delete path;
+	return true;
 }
 
-void getTargetImage(int id, char *url){
+bool getTargetImage(int id, char *url){
 	/* TODO
 	char *checkurl = strstr(url, "amazon.com");
 	if(checkurl){
 		networkLog(id, "skip %s", "amazon.com");
 		tm.which++;
 		parseHTML(id, tm.which, TABLE_PREFIX);
-		tm.halt = RESTART_GETIMAGE;
+		return false;
 	}
 	else
 	 */
 	if(strstr(url, "https://")){
-		getTargetImage_https(id, url);
+		return getTargetImage_https(id, url);
 	}else{
-		getTargetImage_http(id, url);
+		return getTargetImage_http(id, url);
 	}
 }
 
@@ -783,8 +741,9 @@ bool checkHeaderValue(char *headerLine, const char *name){
 	return name[namePos]==0;
 }
 
-void readHttpHeader(int id, char *headerLine, char*url){
-	networkLog(id, headerLine);
+/* returns true when retrying */
+bool readHttpHeader(int id, char *headerLine, char*url){
+	networkLog_noparam(id, headerLine);
 
 	toLowerCase(headerLine);
 
@@ -851,7 +810,7 @@ void readHttpHeader(int id, char *headerLine, char*url){
 			strcpy_s(url, BUF_LEN, url2);
 		}
 		delete[] url2;
-		tm.halt = RESTART_GETIMAGE;
+		return true;
 	}
 
 	//Content-Encoding gzip is not supported
@@ -862,7 +821,7 @@ void readHttpHeader(int id, char *headerLine, char*url){
 			tm.which++;
 			networkLog(id, "Content-Encoding gzip is not supported");
 			parseHTML(id, tm.which, TABLE_PREFIX);
-			tm.halt = RESTART_GETIMAGE;
+			return true;
 		}
 	}
 
@@ -871,9 +830,10 @@ void readHttpHeader(int id, char *headerLine, char*url){
 	if(result2){
 		ns.found200=true;
 	}
+	return false;
 }
 
-void receivingImageFile(int id, char *url, SSL *ssl){
+bool receivingImageFile(int id, char *url, SSL *ssl){
 	// to avoid the blocking of recv()
 #ifdef __WIN32__
 	unsigned long value = 1;
@@ -903,13 +863,15 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 	ns.receiveLength=0;
 	ifr.reset();
 
+	bool failure = false;
+
 	//receive
 	for(int i=0 ; i<=10000 ; i++){
 		if(i==10000){
 			tm.which++;
 			networkLog(id, "recv() won't be ready forever (pass it)");
 			parseHTML(id, tm.which, TABLE_PREFIX);
-			tm.halt = RESTART_GETIMAGE;
+			failure = true;
 			break;
 		}
 
@@ -947,7 +909,11 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 					for(int k=headerPos; k<BUF_LEN ; k++){
 						headerLine[k]=0;
 					}
-					readHttpHeader(id,headerLine,url);
+					if(readHttpHeader(id,headerLine,url)){
+						// redirect
+						failure = true;
+						break;
+					}
 					headerPos=0;
 				}else{
 					headerLine[headerPos]=get_msg[j];
@@ -1045,7 +1011,7 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 					tm.which++;
 					networkLog(id, "get an error code (pass it)");
 					parseHTML(id, tm.which, TABLE_PREFIX);
-					tm.halt = RESTART_GETIMAGE;
+					failure = true;
 					break;
 				}
 
@@ -1056,7 +1022,8 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 					networkLog(id, fn);
 					if(!file){
 						networkLog(id, "failed to create new img file");
-						tm.halt = THREAD_END;
+						tm.halt = true;
+						failure = true;
 						break;
 					}
 				}
@@ -1074,10 +1041,6 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 				}
 			}
 
-			if(tm.halt==RESTART_GETIMAGE){
-				break;
-			}
-
 			//finish writing a file
 			if(!ns.chunked && ns.contentLength && ns.receiveLength>=ns.contentLength){
 				tm.finish=true;
@@ -1089,7 +1052,7 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 			}
 		}
 
-		if(tm.finish || tm.halt==RESTART_GETIMAGE){
+		if(failure || tm.finish){
 			break;
 		}
 	}
@@ -1097,14 +1060,16 @@ void receivingImageFile(int id, char *url, SSL *ssl){
 	if(file){
 		networkLog(id, "finished writing img file");
 		fclose(file);
-		sprintf_s(str,"save/tmp_google_search_%d.html",tm.selected);
-		remove(str);
+		sprintf_s(thread_str,"save/tmp_google_search_%d.html",tm.selected);
+		remove(thread_str);
 	}
+
+	return !failure;
 }
 
 bool getGoogleImageSearch(int id, char *query){
 	networkLog(id, "getGoogleImageSearch()");
-	long request_size = strlen(query)+100+120;
+	long request_size = strlen(query)+strlen(USER_AGENT)+100;
     char *request = new char[request_size];
     sprintf_s(request, request_size, "GET /search?q=%s&source=lnms&tbm=isch HTTP/1.1\r\nHost: www.google.co.jp\r\nUser-Agent: %s\r\n\r\n", query, USER_AGENT);
 	networkLog(id, "Request header is below");
@@ -1508,23 +1473,24 @@ void ImageFormatReader::checkGIF(int id, char c){
     gifPointer++;
 }
 
+/* to avoid a confusion with a '%' in URL strings */
 void networkLog_noparam(int id, const char *log) {
 	if(!OUTPUT_NETWORK_LOG)return;
-	for(int i=0 ; i<1000 ; i++){
+	for(int i=0 ; i<10000 ; i++){
 		if(log[i] == 0) {
-			str[i] = 13;
-			str[i+1] = 10;
-			str[i+2] = 0;
+			thread_str[i] = 13;
+			thread_str[i+1] = 10;
+			thread_str[i+2] = 0;
 			break;
 		}
-		str[i] = log[i];
+		thread_str[i] = log[i];
 	}
 
 	FILE* hFile;
 	char fn[100];
 	sprintf_s(fn,"log%d.txt",id);
 	fopen_s(&hFile, fn, "ab");
-	fwrite(str, sizeof(str[0]), strlen(str)/sizeof(str[0]), hFile);
+	fwrite(thread_str, sizeof(thread_str[0]), strlen(thread_str)/sizeof(thread_str[0]), hFile);
 	fclose(hFile);
 }
 
@@ -1533,16 +1499,41 @@ void networkLog(int id, const char *log, ...) {
 	va_list c2;
 	va_start(c2, log);
 	#ifdef __WIN32__
-	vsprintf_s(str,log,c2);
+	vsprintf_s(thread_str,log,c2);
 	#else
-	vsprintf(str,log,c2);
+	vsprintf(thread_str,log,c2);
 	#endif
-	sprintf_s(str,"%s\n",str);
+	sprintf_s(thread_str,"%s\n",thread_str);
 
 	FILE* hFile;
 	char fn[100];
 	sprintf_s(fn,"log%d.txt",id);
 	fopen_s(&hFile, fn, "ab");
-	fwrite(str, sizeof(fstr[0]), strlen(str)/sizeof(str[0]), hFile);
+	fwrite(thread_str, sizeof(thread_str[0]), strlen(thread_str)/sizeof(thread_str[0]), hFile);
 	fclose(hFile);
+}
+
+bool thread_loadFile(const char* fn){
+	fpos_t a=0,b=0;
+	FILE* hFile;
+
+	if(thread_fstr)delete [] thread_fstr;
+	thread_fsize=0;
+	thread_fstr=NULL;
+	fopen_s(&hFile,fn,"rb");
+	if(hFile==NULL){
+		thread_fstr=NULL;
+		return false;
+	}
+
+	b=fseek(hFile,0,SEEK_END);
+	fgetpos(hFile,&a);
+	thread_fsize=(size_t)a;
+	fseek(hFile,(long)b,SEEK_SET);
+
+	thread_fstr=new char[thread_fsize+1];
+	fread(thread_fstr, sizeof(thread_fstr[0]), thread_fsize/sizeof(thread_fstr[0]), hFile);
+	fclose(hFile);
+	thread_fstr[thread_fsize]=0;
+	return true;
 }

@@ -24,7 +24,7 @@ void Antenna::setTmpFish(){
 }
 
 void Antenna::receive(){
-	station=EOF;rcv=0;A=0,T=0,C=0;m_wave2=70;
+	station=EOF;rcv=0;A=0;T=0;C=0;m_wave2=70;
 	mg_rcv=0;
 	if(ADJ_DIR==AUTO && ant_mode==TUNE){
 		Area *ar=area;
