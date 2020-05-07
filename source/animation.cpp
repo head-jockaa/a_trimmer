@@ -770,13 +770,15 @@ void applyJsonData(JsonData *json){
 
 	id=0;
 	int w=0,h=0;
-	char file[100];
-	file[0]=0;
+	char file[100], frame_file[100];
 	for(int i=0 ; i<json->jr.image.valueNum ; i++){
+		file[0]=0;
+		frame_file[0]=0;
 		for(int j=i ; j<json->jr.image.valueNum ; j++){
 			if(json->jr.image.name[j][0]==';')break;
 			if(strcmp(json->jr.image.name[j],"id")==0)id=json->jr.image.valueDouble[j];
 			else if(strcmp(json->jr.image.name[j],"file")==0)strcpy_s(file,json->jr.image.valueString[j]);
+			else if(strcmp(json->jr.image.name[j],"frame")==0)strcpy_s(frame_file,json->jr.image.valueString[j]);
 			else if(strcmp(json->jr.image.name[j],"w")==0)w=json->jr.image.valueDouble[j];
 			else if(strcmp(json->jr.image.name[j],"h")==0)h=json->jr.image.valueDouble[j];
 			i++;
@@ -789,9 +791,18 @@ void applyJsonData(JsonData *json){
 		}
 		freeImage(json->bg[id]);
 		if(file[0]){
-			getImage(json->bg[id],file,BLUE);
+			if(frame_file[0]){
+				getImage(json->bg[id],file);
+				Image *frame;
+				getImage(frame,frame_file,BLACK);
+				drawImage(json->bg[id],frame,0,0,0,0,frame->w,frame->h,255);
+				setAlpha(json->bg[id], 0, 0, 255);
+				freeImage(frame);
+			}else{
+				getImage(json->bg[id],file,BLUE);
+			}
 		}
-		if(w!=0 && h!=0){
+		else if(w!=0 && h!=0){
 			json->bg[id]=new Image(w,h);
 		}
 	}
