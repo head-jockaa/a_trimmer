@@ -9,7 +9,7 @@ struct ObjectSetting{
 	double R,G,B;
 	double gradRfrom,gradGfrom,gradBfrom;
 	double gradRto,gradGto,gradBto;
-	bool fixed;
+	bool fixed, reverse;
 };
 struct ObjectMoving{
 	double x,y,ix,iy,mag,w,h,alpha,shake;

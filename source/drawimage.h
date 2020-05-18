@@ -15,6 +15,7 @@ void drawImage_t(Image* scr, Image* img, int x, int y, int x2, int y2, int w2, i
 void drawImage_x(SDL_Surface* scr, Image* img, int x, int y, double mag, int x2, int y2, int w2, int h2, int a);
 void drawImage_x(Image* scr, Image* img, int x, int y, double mag, int x2, int y2, int w2, int h2, int a);
 void drawImage_xr(SDL_Surface* scr, Image* img, int x, int y, double mag, int x2, int y2, int w2, int h2, int a);
+void drawImage_xr(Image* scr, Image* img, int x, int y, double mag, int x2, int y2, int w2, int h2, int a);
 void rotateImage(SDL_Surface* scr, Image* img, int x, int y, double mag, int x2, int y2, int cx, int cy, int w2, int h2, int a);
 void rotateImage(Image* scr, Image* img, int x, int y, double rot, int x2, int y2, int cx, int cy, int w2, int h2, int a);
 void rotateImage_x(SDL_Surface* scr, Image* img, int x, int y, double rot, double mag, int x2, int y2, int cx, int cy, int w2, int h2, int a);

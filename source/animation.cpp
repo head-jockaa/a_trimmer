@@ -62,7 +62,7 @@ void resetObjectSetting(ObjectSetting &s){
 	s.R=0;s.G=0;s.B=0;s.img_id=0;
 	s.gradRfrom=0;s.gradGfrom=0;s.gradBfrom=0;
 	s.gradRto=0;s.gradGto=0;s.gradBto=0;
-	s.fixed=false;
+	s.fixed=false;s.reverse=false;
 }
 void resetObjectMoving(ObjectMoving &m){
 	m.x=0;m.y=0;m.ix=0;m.iy=0;m.mag=0;m.w=0;m.h=0;m.alpha=0;m.shake=0;
@@ -577,6 +577,7 @@ void applyJsonData(JsonData *json){
 				json->obj[id].set.type=CARTOON_FILLRECT_GRAD;
 			}
 			else if(strcmp(json->jr.set.name[j],"shake")==0)json->obj[id].set.shake=json->jr.set.valueDouble[j];
+			else if(strcmp(json->jr.set.name[j],"reverse")==0)json->obj[id].set.reverse=json->jr.set.valueBool[j];
 			else if(strcmp(json->jr.set.name[j],"draw_to")==0)json->obj[id].set.drawTo=json->jr.set.valueDouble[j];
 			else if(strcmp(json->jr.set.name[j],"type")==0){
 				if(strcmp(json->jr.set.valueString[j],"carlight")==0)json->obj[id].set.type=CARTOON_CARLIGHT;
@@ -1424,6 +1425,7 @@ void _drawAnimationCut(JsonData *json, SDL_Surface* scr, int from, int to){
 		int h=(int)json->obj[i].set.h;
 		int a=(int)((json->obj[i].set.alpha+json->obj[i].slideAlpha.position)*fade);
 		double mag=json->obj[i].set.mag+json->obj[i].slideMag.position;
+		bool reverse=json->obj[i].set.reverse;
 		if(!json->obj[i].set.fixed){
 			x-=json->scrX;
 			x-=json->scrY;
@@ -1434,9 +1436,17 @@ void _drawAnimationCut(JsonData *json, SDL_Surface* scr, int from, int to){
 			Image *ima=json->bg[json->obj[i].set.drawTo];
 			if(json->obj[i].set.type==CARTOON_DRAWIMAGE){
 				if(mag==1){
-					drawImage(ima,bg,x,y,ix,iy,w,h,a);
+					if(reverse){
+						drawImage_r(ima,bg,x,y,ix,iy,w,h,a);
+					}else{
+						drawImage(ima,bg,x,y,ix,iy,w,h,a);
+					}
 				}else{
-					drawImage_x(ima,bg,x,y,mag,ix,iy,w,h,a);
+					if(reverse){
+						drawImage_xr(ima,bg,x,y,mag,ix,iy,w,h,a);
+					}else{
+						drawImage_x(ima,bg,x,y,mag,ix,iy,w,h,a);
+					}
 				}
 			}
 			if(json->obj[i].set.type==CARTOON_ILLUMINATE){
@@ -1468,9 +1478,17 @@ void _drawAnimationCut(JsonData *json, SDL_Surface* scr, int from, int to){
 		}else{
 			if(json->obj[i].set.type==CARTOON_DRAWIMAGE){
 				if(mag==1){
-					drawImage(scr,bg,x,y,ix,iy,w,h,a);
+					if(reverse){
+						drawImage_r(scr,bg,x,y,ix,iy,w,h,a);
+					}else{
+						drawImage(scr,bg,x,y,ix,iy,w,h,a);
+					}
 				}else{
-					drawImage_x(scr,bg,x,y,mag,ix,iy,w,h,a);
+					if(reverse){
+						drawImage_xr(scr,bg,x,y,mag,ix,iy,w,h,a);
+					}else{
+						drawImage_x(scr,bg,x,y,mag,ix,iy,w,h,a);
+					}
 				}
 			}
 			if(json->obj[i].set.type==CARTOON_ILLUMINATE){

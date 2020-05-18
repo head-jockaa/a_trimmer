@@ -308,9 +308,9 @@ void __drawImage_xr(Uint8* px, int pxwidth, int pxheight, Image* ima, int x, int
 	int h=(int)(h3*mag);
 
 	//‚Í‚Ý‚¾‚·•”•ª‚Í•`‰æ‚µ‚È‚¢
-	if(x<0){x3-=x/mag;w+=x;x=0;}
+	if(x<0){w+=x;x=0;}
 	if(y<0){y3-=y/mag;h+=y;y=0;}
-	if(x+w>pxwidth)w=pxwidth-x;
+	if(x+w>pxwidth){x3+=(x+w-pxwidth)/mag;w=pxwidth-x;}
 	if(y+h>pxheight)h=pxheight-y;
 
 	px=px+(pxwidth*y+x+w)*4;
@@ -638,7 +638,7 @@ void rotateImage_x(Image* scr, Image* ima, int x, int y, double rot, double mag,
 }
 
 void __fillRect(Uint8* px, int pxwidth, int x, int y, int w, int h, Uint8 R, Uint8 G, Uint8 B, int a){
-	if(a==0)return;
+	if(a<0)return;
 
 	Uint16 px_skip;
 	px=px+(pxwidth*y+x)*4;
@@ -657,19 +657,6 @@ void __fillRect(Uint8* px, int pxwidth, int x, int y, int w, int h, Uint8 R, Uin
 			for(int i=0 ; i<w ; i++){
 				*(Uint32 *)px=color;
 				px+=4;
-			}
-			px+=px_skip;
-		}
-	}
-	else if(a==128){
-		for(int j=0 ; j<h ; j++){
-			for(int i=0 ; i<w ; i++){
-				*px = (R2+*px) >> 2;
-				px++;
-				*px = (G+*px) >> 2;
-				px++;
-				*px = (B2+*px) >> 2;
-				px++;px++;
 			}
 			px+=px_skip;
 		}
