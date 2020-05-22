@@ -59,13 +59,14 @@ void JsonDataReader::init(int size){
 void resetObjectSetting(ObjectSetting &s){
 	s.x=0;s.y=0;s.ix=0;s.iy=0;s.w=0;s.h=0;
 	s.mag=1;s.alpha=255;s.shake=0;s.type=0;s.drawTo=-1;s.lang=-1;
+	s.rotate=0;s.cx=0;s.cy=0;
 	s.R=0;s.G=0;s.B=0;s.img_id=0;
 	s.gradRfrom=0;s.gradGfrom=0;s.gradBfrom=0;
 	s.gradRto=0;s.gradGto=0;s.gradBto=0;
 	s.fixed=false;s.reverse=false;
 }
 void resetObjectMoving(ObjectMoving &m){
-	m.x=0;m.y=0;m.ix=0;m.iy=0;m.mag=0;m.w=0;m.h=0;m.alpha=0;m.shake=0;
+	m.x=0;m.y=0;m.ix=0;m.iy=0;m.mag=0;m.w=0;m.h=0;m.alpha=0;m.shake=0;m.rotate=0;
 	m.R=0;m.G=0;m.B=0;
 	m.gradRfrom=0;m.gradGfrom=0;m.gradBfrom=0;
 	m.gradRto=0;m.gradGto=0;m.gradBto=0;
@@ -578,6 +579,9 @@ void applyJsonData(JsonData *json){
 			}
 			else if(strcmp(json->jr.set.name[j],"shake")==0)json->obj[id].set.shake=json->jr.set.valueDouble[j];
 			else if(strcmp(json->jr.set.name[j],"reverse")==0)json->obj[id].set.reverse=json->jr.set.valueBool[j];
+			else if(strcmp(json->jr.set.name[j],"rotate")==0)json->obj[id].set.rotate=json->jr.set.valueDouble[j];
+			else if(strcmp(json->jr.set.name[j],"cx")==0)json->obj[id].set.cx=json->jr.set.valueDouble[j];
+			else if(strcmp(json->jr.set.name[j],"cy")==0)json->obj[id].set.cy=json->jr.set.valueDouble[j];
 			else if(strcmp(json->jr.set.name[j],"draw_to")==0)json->obj[id].set.drawTo=json->jr.set.valueDouble[j];
 			else if(strcmp(json->jr.set.name[j],"type")==0){
 				if(strcmp(json->jr.set.valueString[j],"carlight")==0)json->obj[id].set.type=CARTOON_CARLIGHT;
@@ -704,6 +708,7 @@ void applyJsonData(JsonData *json){
 			else if(strcmp(json->jr.move.name[j],"w")==0)json->obj[id].move.w=json->jr.move.valueDouble[j];
 			else if(strcmp(json->jr.move.name[j],"h")==0)json->obj[id].move.h=json->jr.move.valueDouble[j];
 			else if(strcmp(json->jr.move.name[j],"shake")==0)json->obj[id].move.shake=json->jr.move.valueDouble[j];
+			else if(strcmp(json->jr.move.name[j],"rotate")==0)json->obj[id].move.rotate=json->jr.move.valueDouble[j];
 			else if(strcmp(json->jr.move.name[j],"flip in")==0){
 				json->obj[id].flip.interval=json->jr.move.valueDouble[j];
 				json->obj[id].flip.count=0;
@@ -1117,6 +1122,7 @@ void _moveObject(JsonData *json){
 		json->obj[i].set.mag+=json->obj[i].move.mag;
 		json->obj[i].set.alpha+=json->obj[i].move.alpha;
 		json->obj[i].set.shake+=json->obj[i].move.shake;
+		json->obj[i].set.rotate+=json->obj[i].move.rotate;
 		json->obj[i].set.R+=json->obj[i].move.R;
 		json->obj[i].set.G+=json->obj[i].move.G;
 		json->obj[i].set.B+=json->obj[i].move.B;
@@ -1426,6 +1432,9 @@ void _drawAnimationCut(JsonData *json, SDL_Surface* scr, int from, int to){
 		int a=(int)((json->obj[i].set.alpha+json->obj[i].slideAlpha.position)*fade);
 		double mag=json->obj[i].set.mag+json->obj[i].slideMag.position;
 		bool reverse=json->obj[i].set.reverse;
+		double rotate=json->obj[i].set.rotate;
+		double cx=json->obj[i].set.cx;
+		double cy=json->obj[i].set.cy;
 		if(!json->obj[i].set.fixed){
 			x-=json->scrX;
 			x-=json->scrY;
@@ -1436,13 +1445,19 @@ void _drawAnimationCut(JsonData *json, SDL_Surface* scr, int from, int to){
 			Image *ima=json->bg[json->obj[i].set.drawTo];
 			if(json->obj[i].set.type==CARTOON_DRAWIMAGE){
 				if(mag==1){
-					if(reverse){
+					if(rotate){
+						rotateImage(ima,bg,x,y,rotate,ix,iy,cx,cy,w,h,a);
+					}
+					else if(reverse){
 						drawImage_r(ima,bg,x,y,ix,iy,w,h,a);
 					}else{
 						drawImage(ima,bg,x,y,ix,iy,w,h,a);
 					}
 				}else{
-					if(reverse){
+					if(rotate){
+						rotateImage_x(ima,bg,x,y,rotate,mag,ix,iy,cx,cy,w,h,a);
+					}
+					else if(reverse){
 						drawImage_xr(ima,bg,x,y,mag,ix,iy,w,h,a);
 					}else{
 						drawImage_x(ima,bg,x,y,mag,ix,iy,w,h,a);
@@ -1478,13 +1493,19 @@ void _drawAnimationCut(JsonData *json, SDL_Surface* scr, int from, int to){
 		}else{
 			if(json->obj[i].set.type==CARTOON_DRAWIMAGE){
 				if(mag==1){
-					if(reverse){
+					if(rotate){
+						rotateImage(scr,bg,x,y,rotate,ix,iy,cx,cy,w,h,a);
+					}
+					else if(reverse){
 						drawImage_r(scr,bg,x,y,ix,iy,w,h,a);
 					}else{
 						drawImage(scr,bg,x,y,ix,iy,w,h,a);
 					}
 				}else{
-					if(reverse){
+					if(rotate){
+						rotateImage_x(scr,bg,x,y,rotate,mag,ix,iy,cx,cy,w,h,a);
+					}
+					else if(reverse){
 						drawImage_xr(scr,bg,x,y,mag,ix,iy,w,h,a);
 					}else{
 						drawImage_x(scr,bg,x,y,mag,ix,iy,w,h,a);

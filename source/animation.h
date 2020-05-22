@@ -4,7 +4,7 @@
 #include "util.h"
 
 struct ObjectSetting{
-	double x,y,ix,iy,w,h,mag,alpha,shake;
+	double x,y,ix,iy,w,h,mag,alpha,shake,rotate,cx,cy;
 	int type,drawTo,lang,img_id;
 	double R,G,B;
 	double gradRfrom,gradGfrom,gradBfrom;
@@ -12,7 +12,7 @@ struct ObjectSetting{
 	bool fixed, reverse;
 };
 struct ObjectMoving{
-	double x,y,ix,iy,mag,w,h,alpha,shake;
+	double x,y,ix,iy,mag,w,h,alpha,shake,rotate;
 	double R,G,B,gradRfrom,gradGfrom,gradBfrom,gradRto,gradGto,gradBto;
 };
 struct ObjectFlipping{

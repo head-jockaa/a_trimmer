@@ -381,12 +381,11 @@ void drawImage_xr(Image* scr, Image* ima, int x, int y, double mag, int x2, int 
 
 void __rotateImage(Uint8* px, int pxwidth, int pxheight, Image* ima, int x, int y, double rot, int x2, int y2, int cx, int cy, int w2, int h2, int a){
 //ägëÂèkè¨ï`âÊÇ∆âÒì]
+	if(a<0)return;
+	if(a>255)a=255;
 	Uint8 *ima_a = ima->A;
 	Uint8 *ima_rgb = (Uint8*)ima->RGB;
 	int px_skip;
-
-	if(a<0)a=0;
-	if(a>255)a=255;
 
 	double r1=sqrt(1.0*cx*cx+cy*cy);
 	double r2=sqrt(1.0*(w2-cx)*(w2-cx)+cy*cy);
@@ -421,24 +420,51 @@ void __rotateImage(Uint8* px, int pxwidth, int pxheight, Image* ima, int x, int 
 
 	rotateX=x2+cx+offsetX*rcos-offsetY*rsin;
 	rotateY=y2+cy+offsetX*rsin+offsetY*rcos;
-	for(int j=0 ; j<h ; j++){
-		for(int i=0 ; i<w ; i++){
-			if(rotateX<x2 || rotateX>=x2+w2 || rotateY<y2 || rotateY>=y2+h2){
-				px+=4;rotateX+=rcos;rotateY+=rsin;continue;
+
+	if(a==255){
+		for(int j=0 ; j<h ; j++){
+			for(int i=0 ; i<w ; i++){
+				if(rotateX<x2 || rotateX>=x2+w2 || rotateY<y2 || rotateY>=y2+h2){
+					px+=4;rotateX+=rcos;rotateY+=rsin;continue;
+				}
+				img_offset=(int)rotateY*(ima->w)+(int)rotateX;
+				if(*(ima_a+img_offset)){
+					*(Uint32*)px=*(Uint32*)(ima_rgb+img_offset*4);
+				}
+				px+=4;
+				rotateX+=rcos;
+				rotateY+=rsin;
 			}
-			img_offset=(int)rotateY*(ima->w)+(int)rotateX;
-			if(*(ima_a+img_offset)){
-				*(Uint32*)px=*(Uint32*)(ima_rgb+img_offset*4);
-			}
-			px+=4;
-			rotateX+=rcos;
-			rotateY+=rsin;
+			px+=px_skip;
+			rotateX-=rsin;
+			rotateY+=rcos;
+			rotateX-=backX;
+			rotateY-=backY;
 		}
-		px+=px_skip;
-		rotateX-=rsin;
-		rotateY+=rcos;
-		rotateX-=backX;
-		rotateY-=backY;
+	}else{
+		for(int j=0 ; j<h ; j++){
+			for(int i=0 ; i<w ; i++){
+				if(rotateX<x2 || rotateX>=x2+w2 || rotateY<y2 || rotateY>=y2+h2){
+					px+=4;rotateX+=rcos;rotateY+=rsin;continue;
+				}
+				img_offset=(int)rotateY*(ima->w)+(int)rotateX;
+				if(*(ima_a+img_offset)){
+					//*(Uint32*)px=*(Uint32*)(ima_rgb+img_offset*4);
+					Uint8 *ima_rgb2 = ima_rgb+img_offset*4;
+					*px+=( (a*(*ima_rgb2-*px)) >> 8 );
+					*(px+1)+=( (a*(*(ima_rgb2+1)-*(px+1))) >> 8 );
+					*(px+2)+=( (a*(*(ima_rgb2+2)-*(px+2))) >> 8 );
+				}
+				px+=4;
+				rotateX+=rcos;
+				rotateY+=rsin;
+			}
+			px+=px_skip;
+			rotateX-=rsin;
+			rotateY+=rcos;
+			rotateX-=backX;
+			rotateY-=backY;
+		}
 	}
 }
 

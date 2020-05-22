@@ -1228,12 +1228,12 @@ void drawTowerList(SDL_Surface* scr){
 				drawText2(scr,400,i*40+80,str);
 			}
 		}
-		if(area[this_area[which_tower]].tower[this_tower[which_tower]].v)drawImage(scr,img.back,560,0,1240,640,80,80,255);
-		else drawImage(scr,img.back,560,0,1240,560,80,80,255);
+		if(area[this_area[which_tower]].tower[this_tower[which_tower]].v)drawImage(scr,img.back,560,0,1240,160,80,80,255);
+		else drawImage(scr,img.back,560,0,1240,80,80,80,255);
 		if(((count/20)%4)!=3){
 			for(int i=0 ; i<8 ; i++){
 				if(((area[this_area[which_tower]].tower[this_tower[which_tower]].bias>>i)&1)==1){
-					drawImage(scr,img.back,480,0,600+i*80,560+((count/20)%4)*80,80,80,255);
+					drawImage(scr,img.back,480,0,600+i*80,80+((count/20)%4)*80,80,80,255);
 				}
 			}
 		}
@@ -1258,12 +1258,12 @@ void drawMiyazakiMuseum(SDL_Surface* scr){
 	for(int i=0 ; i<14 ; i++){
 		if((i==7 && !gd.bought[15]) || (i==9 && !gd.bought[16]) || (i==6 && !gd.bought[6])
 		   || (i==10 && !gd.bought[9]) || (i==11 && !gd.bought[11]) || (i==8 && !gd.bought[12])){
-			drawImage(scr,img.back,i*200-shopScrX,400,0,480,80,80,255);
+			drawImage(scr,img.back,i*200-shopScrX,400,0,0,80,80,255);
 		}
-		else drawImage(scr,img.back,i*200-shopScrX,400,80+i*80,480,80,80,255);
+		else drawImage(scr,img.back,i*200-shopScrX,400,80+i*80,0,80,80,255);
 	}
 	if(phase==SEOI_HA){
-		drawImage(scr,img.back,1400-shopScrX,380,1200+(count/30)*80,480,80,80,255);
+		drawImage(scr,img.back,1400-shopScrX,380,1200+(count/30)*80,0,80,80,255);
 	}
 	drawImage(scr,img.chr,(int)shopPlayerX-shopScrX-14,420,shopPlayerDir*30,0,30,60,255);
 	if(key.left || key.right)drawImage(scr,img.chr,(int)shopPlayerX-shopScrX-26,440,((count/5)%2)*60,110,60,60,255);
@@ -1272,7 +1272,7 @@ void drawMiyazakiMuseum(SDL_Surface* scr){
 		drawText2(scr,0,0,str,(int)strlen(str));
 	}
 	if(phase==GUIDE_TOP){
-		drawImage(scr,img.back,300,240,0,660,240,120,255);
+		drawImage(scr,img.back,300,240,0,180,240,120,255);
 		sprintf_s(str,"%4d/%4d",collection,animedex_num);
 		drawText2(scr,380,300,str);
 	}
