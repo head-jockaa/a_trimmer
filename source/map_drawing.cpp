@@ -83,7 +83,7 @@ void createMap(){
 	for(int i=0 ; i<=map.mapW/300 ; i++)for(int j=0 ; j<=map.mapH/300 ; j++){
 		if(SDL_BYTEORDER==SDL_BIG_ENDIAN)img=SDL_CreateRGBSurface(SDL_SWSURFACE, 300, 300, 32, 0xff000000,0x00ff0000,0x0000ff00,0);
 		else img=SDL_CreateRGBSurface(SDL_SWSURFACE, 300, 300, 32, 0x000000ff,0x0000ff00,0x00ff0000,0);
-		sprintf_s(str,"file/img/map/map%d%d.gif",j,i);
+		sprintf_s(str,"file/img/map/map%d%d.png",j,i);
 		img2=IMG_Load(str);
 		if(img2){
 			drawSurface(img,img2,0,0,0,0,300,300,255);
