@@ -26,6 +26,7 @@ CREATE TABLE `area` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `rural` (
+  `id` int(11) NOT NULL,
   `filepath` text NOT NULL,
   `tv1` int(11) DEFAULT NULL,
   `tv2` int(11) DEFAULT NULL,
@@ -37,7 +38,7 @@ CREATE TABLE `rural` (
   `tv8` int(11) DEFAULT NULL,
   `tv9` int(11) DEFAULT NULL,
   `tv10` int(11) DEFAULT NULL,
-  PRIMARY KEY (`filepath`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `areacode` (
@@ -104,7 +105,7 @@ CREATE TABLE `station` (
   `abbr` varchar(100) DEFAULT NULL,
   `name_jp` varchar(100) NOT NULL,
   `name_en` varchar(100) NOT NULL,
-  `message` text,
+  `message_jp` text,
   `message_en` text,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
