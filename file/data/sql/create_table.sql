@@ -121,15 +121,14 @@ CREATE TABLE `timeslot` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `timetable` (
-  `id` int(11) NOT NULL,
   `season_id` int(11) NOT NULL,
-  `anime_id` int(11) NOT NULL,
   `station_id` int(11) NOT NULL,
   `week` tinyint(3) unsigned NOT NULL,
   `hour` tinyint(3) unsigned NOT NULL,
   `minute` tinyint(3) unsigned NOT NULL,
   `time` smallint(6) NOT NULL,
-  PRIMARY KEY (`id`)
+  `anime_id` int(11) NOT NULL,
+  PRIMARY KEY (`season_id`,`station_id`,`week`,`hour`,`minute`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `tower` (

@@ -103,7 +103,8 @@ void getRGB(Uint32 px, Uint8 *r, Uint8 *g, Uint8 *b);
 
 extern SDL_Rect scr;
 extern bool run,setSMR,map_loaded,*animebook,ABGR;
-extern Uint8 mode,mode2,which_season,phase,kick_count,pauseGame;
+extern int which_season;
+extern Uint8 mode,mode2,phase,kick_count,pauseGame;
 extern int stas,entries,prgs,animedex_num,collection,areas,towers,mounts,towns,season_num,clear_num,mapW,mapH;
 extern int count,bg_count,face[1000],start;
 extern int talk_kulisap,face_kulisap,ant_dir;
