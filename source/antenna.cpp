@@ -924,7 +924,7 @@ void ConvenientRod::makeList(){
 	}
 }
 void ConvenientRod::make_st_list(){
-	st_list.setMenu(0,20,20,8,st_num);
+	st_list.setMenu(0,30,20,8,st_num);
 	for(int i=0 ; i<st_num ; i++){
 		st_list.stack(sta[st[i]].name);
 		st_list.inputMark(i,sta[st[i]].mark);
@@ -1117,17 +1117,17 @@ void SuperHandyRod::makeList2(){
 	}
 }
 void SuperHandyRod::make_st_list2(){
-	st_list.setMenu(0,20,30,8,st_num);
+	st_list.setMenu(0,30,30,8,st_num);
 	String s;
 	for(int i=0 ; i<st_num ; i++){
-		sprintf_s(s.str[0],"%s",sta[st[i]].name.str[0]);
+		sprintf_s(s.str[0],"%s",sta[st[i]].abbr.str[0]);
 		sprintf_s(s.str[0],"%s:%d:%s",s.str[0],(int)area[ar[i]].tower[tw[i]].rcv[chn[i]],area[ar[i]].tower[tw[i]].name.str[0]);
-		sprintf_s(s.str[1],"%s",sta[st[i]].name.str[1]);
+		sprintf_s(s.str[1],"%s",sta[st[i]].abbr.str[1]);
 		sprintf_s(s.str[1],"%s:%d:%s",s.str[1],area[ar[i]].tower[tw[i]].rcv[chn[i]],area[ar[i]].tower[tw[i]].name.str[1]);
 		st_list.stack(s);
 		st_list.inputMark(i,sta[st[i]].mark);
 		if(rc[i]-mr[i]<100)st_list.gray[i]=true;
-	}
+    }
 	st_list.setViewMode(VISIBLE);
 }
 

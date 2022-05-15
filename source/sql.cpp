@@ -637,6 +637,10 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
 			if(get)mount[index].city=intValue;
 		}
+		else if(strcmp(cname,"note")==0) {
+			sqlPointer+=fetchSqlString(c,str);
+			if(get)strcpy_s(mount[index].note.str[0],str);
+		}
 	}
 	else if(strcmp(tname,"satellite")==0) {
 		if(strcmp(cname,"physical")==0) {
@@ -695,6 +699,11 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 		else if(strcmp(cname,"message_en")==0) {
 			sqlPointer+=fetchSqlString(c,str);
 			if(get)strcpy_s(sta[index].talk.str[1],str);
+		}
+		else if(strcmp(cname,"abbr")==0) {
+			sqlPointer+=fetchSqlString(c,str);
+			if(get)strcpy_s(sta[index].abbr.str[0],str);
+			if(get)strcpy_s(sta[index].abbr.str[1],str);
 		}
 	}
 	else if(strcmp(tname,"timeslot")==0) {

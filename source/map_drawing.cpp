@@ -10,7 +10,9 @@ void fillRect_except_yellow(Image *img, int x, int y, int w, int h, int r, int g
 
 void Map::set(){
 	rgb=new Image(mapW,mapH);
-	shore=new Uint8[mapW*mapH];
+	shore=new Uint16[mapW*mapH];
+	road=new Uint16[mapW*mapH];
+	foothill=new Uint16[mapW*mapH];
 	h=new Uint16*[mapW];
 	type=new Uint8[mapW*mapH];
 	slope=new Uint16*[mapW];
@@ -25,6 +27,14 @@ void Map::set(){
 		type[j*mapW+i]=0;slope[i][j]=0;smr[i][j]=0;
 	}
 	getImage(rpg,"file/img/rpgchip.png",BLACK);
+}
+
+void Map::addType(int i, Uint8 t){
+	if(t<16){
+		type[i] = (type[i]&240) + t;
+	}else{
+		type[i] = t + (type[i]&15);
+	}
 }
 
 void Map::setRPGchip(int bright){
@@ -56,6 +66,7 @@ void Map::reset(){
 	}
 	freeImage(rgb);
 	delete [] shore;
+	delete [] road;
 	delete [] h;
 	delete [] type;
 	delete [] slope;
@@ -104,7 +115,7 @@ void createMap(){
 			}
 			else if(col.r==255 && col.g==255 && col.b==255){
 				map.rgb->RGB[(j*300+b)*map.mapW+(i*300+a)]=setRGB(255,255,255);
-				map.type[(j*300+b)*map.mapW+(i*300+a)]=ROAD;
+				map.addType((j*300+b)*map.mapW+(i*300+a), ROAD);
 			}
 			else{
 				map.rgb->RGB[(j*300+b)*map.mapW+(i*300+a)]=setRGB(255,255,0);
@@ -122,11 +133,15 @@ void createMap(){
 		else map.c[i+j*640]=a;
 	}
 
-	createMap_shore();
 	createMap_mount();
+	createMap_shore();
 	createMap_town();
 	createMap_tower();
 	map_loaded=true;
+}
+
+bool isSlope(Uint8 type){
+	return (type&15)==SLOPE_45 || (type&15)==SLOPE_135 || (type&15)==SLOPE_225 || (type&15)==SLOPE_315 || (type&15)==SUMMIT;
 }
 
 void createMap_shore(){
@@ -136,17 +151,53 @@ void createMap_shore(){
 		}
 	}
 	for(int a=0 ; a<map.mapW ; a++)for(int b=0 ; b<map.mapH ; b++){
+		map.shore[b*map.mapW+a]=0;
+		map.road[b*map.mapW+a]=0;
+		map.foothill[b*map.mapW+a]=0;
 		if(map.type[b*map.mapW+a]==SEA){
-			map.shore[b*map.mapW+a]=0;
-			if(a>0 && b>0 && map.type[a-1+(b-1)*map.mapW]!=SEA && map.type[a-1+(b-1)*map.mapW]!=SHORE)map.shore[b*map.mapW+a]++;
-			if(b>0 && map.type[a+(b-1)*map.mapW]!=SEA && map.type[a+(b-1)*map.mapW]!=SHORE)map.shore[b*map.mapW+a]+=2;
-			if(a<map.mapW-1 && b>0 && map.type[a+1+(b-1)*map.mapW]!=SEA && map.type[a+1+(b-1)*map.mapW]!=SHORE)map.shore[b*map.mapW+a]+=4;
-			if(a>0 && map.type[a-1+b*map.mapW]!=SEA && map.type[a-1+b*map.mapW]!=SHORE)map.shore[b*map.mapW+a]+=8;
-			if(a<map.mapW-1 && map.type[a+1+b*map.mapW]!=SEA && map.type[a+1+b*map.mapW]!=SHORE)map.shore[b*map.mapW+a]+=16;
-			if(a>0 && b<map.mapH-1 && map.type[a-1+(b+1)*map.mapW]!=SEA && map.type[a-1+(b+1)*map.mapW]!=SHORE)map.shore[b*map.mapW+a]+=32;
-			if(b<map.mapH-1 && map.type[a+(b+1)*map.mapW]!=SEA && map.type[a+(b+1)*map.mapW]!=SHORE)map.shore[b*map.mapW+a]+=64;
-			if(a<map.mapW-1 && b<map.mapH-1 && map.type[a+1+(b+1)*map.mapW]!=SEA && map.type[a+1+(b+1)*map.mapW]!=SHORE)map.shore[b*map.mapW+a]+=128;
-			if(map.shore[b*map.mapW+a]!=0)map.type[b*map.mapW+a]=SHORE;
+			if(a>0 && b>0 && map.type[a-1+(b-1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]++;
+			if(b>0 && map.type[a+(b-1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=2;
+			if(a<map.mapW-1 && b>0 && map.type[a+1+(b-1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=4;
+			if(a>0 && map.type[a-1+b*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=8;
+			if(a<map.mapW-1 && map.type[a+1+b*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=16;
+			if(a>0 && b<map.mapH-1 && map.type[a-1+(b+1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=32;
+			if(b<map.mapH-1 && map.type[a+(b+1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=64;
+			if(a<map.mapW-1 && b<map.mapH-1 && map.type[a+1+(b+1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=128;
+		}
+		else {
+			if(a>0 && b>0 && map.type[a-1+b*map.mapW]==SEA && map.type[a+(b-1)*map.mapW]==SEA && map.type[a-1+(b-1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]++;
+			if(a<map.mapW-1 && b>0 && map.type[a+(b-1)*map.mapW]==SEA && map.type[a+1+b*map.mapW]==SEA && map.type[a+1+(b-1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=2;
+			if(a>0 && b<map.mapH-1 && map.type[a-1+b*map.mapW]==SEA && map.type[a+(b+1)*map.mapW]==SEA && map.type[a-1+(b+1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=4;
+			if(a<map.mapW-1 && b<map.mapH-1 && map.type[a+(b+1)*map.mapW]==SEA && map.type[a+1+b*map.mapW]==SEA && map.type[a+1+(b+1)*map.mapW]!=SEA)map.shore[b*map.mapW+a]+=8;
+			if(map.shore[b*map.mapW+a]!=0)map.shore[b*map.mapW+a]+=256;
+		}
+
+		if(isSlope(map.type[b*map.mapW+a])){
+			if(a>0 && b>0 && !isSlope(map.type[a-1+(b-1)*map.mapW]))map.foothill[b*map.mapW+a]++;
+			if(b>0 && !isSlope(map.type[a+(b-1)*map.mapW]))map.foothill[b*map.mapW+a]+=2;
+			if(a<map.mapW-1 && b>0 && !isSlope(map.type[a+1+(b-1)*map.mapW]))map.foothill[b*map.mapW+a]+=4;
+			if(a>0 && !isSlope(map.type[a-1+b*map.mapW]))map.foothill[b*map.mapW+a]+=8;
+			if(a<map.mapW-1 && !isSlope(map.type[a+1+b*map.mapW]))map.foothill[b*map.mapW+a]+=16;
+			if(a>0 && b<map.mapH-1 && !isSlope(map.type[a-1+(b+1)*map.mapW]))map.foothill[b*map.mapW+a]+=32;
+			if(b<map.mapH-1 && !isSlope(map.type[a+(b+1)*map.mapW]))map.foothill[b*map.mapW+a]+=64;
+			if(a<map.mapW-1 && b<map.mapH-1 && !isSlope(map.type[a+1+(b+1)*map.mapW]))map.foothill[b*map.mapW+a]+=128;
+		}
+
+		if(map.type[b*map.mapW+a]&ROAD){
+			if(a>0 && b>0 && !(map.type[a-1+(b-1)*map.mapW]&ROAD))map.road[b*map.mapW+a]++;
+			if(b>0 && !(map.type[a+(b-1)*map.mapW]&ROAD))map.road[b*map.mapW+a]+=2;
+			if(a<map.mapW-1 && b>0 && !(map.type[a+1+(b-1)*map.mapW]&ROAD))map.road[b*map.mapW+a]+=4;
+			if(a>0 && !(map.type[a-1+b*map.mapW]&ROAD))map.road[b*map.mapW+a]+=8;
+			if(a<map.mapW-1 && !(map.type[a+1+b*map.mapW]&ROAD))map.road[b*map.mapW+a]+=16;
+			if(a>0 && b<map.mapH-1 && !(map.type[a-1+(b+1)*map.mapW]&ROAD))map.road[b*map.mapW+a]+=32;
+			if(b<map.mapH-1 && !(map.type[a+(b+1)*map.mapW]&ROAD))map.road[b*map.mapW+a]+=64;
+			if(a<map.mapW-1 && b<map.mapH-1 && !(map.type[a+1+(b+1)*map.mapW]&ROAD))map.road[b*map.mapW+a]+=128;
+		} else {
+			if(a>0 && b>0 && map.type[a-1+b*map.mapW]&ROAD && map.type[a+(b-1)*map.mapW]&ROAD && !(map.type[a-1+(b-1)*map.mapW]&ROAD))map.road[b*map.mapW+a]++;
+			if(a<map.mapW-1 && b>0 && map.type[a+(b-1)*map.mapW]&ROAD && map.type[a+1+b*map.mapW]&ROAD && !(map.type[a+1+(b-1)*map.mapW]&ROAD))map.road[b*map.mapW+a]+=2;
+			if(a>0 && b<map.mapH-1 && map.type[a-1+b*map.mapW]&ROAD && map.type[a+(b+1)*map.mapW]&ROAD && !(map.type[a-1+(b+1)*map.mapW]&ROAD))map.road[b*map.mapW+a]+=4;
+			if(a<map.mapW-1 && b<map.mapH-1 && map.type[a+(b+1)*map.mapW]&ROAD && map.type[a+1+b*map.mapW]&ROAD && !(map.type[a+1+(b+1)*map.mapW]&ROAD))map.road[b*map.mapW+a]+=8;
+			if(map.road[b*map.mapW+a]!=0)map.road[b*map.mapW+a]+=256;
 		}
 	}
 }
@@ -154,7 +205,7 @@ void createMap_shore(){
 void createMap_color(int bright){
 	SDL_Color col;
 	for(int a=0 ; a<map.mapW ; a++)for(int b=0 ; b<map.mapH ; b++){
-		if(map.type[b*map.mapW+a]!=SEA && map.type[b*map.mapW+a]!=SHORE){
+		if(map.type[b*map.mapW+a]!=SEA){
 			if(map.h[a][b]<500){
 				col.r=128-map.h[a][b]*128/500;
 				col.g=128;
@@ -197,32 +248,32 @@ void createMap_mount(){
 	for(int m=0 ; m<mounts ; m++){
 		X=mt->x;Y=mt->y;
 		if(mt->volcano)map.volcanoNum++;
-		for(int a=-mt->range ; a<mt->range ; a++)for(int b=-mt->range ; b<mt->range; b++){
+		for(int a=1-mt->range ; a<mt->range ; a++)for(int b=1-mt->range ; b<mt->range; b++){
 			if(X+a<0 || X+a>=map.mapW || Y+b<0 || Y+b>=map.mapH || sqrt(1.0*a*a+b*b)>mt->range){
 				continue;
 			}
-			if(map.type[(Y+b)*map.mapW+(X+a)]==SEA || map.type[(Y+b)*map.mapW+(X+a)]==SHORE){
+			if(map.type[(Y+b)*map.mapW+(X+a)]==SEA){
 				continue;
 			}
 			if(mt->city){
-				map.type[(Y+b)*map.mapW+(X+a)]=CITY;
+				map.addType((Y+b)*map.mapW+(X+a), CITY);
 			}else{
 				double sl=1.0*(mt->h-mt->slope)/mt->range;
 				if( map.h[X+a][Y+b]<mt->h-(int)(sl*sqrt(1.0*a*a+b*b)) ){
 					map.h[X+a][Y+b]=mt->h-(int)(sl*sqrt(1.0*a*a+b*b));
-					if(map.type[(Y+b)*map.mapW+(X+a)]!=ROAD && map.type[(Y+b)*map.mapW+(X+a)]!=CITY){
+					if((map.type[(Y+b)*map.mapW+(X+a)]&15)!=CITY){
 						map.slope[X+a][Y+b]=(int)sl;
 						if(a==0 && b==0){
-							if(mt->volcano)map.type[(Y+b)*map.mapW+(X+a)]=VOLCANO;
-							else map.type[(Y+b)*map.mapW+(X+a)]=SUMMIT;
+							if(mt->volcano)map.addType((Y+b)*map.mapW+(X+a), VOLCANO);
+							else map.addType((Y+b)*map.mapW+(X+a), SUMMIT);
 						}
-						else if((int)sl<10){
-							map.type[(Y+b)*map.mapW+(X+a)]=NULL;
+					    else if(mt->h == mt->slope){
+							map.addType((Y+b)*map.mapW+(X+a), NULL);
 						}else{
-							if(a>0 && b<=0)map.type[(Y+b)*map.mapW+(X+a)]=SLOPE_45;
-							else if(a<=0 && b<0)map.type[(Y+b)*map.mapW+(X+a)]=SLOPE_135;
-							else if(a<0 && b>=0)map.type[(Y+b)*map.mapW+(X+a)]=SLOPE_225;
-							else if(a>=0 && b>0)map.type[(Y+b)*map.mapW+(X+a)]=SLOPE_315;
+							if(a>0 && b<=0)map.addType((Y+b)*map.mapW+(X+a), SLOPE_45);
+							else if(a<=0 && b<0)map.addType((Y+b)*map.mapW+(X+a), SLOPE_135);
+							else if(a<0 && b>=0)map.addType((Y+b)*map.mapW+(X+a), SLOPE_225);
+							else if(a>=0 && b>0)map.addType((Y+b)*map.mapW+(X+a), SLOPE_315);
 						}
 					}
 				}
@@ -251,11 +302,7 @@ void createMap_town(){
 				tw++;
 				continue;
 			}
-			if(map.type[tw->x+tw->y*map.mapW]==CITY){
-				map.type[tw->x+tw->y*map.mapW]=TOWN_IN_CITY;
-			}else{
-				map.type[tw->x+tw->y*map.mapW]=TOWN;
-			}
+			map.type[(tw->x)+(tw->y)*map.mapW]+=TOWN;
 			tw++;
 		}
 		ar++;
@@ -272,7 +319,7 @@ void createMap_tower(){
 				tw++;
 				continue;
 			}
-			map.type[tw->x+tw->y*map.mapW]=NULL;
+			map.type[tw->x+tw->y*map.mapW]&=15;
 			tw++;
 		}
 		ar++;
@@ -287,9 +334,15 @@ void createMap_tower(){
 				continue;
 			}
 			if(tw->remove){tw++;continue;}
-			if((tw->kw)>=1)map.type[tw->x+tw->y*map.mapW]=TOWER_L;
-			else if((tw->kw)>=0.1 && map.type[tw->x+tw->y*map.mapW]!=TOWER_L)map.type[tw->x+tw->y*map.mapW]=TOWER_M;
-			else if(map.type[tw->x+tw->y*map.mapW]!=TOWER_L && map.type[tw->x+tw->y*map.mapW]!=TOWER_M)map.type[tw->x+tw->y*map.mapW]=TOWER_S;
+			if((tw->kw)>=1){
+				map.type[tw->x+tw->y*map.mapW] = TOWER_L + (map.type[tw->x+tw->y*map.mapW]&15);
+			}
+			else if((tw->kw)>=0.1 && (map.type[tw->x+tw->y*map.mapW]&240)!=TOWER_L){
+				map.type[tw->x+tw->y*map.mapW] = TOWER_M + (map.type[tw->x+tw->y*map.mapW]&15);
+			}
+			else if((map.type[tw->x+tw->y*map.mapW]&240)!=TOWER_L && (map.type[tw->x+tw->y*map.mapW]&240)!=TOWER_M){
+				map.type[tw->x+tw->y*map.mapW] = TOWER_S + (map.type[tw->x+tw->y*map.mapW]&15);
+			}
 			tw++;
 		}
 		ar++;
@@ -416,77 +469,251 @@ void fillRect_except_yellow(Image *img, int x, int y, int w, int h, int r, int g
 	}
 }
 
-void drawRPGchip(Uint8* px, Uint16 scrWidth, int x, int y, int mag, int n, int p, int bright){
-	Uint8 *rgb=(Uint8*)map.rpg->RGB;
+void drawRPGchip(Uint8* px, Uint8* alpha, Uint16 scrWidth, int x, int y, int mag, Uint8 type, int s, int r, int f, int p, int bright){
+	Uint8 *rpg=(Uint8*)map.rpg->RGB;
 	Uint8 *pos=(Uint8*)map.rgb->RGB;
+	Uint8 *grass=(Uint8*)map.rpg->RGB;
+	Uint8 *slope=(Uint8*)map.rpg->RGB;
+	Uint8 *shore=(Uint8*)map.rpg->RGB;
+	Uint8 *road=(Uint8*)map.rpg->RGB;
+	Uint8 *foothill=(Uint8*)map.rpg->RGB;
 	pos+=p*4;
+
 	int w=mag,h=mag,x2=0,y2=0;
+	int grassX=0,grassY=0,slopeX=0,slopeY=0;
+	int shoreX=0,shoreY=0,roadX=0,roadY=0,foothillX=0,foothillY=0;
+
+	int n=9,n2=4;
+
+	switch(type&15){
+		case SLOPE_45: n2=0;break;
+		case SLOPE_135: n2=1;break;
+		case SLOPE_225: n2=2;break;
+		case SLOPE_315: n2=3;break;
+		case VOLCANO: n=2;break;
+		case CITY: n=6;break;
+		case SEA: n=8;break;
+		case SUMMIT: n=1;break;
+		default: break; // FLAT LAND
+	}
+	switch(type&112){
+		case TOWN: n=7;break;
+		case TOWER_S: n=3;break;
+		case TOWER_M: n=4;break;
+		case TOWER_L: n=5;break;
+		default: break;
+	}
+	if(type&ROAD && (n==1||n==6||n==9))n=0;
 
 	if(mag==8){
 		x2=(n%8)*8;
 		y2=(n/8)*8;
+		grassX=32;grassY=280;
+		slopeX=n2*8;slopeY=280;
+		shoreX=(s%8)*8;shoreY=8+(s/8)*8;
+		roadX=(r%8)*8;roadY=8+(r/8)*8;
+		foothillX=(f%8)*8;foothillY=8+(f/8)*8;
 	}
 	else if(mag==16){
 		x2=64+(n%8)*16;
 		y2=(n/8)*16;
+		grassX=128;grassY=560;
+		slopeX=64+n2*16;slopeY=560;
+		shoreX=64+(s%8)*16;shoreY=16+(s/8)*16;
+		roadX=64+(r%8)*16;roadY=16+(r/8)*16;
+		foothillX=64+(f%8)*16;foothillY=16+(f/8)*16;
 	}
 	else if(mag==32){
 		x2=192+(n%8)*32;
 		y2=(n/8)*32;
+		grassX=320;grassY=1120;
+		slopeX=192+n2*32;slopeY=1120;
+		shoreX=192+(s%8)*32;shoreY=32+(s/8)*32;
+		roadX=192+(r%8)*32;roadY=32+(r/8)*32;
+		foothillX=192+(f%8)*32;foothillY=32+(f/8)*32;
 	}
 
-	if(x<0){x2-=x;w+=x;x=0;}
-	if(y<0){y2-=y;h+=y;y=0;}
+	if(x<0){x2-=x;grassX-=x;slopeX-=x;shoreX-=x;roadX-=x;foothillX-=x;w+=x;x=0;}
+	if(y<0){y2-=y;grassY-=y;slopeY-=y;shoreY-=y;roadY-=y;foothillY-=y;h+=y;y=0;}
 	if(x+w>640)w=640-x;
 	if(y+h>480)h=480-y;
 	px=px+(y*scrWidth+x)*4;
 	Uint16 px_skip=(scrWidth-w)*4;
-	rgb=rgb+(y2*(map.rpg->w)+x2)*4;
-	Uint16 rgb_skip=((map.rpg->w)-w)*4;
+	alpha=alpha+(y*scrWidth+x);
+	Uint16 alpha_skip=scrWidth-w;
+	rpg=rpg+(y2*(map.rpg->w)+x2)*4;
+	Uint16 rpg_skip=((map.rpg->w)-w)*4;
+	grass=grass+(grassY*(map.rpg->w)+grassX)*4;
+	slope=slope+(slopeY*(map.rpg->w)+slopeX)*4;
+	shore=shore+(shoreY*(map.rpg->w)+shoreX)*4;
+	road=road+(roadY*(map.rpg->w)+roadX)*4;
+	foothill=foothill+(foothillY*(map.rpg->w)+foothillX)*4;
 
-	int shore_bright=1000;
-	if(gd.hour<=gd.sunrise_hour-1 || gd.hour>=gd.sunset_hour+2)shore_bright=200;
-	if(gd.hour==gd.sunrise_hour || gd.hour==gd.sunset_hour+1)shore_bright=bright;
+	Uint8 dark=255-255*bright/1000;
+	Uint8 dark2=dark;
+	if(gd.hour>=gd.sunset_hour+2)dark2=255-255*200/1000;
 
-	Uint8 R,G,B;
-	Uint8 R2=*pos, G2=*(pos+1), B2=*(pos+2);
-	Uint8 A=255-255*bright/1000;
-	Uint8 A2=255-255*shore_bright/1000;
+	Uint8 chipR,chipG,chipB;
+
+	// Land Color by Height
+	Uint8 hightColorB=*pos;
+	Uint8 hightColorG=*(pos+1);
+	Uint8 hightColorR=*(pos+2);
+
+	// Land Color by Height (slight dark)
+	Uint8 hightColorR2,hightColorG2,hightColorB2;
+	if(gd.hour<=gd.sunrise_hour-1 || gd.hour>=gd.sunset_hour+2){
+		hightColorB2=hightColorB<6 ? 0 : hightColorB-6;
+		hightColorG2=hightColorG<6 ? 0 : hightColorG-6;
+		hightColorR2=hightColorR<6 ? 0 : hightColorR-6;
+	}else{
+		hightColorB2=hightColorB<30 ? 0 : hightColorB-30;
+		hightColorG2=hightColorG<30 ? 0 : hightColorG-30;
+		hightColorR2=hightColorR<30 ? 0 : hightColorR-30;
+	}
+
+	Uint8 slopeChipR,slopeChipG,slopeChipB;
+
+	Uint8 sandR=128,sandG=128,sandB=0;
+	Uint8 grassR=98,grassG=98,grassB=0;
+	Uint8 roadR=192,roadG=192,roadB=0;
 
 	for(int j=0 ; j<h ; j++){
 		for(int i=0 ; i<w ; i++){
-			B=*rgb;
-			G=*(rgb+1);
-			R=*(rgb+2);
-			if(n>=8 && R==255 && G==255 && B==255){
-				*px=0;px++;
-				*px=128+(128*(-A2)>>8);px++;
-				*px=128+(128*(-A2)>>8);px++;
-				px++;rgb+=4;
+			if(n==8 && *shore==0){
+				*alpha=0;
 			}
-			else if(n==7 && ((R==255 && G==255 && B<=10) || (R==51 && G==51 && B<=10))){
-				*px=0;px++;
-				*px=255;px++;
-				*px=255;px++;
-				px++;rgb+=4;
+			else if(s>=256 && *shore==0){
+				*alpha=0;
 			}
-			else if(R!=0 || G!=0 || B!=0){
-				*px=*rgb+(*rgb*(-A)>>8);px++;rgb++;
-				*px=*rgb+(*rgb*(-A)>>8);px++;rgb++;
-				*px=*rgb+(*rgb*(-A)>>8);px++;rgb++;
-				px++;rgb++;
+			else{
+				*alpha=255;
 			}
-			else if(n==1){
-				*px=B2+(B2*(-A)>>8);px++;
-				*px=G2+(G2*(-A)>>8);px++;
-				*px=R2+(R2*(-A)>>8);px++;
-				px++;rgb+=4;
+			alpha++;
+
+			if(n<=7){
+				chipB=*rpg;
+				chipG=*(rpg+1);
+				chipR=*(rpg+2);
 			}else{
-				px+=4;rgb+=4;
+				chipB=0;chipG=0;chipR=0;
+			}
+
+			slopeChipB=*slope;
+			slopeChipG=*(slope+1);
+			slopeChipR=*(slope+2);
+
+			if((n==0 || (n!=0 && r!=0)) && chipR==0 && chipG==0 && chipB==0 && *road==0){
+				// Road
+				*px=roadB+(roadB*(-dark2)>>8);px++;
+				*px=roadG+(roadG*(-dark2)>>8);px++;
+				*px=roadR+(roadR*(-dark2)>>8);px++;
+				px++;rpg+=4;grass+=4;slope+=4;shore+=4;road+=4;foothill+=4;
+			}
+			else if(n==8){
+				//SEA
+				if(*shore!=0){
+					if(*grass==0){
+						*px=sandB+(sandB*(-dark2)>>8);px++;
+						*px=sandG+(sandG*(-dark2)>>8);px++;
+						*px=sandR+(sandR*(-dark2)>>8);px++;
+					} else {
+						*px=grassB+(grassB*(-dark2)>>8);px++;
+						*px=grassG+(grassG*(-dark2)>>8);px++;
+						*px=grassR+(grassR*(-dark2)>>8);px++;
+					}
+					px++;
+				}else{
+					px+=4;
+				}
+				rpg+=4;grass+=4;slope+=4;shore+=4;road+=4;foothill+=4;
+			}
+			else if(n==7 && ((chipR==255 && chipG==255 && chipB<=10) || (chipR==51 && chipG==51 && chipB<=10))){
+				//Window of House
+				*px=0;px++;
+				*px=255;px++;
+				*px=255;px++;
+				px++;rpg+=4;grass+=4;slope+=4;shore+=4;road+=4;foothill+=4;
+			}
+			else if(n==2 && chipR==0 && chipG==0 && chipB==0){
+				//Volcano
+				if(*grass==0){
+					*px=sandB+(sandB*(-dark2)>>8);px++;
+					*px=sandG+(sandG*(-dark2)>>8);px++;
+					*px=sandR+(sandR*(-dark2)>>8);px++;
+				} else {
+					*px=grassB+(grassB*(-dark2)>>8);px++;
+					*px=grassG+(grassG*(-dark2)>>8);px++;
+					*px=grassR+(grassR*(-dark2)>>8);px++;
+				}
+				px++;rpg+=4;grass+=4;slope+=4;shore+=4;road+=4;foothill+=4;
+			}
+			else if(n2>=0 && n2<=3 && chipR==0 && chipG==0 && chipB==0){
+				//Slope
+				if(*foothill==0){
+					if(slopeChipR!=0 || slopeChipG!=0 || slopeChipB!=0){
+						*px=hightColorB2+(hightColorB2*(-dark)>>8);px++;
+						*px=hightColorG2+(hightColorG2*(-dark)>>8);px++;
+						*px=hightColorR2+(hightColorR2*(-dark)>>8);px++;
+					} else {
+						*px=hightColorB+(hightColorB*(-dark)>>8);px++;
+						*px=hightColorG+(hightColorG*(-dark)>>8);px++;
+						*px=hightColorR+(hightColorR*(-dark)>>8);px++;
+					}
+				}else{
+					if(*grass==0){
+						*px=sandB+(sandB*(-dark2)>>8);px++;
+						*px=sandG+(sandG*(-dark2)>>8);px++;
+						*px=sandR+(sandR*(-dark2)>>8);px++;
+					} else {
+						*px=grassB+(grassB*(-dark2)>>8);px++;
+						*px=grassG+(grassG*(-dark2)>>8);px++;
+						*px=grassR+(grassR*(-dark2)>>8);px++;
+					}
+				}
+				px++;rpg+=4;grass+=4;slope+=4;shore+=4;road+=4;foothill+=4;
+			}
+			else if(n2==4 && chipR==0 && chipG==0 && chipB==0){
+				if(n==1){
+					// SUMMIT
+					if(*grass==0){
+						*px=hightColorB+(hightColorB*(-dark)>>8);px++;
+						*px=hightColorG+(hightColorG*(-dark)>>8);px++;
+						*px=hightColorR+(hightColorR*(-dark)>>8);px++;
+					} else {
+						*px=hightColorB2+(hightColorB2*(-dark)>>8);px++;
+						*px=hightColorG2+(hightColorG2*(-dark)>>8);px++;
+						*px=hightColorR2+(hightColorR2*(-dark)>>8);px++;
+					}
+				}else{
+					// Flat Land
+					if(*grass==0){
+						*px=sandB+(sandB*(-dark2)>>8);px++;
+						*px=sandG+(sandG*(-dark2)>>8);px++;
+						*px=sandR+(sandR*(-dark2)>>8);px++;
+					} else {
+						*px=grassB+(grassB*(-dark2)>>8);px++;
+						*px=grassG+(grassG*(-dark2)>>8);px++;
+						*px=grassR+(grassR*(-dark2)>>8);px++;
+					}
+				}
+				px++;rpg+=4;grass+=4;slope+=4;shore+=4;road+=4;foothill+=4;
+			}
+			else{
+				*px=*rpg+(*rpg*(-dark)>>8);px++;rpg++;
+				*px=*rpg+(*rpg*(-dark)>>8);px++;rpg++;
+				*px=*rpg+(*rpg*(-dark)>>8);px++;rpg++;
+				px++;rpg++;grass+=4;slope+=4;shore+=4;road+=4;foothill+=4;
 			}
 		}
 		px+=px_skip;
-		rgb+=rgb_skip;
+		alpha+=alpha_skip;
+		rpg+=rpg_skip;
+		grass+=rpg_skip;
+		slope+=rpg_skip;
+		shore+=rpg_skip;
+		road+=rpg_skip;
+		foothill+=rpg_skip;
 	}
 }
 
@@ -498,43 +725,31 @@ void drawGround(int scrX, int scrY, int x2, int y2, int w, int h, int bright){
 	if(x2+w>640)w=640-x2;
 	if(y2+h>480)h=480-y2;
 
-	Uint8* px;
-	Uint16 scrWidth;
-	px=(Uint8*)map.bufferGround->RGB;
-	scrWidth=640;
-
 	if(MAGNIFY>=8){
+		Uint8 *px, *alpha;
+		Uint16 scrWidth;
+		px=(Uint8*)map.bufferGround->RGB;
+		alpha=(Uint8*)map.bufferGround->A;
+		scrWidth=640;
 		int a,X,Y;
 		for(int j=0 ; j<=h/MAGNIFY+1 ; j++)for(int i=0 ; i<=w/MAGNIFY+1 ; i++){
 			a=(scrY/MAGNIFY+j)*map.mapW+(scrX/MAGNIFY+i);
 			X=x2+i*MAGNIFY-scrX%MAGNIFY;
 			Y=y2+j*MAGNIFY-scrY%MAGNIFY;
-			switch(map.type[a]){
-				case NULL:
-				case ROAD: drawRPGchip(px,scrWidth,X,Y,MAGNIFY,0,a,bright);break;
-				case VOLCANO: drawRPGchip(px,scrWidth,X,Y,MAGNIFY,2,a,bright);break;
-				case TOWER_S: drawRPGchip(px,scrWidth,X,Y,MAGNIFY,3,a,bright);break;
-				case TOWER_M: drawRPGchip(px,scrWidth,X,Y,MAGNIFY,4,a,bright);break;
-				case TOWER_L: drawRPGchip(px,scrWidth,X,Y,MAGNIFY,5,a,bright);break;
-				case CITY: drawRPGchip(px,scrWidth,X,Y,MAGNIFY,6,a,bright);break;
-				case TOWN:
-				case TOWN_IN_CITY: drawRPGchip(px,scrWidth,X,Y,MAGNIFY,7,a,bright);break;
-				case SHORE:
-					fillRect(map.bufferGround,X,Y,MAGNIFY,MAGNIFY,0,0,0,255);
-					drawRPGchip(px,scrWidth,X,Y,MAGNIFY,8+map.shore[a],a,bright);break;
-				case SEA: fillRect(map.bufferGround,X,Y,MAGNIFY,MAGNIFY,0,0,0,255);break;
-				default: drawRPGchip(px,scrWidth,X,Y,MAGNIFY,1,a,bright);break;
-			}
+			drawRPGchip(px,alpha,scrWidth,X,Y,MAGNIFY,map.type[a],map.shore[a],map.road[a],map.foothill[a],a,bright);
 		}
 	}else{
-		Uint8 *px,*rgb,*a;
-		Uint8 *px_start,*rgb_start,*a_start;
-		Uint16 px_skip,rgb_skip,a_skip;
+		Uint8 *px,*alpha,*rgb,*a;
+		Uint8 *rgb_start,*a_start;
+		Uint16 px_skip,alpha_skip,rgb_skip,a_skip;
 		Uint16 rgb_back,a_back;
 		Uint8 countX=0, countY=0;
 		px=(Uint8*)map.bufferGround->RGB;
+		alpha=(Uint8*)map.bufferGround->A;
 		px_skip=(640-w)*4;
+		alpha_skip=640-w;
 		px+=(y2*640+x2)*4;
+		alpha+=y2*640+x2;
 		rgb=(Uint8*)map.rgb->RGB;
 		a=map.rgb->A;
 		rgb_skip=map.mapW*4;
@@ -543,7 +758,6 @@ void drawGround(int scrX, int scrY, int x2, int y2, int w, int h, int bright){
 		a_back=w/MAGNIFY;
 		rgb+=(scrY/MAGNIFY*map.mapW+scrX/MAGNIFY)*4;
 		a+=scrY/MAGNIFY*map.mapW+scrX/MAGNIFY;
-		px_start=px;
 		rgb_start=rgb;
 		a_start=a;
 
@@ -563,6 +777,7 @@ void drawGround(int scrX, int scrY, int x2, int y2, int w, int h, int bright){
 						*px=0;px++;rgb++;
 						px++;rgb++;
 					}
+					*alpha=*a;alpha++;
 					countX++;
 					if(countX==MAGNIFY){
 						a++;
@@ -572,6 +787,7 @@ void drawGround(int scrX, int scrY, int x2, int y2, int w, int h, int bright){
 					}
 				}
 				px+=px_skip;
+				alpha+=alpha_skip;
 				countY++;
 				if(countY==MAGNIFY){
 					rgb_start+=rgb_skip;a_start+=a_skip;
@@ -595,6 +811,7 @@ void drawGround(int scrX, int scrY, int x2, int y2, int w, int h, int bright){
 						*px=0;px++;rgb++;
 						px++;rgb++;
 					}
+					*alpha=*a;alpha++;
 					countX++;
 					if(countX==MAGNIFY){
 						a++;
@@ -604,6 +821,7 @@ void drawGround(int scrX, int scrY, int x2, int y2, int w, int h, int bright){
 					}
 				}
 				px+=px_skip;
+				alpha+=alpha_skip;
 				countY++;
 				if(countY==MAGNIFY){
 					rgb_start+=rgb_skip;a_start+=a_skip;
@@ -613,8 +831,6 @@ void drawGround(int scrX, int scrY, int x2, int y2, int w, int h, int bright){
 			}
 		}
 	}
-
-	setAlpha(map.bufferGround,0,0,0);
 }
 
 void drawCityLight(int scrX, int scrY, int x2, int y2, int w, int h){
@@ -632,7 +848,7 @@ void drawCityLight(int scrX, int scrY, int x2, int y2, int w, int h){
 
 	if(MAGNIFY<=4){
 		Uint8 *px,*city,*blue;
-		Uint8 *px_start,*city_start,*blue_start;
+		Uint8 *city_start,*blue_start;
 		Uint16 px_skip,city_skip,blue_skip;
 		Uint16 city_back;
 		Uint8 countX=0, countY=0;
@@ -646,7 +862,6 @@ void drawCityLight(int scrX, int scrY, int x2, int y2, int w, int h){
 		city_back=w/MAGNIFY;
 		city+=scrY/MAGNIFY*map.mapW+scrX/MAGNIFY;
 		blue+=y2*640+x2;
-		px_start=px;
 		city_start=city;
 		blue_start=blue;
 		countY=scrY%MAGNIFY;
@@ -654,7 +869,7 @@ void drawCityLight(int scrX, int scrY, int x2, int y2, int w, int h){
 		for(int j=0 ; j<h ; j++){
 			countX=scrX%MAGNIFY;
 			for(int i=0 ; i<w ; i++){
-				if(*city==CITY || *city==TOWN_IN_CITY){
+				if((*city&15)==CITY){
 					*px=*blue;
 				}else{
 					*px=0;
@@ -758,15 +973,15 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		if(MAGNIFY==1){
 			for(int j=-1 ; j<h+1 ; j++){
 				for(int i=-1 ; i<w+1 ; i++){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerCircleSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,false,setRGB(255,255,0));
 						drawTowerCircleSpot(px2,px_down,x2+i,y2+j,x2,y2,w,h,false,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,2,setRGB(255,0,0));
 						drawTowerSquareSpot(px2,px_down,x2+i,y2+j,x2,y2,w,h,2,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,1,setRGB(0,0,255));
 						drawTowerSquareSpot(px2,px_down,x2+i,y2+j,x2,y2,w,h,1,setRGB(255,255,255));
 					}
@@ -778,15 +993,15 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		else if(MAGNIFY==2 || MAGNIFY==4){
 			for(int j=-MAGNIFY-shiftY ; j<h+MAGNIFY-shiftY ; j+=MAGNIFY){
 				for(int i=-MAGNIFY-shiftX ; i<w+MAGNIFY-shiftX ; i+=MAGNIFY){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerCircleSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,true,setRGB(255,255,0));
 						drawTowerCircleSpot(px2,px_down,x2+i,y2+j,x2,y2,w,h,true,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,3,setRGB(255,0,0));
 						drawTowerSquareSpot(px2,px_down,x2+i,y2+j,x2,y2,w,h,3,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,2,setRGB(0,0,255));
 						drawTowerSquareSpot(px2,px_down,x2+i,y2+j,x2,y2,w,h,2,setRGB(255,255,255));
 					}
@@ -798,15 +1013,15 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		else if(MAGNIFY==8){
 			for(int j=-8-shiftY ; j<h+8-shiftY ; j+=8){
 				for(int i=-8-shiftX ; i<w+8-shiftX ; i+=8){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerSquareSpot(px,px_down,x2+i+3,y2+j,x2,y2,w,h,2,setRGB(255,255,0));
 						drawTowerSquareSpot(px2,px_down,x2+i+3,y2+j,x2,y2,w,h,2,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i+3,y2+j,x2,y2,w,h,1,setRGB(255,0,0));
 						drawTowerSquareSpot(px2,px_down,x2+i+3,y2+j,x2,y2,w,h,1,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i+3,y2+j,x2,y2,w,h,1,setRGB(0,0,255));
 						drawTowerSquareSpot(px2,px_down,x2+i+3,y2+j,x2,y2,w,h,1,setRGB(255,255,255));
 					}
@@ -818,15 +1033,15 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		else if(MAGNIFY==16){
 			for(int j=-16-shiftY ; j<h+16-shiftY ; j+=16){
 				for(int i=-16-shiftX ; i<w+16-shiftX ; i+=16){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerSquareSpot(px,px_down,x2+i+6,y2+j,x2,y2,w,h,4,setRGB(255,255,0));
 						drawTowerSquareSpot(px2,px_down,x2+i+6,y2+j,x2,y2,w,h,4,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i+6,y2+j,x2,y2,w,h,2,setRGB(255,0,0));
 						drawTowerSquareSpot(px2,px_down,x2+i+6,y2+j,x2,y2,w,h,2,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i+6,y2+j,x2,y2,w,h,2,setRGB(0,0,255));
 						drawTowerSquareSpot(px2,px_down,x2+i+6,y2+j,x2,y2,w,h,2,setRGB(255,255,255));
 					}
@@ -838,15 +1053,15 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		else if(MAGNIFY==32){
 			for(int j=-32-shiftY ; j<h+32-shiftY ; j+=32){
 				for(int i=-32-shiftX ; i<w+32-shiftX ; i+=32){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerSquareSpot(px,px_down,x2+i+12,y2+j,x2,y2,w,h,8,setRGB(255,255,0));
 						drawTowerSquareSpot(px2,px_down,x2+i+12,y2+j,x2,y2,w,h,8,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i+12,y2+j,x2,y2,w,h,4,setRGB(255,0,0));
 						drawTowerSquareSpot(px2,px_down,x2+i+12,y2+j,x2,y2,w,h,4,setRGB(255,255,255));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i+12,y2+j,x2,y2,w,h,4,setRGB(0,0,255));
 						drawTowerSquareSpot(px2,px_down,x2+i+12,y2+j,x2,y2,w,h,4,setRGB(255,255,255));
 					}
@@ -860,13 +1075,13 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		if(MAGNIFY==1){
 			for(int j=-1 ; j<h+1 ; j++){
 				for(int i=-1 ; i<w+1 ; i++){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerCircleSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,false,setRGB(255,255,col));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,2,setRGB(255,col,col));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,1,setRGB(col,col,255));
 					}
 					px_tp++;
@@ -877,13 +1092,13 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		else if(MAGNIFY==2 || MAGNIFY==4){
 			for(int j=-MAGNIFY-shiftY ; j<h+MAGNIFY-shiftY ; j+=MAGNIFY){
 				for(int i=-MAGNIFY-shiftX ; i<w+MAGNIFY-shiftX ; i+=MAGNIFY){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerCircleSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,true,setRGB(255,255,col));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,3,setRGB(255,col,col));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i,y2+j,x2,y2,w,h,2,setRGB(col,col,255));
 					}
 					px_tp++;
@@ -894,13 +1109,13 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		else if(MAGNIFY==8){
 			for(int j=-8-shiftY ; j<h+8-shiftY ; j+=8){
 				for(int i=-8-shiftX ; i<w+8-shiftX ; i+=8){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerSquareSpot(px,px_down,x2+i+3,y2+j,x2,y2,w,h,2,setRGB(255,255,col));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i+3,y2+j,x2,y2,w,h,1,setRGB(255,col,col));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i+3,y2+j,x2,y2,w,h,1,setRGB(col,col,255));
 					}
 					px_tp++;
@@ -911,13 +1126,13 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		else if(MAGNIFY==16){
 			for(int j=-16-shiftY ; j<h+16-shiftY ; j+=16){
 				for(int i=-16-shiftX ; i<w+16-shiftX ; i+=16){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerSquareSpot(px,px_down,x2+i+6,y2+j,x2,y2,w,h,4,setRGB(255,255,col));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i+6,y2+j,x2,y2,w,h,2,setRGB(255,col,col));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i+6,y2+j,x2,y2,w,h,2,setRGB(col,col,255));
 					}
 					px_tp++;
@@ -928,13 +1143,13 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 		else if(MAGNIFY==32){
 			for(int j=-32-shiftY ; j<h+32-shiftY ; j+=32){
 				for(int i=-32-shiftX ; i<w+32-shiftX ; i+=32){
-					if(*px_tp==TOWER_L){
+					if((*px_tp&240)==TOWER_L){
 						drawTowerSquareSpot(px,px_down,x2+i+12,y2+j,x2,y2,w,h,8,setRGB(255,255,col));
 					}
-					else if(*px_tp==TOWER_M){
+					else if((*px_tp&240)==TOWER_M){
 						drawTowerSquareSpot(px,px_down,x2+i+12,y2+j,x2,y2,w,h,4,setRGB(255,col,col));
 					}
-					else if(*px_tp==TOWER_S){
+					else if((*px_tp&240)==TOWER_S){
 						drawTowerSquareSpot(px,px_down,x2+i+12,y2+j,x2,y2,w,h,4,setRGB(col,col,255));
 					}
 					px_tp++;
@@ -945,7 +1160,6 @@ void drawTowerSpot(SDL_Surface *scr, int x, int y, int x2, int y2, int w, int h,
 	}
 
 	if(buf){
-		setAlpha(map.bufferGround,0,0,0);
 		setAlpha(map.bufferTowerSpot,0,0,0);
 		map.bufferedTowerSpotImage=true;
 	}else{
@@ -1103,7 +1317,6 @@ void drawVolcano(SDL_Surface *scr, int scrX, int scrY, int x, int y, int w, int 
 SDL_Color getSkyColor(int h, int m){
 	SDL_Color col;
 	col.r=0;col.g=0;col.b=0;
-	int a=h*60+m;
 	if(h<=gd.sunrise_hour-2){
 		col.r=0;
 		col.g=0;
@@ -1112,48 +1325,48 @@ SDL_Color getSkyColor(int h, int m){
 	else if(h==gd.sunrise_hour-1){
 		col.r=0;
 		col.g=0;
-		col.b=(a-(gd.sunrise_hour-1)*60)*2;
+		col.b=m*128/60;
 	}
 	else if(h==gd.sunrise_hour){
-		col.r=(int)((a-gd.sunrise_hour*60)*3.2);
-		col.g=(a-gd.sunrise_hour*60)*2;
+		col.r=m*192/60;
+		col.g=m*128/60;
 		col.b=128;
 	}
-	else if(h<=8){
+	else if(h<=gd.sunrise_hour+2){
 		col.r=192;
-		col.g=128+(a-(gd.sunrise_hour+1)*60)/(8-gd.sunrise_hour);
-		col.b=128+(a-(gd.sunrise_hour+1)*60)/(8-gd.sunrise_hour);
+		col.g=128+((h-gd.sunrise_hour-1)*60+m)*64/120;
+		col.b=128+((h-gd.sunrise_hour-1)*60+m)*64/120;
 	}
 	else if(h<=11){
 		col.r=192;
 		col.g=192;
-		col.b=192+(int)((a-540)/2.8);
+		col.b=192+((h-gd.sunrise_hour-3)*60+m)*64/((9-gd.sunrise_hour)*60);
 	}
 	else if(h<=gd.sunset_hour-3){
-		col.r=192-(int)(((a-720)/2.8)/(gd.sunset_hour-14));
-		col.g=192-(int)(((a-720)/2.8)/(gd.sunset_hour-14));
+		col.r=192-((h-12)*60+m)*64/((gd.sunset_hour-14)*60);
+		col.g=192-((h-12)*60+m)*64/((gd.sunset_hour-14)*60);
 		col.b=255;
 	}
-	else if(h<=gd.sunset_hour-2){
-		col.r=128+((a-(gd.sunset_hour-2)*60)*2);
+	else if(h==gd.sunset_hour-2){
+		col.r=128+m*127/60;
 		col.g=128;
-		col.b=255-(int)((a-(gd.sunset_hour-2)*60)*4.2);
+		col.b=255-m*255/60;
 	}
 	else if(h==gd.sunset_hour-1){
 		if(m<30){
 			col.r=255;
-			col.g=128-(a-(gd.sunset_hour-1)*60)*2;
-			col.b=(int)((a-(gd.sunset_hour-1)*60)*8.5);
+			col.g=128-m*64/30;
+			col.b=m*128/30;
 		}else{
-			col.r=255-(int)((a-(gd.sunset_hour-1)*60-30)*6.4);
+			col.r=255-(m-30)*191/30;
 			col.g=64;
-			col.b=128+(a-(gd.sunset_hour-1)*60-30)*4;
+			col.b=128+(m-30)*127/30;
 		}
 	}
 	else if(h==gd.sunset_hour){
-		col.r=64-(a-(gd.sunset_hour*60));
-		col.g=64-(a-(gd.sunset_hour*60));
-		col.b=255-(int)((a-gd.sunset_hour*60)*4.2);
+		col.r=64-m*64/60;
+		col.g=64-m*64/60;
+		col.b=255-m*255/60;
 	}
 	else if(h<=27){
 		col.r=0;
@@ -1220,17 +1433,17 @@ void make3dview(double X, double Y, int D){
 		bool flat=false,road=false;
 
 		if(map.h[i][j]==0){
-			if(map.type[j*map.mapW+i]==SEA || map.type[j*map.mapW+i]==SHORE){
+			if(map.type[j*map.mapW+i]==SEA){
 				col=setRGB(0,0,0);
 			}
 			else col=setRGB((int)(128*aa),(int)(128*aa),0);
 			flat=true;
 		}
-		else if(map.type[j*map.mapW+i]==SEA || map.type[j*map.mapW+i]==SHORE){
+		else if(map.type[j*map.mapW+i]==SEA){
 			col=setRGB(0,0,0);
 			flat=true;road=true;
 		}
-		else if(map.type[j*map.mapW+i]==ROAD){
+		else if(map.type[j*map.mapW+i]&ROAD){
 			col=setRGB((int)(128*aa),(int)(128*aa),0);
 			flat=true;road=true;
 		}else{

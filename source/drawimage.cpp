@@ -1020,51 +1020,61 @@ void illuminateImage_x(Image* scr, Image* ima, int x, int y, double mag, int x2,
 
 void slideImage(Image* scr, int slideX, int slideY){
 	Uint32 *px=scr->RGB;
+	Uint8 *alpha=scr->A;
 	if(slideX<0 && slideY<0){
 		int shiftX=abs(slideX);
 		int shiftY=abs((scr->w)*slideY);
 		for(int j=0 ; j<(scr->h)+slideY ; j++){
 			for(int i=0 ; i<(scr->w)-shiftX ; i++){
 				*px=*(px+shiftX+shiftY);
-				px++;
+				*alpha=*(alpha+shiftX+shiftY);
+				px++;alpha++;
 			}
-			px+=shiftX;
+			px+=shiftX;alpha+=shiftX;
 		}
 	}
 	else if(slideX>=0 && slideY>=0){
 		int shiftX=slideX;
 		int shiftY=(scr->w)*slideY;
 		px+=(scr->w)*(scr->h)-1;
+		alpha+=(scr->w)*(scr->h)-1;
 		for(int j=0 ; j<(scr->h)-slideY ; j++){
 			for(int i=0 ; i<(scr->w)-shiftX ; i++){
 				*px=*(px-shiftX-shiftY);
-				px--;
+				*alpha=*(alpha-shiftX-shiftY);
+				px--;alpha--;
 			}
-			px-=shiftX;
+			px-=shiftX;alpha-=shiftX;
 		}
 	}
 	else if(slideX<0 && slideY>=0){
 		int shiftX=abs(slideX);
 		int shiftY=(scr->w)*slideY;
 		px+=(scr->w)*((scr->h)-1);
+		alpha+=(scr->w)*((scr->h)-1);
 		for(int j=0 ; j<(scr->h)-slideY ; j++){
 			for(int i=0 ; i<(scr->w)-shiftX ; i++){
 				*px=*(px+shiftX-shiftY);
-				px++;
+				*alpha=*(alpha+shiftX-shiftY);
+				px++;alpha++;
 			}
 			px-=((scr->w)-shiftX)+(scr->w);
+			alpha-=((scr->w)-shiftX)+(scr->w);
 		}
 	}
 	else if(slideX>=0 && slideY<0){
 		int shiftX=slideX;
 		int shiftY=abs((scr->w)*slideY);
 		px+=(scr->w)-1;
+		alpha+=(scr->w)-1;
 		for(int j=0 ; j<(scr->h)+slideY ; j++){
 			for(int i=0 ; i<(scr->w)-shiftX ; i++){
 				*px=*(px-shiftX+shiftY);
-				px--;
+				*alpha=*(alpha-shiftX+shiftY);
+				px--;alpha--;
 			}
 			px+=((scr->w)-shiftX+1)+((scr->w)-1);
+			alpha+=((scr->w)-shiftX+1)+((scr->w)-1);
 		}
 	}
 }

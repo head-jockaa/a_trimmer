@@ -772,6 +772,7 @@ void keyAntenna(){
 		}
 		else phase=PLAYING;
 	}
+
 	if(ant->ant_mode==TROLL){
 		double preX=gd.x,preY=gd.y;
 		walking();
@@ -1698,7 +1699,7 @@ void drawFishup(SDL_Surface* scr){
 		if(a<0)a=0;
 		drawImage(scr,img.chr,480+a*8,200,460,60,140,100,255);
 		sprintf_s(str,"+%d",gd.gradeup);
-		drawText(scr,510+a*8,240,str);
+		drawText2(scr,510+a*8,240,str);
 	}
 }
 

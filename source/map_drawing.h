@@ -10,14 +10,12 @@
 #define SUMMIT 5
 #define VOLCANO 6
 #define CITY 7
-#define TOWN 8
-#define TOWN_IN_CITY 9
-#define ROAD 10
-#define SEA 11
-#define SHORE 12
-#define TOWER_S 13
-#define TOWER_M 14
-#define TOWER_L 15
+#define SEA 8
+#define TOWN 16
+#define TOWER_S 32
+#define TOWER_M 48
+#define TOWER_L 64
+#define ROAD 128
 #define BEYOND 30000
 
 void createMap();
@@ -44,8 +42,8 @@ struct Map{
 	int mapW,mapH,ruralW,ruralH,volcanoNum;
 	int airMinX,airMaxX,airMinY,airMaxY,volX,volY,volW,volH;
 	Uint8 rural_size;
-	Uint8 **rural, *shore, *type, **smr;
-	Uint16 **h, **slope;
+	Uint8 **rural, *type, **smr;
+	Uint16 **h, **slope, *shore, *road, *foothill;
 	Uint16 *volcano, *volcano_id, *volcanoX, *volcanoY, *rural_rate;
 	Image *rgb;
 	bool moved, bufferedTowerSpotImage, bufferedVolcanoImage;
@@ -54,6 +52,7 @@ struct Map{
 	Uint8 c[640*480];
 	Uint16 z[640*480];
 	void set();
+	void addType(int i, Uint8 t);
 	void reset();
 	void setRPGchip(int bright);
 };

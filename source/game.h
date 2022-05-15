@@ -46,9 +46,9 @@
 #define PLUGGED_IN 2
 #define MISPLACED 3
 
-#define HAZIA_DEALER_COMES 52
-#define COUNTING_HAZIA 53
-#define FINISH_COUNTING_HAZIA 54
+#define HAZIA_DEALER_COMES 51
+#define COUNTING_HAZIA 52
+#define FINISH_COUNTING_HAZIA 53
 
 void setAntenna();
 void initGame();

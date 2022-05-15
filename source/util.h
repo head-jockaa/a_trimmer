@@ -123,8 +123,8 @@ extern size_t fsize;
 extern int BSchannel[12],BSstation[12];
 
 struct String{
-	char str[2][200];
-	bool head[2][200];
+	char str[2][1000];
+	bool head[2][1000];
 };
 extern String text[1000];
 char* toChar(String s);
@@ -194,7 +194,7 @@ public:
 };
 
 struct Station{
-	String name,talk;
+	String name,abbr,talk;
 	Uint16 mark;
 	int id,ontv;
 };
@@ -246,6 +246,7 @@ struct Mount{
 	Uint8 range, city;
 	int id;
 	bool volcano;
+	String note;
 	float dis, dir, dir1, dir2;
 };
 
