@@ -61,7 +61,9 @@ CREATE TABLE `areacode` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `cartoon` (
-  `id` int(11) NOT NULL,
+  `category` int(11) NOT NULL,
+  `year` int(11) NOT NULL,
+  `serial` int(11) NOT NULL,
   `name_jp` varchar(200) NOT NULL,
   `name_en` varchar(200) NOT NULL,
   `search_query` text NOT NULL,
@@ -127,7 +129,9 @@ CREATE TABLE `timetable` (
   `hour` tinyint(3) unsigned NOT NULL,
   `minute` tinyint(3) unsigned NOT NULL,
   `time` smallint(6) NOT NULL,
-  `anime_id` int(11) NOT NULL,
+  `category` int(11) NOT NULL,
+  `year` int(11) NOT NULL,
+  `serial` int(11) NOT NULL,
   PRIMARY KEY (`season_id`,`station_id`,`week`,`hour`,`minute`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
