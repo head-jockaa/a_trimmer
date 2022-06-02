@@ -306,13 +306,24 @@ void load_animebook(){
 	}
 	animedex_num=allofworks_num;
 	collection=0;
-	animebook=new bool[animedex_num];
+	animebook=new Animebook[animedex_num];
+	for(int i=0 ; i<animedex_num ; i++){
+		animebook[i].category = allofworks[i].category;
+		animebook[i].year = allofworks[i].year;
+		animebook[i].serial = allofworks[i].serial;
+	}
 	if(!loadFile("save/animebook.dat")){
-		for(int i=0 ; i<animedex_num ; i++)animebook[i]=false;
+		for(int i=0 ; i<animedex_num ; i++)animebook[i].got=false;
 	}else{
-		for(int i=0 ; i<animedex_num ; i++){
-			animebook[i]=(fstr[i/8]>>i%8 & 1);
-			if(animebook[i])collection++;
+		for(int i=0 ; i<fsize ; i+=6){
+			if(i+6>fsize)break;
+			for(int a=0 ; a<animedex_num ; a++) {
+				if(to16int(fstr[i],fstr[i+1])==animebook[a].category && to16int(fstr[i+2],fstr[i+3])==animebook[a].year && to16int(fstr[i+4],fstr[i+5])==animebook[a].serial) {
+					animebook[a].got=true;
+					collection++;
+					break;
+				}
+			}
 		}
 	}
 }
@@ -320,26 +331,21 @@ void load_animebook(){
 void save_animebook(){
 	if(!animedex_num)load_animebook();
 	if(fsize)delete [] fstr;
-	fsize=animedex_num/8+1;
+	fsize=animedex_num*6;
 	fstr=new char[fsize];
 	FILE* hFile;
-	int a=0;
+	int fcount=0;
 
-	for(int i=0 ; i<(int)fsize ; i++)fstr[i]=0;
 	for(int i=0 ; i<animedex_num ; i++){
-		if(i%8==0)a+=animebook[i];
-		else if(i%8==1)a+=animebook[i]*2;
-		else if(i%8==2)a+=animebook[i]*4;
-		else if(i%8==3)a+=animebook[i]*8;
-		else if(i%8==4)a+=animebook[i]*16;
-		else if(i%8==5)a+=animebook[i]*32;
-		else if(i%8==6)a+=animebook[i]*64;
-		else if(i%8==7)a+=animebook[i]*128;
-		if(i%8==7 || i==animedex_num-1){
-			fstr[i/8]=a;
-			a=0;
-		}
+		if(!animebook[i].got)continue;
+		fstr[fcount]=animebook[i].category%256;fcount++;
+		fstr[fcount]=animebook[i].category/256;fcount++;
+		fstr[fcount]=animebook[i].year%256;fcount++;
+		fstr[fcount]=animebook[i].year/256;fcount++;
+		fstr[fcount]=animebook[i].serial%256;fcount++;
+		fstr[fcount]=animebook[i].serial/256;fcount++;
 	}
+	fsize=fcount;
 
 	fopen_s(&hFile, "save/animebook.dat", "wb");
 	fwrite(fstr, sizeof(fstr[0]), fsize/sizeof(fstr[0]), hFile);
@@ -355,8 +361,11 @@ void load_entries(int n){
 	sprintf_s(str,"file/data/sql/timetable%d.sql",n);
 	readSQL(str);
 	for(int i=0 ; i<prgs ; i++){
+		prg[i].cartoon_index = getCartoonById(prg[i].category,prg[i].year,prg[i].serial,allofworks,allofworks_num);
 		allofworks[prg[i].cartoon_index].exist=true;
 	}
+
+	// reset
 	if(entries){
 		for(int i=0 ; i<entries ; i++){
 			if(entry[i].prg_num){
@@ -366,6 +375,7 @@ void load_entries(int n){
 		delete [] entry;
 	}
 	entries=0;
+
 	for(int i=0 ; i<allofworks_num ; i++){
 		if(allofworks[i].exist){
 			entries++;
@@ -383,30 +393,38 @@ void load_entries(int n){
 			entry[entries].b=allofworks[i].b;
 			entry[entries].exist=true;
 			entry[entries].prg_num=0;
-			entry[entries].cartoon_id=allofworks[i].cartoon_id;
-			entry[entries].cartoon_index=allofworks[i].cartoon_index;
+			entry[entries].category=allofworks[i].category;
+			entry[entries].year=allofworks[i].year;
+			entry[entries].serial=allofworks[i].serial;
+			entry[entries].animebook_index=i;
 			for(int j=0 ; j<600 ; j++){
 				entry[entries].query[j]=allofworks[i].query[j];
 			}
 			entries++;
 		}
 	}
-	int *prg_count=new int[allofworks_num];
-	for(int i=0 ; i<allofworks_num ; i++){
+	delete [] allofworks;
+	allofworks_num=0;
+	for(int i=0 ; i<prgs ; i++){
+		prg[i].cartoon_index = getCartoonById(prg[i].category,prg[i].year,prg[i].serial,entry,entries);
+	}
+
+	int *prg_count=new int[entries];
+	for(int i=0 ; i<entries ; i++){
 		prg_count[i]=0;
 	}
 	for(int i=0 ; i<prgs ; i++){
 		prg_count[prg[i].cartoon_index]++;
 	}
 	for(int i=0 ; i<entries ; i++){
-		if(prg_count[entry[i].cartoon_index]){
-			entry[i].prg = new Program[prg_count[entry[i].cartoon_index]];
+		if(prg_count[i]){
+			entry[i].prg = new Program[prg_count[i]];
 		}
 	}
 	for(int i=0 ; i<entries ; i++){
 		entry[i].prg_num=0;
 		for(int j=0 ; j<prgs ; j++){
-			if(prg[j].cartoon_index==entry[i].cartoon_index){
+			if(prg[j].cartoon_index==i){
 				int n2=entry[i].prg_num;
 				entry[i].prg[n2].week=prg[j].week;
 				entry[i].prg[n2].hour=prg[j].hour;
@@ -418,9 +436,7 @@ void load_entries(int n){
 		}
 	}
 	delete [] prg;
-	delete [] allofworks;
 	prgs=0;
-	allofworks=0;
 
 	readSQL("file/data/sql/timeslot.sql");
 }
@@ -753,13 +769,23 @@ void save_index(){
 
 void save_record(int n){
 	if(fsize)delete [] fstr;
-	fsize=entries*19+1;
+	fsize=entries*25+4;
 	fstr=new char[fsize];
 	FILE* hFile;
 	size_t fc=0;
 
-	fstr[fc]=which_season;fc++;
+	fstr[fc]=which_season%256;fc++;
+	fstr[fc]=(which_season/256)%256;fc++;
+	fstr[fc]=(which_season/256/256)%256;fc++;
+	fstr[fc]=(which_season/256/256/256)%256;fc++;
 	for(int i=0 ; i<entries ; i++){
+		if(fishbox.getData(i,12)==0)continue;
+		fstr[fc]=entry[i].category%256;fc++;
+		fstr[fc]=entry[i].category/256;fc++;
+		fstr[fc]=entry[i].year%256;fc++;
+		fstr[fc]=entry[i].year/256;fc++;
+		fstr[fc]=entry[i].serial%256;fc++;
+		fstr[fc]=entry[i].serial/256;fc++;
 		fstr[fc]=fishbox.getData(i,0)%256;fc++;
 		fstr[fc]=fishbox.getData(i,0)/256;fc++;
 		fstr[fc]=fishbox.getData(i,1)%256;fc++;
@@ -791,28 +817,35 @@ void load_record(int n){
 	size_t fc=0;
 	sprintf_s(str,"save/record%d.dat",n);
 	loadFile(str);
-	which_season=fstr[fc];fc++;
+	which_season=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
 	load_entries(which_season);
 	fishbox.initFishBox(entries);
 	sprintf_s(str,"save/record%d.dat",n);
 	loadFile(str);
 	gd.score=0;
 	fc=1;
+
+	int category,year,serial,index;
 	for(int i=0 ; i<entries ; i++){
 		if(fc>=fsize)break;
-		fishbox.setData(i,0,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,1,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,2,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,3,fstr[fc]);fc++;
-		fishbox.setData(i,4,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,5,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,6,fstr[fc]);fc++;
-		fishbox.setData(i,7,fstr[fc]);fc++;
-		fishbox.setData(i,8,fstr[fc]);fc++;
-		fishbox.setData(i,9,fstr[fc]);fc++;
-		fishbox.setData(i,10,fstr[fc]);fc++;
-		fishbox.setData(i,11,fstr[fc]);fc++;
-		fishbox.setData(i,12,to16int(fstr[fc],fstr[fc+1]));
+		category = to16int(fstr[fc],fstr[fc+1]);
+		year = to16int(fstr[fc+2],fstr[fc+3]);
+		serial = to16int(fstr[fc+4],fstr[fc+5]);
+		index = getCartoonById(category,year,serial,entry,entries);
+		fc+=6;
+		fishbox.setData(index,0,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,1,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,2,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,3,fstr[fc]);fc++;
+		fishbox.setData(index,4,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,5,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,6,fstr[fc]);fc++;
+		fishbox.setData(index,7,fstr[fc]);fc++;
+		fishbox.setData(index,8,fstr[fc]);fc++;
+		fishbox.setData(index,9,fstr[fc]);fc++;
+		fishbox.setData(index,10,fstr[fc]);fc++;
+		fishbox.setData(index,11,fstr[fc]);fc++;
+		fishbox.setData(index,12,to16int(fstr[fc],fstr[fc+1]));
 		gd.score+=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 	}
 	load_towers();
@@ -822,15 +855,21 @@ void load_record(int n){
 
 void save_game(int n){
 	if(fsize)delete [] fstr;
-	fsize=entries*43+19;
+	fsize=entries*57+22;
 	fstr=new char[fsize];
 	FILE* hFile;
 	size_t fc=0;
-	int today_num=0;
+	int got_num=0, today_num=0;
 
-	fstr[fc]=which_season;fc++;
-	fstr[fc]=entries%256;fc++;
-	fstr[fc]=entries/256;fc++;
+	fstr[fc]=which_season%256;fc++;
+	fstr[fc]=(which_season/256)%256;fc++;
+	fstr[fc]=(which_season/256/256)%256;fc++;
+	fstr[fc]=(which_season/256/256/256)%256;fc++;
+	for(int i=0 ; i<entries ; i++){
+		if(fishbox.getData(i,12)!=0)got_num++;
+	}
+	fstr[fc]=got_num%256;fc++;
+	fstr[fc]=got_num/256;fc++;
 	fstr[fc]=gd.week;fc++;
 	fstr[fc]=gd.hour;fc++;
 	fstr[fc]=gd.minute;fc++;
@@ -852,6 +891,13 @@ void save_game(int n){
 	fstr[fc]=(int)md.manekiY%256;fc++;
 	fstr[fc]=(int)md.manekiY/256;fc++;
 	for(int i=0 ; i<entries ; i++){
+		if(fishbox.getData(i,12)==0)continue;
+		fstr[fc]=entry[i].category%256;fc++;
+		fstr[fc]=entry[i].category/256;fc++;
+		fstr[fc]=entry[i].year%256;fc++;
+		fstr[fc]=entry[i].year/256;fc++;
+		fstr[fc]=entry[i].serial%256;fc++;
+		fstr[fc]=entry[i].serial/256;fc++;
 		fstr[fc]=fishbox.getData(i,0)%256;fc++;
 		fstr[fc]=fishbox.getData(i,0)/256;fc++;
 		fstr[fc]=fishbox.getData(i,1)%256;fc++;
@@ -873,13 +919,21 @@ void save_game(int n){
 		fstr[fc]=fishbox.getData(i,12)/256;fc++;
 	}
 	for(int i=0 ; i<today_num ; i++){
-		fstr[fc]=fishbox.today[i]%256;fc++;
-		fstr[fc]=fishbox.today[i]/256;fc++;
+		fstr[fc]=entry[ fishbox.today[i] ].category%256;fc++;
+		fstr[fc]=entry[ fishbox.today[i] ].category/256;fc++;
+		fstr[fc]=entry[ fishbox.today[i] ].year%256;fc++;
+		fstr[fc]=entry[ fishbox.today[i] ].year/256;fc++;
+		fstr[fc]=entry[ fishbox.today[i] ].serial%256;fc++;
+		fstr[fc]=entry[ fishbox.today[i] ].serial/256;fc++;
 	}
 	for(int i=0 ; i<md.fish_num ; i++){
 		fstr[fc]=md.maneki_count[i];fc++;
-		fstr[fc]=md.fish[i].which_work%256;fc++;
-		fstr[fc]=md.fish[i].which_work/256;fc++;
+		fstr[fc]=entry[ md.fish[i].which_work ].category%256;fc++;
+		fstr[fc]=entry[ md.fish[i].which_work ].category/256;fc++;
+		fstr[fc]=entry[ md.fish[i].which_work ].year%256;fc++;
+		fstr[fc]=entry[ md.fish[i].which_work ].year/256;fc++;
+		fstr[fc]=entry[ md.fish[i].which_work ].serial%256;fc++;
+		fstr[fc]=entry[ md.fish[i].which_work ].serial/256;fc++;
 		fstr[fc]=md.fish[i].x%256;fc++;
 		fstr[fc]=md.fish[i].x/256;fc++;
 		fstr[fc]=md.fish[i].y%256;fc++;
@@ -911,12 +965,12 @@ void save_game(int n){
 
 void load_game(int n){
 	size_t fc=0;
-	int a=0, today_num=0;
+	int got_num=0, today_num=0;
 
 	sprintf_s(str,"save/save%d.dat",n);
 	if(!loadFile(str))return;
-	which_season=fstr[fc];fc++;
-	a=to16int(fstr[fc],fstr[fc+1]);fc+=2;
+	which_season=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);fc+=4;
+	got_num=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 	gd.week=fstr[fc];fc++;
 	gd.hour=fstr[fc];fc++;
 	gd.minute=fstr[fc];fc++;
@@ -927,28 +981,44 @@ void load_game(int n){
 	gd.y=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 	md.manekiX=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 	md.manekiY=to16int(fstr[fc],fstr[fc+1]);fc+=2;
-	fishbox.initFishBox(a);
-	for(int i=0 ; i<a ; i++){
-		fishbox.setData(i,0,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,1,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,2,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,3,fstr[fc]);fc++;
-		fishbox.setData(i,4,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,5,to16int(fstr[fc],fstr[fc+1]));fc+=2;
-		fishbox.setData(i,6,fstr[fc]);fc++;
-		fishbox.setData(i,7,fstr[fc]);fc++;
-		fishbox.setData(i,8,fstr[fc]);fc++;
-		fishbox.setData(i,9,fstr[fc]);fc++;
-		fishbox.setData(i,10,fstr[fc]);fc++;
-		fishbox.setData(i,11,fstr[fc]);fc++;
-		fishbox.setData(i,12,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+	fishbox.initFishBox(entries);
+	int category,year,serial,index;
+	for(int i=0 ; i<got_num ; i++){
+		category = to16int(fstr[fc],fstr[fc+1]);
+		year = to16int(fstr[fc+2],fstr[fc+3]);
+		serial = to16int(fstr[fc+4],fstr[fc+5]);
+		index = getCartoonById(category,year,serial,entry,entries);
+		fc+=6;
+		fishbox.setData(index,0,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,1,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,2,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,3,fstr[fc]);fc++;
+		fishbox.setData(index,4,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,5,to16int(fstr[fc],fstr[fc+1]));fc+=2;
+		fishbox.setData(index,6,fstr[fc]);fc++;
+		fishbox.setData(index,7,fstr[fc]);fc++;
+		fishbox.setData(index,8,fstr[fc]);fc++;
+		fishbox.setData(index,9,fstr[fc]);fc++;
+		fishbox.setData(index,10,fstr[fc]);fc++;
+		fishbox.setData(index,11,fstr[fc]);fc++;
+		fishbox.setData(index,12,to16int(fstr[fc],fstr[fc+1]));fc+=2;
 	}
 	for(int i=0 ; i<today_num ; i++){
-		fishbox.today[i]=to16int(fstr[fc],fstr[fc+1]);fc+=2;
+		category = to16int(fstr[fc],fstr[fc+1]);
+		year = to16int(fstr[fc+2],fstr[fc+3]);
+		serial = to16int(fstr[fc+4],fstr[fc+5]);
+		index = getCartoonById(category,year,serial,entry,entries);
+		fc+=6;
+		fishbox.today[i]=index;
 	}
 	for(int i=0 ; i<md.fish_num ; i++){
 		md.maneki_count[i]=fstr[fc];fc++;
-		md.fish[i].which_work=to16int(fstr[fc],fstr[fc+1]);fc+=2;
+		category = to16int(fstr[fc],fstr[fc+1]);
+		year = to16int(fstr[fc+2],fstr[fc+3]);
+		serial = to16int(fstr[fc+4],fstr[fc+5]);
+		index = getCartoonById(category,year,serial,entry,entries);
+		fc+=6;
+		md.fish[i].which_work=index;
 		md.fish[i].x=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].y=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 		md.fish[i].sta=to16int(fstr[fc],fstr[fc+1]);fc+=2;
@@ -964,6 +1034,17 @@ void load_game(int n){
 		md.fish[i].score=to16int(fstr[fc],fstr[fc+1]);fc+=2;
 	}
 	fix_scrXY();
+}
+
+void load_game_head_only(int n){
+	size_t fc=0;
+	sprintf_s(str,"save/save%d.dat",n);
+	if(!loadFile(str))return;
+	which_season=to32int(fstr[fc],fstr[fc+1],fstr[fc+2],fstr[fc+3]);
+	fc+=6;
+	gd.week=fstr[fc];fc++;
+	gd.hour=fstr[fc];fc++;
+	gd.minute=fstr[fc];fc++;
 }
 
 void load_smr(int n){

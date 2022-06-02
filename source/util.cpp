@@ -1,6 +1,7 @@
 #include "util.h"
 
 Key key;
+Animebook *animebook;
 Season *season;
 Station *sta;
 Program *prg;
@@ -21,7 +22,7 @@ SDL_Rect scr;
 char weekChar[7][2][4],str[1000],str3[60],*fstr;
 size_t fsize=0;
 String text[1000];
-bool run,setSMR,map_loaded=false, *animebook, ABGR;
+bool run,setSMR,map_loaded=false, ABGR;
 double test=0;
 int stas=0,entries=0,prgs=0,animedex_num=0,collection=0,areas=0,towers=0,mounts=0,towns=0,season_num=0,clear_num=0;
 int count=0,bg_count=0,face[1000],start=0;

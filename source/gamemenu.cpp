@@ -56,6 +56,10 @@ void gotoGame(){
 	endGameMenu();
 	initGame();
 	if(c){
+		load_game_head_only(n);
+	}
+	load_entries(which_season);
+	if(c){
 		load_game(n);
 		phase=READY;
 	}
@@ -400,9 +404,9 @@ bool makeSaveMenu(int n){
 		sprintf_s(str,"save/save%d.dat",i);
 		if(!loadFile(str))break;
 		for(int k=0 ; k<2 ; k++){
-			sprintf_s(s.str[k],"%s (%s) %2d:",season[getSeasonById(fstr[0])].name.str[k],weekChar[fstr[3]][k],fstr[4]);
-			if(fstr[5]<10)sprintf_s(s.str[k],"%s0%d",s.str[k],fstr[5]);
-			else sprintf_s(s.str[k],"%s%2d",s.str[k],fstr[5]);
+			sprintf_s(s.str[k],"%s (%s) %2d:",season[getSeasonById(to32int(fstr[0],fstr[1],fstr[2],fstr[3]))].name.str[k],weekChar[fstr[6]][k],fstr[7]);
+			if(fstr[8]<10)sprintf_s(s.str[k],"%s0%d",s.str[k],fstr[8]);
+			else sprintf_s(s.str[k],"%s%2d",s.str[k],fstr[8]);
 		}
 		menu[n].stack(s);
 	}
@@ -427,11 +431,12 @@ bool makeRecordMenu(int n){
 		sc=0;
 		sprintf_s(str,"save/record%d.dat",i);
 		if(!loadFile(str))break;
-		for(int i=18 ; i<(int)fsize ; i+=19){
+		for(int i=27 ; i<(int)fsize ; i+=25){
 			sc+=to16int(fstr[i],fstr[i+1]);
 		}
-		sprintf_s(s.str[0],"%s %10d",season[getSeasonById(fstr[0])].name.str[0],sc);
-		sprintf_s(s.str[1],"%s %10d",season[getSeasonById(fstr[0])].name.str[1],sc);
+		for(int k=0 ; k<2 ; k++){
+			sprintf_s(s.str[k],"%s %10d",season[getSeasonById(to32int(fstr[0],fstr[1],fstr[2],fstr[3]))].name.str[k],sc);
+		}
 		menu[n].stack(s);
 	}
 	if(a==0)return false;

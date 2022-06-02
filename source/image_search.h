@@ -31,7 +31,7 @@ struct _TCPsocket {
 
 // Google
 #define TABLE_PREFIX "[\"GRID_STATE0"
-#define USER_AGENT "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"
+#define USER_AGENT "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36"
 
 struct ThreadManager {
 	bool halt;

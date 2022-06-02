@@ -282,7 +282,7 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 			else if(readmode==HTTPGET_DATA){
 				//start to save a html file
 				if(file==NULL){
-					sprintf_s(fn,"save/tmp_google_search_%d.html",tm.selected);
+					sprintf_s(fn,"save/tmp_google_search_%d_%d_%d.html",animebook[tm.selected].category,animebook[tm.selected].year,animebook[tm.selected].serial);
 					fopen_s(&file, fn, "w");
 					networkLog(id, fn);
 					if(!file){
@@ -300,10 +300,6 @@ bool imageSearch_https(int id, const char *host, int port, const char *request){
 					readmode=HTTPGET_END_CHUNK;
 				}
 			}
-		}
-
-		if(!file){
-			break;
 		}
 
 		if((ns.contentLength && ns.receiveLength>=ns.contentLength) || (readmode==HTTPGET_DATA && ns.chunksize==0)){
@@ -381,7 +377,7 @@ char* getPath(int id, const char *url, char *path){
 void parseHTML(int id, int n, const char *table_prefix){
 	networkLog(id, "parseHTML()");
 	char fn[100];
-	sprintf_s(fn, "save/tmp_google_search_%d.html", tm.selected);
+	sprintf_s(fn, "save/tmp_google_search_%d_%d_%d.html",animebook[tm.selected].category,animebook[tm.selected].year,animebook[tm.selected].serial);
 	thread_loadFile(fn);
 	if(!thread_fsize){
 		return;
@@ -429,15 +425,15 @@ void parseHTML(int id, int n, const char *table_prefix){
 	url = new char[size+1];
 	n=0;
 	for(size_t i=start ; i<=end ; i++){
-		if(i<=size-3 && result[i]=='%' && result[i+1]=='2' && result[i+2]=='5'){
+		if(i<=end-3 && result[i]=='%' && result[i+1]=='2' && result[i+2]=='5'){
 			url[n] = '%';
 			i+=2;
 		}
-		else if(i<=size-6 && result[i]=='\\' && result[i+1]=='u' && result[i+2]=='0' && result[i+3]=='0' && result[i+4]=='2' && result[i+5]=='6'){
+		else if(i<=end-6 && result[i]=='\\' && result[i+1]=='u' && result[i+2]=='0' && result[i+3]=='0' && result[i+4]=='2' && result[i+5]=='6'){
 			url[n] = '&';
 			i+=5;
 		}
-		else if(i<=size-6 && result[i]=='\\' && result[i+1]=='u' && result[i+2]=='0' && result[i+3]=='0' && result[i+4]=='3' && result[i+5]=='d'){
+		else if(i<=end-6 && result[i]=='\\' && result[i+1]=='u' && result[i+2]=='0' && result[i+3]=='0' && result[i+4]=='3' && result[i+5]=='d'){
 			url[n] = '=';
 			i+=5;
 		}else{
@@ -479,7 +475,7 @@ void parseHTML(int id, int n, const char *table_prefix){
 
 	strcpy_s(tm.targetURL, 1000, url);
 	FILE *hFile;
-	sprintf_s(fn,"save/tmp_url/%d.txt",tm.selected);
+	sprintf_s(fn,"save/tmp_url/%d_%d_%d.txt",animebook[tm.selected].category,animebook[tm.selected].year,animebook[tm.selected].serial);
 	fopen_s(&hFile, fn, "wb");
 	networkLog(id, fn);
 	fwrite(tm.targetURL, sizeof(tm.targetURL[0]), n/sizeof(tm.targetURL[0]), hFile);
@@ -1017,7 +1013,7 @@ bool receivingImageFile(int id, char *url, SSL *ssl){
 
 				//start to save an image file
 				if(file==NULL){
-					sprintf_s(fn, "save/tmp_image/%d.jpg", tm.selected);
+					sprintf_s(fn, "save/tmp_image/%d_%d_%d.jpg",animebook[tm.selected].category,animebook[tm.selected].year,animebook[tm.selected].serial);
 					fopen_s(&file, fn, "wb");
 					networkLog(id, fn);
 					if(!file){
@@ -1060,7 +1056,7 @@ bool receivingImageFile(int id, char *url, SSL *ssl){
 	if(file){
 		networkLog(id, "finished writing img file");
 		fclose(file);
-		sprintf_s(thread_str,"save/tmp_google_search_%d.html",tm.selected);
+		sprintf_s(thread_str,"save/tmp_google_search_%d_%d_%d.html",animebook[tm.selected].category,animebook[tm.selected].year,animebook[tm.selected].serial);
 		remove(thread_str);
 	}
 

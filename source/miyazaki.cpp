@@ -327,7 +327,7 @@ void keyGuideTop(){
 void keyGuideAll(){
 	if(key.z && !key_stop(key.z)){
 		int n=menu[GUIDE_ALL].selected();
-		if(animebook[n]){
+		if(animebook[n].got){
 			menu[GUIDE_STALIST].setMenu(10,30,30,9,allofworks[n].prg_num+season_num*2);
 			int line_num=0;
 			String s;
@@ -375,7 +375,7 @@ void keyGuideAll(){
 			showSearchImage=false;
 		}
 		else if(tm.tcpsock==NULL){
-			startThread(allofworks[menu[GUIDE_ALL].selected()].cartoon_id, allofworks[menu[GUIDE_ALL].selected()].query);
+			startThread(menu[GUIDE_ALL].selected(), allofworks[menu[GUIDE_ALL].selected()].query);
 		}
 	}
 	if(key.up && !key_wait(key.up))menu[GUIDE_ALL].cursorUp();
@@ -392,7 +392,7 @@ void keyGuideSeason(){
 			menu[GUIDE_ANIME].setMenu(0,20,40,10,entries);
 			menu[GUIDE_ANIME].lang=JAPANESE;
 			for(int i=0 ; i<entries ; i++){
-				if(animebook[entry[i].cartoon_index]){
+				if(animebook[i].got){
 					menu[GUIDE_ANIME].stack(entry[i].title);
 					menu[GUIDE_ANIME].inputMark(i,entry[i].mark);
 					menu[GUIDE_ANIME].inputColor(i,entry[i].r,entry[i].g,entry[i].b);
@@ -427,7 +427,7 @@ void keyGuideSeason(){
 			for(int w=0 ; w<7 ; w++)for(int h=4 ; h<=27 ; h++)for(int m=0 ; m<60 ; m++){
 				for(int i=0 ; i<entries ; i++)for(int j=0 ; j<entry[i].prg_num ; j++){
 					if(entry[i].prg[j].week==w && entry[i].prg[j].hour==h && entry[i].prg[j].minute==m){
-						if(animebook[entry[i].cartoon_index]){
+						if(animebook[i].got){
 							for(int k=0 ; k<2 ; k++)sprintf_s(s.str[k],"%s",entry[i].title.str[k]);
 							menu[GUIDE_TIME].stack(s);
 						}else{
@@ -480,7 +480,7 @@ void keyPrefList(){
 void keyGuideAnime(){
 	if(key.z && !key_stop(key.z)){
 		int n=menu[GUIDE_ANIME].selected();
-		if(animebook[entry[n].cartoon_index]){
+		if(animebook[n].got){
 			String s;
 			menu[GUIDE_STALIST].setMenu(20,60,30,9,entry[n].prg_num);
 			for(int i=0; i<entry[n].prg_num ; i++){
@@ -570,7 +570,7 @@ void keyGuideSta(){
 		for(int i=0 ; i<cartoon_num ; i++){
 			int a=work_idx[i];
 			int b=prg_idx[i];
-			if(animebook[entry[a].cartoon_index]){
+			if(animebook[a].got){
 				sprintf_s(s.str[0],"%2d:%2d(%s)%s",entry[a].prg[b].hour,entry[a].prg[b].minute,weekChar[entry[a].prg[b].week][0],entry[a].title.str[0]);
 				sprintf_s(s.str[1],"%2d:%2d(%s)%s",entry[a].prg[b].hour,entry[a].prg[b].minute,weekChar[entry[a].prg[b].week][1],entry[a].title.str[1]);
 			}else{
@@ -1417,11 +1417,11 @@ void makeGuideBook(){
 	menu[GUIDE_ALL].setMenu(0,40,40,10,(int)allofworks_num);
 	menu[GUIDE_ALL].lang=JAPANESE;
 	for(int i=0 ; i<allofworks_num ; i++){
-		if(animebook[i])menu[GUIDE_ALL].stack(allofworks[i].title.str[0]);
+		if(animebook[i].got)menu[GUIDE_ALL].stack(allofworks[i].title.str[0]);
 		else menu[GUIDE_ALL].stack("----------");
 	}
 	for(int i=0 ; i<allofworks_num ; i++){
-		if(animebook[i]){
+		if(animebook[i].got){
 			menu[GUIDE_ALL].inputMark(i,allofworks[i].mark);
 			menu[GUIDE_ALL].inputColor(i,allofworks[i].r,allofworks[i].g,allofworks[i].b);
 		}
@@ -1436,6 +1436,7 @@ void makeGuideBook(){
 		readSQL(str);
 		prgs_of_each_season[i]=prgs;
 		for(int j=0 ; j<prgs ; j++){
+			prg[j].cartoon_index = getCartoonById(prg[j].category,prg[j].year,prg[j].serial, allofworks, allofworks_num);
 			allofworks[prg[j].cartoon_index].prg_num++;
 		}
 	}
@@ -1447,6 +1448,7 @@ void makeGuideBook(){
 		sprintf_s(str,"file/data/sql/timetable%d.sql",season[i].id);
 		readSQL(str);
 		for(int j=0 ; j<prgs ; j++){
+			prg[j].cartoon_index = getCartoonById(prg[j].category,prg[j].year,prg[j].serial, allofworks, allofworks_num);
 			int n=allofworks[prg[j].cartoon_index].prg_num;
 			allofworks[prg[j].cartoon_index].prg[n].season_index=prg[j].season_index;
 			allofworks[prg[j].cartoon_index].prg[n].station_index=prg[j].station_index;

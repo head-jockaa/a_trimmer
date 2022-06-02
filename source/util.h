@@ -102,7 +102,7 @@ Uint32 setRGB(Uint8 r, Uint8 g, Uint8 b);
 void getRGB(Uint32 px, Uint8 *r, Uint8 *g, Uint8 *b);
 
 extern SDL_Rect scr;
-extern bool run,setSMR,map_loaded,*animebook,ABGR;
+extern bool run,setSMR,map_loaded,ABGR;
 extern int which_season;
 extern Uint8 mode,mode2,phase,kick_count,pauseGame;
 extern int stas,entries,prgs,animedex_num,collection,areas,towers,mounts,towns,season_num,clear_num,mapW,mapH;
@@ -193,6 +193,11 @@ public:
 	void reset();
 };
 
+struct Animebook{
+	Uint16 category, year, serial;
+	bool got;
+};
+
 struct Station{
 	String name,abbr,talk;
 	Uint16 mark;
@@ -201,13 +206,15 @@ struct Station{
 
 struct Program{
 	Uint8 week,hour,minute;
-	int id,season_index,station_index,time,cartoon_index;
+	int id,season_index,station_index,time;
+	int category,year,serial,cartoon_index;
 };
 
 struct Entry{
 	String title;
 	char query[600];
-	int mark,prg_num,cartoon_id,cartoon_index;
+	int mark,prg_num;
+	int category,year,serial,animebook_index;
 	Program *prg;
 	Uint8 r,g,b;
 	bool exist;
@@ -373,6 +380,7 @@ void strcpy_s(char *s1, long n, const char *s2);
 #endif
 
 extern Key key;
+extern Animebook *animebook;
 extern Station *sta;
 extern Program *prg;
 extern Entry *entry;

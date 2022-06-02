@@ -166,7 +166,6 @@ void initGame2(){
 	else createMap_color(1000);
 	createMap_tower();
 	if(gd.game_mode==STORYMODE){
-		load_entries(which_season);
 		if(!fishbox.loaded())fishbox.initFishBox(entries);
 		for(int i=0 ; i<entries ; i++){
 			gd.score+=fishbox.getSC(i);
@@ -296,9 +295,9 @@ void keyFishup(){
 					phase=BS_CH;
 					n=sta[BSstation[gd.bs_ch]].ontv;
 				}
-				n=entry[n].cartoon_index;
-				if(!animebook[n]){
-					animebook[n]=true;
+				int index=getCartoonById(entry[n].category,entry[n].year,entry[n].serial,entry,entries);
+				if(!animebook[index].got){
+					animebook[index].got=true;
 					collection++;
 					save_animebook();
 				}
@@ -313,9 +312,9 @@ void keyBSAttack(){
 			if(start==0){
 				phase=BS_CH;
 				int n=sta[BSstation[gd.bs_ch]].ontv;
-				n=entry[n].cartoon_index;
-				if(!animebook[n]){
-					animebook[n]=true;
+				int index=getCartoonById(entry[n].category,entry[n].year,entry[n].serial,entry,entries);
+				if(!animebook[index].got){
+					animebook[index].got=true;
 					collection++;
 					save_animebook();
 				}
@@ -1656,7 +1655,9 @@ void drawFishup(SDL_Surface* scr){
 			else drawImage(scr,img.fishup,20,40,0,300,320,320,255);
 			setTmpFish_bs();
 			fishbox.drawTable(scr,tmp_fish);
-			if(!animebook[ entry[sta[BSstation[gd.bs_ch]].ontv].cartoon_index ]){
+			int n=sta[BSstation[gd.bs_ch]].ontv;
+			int index=getCartoonById(entry[n].category,entry[n].year,entry[n].serial,entry,entries);
+			if(!animebook[index].got){
 				drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 				sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
 				drawText2(scr,380,220,str);
@@ -1686,9 +1687,9 @@ void drawFishup(SDL_Surface* scr){
 		if(start>40)drawImage(scr,img.fishup,(start-40)*20,40,320,300,320,320,255);
 		else drawImage(scr,img.fishup,0,40,320,300,320,320,255);
 		int n;
-		if(phase==FISHUP)n=entry[sta[ant->station].ontv].cartoon_index;
-		else n=entry[md.fish[0].which_work].cartoon_index;
-		if(start<70 && !animebook[n]){
+		if(phase==FISHUP)n=sta[ant->station].ontv;
+		else n=md.fish[0].which_work;
+		if(start<70 && !animebook[n].got){
 			drawImage(scr,img.fishup,300,160,520,0,240,120,255);
 			sprintf_s(str,"%4d/%4d",collection+1,animedex_num);
 			drawText2(scr,380,220,str);
@@ -2211,7 +2212,7 @@ void drawGameExplain(SDL_Surface* scr){
 
 bool createSearchImage(int n, double rotate){
 	if (img.searchImage)freeImage(img.searchImage);
-	sprintf_s(str,"save/tmp_image/%d.jpg", n);
+	sprintf_s(str,"save/tmp_image/%d_%d_%d.jpg",animebook[n].category,animebook[n].year,animebook[n].serial);
 	Image *img2,*img3;
 	getImage(img2,str);
 
@@ -2239,7 +2240,7 @@ bool createSearchImage(int n, double rotate){
 		freeImage(img2);
 		return true;
 	}else{
-		networkLog(tm.threadID, "failed to open the saved image file");
+		networkLog(tm.threadID, "failed to open the saved image file: %s", str);
 		return false;
 	}
 }
@@ -2465,13 +2466,13 @@ void timerFishUp(){
 		if(phase==FISHUP)n=sta[ant->station].ontv;
 		else n=md.fish[0].which_work;
 		tm.hasCacheImage=false;
-		if(createSearchImage(entry[n].cartoon_id,0.2)){
+		if(createSearchImage(entry[n].animebook_index,0.2)){
 			tm.hasCacheImage=true;
-			sprintf_s(str,"save/tmp_url/%d.txt",entry[n].cartoon_id);
+			sprintf_s(str,"save/tmp_url/%d_%d_%d.txt",entry[n].category,entry[n].year,entry[n].serial);
 			loadFile(str);
 			sprintf_s(tm.targetURL,fstr);
 		}else{
-			startThread(entry[n].cartoon_id, entry[n].query);
+			startThread(entry[n].animebook_index, entry[n].query);
 		}
 	}
 	if(start==72){
@@ -2512,13 +2513,13 @@ void timerBSAttack(){
 		fishbox.text_count=1;
 		int n=sta[ BSstation[gd.bs_ch] ].ontv;
 		tm.hasCacheImage=false;
-		if(createSearchImage(entry[n].cartoon_id,0.2)){
+		if(createSearchImage(entry[n].animebook_index,0.2)){
 			tm.hasCacheImage=true;
-			sprintf_s(str,"save/tmp_url/%d.txt",entry[n].cartoon_id);
+			sprintf_s(str,"save/tmp_url/%d_%d_%d.txt",entry[n].category,entry[n].year, entry[n].serial);
 			loadFile(str);
 			sprintf_s(tm.targetURL,fstr);
 		}else{
-			startThread(entry[n].cartoon_id, entry[n].query);
+			startThread(entry[n].animebook_index, entry[n].query);
 		}
 	}
 	if(start==0){

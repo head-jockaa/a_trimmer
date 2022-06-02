@@ -30,6 +30,7 @@ void save_record(int n);
 void load_record(int n);
 void save_game(int n);
 void load_game(int n);
+void load_game_head_only(int n);
 void save_smr(int n);
 void load_smr(int n);
 
