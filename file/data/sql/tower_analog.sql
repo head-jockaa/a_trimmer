@@ -1,4 +1,4 @@
-INSERT INTO `tower` (
+INSERT INTO `tower_analog` (
   `id`,
   `name_jp`,
   `name_en`,

@@ -325,6 +325,12 @@ void createMap_tower(){
 		ar++;
 	}
 
+	float towerL=1, towerM=0.1;
+	if(gd.isDigital){
+		towerL=0.1;
+		towerM=0.01;
+	}
+
 	ar=area;
 	for(int i=0 ; i<areas ; i++){
 		Tower *tw=ar->tower;
@@ -334,10 +340,10 @@ void createMap_tower(){
 				continue;
 			}
 			if(tw->remove){tw++;continue;}
-			if((tw->kw)>=1){
+			if((tw->kw)>=towerL){
 				map.type[tw->x+tw->y*map.mapW] = TOWER_L + (map.type[tw->x+tw->y*map.mapW]&15);
 			}
-			else if((tw->kw)>=0.1 && (map.type[tw->x+tw->y*map.mapW]&240)!=TOWER_L){
+			else if((tw->kw)>=towerM && (map.type[tw->x+tw->y*map.mapW]&240)!=TOWER_L){
 				map.type[tw->x+tw->y*map.mapW] = TOWER_M + (map.type[tw->x+tw->y*map.mapW]&15);
 			}
 			else if((map.type[tw->x+tw->y*map.mapW]&240)!=TOWER_L && (map.type[tw->x+tw->y*map.mapW]&240)!=TOWER_M){
@@ -1393,6 +1399,25 @@ void refreshGroundImage(){
 	}
 	map.bufferedTowerSpotImage=false;
 	map.bufferedVolcanoImage=false;
+}
+
+void reloadAllMapData() {
+	delete [] tower;
+	delete [] mount;
+	delete [] town;
+	towers=0;mounts=0;towns=0;
+	rd.estimated=false;
+	map_loaded=false;
+	map.reset();
+	load_towers();
+	load_mounts();
+	load_towns();
+	load_rural();
+	estimate();
+	createMap();
+	createMap_color(1000);
+	estimate_rural();
+	drawGround(gd.scrX,gd.scrY,0,0,640,480,1000);
 }
 
 void make3dview(double X, double Y, int D){

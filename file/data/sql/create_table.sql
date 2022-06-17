@@ -135,7 +135,32 @@ CREATE TABLE `timetable` (
   PRIMARY KEY (`season_id`,`station_id`,`week`,`hour`,`minute`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `tower` (
+CREATE TABLE `tower_analog` (
+  `id` int(11) NOT NULL,
+  `name_jp` varchar(100) NOT NULL,
+  `name_en` varchar(100) NOT NULL,
+  `area_id` int(11) NOT NULL,
+  `x` int(11) NOT NULL,
+  `y` int(11) NOT NULL,
+  `height` int(11) NOT NULL,
+  `kw` float NOT NULL,
+  `erp` float NOT NULL,
+  `vertical` tinyint(1) NOT NULL,
+  `bias` tinyint(3) unsigned NOT NULL,
+  `ch1` int(11) DEFAULT NULL,
+  `ch2` int(11) DEFAULT NULL,
+  `ch3` int(11) DEFAULT NULL,
+  `ch4` int(11) DEFAULT NULL,
+  `ch5` int(11) DEFAULT NULL,
+  `ch6` int(11) DEFAULT NULL,
+  `ch7` int(11) DEFAULT NULL,
+  `ch8` int(11) DEFAULT NULL,
+  `ch9` int(11) DEFAULT NULL,
+  `ch10` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `tower_digital` (
   `id` int(11) NOT NULL,
   `name_jp` varchar(100) NOT NULL,
   `name_en` varchar(100) NOT NULL,

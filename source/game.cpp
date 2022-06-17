@@ -26,7 +26,6 @@ void drawPlayer(SDL_Surface *scr);
 void drawFishup(SDL_Surface *scr);
 void drawGameExplain(SDL_Surface *scr);
 void drawSMR(SDL_Surface* scr);
-void estimate_rural();
 void initManekiTV();
 void setManekiData();
 

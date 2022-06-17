@@ -492,7 +492,8 @@ void escapeSearchQuery(char* utf8, char*escaped){
 void load_towers(){
 	if(towers)return;
 	load_areas();
-	readSQL("file/data/sql/tower.sql");
+	if(gd.isDigital)readSQL("file/data/sql/tower_digital.sql");
+	else readSQL("file/data/sql/tower_analog.sql");
 	for(int i=0 ; i<towers ; i++){
 		area[tower[i].area_index].tower_num++;
 	}
@@ -511,6 +512,7 @@ void load_towers(){
 				area[i].tower[n].erp=tower[j].erp;
 				area[i].tower[n].v=tower[j].v;
 				area[i].tower[n].bias=tower[j].bias;
+				area[i].tower[n].remove=false;
 				for(int k=0 ; k<10 ; k++){
 					area[i].tower[n].ch[k]=tower[j].ch[k];
 				}

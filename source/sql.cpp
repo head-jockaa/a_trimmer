@@ -290,7 +290,7 @@ void initVariableArray(char *tname, int data_size) {
 		prgs=data_size;
 		prg=new Program[prgs];
 	}
-	else if(strcmp(tname,"tower")==0) {
+	else if(strcmp(tname,"tower_analog")==0 || strcmp(tname,"tower_digital")==0) {
 		if(towers) {
 			delete [] tower;
 		}
@@ -811,7 +811,7 @@ void getSqlValue(char *c, char *tname, char *cname, int index, bool get) {
 			if(get)prg[index].serial=intValue;
 		}
 	}
-	else if(strcmp(tname,"tower")==0) {
+	else if(strcmp(tname,"tower_analog")==0 || strcmp(tname,"tower_digital")==0) {
 		if(strcmp(cname,"id")==0) {
 			sqlPointer+=fetchInt(c,&intValue)-1;
 			if(get)tower[index].id=intValue;

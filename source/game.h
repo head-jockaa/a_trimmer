@@ -70,6 +70,7 @@ void drawNetworkStatus(SDL_Surface* scr);
 void drawThrowPhoto(SDL_Surface *scr);
 bool createSearchImage(int n, double rotate);
 bool isNHK(Station sta);
+void estimate_rural();
 
 extern int mwave[68];
 
@@ -89,6 +90,7 @@ struct GameData{
 	double x,y,speed,real_speed,speedX,speedY;
 	bool doze,m_waved,rural_shown,kulisaped,memma_type,bought[18];
 	bool secondMusic;
+	bool isDigital;
 	Uint8 randomNumber;
 };
 extern GameData gd;

@@ -32,6 +32,7 @@ void drawFireWork(SDL_Surface *scr);
 void drawColorLight(int scrX, int scrY, int x, int y, int w, int h);
 SDL_Color getSkyColor(int h, int m);
 void refreshGroundImage();
+void reloadAllMapData();
 void make3dview(double X, double Y, int D);
 void make3dview_tower(double X, double Y, int D);
 void make3dview_sky();
