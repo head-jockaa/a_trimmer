@@ -325,10 +325,10 @@ void createMap_tower(){
 		ar++;
 	}
 
-	float towerL=1, towerM=0.1;
+	float towerL=0.9, towerM=0.09;
 	if(gd.isDigital){
-		towerL=0.1;
-		towerM=0.01;
+		towerL=0.09;
+		towerM=0.009;
 	}
 
 	ar=area;
