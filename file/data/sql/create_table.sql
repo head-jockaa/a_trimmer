@@ -157,6 +157,7 @@ CREATE TABLE `tower_analog` (
   `ch8` int(11) DEFAULT NULL,
   `ch9` int(11) DEFAULT NULL,
   `ch10` int(11) DEFAULT NULL,
+  `altitude` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
